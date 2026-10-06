@@ -27,7 +27,12 @@ import 'common/assignment_origin.dart' as _izy6d885;
 import 'common/record_not_found_exception.dart' as _ilf890y8;
 import 'common/validation_exception.dart' as _ifwcmx8g;
 import 'health/server_health.dart' as _iozgwprg;
+import 'items/access_state.dart' as _imhj9b3j;
+import 'items/capture_draft.dart' as _idav3wwe;
+import 'items/capture_receipt.dart' as _i6e75atc;
+import 'items/capture_result.dart' as _il5toi29;
 import 'items/content_type.dart' as _itwlc5zp;
+import 'items/enrichment_state.dart' as _im2yqxlq;
 import 'items/item.dart' as _iapziv9t;
 import 'items/item_draft.dart' as _ip8cn60r;
 import 'items/item_lifecycle.dart' as _iveh3zib;
@@ -47,7 +52,12 @@ export 'common/assignment_origin.dart';
 export 'common/record_not_found_exception.dart';
 export 'common/validation_exception.dart';
 export 'health/server_health.dart';
+export 'items/access_state.dart';
+export 'items/capture_draft.dart';
+export 'items/capture_receipt.dart';
+export 'items/capture_result.dart';
 export 'items/content_type.dart';
+export 'items/enrichment_state.dart';
 export 'items/item.dart';
 export 'items/item_draft.dart';
 export 'items/item_lifecycle.dart';
@@ -69,6 +79,123 @@ class Protocol extends _is.DatabaseSerializationManager {
   static final Protocol _instance = Protocol._().._registerHostProtocols();
 
   static List<_isp.TableDefinition> get targetTableDefinitions => [
+    _isp.TableDefinition(
+      name: 'capture_receipt',
+      dartName: 'CaptureReceipt',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'operationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'clientItemId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'itemId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'requestHash',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'duplicate',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _isp.ColumnDefinition(
+          name: 'receivedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'capture_receipt_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'capture_receipt_fk_1',
+          columns: ['itemId'],
+          referenceTable: 'item',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'capture_receipt_owner_operation_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'operationId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'capture_receipt_owner_client_item_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'clientItemId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _isp.TableDefinition(
       name: 'collection',
       dartName: 'Collection',
@@ -184,6 +311,12 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
+          name: 'clientItemId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
           name: 'url',
           columnType: _isp.ColumnType.text,
           isNullable: true,
@@ -203,10 +336,22 @@ class Protocol extends _is.DatabaseSerializationManager {
           columnDefault: '\'web\'',
         ),
         _isp.ColumnDefinition(
+          name: 'sourceItemId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
           name: 'title',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'noteText',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
           name: 'contentType',
@@ -241,6 +386,20 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: false,
           dartType: 'DateTime',
           columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'enrichmentState',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:EnrichmentState',
+          columnDefault: '\'pending\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'accessState',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AccessState',
+          columnDefault: '\'unknown\'',
         ),
         _isp.ColumnDefinition(
           name: 'revision',
@@ -298,7 +457,45 @@ class Protocol extends _is.DatabaseSerializationManager {
             ),
           ],
           type: 'btree',
-          isUnique: false,
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'item_owner_source_item_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sourcePlatform',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sourceItemId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'item_owner_client_item_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'clientItemId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
           isPrimary: false,
         ),
         _isp.IndexDefinition(
@@ -964,8 +1161,23 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _iozgwprg.ServerHealth) {
       return _iozgwprg.ServerHealth.fromJson(data) as T;
     }
+    if (t == _imhj9b3j.AccessState) {
+      return _imhj9b3j.AccessState.fromJson(data) as T;
+    }
+    if (t == _idav3wwe.CaptureDraft) {
+      return _idav3wwe.CaptureDraft.fromJson(data) as T;
+    }
+    if (t == _i6e75atc.CaptureReceipt) {
+      return _i6e75atc.CaptureReceipt.fromJson(data) as T;
+    }
+    if (t == _il5toi29.CaptureResult) {
+      return _il5toi29.CaptureResult.fromJson(data) as T;
+    }
     if (t == _itwlc5zp.ContentType) {
       return _itwlc5zp.ContentType.fromJson(data) as T;
+    }
+    if (t == _im2yqxlq.EnrichmentState) {
+      return _im2yqxlq.EnrichmentState.fromJson(data) as T;
     }
     if (t == _iapziv9t.Item) {
       return _iapziv9t.Item.fromJson(data) as T;
@@ -1033,8 +1245,26 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_iozgwprg.ServerHealth?>()) {
       return (data != null ? _iozgwprg.ServerHealth.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_imhj9b3j.AccessState?>()) {
+      return (data != null ? _imhj9b3j.AccessState.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_idav3wwe.CaptureDraft?>()) {
+      return (data != null ? _idav3wwe.CaptureDraft.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i6e75atc.CaptureReceipt?>()) {
+      return (data != null ? _i6e75atc.CaptureReceipt.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_il5toi29.CaptureResult?>()) {
+      return (data != null ? _il5toi29.CaptureResult.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_itwlc5zp.ContentType?>()) {
       return (data != null ? _itwlc5zp.ContentType.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_im2yqxlq.EnrichmentState?>()) {
+      return (data != null ? _im2yqxlq.EnrichmentState.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_iapziv9t.Item?>()) {
       return (data != null ? _iapziv9t.Item.fromJson(data) : null) as T;
@@ -1075,6 +1305,18 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _is.getType<_iopagaq8.Tag?>()) {
       return (data != null ? _iopagaq8.Tag.fromJson(data) : null) as T;
+    }
+    if (t == List<_is.UuidValue>) {
+      return (data as List).map((e) => deserialize<_is.UuidValue>(e)).toList()
+          as T;
+    }
+    if (t == _is.getType<List<_is.UuidValue>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_is.UuidValue>(e))
+                    .toList()
+              : null)
+          as T;
     }
     if (t == List<_iswi3gl6.ReminderWindow>) {
       return (data as List)
@@ -1124,7 +1366,12 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ilf890y8.RecordNotFoundException => 'RecordNotFoundException',
       _ifwcmx8g.ValidationException => 'ValidationException',
       _iozgwprg.ServerHealth => 'ServerHealth',
+      _imhj9b3j.AccessState => 'AccessState',
+      _idav3wwe.CaptureDraft => 'CaptureDraft',
+      _i6e75atc.CaptureReceipt => 'CaptureReceipt',
+      _il5toi29.CaptureResult => 'CaptureResult',
       _itwlc5zp.ContentType => 'ContentType',
+      _im2yqxlq.EnrichmentState => 'EnrichmentState',
       _iapziv9t.Item => 'Item',
       _ip8cn60r.ItemDraft => 'ItemDraft',
       _iveh3zib.ItemLifecycle => 'ItemLifecycle',
@@ -1165,8 +1412,18 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'ValidationException';
       case _iozgwprg.ServerHealth():
         return 'ServerHealth';
+      case _imhj9b3j.AccessState():
+        return 'AccessState';
+      case _idav3wwe.CaptureDraft():
+        return 'CaptureDraft';
+      case _i6e75atc.CaptureReceipt():
+        return 'CaptureReceipt';
+      case _il5toi29.CaptureResult():
+        return 'CaptureResult';
       case _itwlc5zp.ContentType():
         return 'ContentType';
+      case _im2yqxlq.EnrichmentState():
+        return 'EnrichmentState';
       case _iapziv9t.Item():
         return 'Item';
       case _ip8cn60r.ItemDraft():
@@ -1238,8 +1495,23 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'ServerHealth') {
       return deserialize<_iozgwprg.ServerHealth>(data['data']);
     }
+    if (dataClassName == 'AccessState') {
+      return deserialize<_imhj9b3j.AccessState>(data['data']);
+    }
+    if (dataClassName == 'CaptureDraft') {
+      return deserialize<_idav3wwe.CaptureDraft>(data['data']);
+    }
+    if (dataClassName == 'CaptureReceipt') {
+      return deserialize<_i6e75atc.CaptureReceipt>(data['data']);
+    }
+    if (dataClassName == 'CaptureResult') {
+      return deserialize<_il5toi29.CaptureResult>(data['data']);
+    }
     if (dataClassName == 'ContentType') {
       return deserialize<_itwlc5zp.ContentType>(data['data']);
+    }
+    if (dataClassName == 'EnrichmentState') {
+      return deserialize<_im2yqxlq.EnrichmentState>(data['data']);
     }
     if (dataClassName == 'Item') {
       return deserialize<_iapziv9t.Item>(data['data']);
@@ -1322,6 +1594,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _iqfgge80.Collection.t;
       case _ingnmqw7.ItemCollection:
         return _ingnmqw7.ItemCollection.t;
+      case _i6e75atc.CaptureReceipt:
+        return _i6e75atc.CaptureReceipt.t;
       case _iapziv9t.Item:
         return _iapziv9t.Item.t;
       case _ijguvy1g.PinneProfile:

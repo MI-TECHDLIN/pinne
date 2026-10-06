@@ -1,0 +1,19 @@
+### One capture from a device: a shared or pasted link, or a note. Carries no
+### owner and no server id. Retrying with the same [operationId] is safe.
+class: CaptureDraft
+fields:
+  ### The device's stable id for the captured item.
+  clientItemId: UuidValue
+  ### Unique per attempt to change server state; retries reuse it.
+  operationId: UuidValue
+  ### A web link. Either this or [text] is required.
+  url: String?
+  ### Shared or typed text. Becomes a note unless it contains a link.
+  text: String?
+  ### The user's title. When absent the server derives a readable one.
+  title: String?
+  ### Why the user saved it.
+  intention: String?
+  collectionIds: List<UuidValue>?
+  ### When the user saved it on the device, in UTC.
+  capturedAt: DateTime

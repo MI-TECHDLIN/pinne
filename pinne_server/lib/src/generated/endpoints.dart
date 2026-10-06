@@ -14,6 +14,8 @@ import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
 import 'package:pinne_server/src/generated/collections/collection_draft.dart'
     as _imy5wtcu;
+import 'package:pinne_server/src/generated/items/capture_draft.dart'
+    as _iushcgme;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/items/item_draft.dart' as _ittgmzop;
 import 'package:pinne_server/src/generated/profile/profile_draft.dart'
@@ -512,6 +514,24 @@ class Endpoints extends _is.EndpointDispatch {
               ) async => (endpoints['item'] as _i97sinw1.ItemEndpoint).get(
                 session,
                 params['id'],
+              ),
+        ),
+        'capture': _is.MethodConnector(
+          name: 'capture',
+          params: {
+            'draft': _is.ParameterDescription(
+              name: 'draft',
+              type: _is.getType<_iushcgme.CaptureDraft>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['item'] as _i97sinw1.ItemEndpoint).capture(
+                session,
+                params['draft'],
               ),
         ),
         'create': _is.MethodConnector(

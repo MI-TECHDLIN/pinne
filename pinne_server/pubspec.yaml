@@ -9,6 +9,9 @@ environment:
 resolution: workspace
 
 dependencies:
+  crypto: ^3.0.6
+  pinne_capture:
+    path: ../pinne_capture
   serverpod: 4.0.3
   serverpod_auth_idp_server: 4.0.3
   serverpod_cloud_storage: 4.0.3

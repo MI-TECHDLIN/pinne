@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shell/pinne_page.dart';
+import '../capture/paste_capture_card.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
@@ -25,6 +26,8 @@ class TodayScreen extends ConsumerWidget {
       subtitle: 'A small queue of what is worth revisiting now.',
       children: [
         TodaySpiritCard(due: due, seed: avatar.seed, palette: avatar.palette),
+        const SizedBox(height: PinneSpacing.md),
+        const PasteCaptureCard(),
         const SizedBox(height: PinneSpacing.md),
         const ComingSoonCard(
           title: 'Your queue stays small',

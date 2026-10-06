@@ -7,12 +7,14 @@ FROM dart:3.12.2 AS build
 # Create a minimal workspace that preserves locked server dependency versions.
 WORKDIR /app
 COPY pubspec.lock .
+COPY pinne_capture pinne_capture
 COPY pinne_server pinne_server
 RUN printf '%s\n' \
   'name: _' \
   'environment:' \
   '  sdk: ^3.12.2' \
   'workspace:' \
+  '  - pinne_capture' \
   '  - pinne_server' \
   > pubspec.yaml
 RUN dart pub get

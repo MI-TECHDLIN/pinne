@@ -9,11 +9,13 @@ Claude is the planned AI provider. Run steps and commands are in `README.md`.
 - `pinne_server/`: Serverpod 4.0.x, PostgreSQL. Models are `lib/src/**/*.spy.yaml`, grouped by domain folder.
 - `pinne_client/` and `pinne_server/lib/src/generated/`: generated. Never edit; change models or endpoints and run `serverpod generate`.
 - `pinne_flutter/`: Riverpod 3 (`lib/core/`), go_router (`lib/router.dart`), shell and pill nav (`lib/shell/`), one folder per tab under `lib/features/`.
+- `pinne_capture/`: pure Dart rules shared by server and app (source detection, URL normalization, share-text parsing). Change capture rules only here, never copy them into one side.
 
 ## Rules
 
 - Owner ids come from the server session (`session.ownerId` in `pinne_server/lib/src/auth/owner.dart`), never from client input. Every query on an owned table filters by owner, and a foreign id behaves exactly like a missing one (`RecordNotFoundException`).
 - Clients create records through `*Draft` models that have no owner or id.
+- Capture is local-first: the app may say "Saved" only after `CaptureStore.save` returns (`pinne_flutter/lib/features/capture/`). Server mutations from the outbox must be idempotent by operation id; see `item_capture.dart`.
 - Relations between owned rows must check that both ends share the owner.
 - Colours come from `pinne_flutter/lib/theme/pinne_tokens.dart`. Lime is only `accentDue` (due-now state) and `accentPrimaryAction` (one primary action per screen). Violet is for every other button, selected state and link. Never use lime decoratively.
 - The Ribbon Spirit (`lib/ui/ribbon_spirit/`) is the app's character. Its seed recipe and `PinneSpiritPalettes` indices are persisted in `pinne_profile`: never change the recipe math or reorder palettes (see `docs/ribbon-spirit/README.md`).
@@ -22,7 +24,7 @@ Claude is the planned AI provider. Run steps and commands are in `README.md`.
 
 ## Commands
 
-- Checks: `dart analyze` and `dart test` in `pinne_server/`, `flutter analyze` and `flutter test` in `pinne_flutter/`, `dart format` on changed files.
+- Checks: `dart analyze` and `dart test` in `pinne_capture/` and `pinne_server/`, `flutter analyze` and `flutter test` in `pinne_flutter/`, `dart format` on changed files.
 - Server tests use an embedded PostgreSQL and need no Docker. Dev runs use `docker compose up -d` in `pinne_server/`.
 - After a model change with a `table`: `serverpod generate`, then `serverpod create-migration`. A `migration.sql` may be hand-edited only to keep data safe, and the resulting schema must still equal `definition.sql`.
 - With `serverpod start` running, prefer the `serverpod` MCP tools (`create_migration`, `apply_migrations`, `tail_server_logs`, `hot_restart`). Serverpod and Flutter agent skills are installed by `serverpod create` under the git-ignored `.claude/skills/`.

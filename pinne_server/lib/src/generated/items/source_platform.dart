@@ -12,13 +12,21 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// Where a saved item came from.
+/// Where a saved item came from. Detected from the link by the shared
+/// `pinne_capture` package, whose `CaptureSource` maps to this by name.
+/// `unknown` is explicit: an ambiguous link, such as a generic short link,
+/// is never guessed. `other` is kept for rows written before detection.
 enum SourcePlatform implements _is.SerializableModel {
   x,
   youtube,
   web,
   note,
-  other;
+  other,
+  instagram,
+  tiktok,
+  reddit,
+  github,
+  unknown;
 
   static SourcePlatform fromJson(String name) {
     switch (name) {
@@ -32,6 +40,16 @@ enum SourcePlatform implements _is.SerializableModel {
         return SourcePlatform.note;
       case 'other':
         return SourcePlatform.other;
+      case 'instagram':
+        return SourcePlatform.instagram;
+      case 'tiktok':
+        return SourcePlatform.tiktok;
+      case 'reddit':
+        return SourcePlatform.reddit;
+      case 'github':
+        return SourcePlatform.github;
+      case 'unknown':
+        return SourcePlatform.unknown;
       default:
         throw ArgumentError(
           'Value "$name" cannot be converted to "SourcePlatform"',

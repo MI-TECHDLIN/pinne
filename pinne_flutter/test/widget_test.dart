@@ -6,7 +6,12 @@ import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/app.dart';
 import 'package:pinne_flutter/core/motion.dart';
 import 'package:pinne_flutter/core/server_client.dart';
+import 'package:pinne_flutter/features/capture/capture_providers.dart';
+import 'package:pinne_flutter/features/capture/capture_store.dart';
 import 'package:pinne_flutter/features/collections/collection_cover.dart';
+import 'package:sqlite3/sqlite3.dart';
+
+import 'capture/fake_capture_server.dart';
 
 class _SignedOut extends SignedInNotifier {
   @override
@@ -26,6 +31,10 @@ class _AlwaysReduced extends MotionPreferenceNotifier {
 Widget _app({List overrides = const []}) => ProviderScope(
   overrides: [
     serverUrlProvider.overrideWithValue('http://localhost:8080/'),
+    captureStoreProvider.overrideWithValue(
+      CaptureStore(sqlite3.openInMemory()),
+    ),
+    captureApiProvider.overrideWithValue(FakeCaptureServer()),
     signedInProvider.overrideWith(_SignedOut.new),
     motionPreferenceProvider.overrideWith(_AlwaysReduced.new),
     serverHealthProvider.overrideWith(

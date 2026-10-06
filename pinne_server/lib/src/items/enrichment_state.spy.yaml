@@ -1,0 +1,10 @@
+### Progress of fetching metadata and AI processing for an item. Saving never
+### waits for it; a new capture starts as `pending`.
+enum: EnrichmentState
+serialized: byName
+values:
+  - pending
+  - processing
+  - ready
+  - partial
+  - failed

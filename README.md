@@ -16,6 +16,7 @@ and the app shell. Product features land on top of it.
 | `pinne_server/` | Serverpod server: models (`*.spy.yaml`), endpoints, migrations, tests |
 | `pinne_client/` | Generated client package. Do not edit by hand |
 | `pinne_flutter/` | Flutter app: Riverpod state, go_router navigation, design tokens |
+| `pinne_capture/` | Pure Dart capture rules shared by server and app: source detection, URL normalization |
 | `tool/setup_dev_secrets.sh` | Creates local secrets for development and tests |
 
 ## Prerequisites
@@ -91,10 +92,61 @@ Google sign-in is wired in but stays off until real credentials exist:
 Without these the server logs `Google sign-in is disabled` and the app hides
 the Google button. Never commit real credentials.
 
+## Capture
+
+Saving is local-first. A share or paste is written to a SQLite database on
+the phone (WAL, `synchronous = FULL`, item and outbox row in one
+transaction) before the app says "Saved", so it survives the app being
+killed. An outbox then sends it to `item.capture`, retrying with backoff;
+an operation leaves the outbox only once the server confirms it. Retries
+reuse the same operation id, and the server answers a repeat with the same
+result. Signed-out or offline captures wait on the phone and sync after
+sign-in or reconnect. Code: `pinne_flutter/lib/features/capture/` and
+`pinne_server/lib/src/items/item_capture.dart`.
+
+- **Android:** `ShareActivity` receives `text/plain` shares (links and text)
+  and shows the compact "Saved to Pinne" sheet over the app that shared,
+  running the `shareMain` entrypoint in `lib/main.dart`. Done returns there.
+  The sheet's engine closes with it, so it tries one send on Done and
+  otherwise leaves the capture to the main app, which drains the outbox on
+  start, resume, sign-in and reconnect. Background sync without opening the
+  app (WorkManager) is not built yet.
+- **Manual:** paste a link or type a note on Today. Captures show under
+  Collections, in Saved.
+- **Web:** has no durable local store, so capture is hidden there.
+
+### iOS Share Extension (not built yet)
+
+It needs a Mac with Xcode. To add it:
+
+1. In `pinne_flutter/ios/Runner.xcworkspace`, add a **Share Extension**
+   target (for example `ShareExtension`, bundle id
+   `<Runner bundle id>.ShareExtension`), embedded in Runner, with the same
+   team and minimum iOS version as Runner.
+2. Add the **App Groups** capability to both Runner and the extension with
+   one shared group (for example `group.<Runner bundle id>`). This writes
+   `com.apple.security.application-groups` into `Runner.entitlements` and
+   `ShareExtension.entitlements`. Register the group in the Apple Developer
+   account and regenerate both provisioning profiles.
+3. In the extension's `Info.plist`, set `NSExtensionActivationRule` to accept
+   web URLs (`NSExtensionActivationSupportsWebURLWithMaxCount` = 1) and text
+   (`NSExtensionActivationSupportsText` = true).
+4. Move the capture database into the App Group container
+   (`FileManager.containerURL(forSecurityApplicationGroupIdentifier:)`) so
+   both processes reach it. `path_provider` cannot return that path; add a
+   small platform channel for `openCaptureStore()` on iOS.
+5. In the extension, persist the raw shared text to the shared container
+   before showing "Saved" (native Swift, no Flutter engine, to stay inside
+   the extension memory limit), then call
+   `extensionContext.completeRequest` to return to the source app. The main
+   app imports those rows on launch or resume, parses them with
+   `pinne_capture` and queues them in the outbox.
+
 ## Checks
 
 ```bash
 (cd pinne_server && serverpod generate)   # after changing models or endpoints
+(cd pinne_capture && dart analyze && dart test)
 (cd pinne_server && dart analyze && dart test)
 (cd pinne_flutter && flutter analyze && flutter test)
 ```

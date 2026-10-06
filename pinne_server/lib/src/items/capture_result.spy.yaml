@@ -1,0 +1,17 @@
+### The server's answer to a capture. Replaying the same operation returns
+### the same item and duplicate flag.
+class: CaptureResult
+fields:
+  itemId: UuidValue
+  clientItemId: UuidValue
+  revision: int
+  title: String
+  sourcePlatform: SourcePlatform
+  sourceItemId: String?
+  canonicalUrl: String?
+  ### True when the capture matched an item the owner had already saved.
+  duplicate: bool
+  ### The existing item a duplicate capture resolved to.
+  duplicateOf: UuidValue?
+  enrichmentState: EnrichmentState
+  savedAt: DateTime
