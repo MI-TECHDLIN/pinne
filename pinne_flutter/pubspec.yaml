@@ -87,6 +87,9 @@ flutter:
   # https://flutter.dev/assets-and-images/#from-packages
   assets:
     - assets/config.json
+    # Still AI art (docs/ai-art/). Not used by any screen yet.
+    - assets/art/
+    - assets/art/cutout/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
