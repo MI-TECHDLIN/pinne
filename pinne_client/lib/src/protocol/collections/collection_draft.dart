@@ -19,12 +19,16 @@ abstract class CollectionDraft
     required this.name,
     this.description,
     this.parentId,
+    required this.coverSeed,
+    required this.paletteIndex,
   });
 
   factory CollectionDraft({
     required String name,
     String? description,
     _isc.UuidValue? parentId,
+    required int coverSeed,
+    required int paletteIndex,
   }) = _CollectionDraftImpl;
 
   factory CollectionDraft.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -34,6 +38,8 @@ abstract class CollectionDraft
       parentId: jsonSerialization['parentId'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['parentId']),
+      coverSeed: jsonSerialization['coverSeed'] as int,
+      paletteIndex: jsonSerialization['paletteIndex'] as int,
     );
   }
 
@@ -43,6 +49,10 @@ abstract class CollectionDraft
 
   _isc.UuidValue? parentId;
 
+  int coverSeed;
+
+  int paletteIndex;
+
   /// Returns a shallow copy of this [CollectionDraft]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -50,6 +60,8 @@ abstract class CollectionDraft
     String? name,
     String? description,
     _isc.UuidValue? parentId,
+    int? coverSeed,
+    int? paletteIndex,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -58,6 +70,8 @@ abstract class CollectionDraft
       'name': name,
       if (description != null) 'description': description,
       if (parentId != null) 'parentId': parentId?.toJson(),
+      'coverSeed': coverSeed,
+      'paletteIndex': paletteIndex,
     };
   }
 
@@ -68,6 +82,8 @@ abstract class CollectionDraft
       'name': name,
       if (description != null) 'description': description,
       if (parentId != null) 'parentId': parentId?.toJson(),
+      'coverSeed': coverSeed,
+      'paletteIndex': paletteIndex,
     };
   }
 
@@ -84,10 +100,14 @@ class _CollectionDraftImpl extends CollectionDraft {
     required String name,
     String? description,
     _isc.UuidValue? parentId,
+    required int coverSeed,
+    required int paletteIndex,
   }) : super._(
          name: name,
          description: description,
          parentId: parentId,
+         coverSeed: coverSeed,
+         paletteIndex: paletteIndex,
        );
 
   /// Returns a shallow copy of this [CollectionDraft]
@@ -98,11 +118,15 @@ class _CollectionDraftImpl extends CollectionDraft {
     String? name,
     Object? description = _Undefined,
     Object? parentId = _Undefined,
+    int? coverSeed,
+    int? paletteIndex,
   }) {
     return CollectionDraft(
       name: name ?? this.name,
       description: description is String? ? description : this.description,
       parentId: parentId is _isc.UuidValue? ? parentId : this.parentId,
+      coverSeed: coverSeed ?? this.coverSeed,
+      paletteIndex: paletteIndex ?? this.paletteIndex,
     );
   }
 }

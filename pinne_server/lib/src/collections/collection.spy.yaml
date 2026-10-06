@@ -8,6 +8,8 @@ fields:
   name: String
   description: String?
   parentId: UuidValue?, relation(parent=collection, onDelete=SetNull)
+  coverSeed: int, default=0
+  paletteIndex: int, default=0
 indexes:
   collection_owner_parent_idx:
     fields: ownerId, parentId
