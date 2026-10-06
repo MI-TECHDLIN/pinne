@@ -22,7 +22,10 @@ abstract class Collection
     required this.name,
     this.description,
     this.parentId,
-  });
+    int? coverSeed,
+    int? paletteIndex,
+  }) : coverSeed = coverSeed ?? 0,
+       paletteIndex = paletteIndex ?? 0;
 
   factory Collection({
     _is.UuidValue? id,
@@ -30,6 +33,8 @@ abstract class Collection
     required String name,
     String? description,
     _is.UuidValue? parentId,
+    int? coverSeed,
+    int? paletteIndex,
   }) = _CollectionImpl;
 
   factory Collection.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -45,6 +50,8 @@ abstract class Collection
       parentId: jsonSerialization['parentId'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['parentId']),
+      coverSeed: jsonSerialization['coverSeed'] as int?,
+      paletteIndex: jsonSerialization['paletteIndex'] as int?,
     );
   }
 
@@ -63,6 +70,10 @@ abstract class Collection
 
   _is.UuidValue? parentId;
 
+  int coverSeed;
+
+  int paletteIndex;
+
   @override
   _is.Table<_is.UuidValue?> get table => t;
 
@@ -75,6 +86,8 @@ abstract class Collection
     String? name,
     String? description,
     _is.UuidValue? parentId,
+    int? coverSeed,
+    int? paletteIndex,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -85,6 +98,8 @@ abstract class Collection
       'name': name,
       if (description != null) 'description': description,
       if (parentId != null) 'parentId': parentId?.toJson(),
+      'coverSeed': coverSeed,
+      'paletteIndex': paletteIndex,
     };
   }
 
@@ -97,6 +112,8 @@ abstract class Collection
       'name': name,
       if (description != null) 'description': description,
       if (parentId != null) 'parentId': parentId?.toJson(),
+      'coverSeed': coverSeed,
+      'paletteIndex': paletteIndex,
     };
   }
 
@@ -137,12 +154,16 @@ class _CollectionImpl extends Collection {
     required String name,
     String? description,
     _is.UuidValue? parentId,
+    int? coverSeed,
+    int? paletteIndex,
   }) : super._(
          id: id,
          ownerId: ownerId,
          name: name,
          description: description,
          parentId: parentId,
+         coverSeed: coverSeed,
+         paletteIndex: paletteIndex,
        );
 
   /// Returns a shallow copy of this [Collection]
@@ -155,6 +176,8 @@ class _CollectionImpl extends Collection {
     String? name,
     Object? description = _Undefined,
     Object? parentId = _Undefined,
+    int? coverSeed,
+    int? paletteIndex,
   }) {
     return Collection(
       id: id is _is.UuidValue? ? id : this.id,
@@ -162,6 +185,8 @@ class _CollectionImpl extends Collection {
       name: name ?? this.name,
       description: description is String? ? description : this.description,
       parentId: parentId is _is.UuidValue? ? parentId : this.parentId,
+      coverSeed: coverSeed ?? this.coverSeed,
+      paletteIndex: paletteIndex ?? this.paletteIndex,
     );
   }
 }
@@ -191,6 +216,16 @@ class CollectionUpdateTable extends _is.UpdateTable<CollectionTable> {
     table.parentId,
     value,
   );
+
+  _is.ColumnValue<int, int> coverSeed(int value) => _is.ColumnValue(
+    table.coverSeed,
+    value,
+  );
+
+  _is.ColumnValue<int, int> paletteIndex(int value) => _is.ColumnValue(
+    table.paletteIndex,
+    value,
+  );
 }
 
 class CollectionTable extends _is.Table<_is.UuidValue?> {
@@ -212,6 +247,16 @@ class CollectionTable extends _is.Table<_is.UuidValue?> {
       'parentId',
       this,
     );
+    coverSeed = _is.ColumnInt(
+      'coverSeed',
+      this,
+      hasDefault: true,
+    );
+    paletteIndex = _is.ColumnInt(
+      'paletteIndex',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final CollectionUpdateTable updateTable;
@@ -224,6 +269,10 @@ class CollectionTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnUuid parentId;
 
+  late final _is.ColumnInt coverSeed;
+
+  late final _is.ColumnInt paletteIndex;
+
   @override
   List<_is.Column> get columns => [
     id,
@@ -231,6 +280,8 @@ class CollectionTable extends _is.Table<_is.UuidValue?> {
     name,
     description,
     parentId,
+    coverSeed,
+    paletteIndex,
   ];
 }
 

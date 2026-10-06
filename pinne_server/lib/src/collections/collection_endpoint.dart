@@ -10,6 +10,8 @@ class CollectionEndpoint extends Endpoint {
   bool get requireLogin => true;
 
   static const maxDepth = 8;
+  static const maxCoverSeed = 0x7fffffff;
+  static const allowedPaletteIndexes = {0, 1, 2, 3, 4};
 
   Future<List<Collection>> list(Session session) async {
     final owner = session.ownerId;
@@ -29,6 +31,10 @@ class CollectionEndpoint extends Endpoint {
   }
 
   Future<Collection> create(Session session, CollectionDraft draft) async {
+    _validateCover(
+      coverSeed: draft.coverSeed,
+      paletteIndex: draft.paletteIndex,
+    );
     await _checkParent(session, collectionId: null, parentId: draft.parentId);
     return Collection.db.insertRow(
       session,
@@ -37,6 +43,8 @@ class CollectionEndpoint extends Endpoint {
         name: draft.name,
         description: draft.description,
         parentId: draft.parentId,
+        coverSeed: draft.coverSeed,
+        paletteIndex: draft.paletteIndex,
       ),
     );
   }
@@ -47,6 +55,10 @@ class CollectionEndpoint extends Endpoint {
     if (existing == null) {
       throw RecordNotFoundException(resource: 'collection');
     }
+    _validateCover(
+      coverSeed: collection.coverSeed,
+      paletteIndex: collection.paletteIndex,
+    );
     await _checkParent(
       session,
       collectionId: id,
@@ -58,6 +70,8 @@ class CollectionEndpoint extends Endpoint {
         name: collection.name,
         description: collection.description,
         parentId: collection.parentId,
+        coverSeed: collection.coverSeed,
+        paletteIndex: collection.paletteIndex,
       ),
     );
   }
@@ -69,6 +83,17 @@ class CollectionEndpoint extends Endpoint {
       where: (t) => t.id.equals(id) & t.ownerId.equals(owner),
     );
     return deleted.isNotEmpty;
+  }
+
+  void _validateCover({required int coverSeed, required int paletteIndex}) {
+    if (coverSeed < 0 || coverSeed > maxCoverSeed) {
+      throw ValidationException(
+        message: 'Cover seed must be between 0 and $maxCoverSeed.',
+      );
+    }
+    if (!allowedPaletteIndexes.contains(paletteIndex)) {
+      throw ValidationException(message: 'Unknown collection cover palette.');
+    }
   }
 
   /// Walks up from [parentId] and rejects foreign parents, cycles through

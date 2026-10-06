@@ -102,6 +102,20 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: true,
           dartType: 'UuidValue?',
         ),
+        _isp.ColumnDefinition(
+          name: 'coverSeed',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'paletteIndex',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(

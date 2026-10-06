@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/motion.dart';
 import '../../core/server_client.dart';
 import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
+import '../../ui/motion.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -71,7 +71,7 @@ class _MotionCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final preference = ref.watch(motionPreferenceProvider);
-    final reduced = ref.watch(reduceMotionProvider);
+    final reduced = reduceMotionOf(context);
     final theme = Theme.of(context);
     return GlassCard(
       child: Column(
