@@ -8,6 +8,7 @@ import '../../core/server_client.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../capture/saved_section.dart';
 import 'collection_cover.dart';
 
 @immutable
@@ -115,6 +116,8 @@ class CollectionsScreen extends ConsumerWidget {
           ),
           data: (items) => _CollectionGrid(items: items),
         ),
+        const SizedBox(height: PinneSpacing.xl),
+        const SavedSection(),
       ],
     );
   }
