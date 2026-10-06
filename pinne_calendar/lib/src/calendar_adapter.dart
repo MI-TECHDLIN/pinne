@@ -194,6 +194,10 @@ enum ReconcileState {
 
   /// No event carries the session's uid.
   missing,
+
+  /// The known id now names an event Pinne did not create. It must not be
+  /// touched.
+  foreign,
 }
 
 final class ReconcileResult {

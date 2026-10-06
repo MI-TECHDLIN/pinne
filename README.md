@@ -17,6 +17,7 @@ and the app shell. Product features land on top of it.
 | `pinne_client/` | Generated client package. Do not edit by hand |
 | `pinne_flutter/` | Flutter app: Riverpod state, go_router navigation, design tokens |
 | `pinne_capture/` | Pure Dart capture rules shared by server and app: source detection, URL normalization |
+| `pinne_calendar/` | Pure Dart calendar rules shared by server and app: busy intervals, the calendar adapter contract, the slot planner, `.ics` export |
 | `tool/setup_dev_secrets.sh` | Creates local secrets for development and tests |
 
 ## Prerequisites
@@ -142,10 +143,50 @@ It needs a Mac with Xcode. To add it:
    app imports those rows on launch or resume, parses them with
    `pinne_capture` and queues them in the outbox.
 
+## Calendar planning
+
+Today → **Plan** opens the Planner. It proposes short review sessions in free
+time, shows what was checked ("Checked your busy times 2 minutes ago"), and
+schedules them only after you accept. Code: `pinne_flutter/lib/features/planner/`,
+`pinne_server/lib/src/planning/` and `pinne_calendar/`.
+
+| Route | Busy times | Sessions | Notes |
+| --- | --- | --- | --- |
+| Android phone calendars | Read on the phone from the calendars you check | Written to the one calendar you choose | Uses [`device_calendar_plus`](https://pub.dev/packages/device_calendar_plus) 0.10.1 (MIT). Asks for `READ_CALENDAR` and `WRITE_CALENDAR` only when you tap *Allow calendar access*. |
+| Google Calendar | No | No | Reports "not configured" until `googleCalendarClientSecret` exists, and "not built yet" after. It never claims to have read a Google calendar. |
+| Calendar file (.ics) | No | You import the file | Export only: not live sync and not proof of free time. |
+
+How it stays honest:
+
+- **Unknown is never free.** A plan is "checked" only when every calendar
+  chosen for busy times was read on this phone in the last 15 minutes over
+  the whole period. Otherwise it cannot be accepted as checked; you can only
+  *Keep in Pinne without checking*, which writes nothing to a calendar and
+  labels the sessions.
+- **Accept rechecks.** Accepting reads busy times again. A new clash revises
+  the plan instead of scheduling over it.
+- **No duplicates.** The server stores each session and its calendar
+  operation before the phone writes anything. The phone marks every event it
+  writes with the session's id and looks for that mark before creating,
+  moving or removing, so a write whose answer was lost is found, not
+  repeated, and an event Pinne did not create is never changed.
+- **Your calendar edits win.** Moving or deleting a Pinne event in your
+  calendar app moves or cancels the session the next time the Planner opens.
+- Calendar titles say only "Pinne review"; saved items' names stay in Pinne.
+- Device calendar ids are stored with the install's id; only that phone acts
+  on them. Disconnecting keeps scheduled sessions and existing events.
+
+Planner settings (the sliders icon) set the week or month horizon, days,
+daily window, session length, how many sessions, buffers around events,
+earliest start, and whether plans need your acceptance or are suggestions
+only. Items in sessions are your active, unreviewed saves for now
+(`SessionItemSource` is the seam for the review queue).
+
 ## Checks
 
 ```bash
 (cd pinne_server && serverpod generate)   # after changing models or endpoints
+(cd pinne_calendar && dart analyze && dart test)
 (cd pinne_capture && dart analyze && dart test)
 (cd pinne_server && dart analyze && dart test)
 (cd pinne_flutter && flutter analyze && flutter test)
