@@ -6,6 +6,7 @@ import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/app.dart';
 import 'package:pinne_flutter/core/motion.dart';
 import 'package:pinne_flutter/core/server_client.dart';
+import 'package:pinne_flutter/features/collections/collection_cover.dart';
 
 class _SignedOut extends SignedInNotifier {
   @override
@@ -17,10 +18,16 @@ class _PlatformReducesMotion extends PlatformReduceMotionNotifier {
   bool build() => true;
 }
 
+class _AlwaysReduced extends MotionPreferenceNotifier {
+  @override
+  MotionPreference build() => MotionPreference.reduced;
+}
+
 Widget _app({List overrides = const []}) => ProviderScope(
   overrides: [
     serverUrlProvider.overrideWithValue('http://localhost:8080/'),
     signedInProvider.overrideWith(_SignedOut.new),
+    motionPreferenceProvider.overrideWith(_AlwaysReduced.new),
     serverHealthProvider.overrideWith(
       (ref) async => ServerHealth(
         ok: true,
@@ -87,6 +94,57 @@ void main() {
       ),
     );
     semantics.dispose();
+  });
+
+  testWidgets('reduceMotionOf reads Android disable animations', (
+    tester,
+  ) async {
+    var reduced = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Builder(
+            builder: (context) {
+              reduced = reduceMotionOf(context);
+              return const SizedBox();
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(reduced, isTrue);
+  });
+
+  testWidgets('reduceMotionOf reads iOS reduce motion', (tester) async {
+    tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(reduceMotion: true);
+    addTearDown(
+      tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+    );
+    var reduced = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            reduced = reduceMotionOf(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(reduced, isTrue);
+  });
+
+  test('collection cover is stable for a stored seed', () {
+    final first = collectionCoverMesh(4242, 3);
+    final second = collectionCoverMesh(4242, 3);
+    final different = collectionCoverMesh(4243, 3);
+
+    expect(first, equals(second));
+    expect(first, isNot(equals(different)));
   });
 
   test('reduce motion follows the platform unless overridden', () {

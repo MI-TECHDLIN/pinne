@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/pinne_tokens.dart';
+import '../ui/glass_card.dart';
+
+export '../ui/glass_card.dart';
 
 /// Shared layout for top-level screens: the violet glow, a big light headline
 /// with an optional bold tail, and scrolling content that clears the nav.
@@ -70,27 +73,6 @@ class PinnePage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// A translucent card with a hairline border.
-class GlassCard extends StatelessWidget {
-  const GlassCard({super.key, required this.child, this.padding});
-
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: padding ?? const EdgeInsets.all(PinneSpacing.lg),
-      decoration: BoxDecoration(
-        color: PinneColors.card,
-        borderRadius: BorderRadius.circular(PinneRadii.card),
-        border: Border.all(color: PinneColors.line),
-      ),
-      child: child,
     );
   }
 }

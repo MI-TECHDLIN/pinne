@@ -70,8 +70,3 @@ abstract final class PinneSpacing {
   /// Space reserved at the bottom of scrolling screens for the floating nav.
   static const navClearance = 104.0;
 }
-
-abstract final class PinneDurations {
-  static const quick = Duration(milliseconds: 160);
-  static const standard = Duration(milliseconds: 280);
-}
