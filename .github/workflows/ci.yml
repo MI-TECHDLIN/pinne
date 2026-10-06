@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      SERVERPOD_VERSION: '4.0.3'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.3'
+
+      # Server tests run on an embedded PostgreSQL that Serverpod downloads
+      # once; cache its binaries per Serverpod version.
+      - name: Cache embedded PostgreSQL binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/serverpod/pg-binaries
+          key: serverpod-pg-binaries-${{ runner.os }}-${{ env.SERVERPOD_VERSION }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install Serverpod CLI
+        run: |
+          dart install serverpod_cli@$SERVERPOD_VERSION
+          echo "${XDG_STATE_HOME:-$HOME/.local/state}/Dart/install/bin" >> "$GITHUB_PATH"
+
+      # Throwaway secrets for this run only.
+      - name: Generate test secrets
+        run: tool/setup_dev_secrets.sh
+
+      - name: Check generated code is current
+        working-directory: pinne_server
+        run: |
+          serverpod generate
+          git diff --exit-code -- lib/src/generated ../pinne_client
+
+      - name: Check formatting
+        run: dart format --set-exit-if-changed pinne_server/lib pinne_server/test pinne_server/bin pinne_flutter/lib pinne_flutter/test
+
+      - name: Analyze server
+        working-directory: pinne_server
+        run: dart analyze --fatal-infos
+
+      - name: Analyze app
+        working-directory: pinne_flutter
+        run: flutter analyze
+
+      - name: Server tests
+        working-directory: pinne_server
+        run: dart test
+
+      - name: App tests
+        working-directory: pinne_flutter
+        run: flutter test
