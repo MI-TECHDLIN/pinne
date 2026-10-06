@@ -2,11 +2,12 @@ import 'package:serverpod/serverpod.dart';
 
 import '../auth/owner.dart';
 import '../generated/protocol.dart';
+import 'item_capture.dart';
 
 /// Owner-scoped CRUD for saved items. Every query filters on the signed-in
 /// owner, so another user's ids behave exactly like missing ids.
 ///
-/// Capture enrichment, duplicate resolution and search are later features.
+/// Enrichment and search are later features.
 class ItemEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
@@ -39,6 +40,14 @@ class ItemEndpoint extends Endpoint {
       session,
       where: (t) => t.id.equals(id) & t.ownerId.equals(owner),
     );
+  }
+
+  /// Saves a shared or pasted link or note. Safe to retry with the same
+  /// operation id. A recognised duplicate returns the existing item with
+  /// `duplicate` set; its notes, collections and first `savedAt` are kept.
+  /// The answer never waits for enrichment, which starts as `pending`.
+  Future<CaptureResult> capture(Session session, CaptureDraft draft) {
+    return ItemCapture(session, session.ownerId).capture(draft);
   }
 
   Future<Item> create(Session session, ItemDraft draft) async {

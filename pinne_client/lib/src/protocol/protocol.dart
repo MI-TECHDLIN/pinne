@@ -26,7 +26,11 @@ import 'common/assignment_origin.dart' as _izy6d885;
 import 'common/record_not_found_exception.dart' as _ilf890y8;
 import 'common/validation_exception.dart' as _ifwcmx8g;
 import 'health/server_health.dart' as _iozgwprg;
+import 'items/access_state.dart' as _imhj9b3j;
+import 'items/capture_draft.dart' as _idav3wwe;
+import 'items/capture_result.dart' as _il5toi29;
 import 'items/content_type.dart' as _itwlc5zp;
+import 'items/enrichment_state.dart' as _im2yqxlq;
 import 'items/item.dart' as _iapziv9t;
 import 'items/item_draft.dart' as _ip8cn60r;
 import 'items/item_lifecycle.dart' as _iveh3zib;
@@ -46,7 +50,11 @@ export 'common/assignment_origin.dart';
 export 'common/record_not_found_exception.dart';
 export 'common/validation_exception.dart';
 export 'health/server_health.dart';
+export 'items/access_state.dart';
+export 'items/capture_draft.dart';
+export 'items/capture_result.dart';
 export 'items/content_type.dart';
+export 'items/enrichment_state.dart';
 export 'items/item.dart';
 export 'items/item_draft.dart';
 export 'items/item_lifecycle.dart';
@@ -116,8 +124,20 @@ class Protocol extends _isc.SerializationManager {
     if (t == _iozgwprg.ServerHealth) {
       return _iozgwprg.ServerHealth.fromJson(data) as T;
     }
+    if (t == _imhj9b3j.AccessState) {
+      return _imhj9b3j.AccessState.fromJson(data) as T;
+    }
+    if (t == _idav3wwe.CaptureDraft) {
+      return _idav3wwe.CaptureDraft.fromJson(data) as T;
+    }
+    if (t == _il5toi29.CaptureResult) {
+      return _il5toi29.CaptureResult.fromJson(data) as T;
+    }
     if (t == _itwlc5zp.ContentType) {
       return _itwlc5zp.ContentType.fromJson(data) as T;
+    }
+    if (t == _im2yqxlq.EnrichmentState) {
+      return _im2yqxlq.EnrichmentState.fromJson(data) as T;
     }
     if (t == _iapziv9t.Item) {
       return _iapziv9t.Item.fromJson(data) as T;
@@ -185,8 +205,22 @@ class Protocol extends _isc.SerializationManager {
     if (t == _isc.getType<_iozgwprg.ServerHealth?>()) {
       return (data != null ? _iozgwprg.ServerHealth.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_imhj9b3j.AccessState?>()) {
+      return (data != null ? _imhj9b3j.AccessState.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_idav3wwe.CaptureDraft?>()) {
+      return (data != null ? _idav3wwe.CaptureDraft.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_il5toi29.CaptureResult?>()) {
+      return (data != null ? _il5toi29.CaptureResult.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_itwlc5zp.ContentType?>()) {
       return (data != null ? _itwlc5zp.ContentType.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_im2yqxlq.EnrichmentState?>()) {
+      return (data != null ? _im2yqxlq.EnrichmentState.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_iapziv9t.Item?>()) {
       return (data != null ? _iapziv9t.Item.fromJson(data) : null) as T;
@@ -227,6 +261,18 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _isc.getType<_iopagaq8.Tag?>()) {
       return (data != null ? _iopagaq8.Tag.fromJson(data) : null) as T;
+    }
+    if (t == List<_isc.UuidValue>) {
+      return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
+          as T;
+    }
+    if (t == _isc.getType<List<_isc.UuidValue>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_isc.UuidValue>(e))
+                    .toList()
+              : null)
+          as T;
     }
     if (t == List<_iswi3gl6.ReminderWindow>) {
       return (data as List)
@@ -273,7 +319,11 @@ class Protocol extends _isc.SerializationManager {
       _ilf890y8.RecordNotFoundException => 'RecordNotFoundException',
       _ifwcmx8g.ValidationException => 'ValidationException',
       _iozgwprg.ServerHealth => 'ServerHealth',
+      _imhj9b3j.AccessState => 'AccessState',
+      _idav3wwe.CaptureDraft => 'CaptureDraft',
+      _il5toi29.CaptureResult => 'CaptureResult',
       _itwlc5zp.ContentType => 'ContentType',
+      _im2yqxlq.EnrichmentState => 'EnrichmentState',
       _iapziv9t.Item => 'Item',
       _ip8cn60r.ItemDraft => 'ItemDraft',
       _iveh3zib.ItemLifecycle => 'ItemLifecycle',
@@ -314,8 +364,16 @@ class Protocol extends _isc.SerializationManager {
         return 'ValidationException';
       case _iozgwprg.ServerHealth():
         return 'ServerHealth';
+      case _imhj9b3j.AccessState():
+        return 'AccessState';
+      case _idav3wwe.CaptureDraft():
+        return 'CaptureDraft';
+      case _il5toi29.CaptureResult():
+        return 'CaptureResult';
       case _itwlc5zp.ContentType():
         return 'ContentType';
+      case _im2yqxlq.EnrichmentState():
+        return 'EnrichmentState';
       case _iapziv9t.Item():
         return 'Item';
       case _ip8cn60r.ItemDraft():
@@ -383,8 +441,20 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName == 'ServerHealth') {
       return deserialize<_iozgwprg.ServerHealth>(data['data']);
     }
+    if (dataClassName == 'AccessState') {
+      return deserialize<_imhj9b3j.AccessState>(data['data']);
+    }
+    if (dataClassName == 'CaptureDraft') {
+      return deserialize<_idav3wwe.CaptureDraft>(data['data']);
+    }
+    if (dataClassName == 'CaptureResult') {
+      return deserialize<_il5toi29.CaptureResult>(data['data']);
+    }
     if (dataClassName == 'ContentType') {
       return deserialize<_itwlc5zp.ContentType>(data['data']);
+    }
+    if (dataClassName == 'EnrichmentState') {
+      return deserialize<_im2yqxlq.EnrichmentState>(data['data']);
     }
     if (dataClassName == 'Item') {
       return deserialize<_iapziv9t.Item>(data['data']);

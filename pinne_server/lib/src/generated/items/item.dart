@@ -11,7 +11,9 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _is;
+import '../items/access_state.dart' as _idll96tf;
 import '../items/content_type.dart' as _ic14w5wg;
+import '../items/enrichment_state.dart' as _iib6h77f;
 import '../items/item_lifecycle.dart' as _i6i14d93;
 import '../items/source_platform.dart' as _ixm5zqtz;
 
@@ -22,35 +24,47 @@ abstract class Item
   Item._({
     this.id,
     required this.ownerId,
+    this.clientItemId,
     this.url,
     this.canonicalUrl,
     _ixm5zqtz.SourcePlatform? sourcePlatform,
+    this.sourceItemId,
     required this.title,
+    this.noteText,
     _ic14w5wg.ContentType? contentType,
     this.intention,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
+    _iib6h77f.EnrichmentState? enrichmentState,
+    _idll96tf.AccessState? accessState,
     int? revision,
   }) : sourcePlatform = sourcePlatform ?? _ixm5zqtz.SourcePlatform.web,
        contentType = contentType ?? _ic14w5wg.ContentType.other,
        priority = priority ?? 0,
        lifecycle = lifecycle ?? _i6i14d93.ItemLifecycle.active,
        savedAt = savedAt ?? DateTime.now(),
+       enrichmentState = enrichmentState ?? _iib6h77f.EnrichmentState.pending,
+       accessState = accessState ?? _idll96tf.AccessState.unknown,
        revision = revision ?? 1;
 
   factory Item({
     _is.UuidValue? id,
     required _is.UuidValue ownerId,
+    _is.UuidValue? clientItemId,
     String? url,
     String? canonicalUrl,
     _ixm5zqtz.SourcePlatform? sourcePlatform,
+    String? sourceItemId,
     required String title,
+    String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
+    _iib6h77f.EnrichmentState? enrichmentState,
+    _idll96tf.AccessState? accessState,
     int? revision,
   }) = _ItemImpl;
 
@@ -62,6 +76,11 @@ abstract class Item
       ownerId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['ownerId'],
       ),
+      clientItemId: jsonSerialization['clientItemId'] == null
+          ? null
+          : _is.UuidValueJsonExtension.fromJson(
+              jsonSerialization['clientItemId'],
+            ),
       url: jsonSerialization['url'] as String?,
       canonicalUrl: jsonSerialization['canonicalUrl'] as String?,
       sourcePlatform: jsonSerialization['sourcePlatform'] == null
@@ -69,7 +88,9 @@ abstract class Item
           : _ixm5zqtz.SourcePlatform.fromJson(
               (jsonSerialization['sourcePlatform'] as String),
             ),
+      sourceItemId: jsonSerialization['sourceItemId'] as String?,
       title: jsonSerialization['title'] as String,
+      noteText: jsonSerialization['noteText'] as String?,
       contentType: jsonSerialization['contentType'] == null
           ? null
           : _ic14w5wg.ContentType.fromJson(
@@ -85,6 +106,16 @@ abstract class Item
       savedAt: jsonSerialization['savedAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['savedAt']),
+      enrichmentState: jsonSerialization['enrichmentState'] == null
+          ? null
+          : _iib6h77f.EnrichmentState.fromJson(
+              (jsonSerialization['enrichmentState'] as String),
+            ),
+      accessState: jsonSerialization['accessState'] == null
+          ? null
+          : _idll96tf.AccessState.fromJson(
+              (jsonSerialization['accessState'] as String),
+            ),
       revision: jsonSerialization['revision'] as int?,
     );
   }
@@ -98,7 +129,12 @@ abstract class Item
 
   _is.UuidValue ownerId;
 
-  /// The URL as shared by the user. Null for note-only items.
+  /// The id the capturing device gave the item, so a retried capture maps
+  /// to this row instead of creating another.
+  _is.UuidValue? clientItemId;
+
+  /// The URL as shared by the user, minus tracking parameters. Null for
+  /// note-only items.
   String? url;
 
   /// Normalized URL used to recognize duplicates.
@@ -106,7 +142,14 @@ abstract class Item
 
   _ixm5zqtz.SourcePlatform sourcePlatform;
 
+  /// The platform's own id for the item, such as a post or video id. Used
+  /// with the platform to recognize duplicates.
+  String? sourceItemId;
+
   String title;
+
+  /// The text of a note-only item. Null for links.
+  String? noteText;
 
   _ic14w5wg.ContentType contentType;
 
@@ -117,7 +160,13 @@ abstract class Item
 
   _i6i14d93.ItemLifecycle lifecycle;
 
+  /// When the user first saved it, on their device. Never moved by a later
+  /// duplicate capture.
   DateTime savedAt;
+
+  _iib6h77f.EnrichmentState enrichmentState;
+
+  _idll96tf.AccessState accessState;
 
   /// Optimistic concurrency counter, bumped on every server-side update.
   int revision;
@@ -131,15 +180,20 @@ abstract class Item
   Item copyWith({
     _is.UuidValue? id,
     _is.UuidValue? ownerId,
+    _is.UuidValue? clientItemId,
     String? url,
     String? canonicalUrl,
     _ixm5zqtz.SourcePlatform? sourcePlatform,
+    String? sourceItemId,
     String? title,
+    String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
+    _iib6h77f.EnrichmentState? enrichmentState,
+    _idll96tf.AccessState? accessState,
     int? revision,
   });
   @override
@@ -148,15 +202,20 @@ abstract class Item
       '__className__': 'Item',
       if (id != null) 'id': id?.toJson(),
       'ownerId': ownerId.toJson(),
+      if (clientItemId != null) 'clientItemId': clientItemId?.toJson(),
       if (url != null) 'url': url,
       if (canonicalUrl != null) 'canonicalUrl': canonicalUrl,
       'sourcePlatform': sourcePlatform.toJson(),
+      if (sourceItemId != null) 'sourceItemId': sourceItemId,
       'title': title,
+      if (noteText != null) 'noteText': noteText,
       'contentType': contentType.toJson(),
       if (intention != null) 'intention': intention,
       'priority': priority,
       'lifecycle': lifecycle.toJson(),
       'savedAt': savedAt.toJson(),
+      'enrichmentState': enrichmentState.toJson(),
+      'accessState': accessState.toJson(),
       'revision': revision,
     };
   }
@@ -167,15 +226,20 @@ abstract class Item
       '__className__': 'Item',
       if (id != null) 'id': id?.toJson(),
       'ownerId': ownerId.toJson(),
+      if (clientItemId != null) 'clientItemId': clientItemId?.toJson(),
       if (url != null) 'url': url,
       if (canonicalUrl != null) 'canonicalUrl': canonicalUrl,
       'sourcePlatform': sourcePlatform.toJson(),
+      if (sourceItemId != null) 'sourceItemId': sourceItemId,
       'title': title,
+      if (noteText != null) 'noteText': noteText,
       'contentType': contentType.toJson(),
       if (intention != null) 'intention': intention,
       'priority': priority,
       'lifecycle': lifecycle.toJson(),
       'savedAt': savedAt.toJson(),
+      'enrichmentState': enrichmentState.toJson(),
+      'accessState': accessState.toJson(),
       'revision': revision,
     };
   }
@@ -214,28 +278,38 @@ class _ItemImpl extends Item {
   _ItemImpl({
     _is.UuidValue? id,
     required _is.UuidValue ownerId,
+    _is.UuidValue? clientItemId,
     String? url,
     String? canonicalUrl,
     _ixm5zqtz.SourcePlatform? sourcePlatform,
+    String? sourceItemId,
     required String title,
+    String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
+    _iib6h77f.EnrichmentState? enrichmentState,
+    _idll96tf.AccessState? accessState,
     int? revision,
   }) : super._(
          id: id,
          ownerId: ownerId,
+         clientItemId: clientItemId,
          url: url,
          canonicalUrl: canonicalUrl,
          sourcePlatform: sourcePlatform,
+         sourceItemId: sourceItemId,
          title: title,
+         noteText: noteText,
          contentType: contentType,
          intention: intention,
          priority: priority,
          lifecycle: lifecycle,
          savedAt: savedAt,
+         enrichmentState: enrichmentState,
+         accessState: accessState,
          revision: revision,
        );
 
@@ -246,29 +320,41 @@ class _ItemImpl extends Item {
   Item copyWith({
     Object? id = _Undefined,
     _is.UuidValue? ownerId,
+    Object? clientItemId = _Undefined,
     Object? url = _Undefined,
     Object? canonicalUrl = _Undefined,
     _ixm5zqtz.SourcePlatform? sourcePlatform,
+    Object? sourceItemId = _Undefined,
     String? title,
+    Object? noteText = _Undefined,
     _ic14w5wg.ContentType? contentType,
     Object? intention = _Undefined,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
+    _iib6h77f.EnrichmentState? enrichmentState,
+    _idll96tf.AccessState? accessState,
     int? revision,
   }) {
     return Item(
       id: id is _is.UuidValue? ? id : this.id,
       ownerId: ownerId ?? this.ownerId,
+      clientItemId: clientItemId is _is.UuidValue?
+          ? clientItemId
+          : this.clientItemId,
       url: url is String? ? url : this.url,
       canonicalUrl: canonicalUrl is String? ? canonicalUrl : this.canonicalUrl,
       sourcePlatform: sourcePlatform ?? this.sourcePlatform,
+      sourceItemId: sourceItemId is String? ? sourceItemId : this.sourceItemId,
       title: title ?? this.title,
+      noteText: noteText is String? ? noteText : this.noteText,
       contentType: contentType ?? this.contentType,
       intention: intention is String? ? intention : this.intention,
       priority: priority ?? this.priority,
       lifecycle: lifecycle ?? this.lifecycle,
       savedAt: savedAt ?? this.savedAt,
+      enrichmentState: enrichmentState ?? this.enrichmentState,
+      accessState: accessState ?? this.accessState,
       revision: revision ?? this.revision,
     );
   }
@@ -282,6 +368,13 @@ class ItemUpdateTable extends _is.UpdateTable<ItemTable> {
         table.ownerId,
         value,
       );
+
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> clientItemId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.clientItemId,
+    value,
+  );
 
   _is.ColumnValue<String, String> url(String? value) => _is.ColumnValue(
     table.url,
@@ -300,8 +393,19 @@ class ItemUpdateTable extends _is.UpdateTable<ItemTable> {
     value,
   );
 
+  _is.ColumnValue<String, String> sourceItemId(String? value) =>
+      _is.ColumnValue(
+        table.sourceItemId,
+        value,
+      );
+
   _is.ColumnValue<String, String> title(String value) => _is.ColumnValue(
     table.title,
+    value,
+  );
+
+  _is.ColumnValue<String, String> noteText(String? value) => _is.ColumnValue(
+    table.noteText,
     value,
   );
 
@@ -335,6 +439,19 @@ class ItemUpdateTable extends _is.UpdateTable<ItemTable> {
         value,
       );
 
+  _is.ColumnValue<_iib6h77f.EnrichmentState, _iib6h77f.EnrichmentState>
+  enrichmentState(_iib6h77f.EnrichmentState value) => _is.ColumnValue(
+    table.enrichmentState,
+    value,
+  );
+
+  _is.ColumnValue<_idll96tf.AccessState, _idll96tf.AccessState> accessState(
+    _idll96tf.AccessState value,
+  ) => _is.ColumnValue(
+    table.accessState,
+    value,
+  );
+
   _is.ColumnValue<int, int> revision(int value) => _is.ColumnValue(
     table.revision,
     value,
@@ -346,6 +463,10 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
     updateTable = ItemUpdateTable(this);
     ownerId = _is.ColumnUuid(
       'ownerId',
+      this,
+    );
+    clientItemId = _is.ColumnUuid(
+      'clientItemId',
       this,
     );
     url = _is.ColumnString(
@@ -362,8 +483,16 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
       _is.EnumSerialization.byName,
       hasDefault: true,
     );
+    sourceItemId = _is.ColumnString(
+      'sourceItemId',
+      this,
+    );
     title = _is.ColumnString(
       'title',
+      this,
+    );
+    noteText = _is.ColumnString(
+      'noteText',
       this,
     );
     contentType = _is.ColumnEnum(
@@ -392,6 +521,18 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
       this,
       hasDefault: true,
     );
+    enrichmentState = _is.ColumnEnum(
+      'enrichmentState',
+      this,
+      _is.EnumSerialization.byName,
+      hasDefault: true,
+    );
+    accessState = _is.ColumnEnum(
+      'accessState',
+      this,
+      _is.EnumSerialization.byName,
+      hasDefault: true,
+    );
     revision = _is.ColumnInt(
       'revision',
       this,
@@ -403,7 +544,12 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnUuid ownerId;
 
-  /// The URL as shared by the user. Null for note-only items.
+  /// The id the capturing device gave the item, so a retried capture maps
+  /// to this row instead of creating another.
+  late final _is.ColumnUuid clientItemId;
+
+  /// The URL as shared by the user, minus tracking parameters. Null for
+  /// note-only items.
   late final _is.ColumnString url;
 
   /// Normalized URL used to recognize duplicates.
@@ -411,7 +557,14 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnEnum<_ixm5zqtz.SourcePlatform> sourcePlatform;
 
+  /// The platform's own id for the item, such as a post or video id. Used
+  /// with the platform to recognize duplicates.
+  late final _is.ColumnString sourceItemId;
+
   late final _is.ColumnString title;
+
+  /// The text of a note-only item. Null for links.
+  late final _is.ColumnString noteText;
 
   late final _is.ColumnEnum<_ic14w5wg.ContentType> contentType;
 
@@ -422,7 +575,13 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnEnum<_i6i14d93.ItemLifecycle> lifecycle;
 
+  /// When the user first saved it, on their device. Never moved by a later
+  /// duplicate capture.
   late final _is.ColumnDateTime savedAt;
+
+  late final _is.ColumnEnum<_iib6h77f.EnrichmentState> enrichmentState;
+
+  late final _is.ColumnEnum<_idll96tf.AccessState> accessState;
 
   /// Optimistic concurrency counter, bumped on every server-side update.
   late final _is.ColumnInt revision;
@@ -431,15 +590,20 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
   List<_is.Column> get columns => [
     id,
     ownerId,
+    clientItemId,
     url,
     canonicalUrl,
     sourcePlatform,
+    sourceItemId,
     title,
+    noteText,
     contentType,
     intention,
     priority,
     lifecycle,
     savedAt,
+    enrichmentState,
+    accessState,
     revision,
   ];
 }

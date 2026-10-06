@@ -19,6 +19,10 @@ import 'package:pinne_server/src/generated/collections/collection_draft.dart'
     as _imy5wtcu;
 import 'package:pinne_server/src/generated/health/server_health.dart'
     as _iq4esrxi;
+import 'package:pinne_server/src/generated/items/capture_draft.dart'
+    as _iushcgme;
+import 'package:pinne_server/src/generated/items/capture_result.dart'
+    as _ikufny5w;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/items/item_draft.dart' as _ittgmzop;
 import 'package:pinne_server/src/generated/profile/pinne_profile.dart'
@@ -919,6 +923,37 @@ class _ItemEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_id0tr7gx.Item?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ikufny5w.CaptureResult> capture(
+    _ist.TestSessionBuilder sessionBuilder,
+    _iushcgme.CaptureDraft draft,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'item',
+            method: 'capture',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'item',
+          methodName: 'capture',
+          parameters: _ist.testObjectToJson({'draft': draft}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ikufny5w.CaptureResult>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

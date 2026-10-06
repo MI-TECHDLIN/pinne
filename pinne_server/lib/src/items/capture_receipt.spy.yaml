@@ -1,0 +1,23 @@
+### The stored outcome of one capture operation, so a retried operation gets
+### the same answer even when it matched a duplicate and created no item.
+class: CaptureReceipt
+table: capture_receipt
+serverOnly: true
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  operationId: UuidValue
+  clientItemId: UuidValue
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  ### Hash of the capture payload. The same operation id with a different
+  ### payload is refused.
+  requestHash: String
+  duplicate: bool
+  receivedAt: DateTime, default=now
+indexes:
+  capture_receipt_owner_operation_idx:
+    fields: ownerId, operationId
+    unique: true
+  capture_receipt_owner_client_item_idx:
+    fields: ownerId, clientItemId
+    unique: true

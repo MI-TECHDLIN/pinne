@@ -1,4 +1,7 @@
-### Where a saved item came from.
+### Where a saved item came from. Detected from the link by the shared
+### `pinne_capture` package, whose `CaptureSource` maps to this by name.
+### `unknown` is explicit: an ambiguous link, such as a generic short link,
+### is never guessed. `other` is kept for rows written before detection.
 enum: SourcePlatform
 serialized: byName
 values:
@@ -7,3 +10,8 @@ values:
   - web
   - note
   - other
+  - instagram
+  - tiktok
+  - reddit
+  - github
+  - unknown

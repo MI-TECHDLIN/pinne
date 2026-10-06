@@ -24,6 +24,7 @@ health:
 item:
   - list:
   - get:
+  - capture:
   - create:
   - update:
   - delete:

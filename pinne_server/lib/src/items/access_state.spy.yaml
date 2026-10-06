@@ -1,0 +1,9 @@
+### Whether the original content could be reached. Independent of lifecycle
+### and enrichment. A link that was never fetched is `unknown`.
+enum: AccessState
+serialized: byName
+values:
+  - available
+  - loginRequired
+  - unavailable
+  - unknown

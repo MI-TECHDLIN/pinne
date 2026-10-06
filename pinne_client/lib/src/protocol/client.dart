@@ -18,6 +18,10 @@ import 'package:pinne_client/src/protocol/collections/collection_draft.dart'
     as _iqvt7ot6;
 import 'package:pinne_client/src/protocol/health/server_health.dart'
     as _ibqesezf;
+import 'package:pinne_client/src/protocol/items/capture_draft.dart'
+    as _ium6vjfl;
+import 'package:pinne_client/src/protocol/items/capture_result.dart'
+    as _ibc30ndw;
 import 'package:pinne_client/src/protocol/items/item.dart' as _itiiwgx0;
 import 'package:pinne_client/src/protocol/items/item_draft.dart' as _ixoujeet;
 import 'package:pinne_client/src/protocol/profile/pinne_profile.dart'
@@ -376,7 +380,7 @@ class EndpointHealth extends _isc.EndpointRef {
 /// Owner-scoped CRUD for saved items. Every query filters on the signed-in
 /// owner, so another user's ids behave exactly like missing ids.
 ///
-/// Capture enrichment, duplicate resolution and search are later features.
+/// Enrichment and search are later features.
 /// {@category Endpoint}
 class EndpointItem extends _isc.EndpointRef {
   EndpointItem(_isc.EndpointCaller caller) : super(caller);
@@ -403,6 +407,17 @@ class EndpointItem extends _isc.EndpointRef {
         'item',
         'get',
         {'id': id},
+      );
+
+  /// Saves a shared or pasted link or note. Safe to retry with the same
+  /// operation id. A recognised duplicate returns the existing item with
+  /// `duplicate` set; its notes, collections and first `savedAt` are kept.
+  /// The answer never waits for enrichment, which starts as `pending`.
+  _ida.Future<_ibc30ndw.CaptureResult> capture(_ium6vjfl.CaptureDraft draft) =>
+      caller.callServerEndpoint<_ibc30ndw.CaptureResult>(
+        'item',
+        'capture',
+        {'draft': draft},
       );
 
   _ida.Future<_itiiwgx0.Item> create(_ixoujeet.ItemDraft draft) =>

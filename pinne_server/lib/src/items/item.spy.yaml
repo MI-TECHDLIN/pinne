@@ -5,18 +5,31 @@ table: item
 fields:
   id: UuidValue?, defaultPersist=random_v7
   ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
-  ### The URL as shared by the user. Null for note-only items.
+  ### The id the capturing device gave the item, so a retried capture maps
+  ### to this row instead of creating another.
+  clientItemId: UuidValue?
+  ### The URL as shared by the user, minus tracking parameters. Null for
+  ### note-only items.
   url: String?
   ### Normalized URL used to recognize duplicates.
   canonicalUrl: String?
   sourcePlatform: SourcePlatform, default=web
+  ### The platform's own id for the item, such as a post or video id. Used
+  ### with the platform to recognize duplicates.
+  sourceItemId: String?
   title: String
+  ### The text of a note-only item. Null for links.
+  noteText: String?
   contentType: ContentType, default=other
   ### The user's own note on why they saved this item.
   intention: String?
   priority: int, default=0
   lifecycle: ItemLifecycle, default=active
+  ### When the user first saved it, on their device. Never moved by a later
+  ### duplicate capture.
   savedAt: DateTime, default=now
+  enrichmentState: EnrichmentState, default=pending
+  accessState: AccessState, default=unknown
   ### Optimistic concurrency counter, bumped on every server-side update.
   revision: int, default=1
 indexes:
@@ -24,5 +37,12 @@ indexes:
     fields: ownerId, savedAt, id
   item_owner_canonical_url_idx:
     fields: ownerId, canonicalUrl
+    unique: true
+  item_owner_source_item_idx:
+    fields: ownerId, sourcePlatform, sourceItemId
+    unique: true
+  item_owner_client_item_idx:
+    fields: ownerId, clientItemId
+    unique: true
   item_owner_lifecycle_idx:
     fields: ownerId, lifecycle
