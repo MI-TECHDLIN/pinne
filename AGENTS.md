@@ -17,7 +17,7 @@ Claude is the planned AI provider. Run steps and commands are in `README.md`.
 - Relations between owned rows must check that both ends share the owner.
 - Colours come from `pinne_flutter/lib/theme/pinne_tokens.dart`. Lime is only `accentDue` (due-now state) and `accentPrimaryAction` (one primary action per screen). Violet is for every other button, selected state and link. Never use lime decoratively.
 - The Ribbon Spirit (`lib/ui/ribbon_spirit/`) is the app's character. Its seed recipe and `PinneSpiritPalettes` indices are persisted in `pinne_profile`: never change the recipe math or reorder palettes (see `docs/ribbon-spirit/README.md`).
-- Animations read `reduceMotionProvider` (`lib/core/motion.dart`). It follows the OS reduce-motion flag unless the user overrides it in Settings.
+- Widgets gate animation on `reduceMotionOf(context)` (`lib/ui/motion.dart`; `reduceMotionProvider` is only for code without a context). It follows the OS reduce-motion flags unless the user overrides it in Settings.
 - Secrets live only in git-ignored `pinne_server/config/passwords.yaml` and `pinne_server/.env`. Templates: `config/passwords.yaml.example` and `tool/setup_dev_secrets.sh`.
 
 ## Commands
