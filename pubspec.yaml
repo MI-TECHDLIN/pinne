@@ -1,0 +1,11 @@
+name: _
+publish_to: none
+
+environment:
+  sdk: '^3.12.2'
+
+workspace:
+  - pinne_client
+  - pinne_server
+  - pinne_flutter
+

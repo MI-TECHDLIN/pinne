@@ -1,0 +1,12 @@
+### Client input for creating an item. Carries no owner or id; the server
+### assigns both.
+class: ItemDraft
+fields:
+  url: String?
+  title: String
+  sourcePlatform: SourcePlatform, default=web
+  contentType: ContentType, default=other
+  intention: String?
+  priority: int, default=0
+  ### When the user saved it on the device, if captured offline.
+  savedAt: DateTime?

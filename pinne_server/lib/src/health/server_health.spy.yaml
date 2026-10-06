@@ -1,0 +1,7 @@
+### Public server health, safe to show before sign-in.
+class: ServerHealth
+fields:
+  ok: bool
+  databaseOk: bool
+  serverTime: DateTime
+  version: String

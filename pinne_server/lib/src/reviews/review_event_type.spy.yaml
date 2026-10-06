@@ -1,0 +1,9 @@
+### What happened in a review event. `undo` compensates an earlier event.
+enum: ReviewEventType
+serialized: byName
+values:
+  - opened
+  - reviewed
+  - completed
+  - applied
+  - undo

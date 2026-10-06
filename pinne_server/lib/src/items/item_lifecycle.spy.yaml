@@ -1,0 +1,7 @@
+### Whether an item is in use. Review progress is derived separately from
+### review events and is never stored here.
+enum: ItemLifecycle
+serialized: byName
+values:
+  - active
+  - archived

@@ -1,0 +1,13 @@
+### A user-defined group of items. Collections can nest; the parent must belong
+### to the same owner and must not create a cycle.
+class: Collection
+table: collection
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  name: String
+  description: String?
+  parentId: UuidValue?, relation(parent=collection, onDelete=SetNull)
+indexes:
+  collection_owner_parent_idx:
+    fields: ownerId, parentId

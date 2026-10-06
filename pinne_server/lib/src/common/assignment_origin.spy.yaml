@@ -1,0 +1,7 @@
+### How an item was placed into a collection or given a tag.
+enum: AssignmentOrigin
+serialized: byName
+values:
+  - manual
+  - ai
+  - imported

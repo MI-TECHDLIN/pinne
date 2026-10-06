@@ -1,0 +1,6 @@
+### Client input for creating a collection.
+class: CollectionDraft
+fields:
+  name: String
+  description: String?
+  parentId: UuidValue?

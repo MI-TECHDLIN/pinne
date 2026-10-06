@@ -1,0 +1,9 @@
+### Where a saved item came from.
+enum: SourcePlatform
+serialized: byName
+values:
+  - x
+  - youtube
+  - web
+  - note
+  - other
