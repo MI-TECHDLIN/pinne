@@ -112,3 +112,11 @@ serverpod generate
 serverpod create-migration
 dart run bin/main.dart --apply-migrations
 ```
+
+## AI art
+
+The Ribbon Spirit stills in `pinne_flutter/assets/art/` were generated with
+FLUX.2 [klein] 4B (Apache-2.0). Prompts, seeds, the licence record and the
+AI-use disclosure for the submission are in
+[`docs/ai-art/README.md`](docs/ai-art/README.md). The animated spirit in the
+app is drawn in code (`docs/ribbon-spirit/`).
