@@ -27,3 +27,6 @@ item:
   - create:
   - update:
   - delete:
+profile:
+  - get:
+  - upsert:

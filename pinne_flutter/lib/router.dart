@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import 'features/search/search_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/today/today_screen.dart';
 import 'shell/app_shell.dart';
+import 'ui/ribbon_spirit/ribbon_gallery.dart';
 
 abstract final class Routes {
   static const today = '/today';
@@ -17,12 +19,18 @@ abstract final class Routes {
   static const progress = '/progress';
   static const settings = '/settings';
   static const signIn = '/sign-in';
+  static const ribbonGallery = '/debug/ribbon-spirit';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: Routes.today,
     routes: [
+      if (kDebugMode)
+        GoRoute(
+          path: Routes.ribbonGallery,
+          builder: (context, state) => const RibbonGallery(),
+        ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(navigationShell: shell),
         branches: [

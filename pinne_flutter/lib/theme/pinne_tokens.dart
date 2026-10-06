@@ -70,3 +70,49 @@ abstract final class PinneSpacing {
   /// Space reserved at the bottom of scrolling screens for the floating nav.
   static const navClearance = 104.0;
 }
+
+/// Stored palette indices are an API contract with ProfileEndpoint.paletteCount.
+/// Append new entries; never reorder. No lime, including in highlights/shadows.
+abstract final class PinneSpiritPalettes {
+  static const values = [
+    SpiritPalette(
+      'Violet',
+      Color(0xFF392081),
+      PinneColors.violet,
+      Color(0xFFE4D6FF),
+    ),
+    SpiritPalette(
+      'Lilac',
+      Color(0xFF62428F),
+      PinneColors.lilac,
+      Color(0xFFF3DEFF),
+    ),
+    SpiritPalette(
+      'Peach',
+      Color(0xFFAB4269),
+      PinneColors.peach,
+      Color(0xFFFFE7CC),
+    ),
+    SpiritPalette(
+      'Mint',
+      Color(0xFF206D7B),
+      PinneColors.mint,
+      Color(0xFFD8FFF5),
+    ),
+    SpiritPalette(
+      'Pink',
+      Color(0xFF89377E),
+      PinneColors.pink,
+      Color(0xFFFFDEEF),
+    ),
+    SpiritPalette('Sky', Color(0xFF384C9C), PinneColors.sky, Color(0xFFE2EEFF)),
+  ];
+}
+
+class SpiritPalette {
+  const SpiritPalette(this.name, this.shadow, this.body, this.light);
+  final String name;
+  final Color shadow;
+  final Color body;
+  final Color light;
+}

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,21 +8,29 @@ import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import 'profile_card.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const PinnePage(
+    return PinnePage(
       headline: 'Settings',
       subtitle: 'Reminders, AI and privacy controls will live here.',
       children: [
-        _AccountCard(),
-        SizedBox(height: PinneSpacing.md),
-        _MotionCard(),
-        SizedBox(height: PinneSpacing.md),
-        ServerHealthCard(),
+        const ProfileCard(),
+        const SizedBox(height: PinneSpacing.md),
+        const _AccountCard(),
+        const SizedBox(height: PinneSpacing.md),
+        const _MotionCard(),
+        const SizedBox(height: PinneSpacing.md),
+        const ServerHealthCard(),
+        if (kDebugMode)
+          TextButton(
+            onPressed: () => context.push(Routes.ribbonGallery),
+            child: const Text('Ribbon studio'),
+          ),
       ],
     );
   }

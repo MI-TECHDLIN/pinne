@@ -21,6 +21,10 @@ import 'package:pinne_server/src/generated/health/server_health.dart'
     as _iq4esrxi;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/items/item_draft.dart' as _ittgmzop;
+import 'package:pinne_server/src/generated/profile/pinne_profile.dart'
+    as _ixjrylia;
+import 'package:pinne_server/src/generated/profile/profile_draft.dart'
+    as _i2c58fcj;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -169,6 +173,8 @@ class TestEndpoints {
   late final _HealthEndpoint health;
 
   late final _ItemEndpoint item;
+
+  late final _ProfileEndpoint profile;
 }
 
 class _InternalTestEndpoints extends TestEndpoints
@@ -199,6 +205,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     item = _ItemEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    profile = _ProfileEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1002,6 +1012,78 @@ class _ItemEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _ProfileEndpoint {
+  _ProfileEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_ixjrylia.PinneProfile?> get(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'profile',
+            method: 'get',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'get',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ixjrylia.PinneProfile?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ixjrylia.PinneProfile> upsert(
+    _ist.TestSessionBuilder sessionBuilder,
+    _i2c58fcj.ProfileDraft draft,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'profile',
+            method: 'upsert',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'profile',
+          methodName: 'upsert',
+          parameters: _ist.testObjectToJson({'draft': draft}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ixjrylia.PinneProfile>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

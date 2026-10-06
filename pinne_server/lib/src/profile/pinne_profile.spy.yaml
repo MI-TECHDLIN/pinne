@@ -1,0 +1,13 @@
+### One avatar recipe and display name per signed-in owner.
+class: PinneProfile
+table: pinne_profile
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  displayName: String
+  avatarSeed: int
+  avatarPalette: int
+indexes:
+  pinne_profile_owner_unique:
+    fields: ownerId
+    unique: true
