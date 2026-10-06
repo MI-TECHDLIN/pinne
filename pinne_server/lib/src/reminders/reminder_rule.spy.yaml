@@ -1,0 +1,19 @@
+### When to remind the user about saved items. A null collection is the owner's
+### default rule; a collection rule overrides it.
+class: ReminderRule
+table: reminder_rule
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  collectionId: UuidValue?, relation(parent=collection, onDelete=Cascade)
+  delayHours: int, default=24
+  ### Null means reminders may arrive at any time outside quiet hours.
+  deliveryWindows: List<ReminderWindow>?
+  ### Maximum reminders per day; null means no cap.
+  cap: int?
+  enabled: bool, default=true
+indexes:
+  reminder_rule_owner_collection_idx:
+    fields: ownerId, collectionId
+    unique: true
+    nulls_distinct: false

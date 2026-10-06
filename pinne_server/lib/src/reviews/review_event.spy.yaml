@@ -1,0 +1,23 @@
+### An immutable review fact. Progress is derived from these events; an undo is
+### a new event that points at the event it compensates.
+class: ReviewEvent
+table: review_event
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  eventType: ReviewEventType
+  ### When it happened on the device (UTC).
+  occurredAt: DateTime
+  ### When the server received it (UTC).
+  receivedAt: DateTime, default=now
+  ### IANA timezone of the user at the time of the event.
+  timezone: String
+  ### The user's local calendar date of the event, as yyyy-MM-dd.
+  effectiveLocalDate: String
+  compensatesEventId: UuidValue?, relation(parent=review_event, onDelete=Restrict)
+indexes:
+  review_event_owner_item_time_idx:
+    fields: ownerId, itemId, occurredAt
+  review_event_owner_date_idx:
+    fields: ownerId, effectiveLocalDate

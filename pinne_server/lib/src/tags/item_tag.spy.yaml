@@ -1,0 +1,15 @@
+### A tag on an item. Both ends must share the row owner.
+class: ItemTag
+table: item_tag
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  tagId: UuidValue, relation(parent=tag, onDelete=Cascade)
+  origin: AssignmentOrigin, default=manual
+indexes:
+  item_tag_unique_idx:
+    fields: itemId, tagId
+    unique: true
+  item_tag_owner_tag_idx:
+    fields: ownerId, tagId

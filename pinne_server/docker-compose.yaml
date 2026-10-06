@@ -1,0 +1,20 @@
+# Development PostgreSQL for Pinne. Tests do not use this; they run on an
+# embedded PostgreSQL that Serverpod starts itself (config/test.yaml).
+#
+# The password comes from pinne_server/.env, written by
+# tool/setup_dev_secrets.sh, and must match `development.database` in
+# config/passwords.yaml.
+services:
+  postgres:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "8090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: pinne
+      POSTGRES_PASSWORD: ${PINNE_DEV_DB_PASSWORD:?run tool/setup_dev_secrets.sh first}
+    volumes:
+      - pinne_data:/var/lib/postgresql/data
+
+volumes:
+  pinne_data:

@@ -1,0 +1,10 @@
+### What kind of content a saved item is.
+enum: ContentType
+serialized: byName
+values:
+  - article
+  - video
+  - post
+  - thread
+  - note
+  - other

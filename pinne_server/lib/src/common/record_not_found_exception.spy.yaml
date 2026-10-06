@@ -1,0 +1,5 @@
+### Thrown when a record does not exist or is not owned by the signed-in user.
+### Both cases look identical to the client so ids cannot be probed.
+exception: RecordNotFoundException
+fields:
+  resource: String

@@ -1,0 +1,17 @@
+### Membership of an item in a collection. Both ends must share the row owner.
+class: ItemCollection
+table: item_collection
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  collectionId: UuidValue, relation(parent=collection, onDelete=Cascade)
+  origin: AssignmentOrigin, default=manual
+  ### True when the user placed it by hand, so AI must not move it.
+  manuallyLocked: bool, default=false
+indexes:
+  item_collection_unique_idx:
+    fields: itemId, collectionId
+    unique: true
+  item_collection_owner_collection_idx:
+    fields: ownerId, collectionId

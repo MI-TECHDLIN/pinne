@@ -1,0 +1,28 @@
+### A saved resource. Every row is owned by one auth user; the owner is set by
+### the server from the signed-in session and never taken from the client.
+class: Item
+table: item
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  ### The URL as shared by the user. Null for note-only items.
+  url: String?
+  ### Normalized URL used to recognize duplicates.
+  canonicalUrl: String?
+  sourcePlatform: SourcePlatform, default=web
+  title: String
+  contentType: ContentType, default=other
+  ### The user's own note on why they saved this item.
+  intention: String?
+  priority: int, default=0
+  lifecycle: ItemLifecycle, default=active
+  savedAt: DateTime, default=now
+  ### Optimistic concurrency counter, bumped on every server-side update.
+  revision: int, default=1
+indexes:
+  item_owner_saved_idx:
+    fields: ownerId, savedAt, id
+  item_owner_canonical_url_idx:
+    fields: ownerId, canonicalUrl
+  item_owner_lifecycle_idx:
+    fields: ownerId, lifecycle

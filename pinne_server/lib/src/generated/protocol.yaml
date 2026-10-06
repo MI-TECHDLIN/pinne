@@ -1,0 +1,29 @@
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
+googleIdp:
+  - login:
+  - loginWithCode:
+  - hasAccount:
+jwtRefresh:
+  - refreshAccessToken:
+collection:
+  - list:
+  - get:
+  - create:
+  - update:
+  - delete:
+health:
+  - check:
+item:
+  - list:
+  - get:
+  - create:
+  - update:
+  - delete:
