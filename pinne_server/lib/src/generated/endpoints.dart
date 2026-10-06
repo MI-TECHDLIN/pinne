@@ -16,6 +16,8 @@ import 'package:pinne_server/src/generated/collections/collection_draft.dart'
     as _imy5wtcu;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/items/item_draft.dart' as _ittgmzop;
+import 'package:pinne_server/src/generated/profile/profile_draft.dart'
+    as _i2c58fcj;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -27,6 +29,7 @@ import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
 import '../collections/collection_endpoint.dart' as _i5j0184s;
 import '../health/health_endpoint.dart' as _id9paj9q;
 import '../items/item_endpoint.dart' as _i97sinw1;
+import '../profile/profile_endpoint.dart' as _i6ky944g;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
@@ -66,6 +69,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'item',
+          null,
+        ),
+      'profile': _i6ky944g.ProfileEndpoint()
+        ..initialize(
+          server,
+          'profile',
           null,
         ),
     };
@@ -558,6 +567,41 @@ class Endpoints extends _is.EndpointDispatch {
                 session,
                 params['id'],
               ),
+        ),
+      },
+    );
+    connectors['profile'] = _is.EndpointConnector(
+      name: 'profile',
+      endpoint: endpoints['profile']!,
+      methodConnectors: {
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['profile'] as _i6ky944g.ProfileEndpoint)
+                  .get(session),
+        ),
+        'upsert': _is.MethodConnector(
+          name: 'upsert',
+          params: {
+            'draft': _is.ParameterDescription(
+              name: 'draft',
+              type: _is.getType<_i2c58fcj.ProfileDraft>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['profile'] as _i6ky944g.ProfileEndpoint).upsert(
+                    session,
+                    params['draft'],
+                  ),
         ),
       },
     );

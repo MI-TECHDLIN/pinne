@@ -32,6 +32,8 @@ import 'items/item.dart' as _iapziv9t;
 import 'items/item_draft.dart' as _ip8cn60r;
 import 'items/item_lifecycle.dart' as _iveh3zib;
 import 'items/source_platform.dart' as _i072xpry;
+import 'profile/pinne_profile.dart' as _ijguvy1g;
+import 'profile/profile_draft.dart' as _ij8joe28;
 import 'reminders/reminder_rule.dart' as _i6ljcdoh;
 import 'reminders/reminder_window.dart' as _iswi3gl6;
 import 'reviews/review_event.dart' as _i0pv2k4n;
@@ -50,6 +52,8 @@ export 'items/item.dart';
 export 'items/item_draft.dart';
 export 'items/item_lifecycle.dart';
 export 'items/source_platform.dart';
+export 'profile/pinne_profile.dart';
+export 'profile/profile_draft.dart';
 export 'reminders/reminder_rule.dart';
 export 'reminders/reminder_window.dart';
 export 'reviews/review_event.dart';
@@ -543,6 +547,73 @@ class Protocol extends _is.DatabaseSerializationManager {
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'pinne_profile',
+      dartName: 'PinneProfile',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'displayName',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'avatarSeed',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'avatarPalette',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'pinne_profile_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'pinne_profile_owner_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'reminder_rule',
       dartName: 'ReminderRule',
       schema: 'public',
@@ -908,6 +979,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _i072xpry.SourcePlatform) {
       return _i072xpry.SourcePlatform.fromJson(data) as T;
     }
+    if (t == _ijguvy1g.PinneProfile) {
+      return _ijguvy1g.PinneProfile.fromJson(data) as T;
+    }
+    if (t == _ij8joe28.ProfileDraft) {
+      return _ij8joe28.ProfileDraft.fromJson(data) as T;
+    }
     if (t == _i6ljcdoh.ReminderRule) {
       return _i6ljcdoh.ReminderRule.fromJson(data) as T;
     }
@@ -972,6 +1049,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_i072xpry.SourcePlatform?>()) {
       return (data != null ? _i072xpry.SourcePlatform.fromJson(data) : null)
           as T;
+    }
+    if (t == _is.getType<_ijguvy1g.PinneProfile?>()) {
+      return (data != null ? _ijguvy1g.PinneProfile.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ij8joe28.ProfileDraft?>()) {
+      return (data != null ? _ij8joe28.ProfileDraft.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i6ljcdoh.ReminderRule?>()) {
       return (data != null ? _i6ljcdoh.ReminderRule.fromJson(data) : null) as T;
@@ -1046,6 +1129,8 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ip8cn60r.ItemDraft => 'ItemDraft',
       _iveh3zib.ItemLifecycle => 'ItemLifecycle',
       _i072xpry.SourcePlatform => 'SourcePlatform',
+      _ijguvy1g.PinneProfile => 'PinneProfile',
+      _ij8joe28.ProfileDraft => 'ProfileDraft',
       _i6ljcdoh.ReminderRule => 'ReminderRule',
       _iswi3gl6.ReminderWindow => 'ReminderWindow',
       _i0pv2k4n.ReviewEvent => 'ReviewEvent',
@@ -1090,6 +1175,10 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'ItemLifecycle';
       case _i072xpry.SourcePlatform():
         return 'SourcePlatform';
+      case _ijguvy1g.PinneProfile():
+        return 'PinneProfile';
+      case _ij8joe28.ProfileDraft():
+        return 'ProfileDraft';
       case _i6ljcdoh.ReminderRule():
         return 'ReminderRule';
       case _iswi3gl6.ReminderWindow():
@@ -1164,6 +1253,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'SourcePlatform') {
       return deserialize<_i072xpry.SourcePlatform>(data['data']);
     }
+    if (dataClassName == 'PinneProfile') {
+      return deserialize<_ijguvy1g.PinneProfile>(data['data']);
+    }
+    if (dataClassName == 'ProfileDraft') {
+      return deserialize<_ij8joe28.ProfileDraft>(data['data']);
+    }
     if (dataClassName == 'ReminderRule') {
       return deserialize<_i6ljcdoh.ReminderRule>(data['data']);
     }
@@ -1229,6 +1324,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _ingnmqw7.ItemCollection.t;
       case _iapziv9t.Item:
         return _iapziv9t.Item.t;
+      case _ijguvy1g.PinneProfile:
+        return _ijguvy1g.PinneProfile.t;
       case _i6ljcdoh.ReminderRule:
         return _i6ljcdoh.ReminderRule.t;
       case _i0pv2k4n.ReviewEvent:

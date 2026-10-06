@@ -1,0 +1,6 @@
+### Editable profile fields. Identity always comes from the session.
+class: ProfileDraft
+fields:
+  displayName: String
+  avatarSeed: int
+  avatarPalette: int

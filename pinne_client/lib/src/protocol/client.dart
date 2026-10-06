@@ -20,6 +20,10 @@ import 'package:pinne_client/src/protocol/health/server_health.dart'
     as _ibqesezf;
 import 'package:pinne_client/src/protocol/items/item.dart' as _itiiwgx0;
 import 'package:pinne_client/src/protocol/items/item_draft.dart' as _ixoujeet;
+import 'package:pinne_client/src/protocol/profile/pinne_profile.dart'
+    as _i1myizpd;
+import 'package:pinne_client/src/protocol/profile/profile_draft.dart'
+    as _iyve154t;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
@@ -426,6 +430,28 @@ class EndpointItem extends _isc.EndpointRef {
       );
 }
 
+/// {@category Endpoint}
+class EndpointProfile extends _isc.EndpointRef {
+  EndpointProfile(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'profile';
+
+  _ida.Future<_i1myizpd.PinneProfile?> get() =>
+      caller.callServerEndpoint<_i1myizpd.PinneProfile?>(
+        'profile',
+        'get',
+        {},
+      );
+
+  _ida.Future<_i1myizpd.PinneProfile> upsert(_iyve154t.ProfileDraft draft) =>
+      caller.callServerEndpoint<_i1myizpd.PinneProfile>(
+        'profile',
+        'upsert',
+        {'draft': draft},
+      );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _iaic.Caller(client);
@@ -470,6 +496,7 @@ class Client extends _isc.ServerpodClientShared {
     collection = EndpointCollection(this);
     health = EndpointHealth(this);
     item = EndpointItem(this);
+    profile = EndpointProfile(this);
     modules = Modules(this);
   }
 
@@ -485,6 +512,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointItem item;
 
+  late final EndpointProfile profile;
+
   late final Modules modules;
 
   @override
@@ -495,6 +524,7 @@ class Client extends _isc.ServerpodClientShared {
     'collection': collection,
     'health': health,
     'item': item,
+    'profile': profile,
   };
 
   @override
