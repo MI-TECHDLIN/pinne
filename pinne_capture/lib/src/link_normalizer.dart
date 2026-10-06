@@ -60,10 +60,10 @@ NormalizedLink? normalizeLink(String input) {
   final uri = _parseWebUri(input);
   if (uri == null) return null;
 
+  // Credentials before the host (`https://x.com@other.example/`) are
+  // dropped: the link opens the real host, so that host is what counts.
   final host = _hostOf(uri);
-  if (uri.userInfo.isNotEmpty || !_looksPublic(host)) {
-    return _generic(uri, CaptureSource.unknown);
-  }
+  if (!_looksPublic(host)) return _generic(uri, CaptureSource.unknown);
   final bare = _withoutPrefixes(host);
   if (_shorteners.contains(bare)) return _generic(uri, CaptureSource.unknown);
 

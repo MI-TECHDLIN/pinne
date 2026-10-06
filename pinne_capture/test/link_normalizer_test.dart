@@ -210,7 +210,7 @@ const _table = <Row>[
     id: null,
     canonical: 'https://app.example.com/#/articles/42',
   ),
-  // Unknown: shorteners, private hosts and credentials in the link.
+  // Unknown: shorteners and private hosts.
   (
     url: 'https://bit.ly/3xYzAbC',
     source: CaptureSource.unknown,
@@ -235,9 +235,10 @@ const _table = <Row>[
     id: null,
     canonical: 'http://192.168.1.20/admin',
   ),
+  // Credentials are dropped; the real host decides, so this is never X.
   (
     url: 'https://x.com@phish.example/status/1',
-    source: CaptureSource.unknown,
+    source: CaptureSource.web,
     id: null,
     canonical: 'https://phish.example/status/1',
   ),
@@ -252,6 +253,21 @@ void main() {
         expect(link!.source, row.source, reason: 'source');
         expect(link.sourceItemId, row.id, reason: 'source item id');
         expect(link.canonicalUrl, row.canonical, reason: 'canonical URL');
+      });
+    }
+  });
+
+  group('normalizing the clean URL again', () {
+    // The app sends the clean URL and the server normalizes it again, so
+    // both must reach the same identity.
+    for (final row in _table) {
+      test(row.url, () {
+        final link = normalizeLink(row.url)!;
+        final again = normalizeLink(link.cleanUrl)!;
+        expect(again.source, link.source);
+        expect(again.sourceItemId, link.sourceItemId);
+        expect(again.canonicalUrl, link.canonicalUrl);
+        expect(again.cleanUrl, link.cleanUrl);
       });
     }
   });
