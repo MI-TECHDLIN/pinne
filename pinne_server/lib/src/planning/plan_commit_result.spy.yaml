@@ -1,0 +1,5 @@
+class: PlanCommitResult
+fields:
+  sessions: List<SessionView>
+  ### Calendar events this device should write now.
+  writes: List<CalendarWrite>

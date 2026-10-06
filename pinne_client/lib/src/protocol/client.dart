@@ -12,6 +12,14 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
+import 'package:pinne_client/src/protocol/calendar/calendar_connection_view.dart'
+    as _i0t8t4zu;
+import 'package:pinne_client/src/protocol/calendar/calendar_route_status.dart'
+    as _ig4e8y15;
+import 'package:pinne_client/src/protocol/calendar/calendar_selection_choice.dart'
+    as _im02fgk3;
+import 'package:pinne_client/src/protocol/calendar/device_calendar_report.dart'
+    as _icb9y8st;
 import 'package:pinne_client/src/protocol/collections/collection.dart'
     as _i9zrdvr8;
 import 'package:pinne_client/src/protocol/collections/collection_draft.dart'
@@ -24,6 +32,28 @@ import 'package:pinne_client/src/protocol/items/capture_result.dart'
     as _ibc30ndw;
 import 'package:pinne_client/src/protocol/items/item.dart' as _itiiwgx0;
 import 'package:pinne_client/src/protocol/items/item_draft.dart' as _ixoujeet;
+import 'package:pinne_client/src/protocol/planning/calendar_write.dart'
+    as _i4bu6rte;
+import 'package:pinne_client/src/protocol/planning/calendar_write_result.dart'
+    as _ivswpuyg;
+import 'package:pinne_client/src/protocol/planning/plan_commit_request.dart'
+    as _imjid542;
+import 'package:pinne_client/src/protocol/planning/plan_commit_result.dart'
+    as _ijkqk6e6;
+import 'package:pinne_client/src/protocol/planning/plan_proposal.dart'
+    as _i2np8a84;
+import 'package:pinne_client/src/protocol/planning/plan_request.dart'
+    as _iztxi4r1;
+import 'package:pinne_client/src/protocol/planning/planner_preferences.dart'
+    as _i47tswj4;
+import 'package:pinne_client/src/protocol/planning/planner_preferences_draft.dart'
+    as _isn8u3xd;
+import 'package:pinne_client/src/protocol/planning/session_change_result.dart'
+    as _ia2d415f;
+import 'package:pinne_client/src/protocol/planning/session_move_request.dart'
+    as _ildvggxs;
+import 'package:pinne_client/src/protocol/planning/session_view.dart'
+    as _i2af9p8a;
 import 'package:pinne_client/src/protocol/profile/pinne_profile.dart'
     as _i1myizpd;
 import 'package:pinne_client/src/protocol/profile/profile_draft.dart'
@@ -316,6 +346,75 @@ class EndpointJwtRefresh extends _iacc.EndpointRefreshJwtTokens {
       );
 }
 
+/// Calendar routes, connections and the owner's choice of conflict and write
+/// calendars. Device calendars are read and written on the phone; the server
+/// keeps only which calendars to use and when they were last read.
+/// {@category Endpoint}
+class EndpointCalendar extends _isc.EndpointRef {
+  EndpointCalendar(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'calendar';
+
+  /// Every route and what it can do on this server right now.
+  _ida.Future<List<_ig4e8y15.CalendarRouteStatus>> routes() =>
+      caller.callServerEndpoint<List<_ig4e8y15.CalendarRouteStatus>>(
+        'calendar',
+        'routes',
+        {},
+      );
+
+  /// Starts the Google Calendar consent flow. Refused with a structured
+  /// error until the route is configured and built.
+  _ida.Future<void> authorizeGoogle() => caller.callServerEndpoint<void>(
+    'calendar',
+    'authorizeGoogle',
+    {},
+  );
+
+  _ida.Future<List<_i0t8t4zu.CalendarConnectionView>> connections() =>
+      caller.callServerEndpoint<List<_i0t8t4zu.CalendarConnectionView>>(
+        'calendar',
+        'connections',
+        {},
+      );
+
+  /// Records what a device can see: its permission and calendars. Existing
+  /// choices are kept; new calendars are checked for conflicts by default,
+  /// because checking more calendars can only avoid clashes. No calendar is
+  /// chosen for writing until the owner picks one.
+  _ida.Future<_i0t8t4zu.CalendarConnectionView> syncDeviceCalendars(
+    _icb9y8st.DeviceCalendarReport report,
+  ) => caller.callServerEndpoint<_i0t8t4zu.CalendarConnectionView>(
+    'calendar',
+    'syncDeviceCalendars',
+    {'report': report},
+  );
+
+  /// Applies the owner's choices for a connection's calendars. At most one
+  /// calendar of the owner takes writes; choosing one clears the others.
+  _ida.Future<List<_i0t8t4zu.CalendarConnectionView>> setSelections(
+    _isc.UuidValue connectionId,
+    List<_im02fgk3.CalendarSelectionChoice> choices,
+  ) => caller.callServerEndpoint<List<_i0t8t4zu.CalendarConnectionView>>(
+    'calendar',
+    'setSelections',
+    {
+      'connectionId': connectionId,
+      'choices': choices,
+    },
+  );
+
+  /// Stops using a connection. Sessions already scheduled stay in Pinne and
+  /// events already written stay in the calendar; nothing is deleted there.
+  _ida.Future<bool> disconnect(_isc.UuidValue connectionId) =>
+      caller.callServerEndpoint<bool>(
+        'calendar',
+        'disconnect',
+        {'connectionId': connectionId},
+      );
+}
+
 /// Owner-scoped CRUD for collections. A parent must belong to the same owner
 /// and must not make the tree cyclic.
 /// {@category Endpoint}
@@ -445,6 +544,117 @@ class EndpointItem extends _isc.EndpointRef {
       );
 }
 
+/// Review-session planning: preferences, propose, commit, move, cancel,
+/// device calendar work and iCalendar export. See [Planner] for the rules.
+/// {@category Endpoint}
+class EndpointPlanner extends _isc.EndpointRef {
+  EndpointPlanner(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'planner';
+
+  /// The owner's planning rules; defaults have a null id until saved.
+  _ida.Future<_i47tswj4.PlannerPreferences> preferences() =>
+      caller.callServerEndpoint<_i47tswj4.PlannerPreferences>(
+        'planner',
+        'preferences',
+        {},
+      );
+
+  _ida.Future<_i47tswj4.PlannerPreferences> savePreferences(
+    _isn8u3xd.PlannerPreferencesDraft draft,
+  ) => caller.callServerEndpoint<_i47tswj4.PlannerPreferences>(
+    'planner',
+    'savePreferences',
+    {'draft': draft},
+  );
+
+  /// Proposes sessions in free time. Nothing is scheduled or written.
+  _ida.Future<_i2np8a84.PlanProposal> propose(_iztxi4r1.PlanRequest request) =>
+      caller.callServerEndpoint<_i2np8a84.PlanProposal>(
+        'planner',
+        'propose',
+        {'request': request},
+      );
+
+  _ida.Future<_i2np8a84.PlanProposal?> currentProposal() =>
+      caller.callServerEndpoint<_i2np8a84.PlanProposal?>(
+        'planner',
+        'currentProposal',
+        {},
+      );
+
+  /// Accepts a plan after checking availability again. Safe to retry with
+  /// the same operation id.
+  _ida.Future<_ijkqk6e6.PlanCommitResult> commit(
+    _imjid542.PlanCommitRequest request,
+  ) => caller.callServerEndpoint<_ijkqk6e6.PlanCommitResult>(
+    'planner',
+    'commit',
+    {'request': request},
+  );
+
+  /// Scheduled sessions overlapping `[from, to)`.
+  _ida.Future<List<_i2af9p8a.SessionView>> sessions(
+    DateTime from,
+    DateTime to,
+  ) => caller.callServerEndpoint<List<_i2af9p8a.SessionView>>(
+    'planner',
+    'sessions',
+    {
+      'from': from,
+      'to': to,
+    },
+  );
+
+  _ida.Future<_ia2d415f.SessionChangeResult> moveSession(
+    _ildvggxs.SessionMoveRequest request,
+  ) => caller.callServerEndpoint<_ia2d415f.SessionChangeResult>(
+    'planner',
+    'moveSession',
+    {'request': request},
+  );
+
+  _ida.Future<_ia2d415f.SessionChangeResult> cancelSession(
+    _isc.UuidValue sessionId,
+    _isc.UuidValue operationId,
+    _isc.UuidValue? deviceId,
+  ) => caller.callServerEndpoint<_ia2d415f.SessionChangeResult>(
+    'planner',
+    'cancelSession',
+    {
+      'sessionId': sessionId,
+      'operationId': operationId,
+      'deviceId': deviceId,
+    },
+  );
+
+  /// Calendar events this device should create, move, remove or check.
+  _ida.Future<List<_i4bu6rte.CalendarWrite>> deviceWork(
+    _isc.UuidValue deviceId,
+  ) => caller.callServerEndpoint<List<_i4bu6rte.CalendarWrite>>(
+    'planner',
+    'deviceWork',
+    {'deviceId': deviceId},
+  );
+
+  _ida.Future<void> reportWrites(List<_ivswpuyg.CalendarWriteResult> results) =>
+      caller.callServerEndpoint<void>(
+        'planner',
+        'reportWrites',
+        {'results': results},
+      );
+
+  /// An export-only `.ics` file: a copy to import, not a live sync, and not
+  /// proof of free time.
+  _ida.Future<String> exportIcs(List<_isc.UuidValue> sessionIds) =>
+      caller.callServerEndpoint<String>(
+        'planner',
+        'exportIcs',
+        {'sessionIds': sessionIds},
+      );
+}
+
 /// {@category Endpoint}
 class EndpointProfile extends _isc.EndpointRef {
   EndpointProfile(_isc.EndpointCaller caller) : super(caller);
@@ -508,9 +718,11 @@ class Client extends _isc.ServerpodClientShared {
     emailIdp = EndpointEmailIdp(this);
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    calendar = EndpointCalendar(this);
     collection = EndpointCollection(this);
     health = EndpointHealth(this);
     item = EndpointItem(this);
+    planner = EndpointPlanner(this);
     profile = EndpointProfile(this);
     modules = Modules(this);
   }
@@ -521,11 +733,15 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointJwtRefresh jwtRefresh;
 
+  late final EndpointCalendar calendar;
+
   late final EndpointCollection collection;
 
   late final EndpointHealth health;
 
   late final EndpointItem item;
+
+  late final EndpointPlanner planner;
 
   late final EndpointProfile profile;
 
@@ -536,9 +752,11 @@ class Client extends _isc.ServerpodClientShared {
     'emailIdp': emailIdp,
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
+    'calendar': calendar,
     'collection': collection,
     'health': health,
     'item': item,
+    'planner': planner,
     'profile': profile,
   };
 

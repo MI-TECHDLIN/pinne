@@ -1,0 +1,4 @@
+class: SessionChangeResult
+fields:
+  session: SessionView
+  writes: List<CalendarWrite>

@@ -1,0 +1,8 @@
+### How a calendar is reached. Device routes run on the phone; the server
+### cannot call them on demand. Mirrors `CalendarRouteKind` in pinne_calendar.
+enum: CalendarRoute
+serialized: byName
+values:
+  - androidDevice
+  - googleCloud
+  - icsExport

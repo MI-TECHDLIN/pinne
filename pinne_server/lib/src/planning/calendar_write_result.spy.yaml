@@ -1,0 +1,14 @@
+class: CalendarWriteResult
+fields:
+  linkId: UuidValue
+  action: CalendarWriteAction
+  outcome: CalendarWriteOutcome
+  ### The session's `planRevision` this work was built from. A result for
+  ### an older revision does not settle newer work.
+  sessionRevision: int
+  externalEventId: String?
+  providerRevision: String?
+  ### The event's current time, for `moved`.
+  startAt: DateTime?
+  endAt: DateTime?
+  message: String?

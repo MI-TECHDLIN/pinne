@@ -1,0 +1,7 @@
+enum: SessionStatus
+serialized: byName
+values:
+  ### Part of a plan the user has not accepted.
+  - proposed
+  - scheduled
+  - cancelled

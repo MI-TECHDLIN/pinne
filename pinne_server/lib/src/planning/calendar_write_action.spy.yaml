@@ -1,0 +1,8 @@
+enum: CalendarWriteAction
+serialized: byName
+values:
+  - create
+  - update
+  - delete
+  ### Look the event up and report whether the user moved or removed it.
+  - check

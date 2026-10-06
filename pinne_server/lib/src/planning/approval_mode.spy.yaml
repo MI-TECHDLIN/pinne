@@ -1,0 +1,8 @@
+### How plans become sessions. Neither mode commits without the user.
+enum: ApprovalMode
+serialized: byName
+values:
+  ### Plans are suggestions only and cannot be accepted.
+  - proposeOnly
+  ### The user accepts a plan, then it is checked again and scheduled.
+  - confirm

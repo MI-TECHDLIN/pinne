@@ -1,0 +1,4 @@
+### Ask for a plan. Busy times come from the device for device calendars.
+class: PlanRequest
+fields:
+  availability: List<AvailabilitySnapshot>

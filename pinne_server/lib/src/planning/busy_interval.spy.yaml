@@ -1,0 +1,9 @@
+### An occupied time read from a calendar: UTC, start inclusive, end
+### exclusive.
+class: BusyInterval
+fields:
+  startAt: DateTime
+  endAt: DateTime
+  allDay: bool
+  ### Set when the event is one Pinne wrote for a session.
+  sessionUid: String?

@@ -1,0 +1,11 @@
+### Accept a plan. Busy times must be read again right before this call.
+class: PlanCommitRequest
+fields:
+  planId: UuidValue
+  ### Stable across retries of the same acceptance.
+  operationId: UuidValue
+  availability: List<AvailabilitySnapshot>
+  ### The user chose to keep the sessions without a calendar check. They are
+  ### saved in Pinne only, never written to a calendar, and labelled.
+  acceptUnverified: bool
+  deviceId: UuidValue?

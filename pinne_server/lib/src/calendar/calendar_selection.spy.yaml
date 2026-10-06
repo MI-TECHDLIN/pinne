@@ -1,0 +1,23 @@
+### A calendar of a connection, with how the owner uses it. Device calendar
+### ids are only meaningful on the device in `deviceId`.
+class: CalendarSelection
+table: calendar_selection
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  connectionId: UuidValue, relation(parent=calendar_connection, onDelete=Cascade)
+  externalCalendarId: String
+  deviceId: UuidValue?
+  name: String
+  accountName: String?
+  readOnly: bool
+  ### Busy times in this calendar block sessions.
+  useForConflicts: bool, default=false
+  ### Sessions are written here. At most one per owner.
+  useForWrites: bool, default=false
+indexes:
+  calendar_selection_connection_calendar_idx:
+    fields: connectionId, externalCalendarId
+    unique: true
+  calendar_selection_owner_idx:
+    fields: ownerId

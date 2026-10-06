@@ -1,0 +1,11 @@
+enum: PlanningErrorCode
+serialized: byName
+values:
+  ### No recent read of every conflict calendar. Unknown is never free.
+  - availabilityUnverified
+  ### A session now overlaps a busy time or is too soon.
+  - conflict
+  ### The planner is set to suggest only.
+  - proposeOnly
+  ### The plan was replaced or is too old to accept.
+  - planExpired

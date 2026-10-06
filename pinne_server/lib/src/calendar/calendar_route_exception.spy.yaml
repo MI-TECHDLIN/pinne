@@ -1,0 +1,10 @@
+### A structured refusal from a calendar route: the operation is unsupported,
+### not configured, not permitted, or the calendar is read-only or gone.
+exception: CalendarRouteException
+fields:
+  route: CalendarRoute
+  ### `CalendarCapability` name from pinne_calendar, such as `readBusy`.
+  capability: String
+  ### `CapabilityFailure` name from pinne_calendar, such as `notConfigured`.
+  failure: String
+  message: String

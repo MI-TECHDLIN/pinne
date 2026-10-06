@@ -1,0 +1,7 @@
+enum: PlanHorizon
+serialized: byName
+values:
+  ### The next seven local days.
+  - week
+  ### The next calendar month, from today.
+  - month

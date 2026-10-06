@@ -1,0 +1,19 @@
+### An item chosen for a session. Both ends share the owner.
+class: SessionItem
+table: session_item
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  sessionId: UuidValue, relation(parent=review_session, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  position: int
+  ### An estimate unless the item's duration is known.
+  plannedMinutes: int
+  estimated: bool
+indexes:
+  session_item_session_position_idx:
+    fields: sessionId, position
+    unique: true
+  session_item_session_item_idx:
+    fields: sessionId, itemId
+    unique: true

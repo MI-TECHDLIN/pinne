@@ -1,0 +1,10 @@
+### What a device reports about its calendars after asking the OS.
+class: DeviceCalendarReport
+fields:
+  route: CalendarRoute
+  deviceId: UuidValue
+  label: String
+  permission: CalendarPermission
+  ### Empty when permission does not allow listing.
+  calendars: List<DeviceCalendarInfo>
+  checkedAt: DateTime

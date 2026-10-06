@@ -1,0 +1,14 @@
+enum: CalendarWriteOutcome
+serialized: byName
+values:
+  - done
+  ### Delete found nothing to delete.
+  - alreadyGone
+  ### The event id points at an event Pinne did not write; left untouched.
+  - notOurs
+  ### The user moved the event in their calendar app.
+  - moved
+  ### The user removed the event in their calendar app.
+  - missing
+  ### Will be retried.
+  - failed

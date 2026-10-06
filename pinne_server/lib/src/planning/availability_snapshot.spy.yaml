@@ -1,0 +1,12 @@
+### Busy times the device read from one selected calendar, and when.
+class: AvailabilitySnapshot
+fields:
+  selectionId: UuidValue
+  checkedAt: DateTime
+  windowStart: DateTime
+  windowEnd: DateTime
+  ### False when the calendar could not be read; intervals are then empty
+  ### and the calendar counts as unknown, never as free.
+  readable: bool
+  problem: String?
+  intervals: List<BusyInterval>

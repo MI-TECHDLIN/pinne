@@ -1,0 +1,13 @@
+### What a route offers on this server, for the connections screen.
+class: CalendarRouteStatus
+fields:
+  route: CalendarRoute
+  label: String
+  ### False when the route cannot be used, such as missing configuration.
+  available: bool
+  ### Whether the route reads and writes a real calendar. False for export.
+  liveSync: bool
+  canReadBusy: bool
+  canWrite: bool
+  ### Plain-language limit to show next to the route.
+  limitation: String?

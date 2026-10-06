@@ -1,0 +1,8 @@
+class: SessionMoveRequest
+fields:
+  sessionId: UuidValue
+  operationId: UuidValue
+  startAt: DateTime
+  availability: List<AvailabilitySnapshot>
+  acceptUnverified: bool
+  deviceId: UuidValue?

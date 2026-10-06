@@ -1,0 +1,24 @@
+### One calendar route for an owner, such as the calendars on one phone.
+### Provider secrets never live in this row.
+class: CalendarConnection
+table: calendar_connection
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  route: CalendarRoute
+  ### For a device route, the id of the app install that holds the calendars.
+  accountKey: String
+  ### A name the user recognises, such as the phone model.
+  label: String
+  ### For device routes: only this install acts on the calendars.
+  deviceId: UuidValue?
+  permission: CalendarPermission
+  ### Reference to a secret in the secret store; never the secret itself.
+  tokenSecretRef: String?, scope=serverOnly
+  ### When the route last listed calendars or read busy times successfully.
+  lastCheckedAt: DateTime?
+  createdAt: DateTime, default=now
+indexes:
+  calendar_connection_owner_account_idx:
+    fields: ownerId, route, accountKey
+    unique: true

@@ -13,6 +13,14 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'dart:io' as _idi;
+import 'package:pinne_server/src/generated/calendar/calendar_connection_view.dart'
+    as _i0xb4k4o;
+import 'package:pinne_server/src/generated/calendar/calendar_route_status.dart'
+    as _ia8eyaw8;
+import 'package:pinne_server/src/generated/calendar/calendar_selection_choice.dart'
+    as _i396ixoa;
+import 'package:pinne_server/src/generated/calendar/device_calendar_report.dart'
+    as _ixwdetx3;
 import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
 import 'package:pinne_server/src/generated/collections/collection_draft.dart'
@@ -25,6 +33,28 @@ import 'package:pinne_server/src/generated/items/capture_result.dart'
     as _ikufny5w;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/items/item_draft.dart' as _ittgmzop;
+import 'package:pinne_server/src/generated/planning/calendar_write.dart'
+    as _ijx3xba9;
+import 'package:pinne_server/src/generated/planning/calendar_write_result.dart'
+    as _iaiz9j0d;
+import 'package:pinne_server/src/generated/planning/plan_commit_request.dart'
+    as _icuwwueq;
+import 'package:pinne_server/src/generated/planning/plan_commit_result.dart'
+    as _i8ynq3pt;
+import 'package:pinne_server/src/generated/planning/plan_proposal.dart'
+    as _i91b0gdj;
+import 'package:pinne_server/src/generated/planning/plan_request.dart'
+    as _i6zrjude;
+import 'package:pinne_server/src/generated/planning/planner_preferences.dart'
+    as _i9u34eiq;
+import 'package:pinne_server/src/generated/planning/planner_preferences_draft.dart'
+    as _iq9m58hd;
+import 'package:pinne_server/src/generated/planning/session_change_result.dart'
+    as _i8t4nl2s;
+import 'package:pinne_server/src/generated/planning/session_move_request.dart'
+    as _ijei0lg9;
+import 'package:pinne_server/src/generated/planning/session_view.dart'
+    as _ie9b2ryt;
 import 'package:pinne_server/src/generated/profile/pinne_profile.dart'
     as _ixjrylia;
 import 'package:pinne_server/src/generated/profile/profile_draft.dart'
@@ -172,11 +202,15 @@ class TestEndpoints {
 
   late final _JwtRefreshEndpoint jwtRefresh;
 
+  late final _CalendarEndpoint calendar;
+
   late final _CollectionEndpoint collection;
 
   late final _HealthEndpoint health;
 
   late final _ItemEndpoint item;
+
+  late final _PlannerEndpoint planner;
 
   late final _ProfileEndpoint profile;
 }
@@ -200,6 +234,10 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
+    calendar = _CalendarEndpoint(
+      endpoints,
+      serializationManager,
+    );
     collection = _CollectionEndpoint(
       endpoints,
       serializationManager,
@@ -209,6 +247,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     item = _ItemEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    planner = _PlannerEndpoint(
       endpoints,
       serializationManager,
     );
@@ -648,6 +690,204 @@ class _JwtRefreshEndpoint {
   }
 }
 
+class _CalendarEndpoint {
+  _CalendarEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<List<_ia8eyaw8.CalendarRouteStatus>> routes(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'calendar',
+            method: 'routes',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'calendar',
+          methodName: 'routes',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ia8eyaw8.CalendarRouteStatus>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<void> authorizeGoogle(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'calendar',
+            method: 'authorizeGoogle',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'calendar',
+          methodName: 'authorizeGoogle',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i0xb4k4o.CalendarConnectionView>> connections(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'calendar',
+            method: 'connections',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'calendar',
+          methodName: 'connections',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_i0xb4k4o.CalendarConnectionView>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i0xb4k4o.CalendarConnectionView> syncDeviceCalendars(
+    _ist.TestSessionBuilder sessionBuilder,
+    _ixwdetx3.DeviceCalendarReport report,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'calendar',
+            method: 'syncDeviceCalendars',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'calendar',
+          methodName: 'syncDeviceCalendars',
+          parameters: _ist.testObjectToJson({'report': report}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i0xb4k4o.CalendarConnectionView>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i0xb4k4o.CalendarConnectionView>> setSelections(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue connectionId,
+    List<_i396ixoa.CalendarSelectionChoice> choices,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'calendar',
+            method: 'setSelections',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'calendar',
+          methodName: 'setSelections',
+          parameters: _ist.testObjectToJson({
+            'connectionId': connectionId,
+            'choices': choices,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_i0xb4k4o.CalendarConnectionView>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<bool> disconnect(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue connectionId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'calendar',
+            method: 'disconnect',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'calendar',
+          methodName: 'disconnect',
+          parameters: _ist.testObjectToJson({'connectionId': connectionId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _CollectionEndpoint {
   _CollectionEndpoint(
     this._endpointDispatch,
@@ -1047,6 +1287,366 @@ class _ItemEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _PlannerEndpoint {
+  _PlannerEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_i9u34eiq.PlannerPreferences> preferences(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'preferences',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'preferences',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i9u34eiq.PlannerPreferences>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i9u34eiq.PlannerPreferences> savePreferences(
+    _ist.TestSessionBuilder sessionBuilder,
+    _iq9m58hd.PlannerPreferencesDraft draft,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'savePreferences',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'savePreferences',
+          parameters: _ist.testObjectToJson({'draft': draft}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i9u34eiq.PlannerPreferences>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i91b0gdj.PlanProposal> propose(
+    _ist.TestSessionBuilder sessionBuilder,
+    _i6zrjude.PlanRequest request,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'propose',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'propose',
+          parameters: _ist.testObjectToJson({'request': request}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i91b0gdj.PlanProposal>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i91b0gdj.PlanProposal?> currentProposal(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'currentProposal',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'currentProposal',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i91b0gdj.PlanProposal?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8ynq3pt.PlanCommitResult> commit(
+    _ist.TestSessionBuilder sessionBuilder,
+    _icuwwueq.PlanCommitRequest request,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'commit',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'commit',
+          parameters: _ist.testObjectToJson({'request': request}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i8ynq3pt.PlanCommitResult>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ie9b2ryt.SessionView>> sessions(
+    _ist.TestSessionBuilder sessionBuilder,
+    DateTime from,
+    DateTime to,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'sessions',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'sessions',
+          parameters: _ist.testObjectToJson({
+            'from': from,
+            'to': to,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ie9b2ryt.SessionView>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8t4nl2s.SessionChangeResult> moveSession(
+    _ist.TestSessionBuilder sessionBuilder,
+    _ijei0lg9.SessionMoveRequest request,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'moveSession',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'moveSession',
+          parameters: _ist.testObjectToJson({'request': request}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i8t4nl2s.SessionChangeResult>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8t4nl2s.SessionChangeResult> cancelSession(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue sessionId,
+    _is.UuidValue operationId,
+    _is.UuidValue? deviceId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'cancelSession',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'cancelSession',
+          parameters: _ist.testObjectToJson({
+            'sessionId': sessionId,
+            'operationId': operationId,
+            'deviceId': deviceId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i8t4nl2s.SessionChangeResult>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ijx3xba9.CalendarWrite>> deviceWork(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue deviceId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'deviceWork',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'deviceWork',
+          parameters: _ist.testObjectToJson({'deviceId': deviceId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ijx3xba9.CalendarWrite>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<void> reportWrites(
+    _ist.TestSessionBuilder sessionBuilder,
+    List<_iaiz9j0d.CalendarWriteResult> results,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'reportWrites',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'reportWrites',
+          parameters: _ist.testObjectToJson({'results': results}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<String> exportIcs(
+    _ist.TestSessionBuilder sessionBuilder,
+    List<_is.UuidValue> sessionIds,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'planner',
+            method: 'exportIcs',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'planner',
+          methodName: 'exportIcs',
+          parameters: _ist.testObjectToJson({'sessionIds': sessionIds}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<String>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
