@@ -36,8 +36,12 @@ import 'package:pinne_server/src/generated/items/capture_draft.dart'
     as _iushcgme;
 import 'package:pinne_server/src/generated/items/capture_result.dart'
     as _ikufny5w;
+import 'package:pinne_server/src/generated/items/content_type.dart'
+    as _iyxjktn1;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/items/item_draft.dart' as _ittgmzop;
+import 'package:pinne_server/src/generated/items/source_platform.dart'
+    as _i72i2l8c;
 import 'package:pinne_server/src/generated/planning/calendar_write.dart'
     as _ijx3xba9;
 import 'package:pinne_server/src/generated/planning/calendar_write_result.dart'
@@ -64,6 +68,24 @@ import 'package:pinne_server/src/generated/profile/pinne_profile.dart'
     as _ixjrylia;
 import 'package:pinne_server/src/generated/profile/profile_draft.dart'
     as _i2c58fcj;
+import 'package:pinne_server/src/generated/reminders/reminder_settings.dart'
+    as _i261tjna;
+import 'package:pinne_server/src/generated/reminders/reminder_settings_draft.dart'
+    as _if8nlr1i;
+import 'package:pinne_server/src/generated/reviews/item_progress.dart'
+    as _idxrvj92;
+import 'package:pinne_server/src/generated/reviews/item_review_control.dart'
+    as _isp3grca;
+import 'package:pinne_server/src/generated/reviews/review_event_draft.dart'
+    as _ikmeff8s;
+import 'package:pinne_server/src/generated/reviews/review_event_receipt.dart'
+    as _i7wp4b9t;
+import 'package:pinne_server/src/generated/reviews/review_queue_result.dart'
+    as _iu5ub1hc;
+import 'package:pinne_server/src/generated/search/review_status_filter.dart'
+    as _i7xfwskj;
+import 'package:pinne_server/src/generated/search/search_page.dart'
+    as _ix4yop5k;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -222,6 +244,12 @@ class TestEndpoints {
   late final _PlannerEndpoint planner;
 
   late final _ProfileEndpoint profile;
+
+  late final _ReviewEndpoint review;
+
+  late final _ReviewQueueEndpoint reviewQueue;
+
+  late final _SearchEndpoint search;
 }
 
 class _InternalTestEndpoints extends TestEndpoints
@@ -271,11 +299,25 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
+    review = _ReviewEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    reviewQueue = _ReviewQueueEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    search = _SearchEndpoint(
+      endpoints,
+      serializationManager,
+    );
   }
 }
 
 class _FutureCalls {
   late final aiOrganize = _AiOrganizeFutureCall();
+
+  late final reminderDigest = _ReminderDigestFutureCall();
 }
 
 class _AiOrganizingEndpoint {
@@ -1940,6 +1982,341 @@ class _ProfileEndpoint {
   }
 }
 
+class _ReviewEndpoint {
+  _ReviewEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_i7wp4b9t.ReviewEventReceipt> record(
+    _ist.TestSessionBuilder sessionBuilder,
+    _ikmeff8s.ReviewEventDraft draft,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'review',
+            method: 'record',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'record',
+          parameters: _ist.testObjectToJson({'draft': draft}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i7wp4b9t.ReviewEventReceipt>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_idxrvj92.ItemProgress?> progress(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'review',
+            method: 'progress',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'progress',
+          parameters: _ist.testObjectToJson({'itemId': itemId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_idxrvj92.ItemProgress?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _ReviewQueueEndpoint {
+  _ReviewQueueEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_iu5ub1hc.ReviewQueueResult> get(
+    _ist.TestSessionBuilder sessionBuilder, {
+    required int timeBudgetMinutes,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'reviewQueue',
+            method: 'get',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'reviewQueue',
+          methodName: 'get',
+          parameters: _ist.testObjectToJson({
+            'timeBudgetMinutes': timeBudgetMinutes,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iu5ub1hc.ReviewQueueResult>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_isp3grca.ItemReviewControl> snooze(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+    DateTime until,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'reviewQueue',
+            method: 'snooze',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'reviewQueue',
+          methodName: 'snooze',
+          parameters: _ist.testObjectToJson({
+            'itemId': itemId,
+            'until': until,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_isp3grca.ItemReviewControl>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_isp3grca.ItemReviewControl> pause(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+    bool paused,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'reviewQueue',
+            method: 'pause',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'reviewQueue',
+          methodName: 'pause',
+          parameters: _ist.testObjectToJson({
+            'itemId': itemId,
+            'paused': paused,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_isp3grca.ItemReviewControl>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_id0tr7gx.Item> archive(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'reviewQueue',
+            method: 'archive',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'reviewQueue',
+          methodName: 'archive',
+          parameters: _ist.testObjectToJson({'itemId': itemId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_id0tr7gx.Item>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i261tjna.ReminderSettings> settings(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'reviewQueue',
+            method: 'settings',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'reviewQueue',
+          methodName: 'settings',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i261tjna.ReminderSettings>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i261tjna.ReminderSettings> updateSettings(
+    _ist.TestSessionBuilder sessionBuilder,
+    _if8nlr1i.ReminderSettingsDraft draft,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'reviewQueue',
+            method: 'updateSettings',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'reviewQueue',
+          methodName: 'updateSettings',
+          parameters: _ist.testObjectToJson({'draft': draft}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i261tjna.ReminderSettings>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _SearchEndpoint {
+  _SearchEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_ix4yop5k.SearchPage> keyword(
+    _ist.TestSessionBuilder sessionBuilder, {
+    required String query,
+    _i72i2l8c.SourcePlatform? source,
+    _iyxjktn1.ContentType? contentType,
+    _is.UuidValue? collectionId,
+    _i7xfwskj.ReviewStatusFilter? reviewStatus,
+    String? cursor,
+    int? limit,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'search',
+            method: 'keyword',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'search',
+          methodName: 'keyword',
+          parameters: _ist.testObjectToJson({
+            'query': query,
+            'source': source,
+            'contentType': contentType,
+            'collectionId': collectionId,
+            'reviewStatus': reviewStatus,
+            'cursor': cursor,
+            'limit': limit,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ix4yop5k.SearchPage>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _AiOrganizeFutureCall {
   Future<void> process(
     _ist.TestSessionBuilder sessionBuilder,
@@ -1956,6 +2333,21 @@ class _AiOrganizeFutureCall {
       await _ifh9pad3.AiOrganizeProcessFutureCall().invoke(
         _localUniqueSession,
         object,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
+  }
+}
+
+class _ReminderDigestFutureCall {
+  Future<void> recompute(_ist.TestSessionBuilder sessionBuilder) async {
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _ifh9pad3.ReminderDigestRecomputeFutureCall().invoke(
+        _localUniqueSession,
+        null,
       );
     } finally {
       await _localUniqueSession.close();

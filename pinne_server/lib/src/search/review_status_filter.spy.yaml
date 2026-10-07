@@ -1,0 +1,5 @@
+enum: ReviewStatusFilter
+serialized: byName
+values:
+  - reviewed
+  - unreviewed

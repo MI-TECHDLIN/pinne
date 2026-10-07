@@ -1,0 +1,11 @@
+### Client input for one immutable review fact. Ownership and effective local
+### date are derived and validated by the server.
+class: ReviewEventDraft
+fields:
+  clientEventId: String
+  itemId: UuidValue
+  eventType: ReviewEventType
+  occurredAt: DateTime
+  timezone: String
+  timezoneOffsetMinutes: int
+  compensatesEventId: UuidValue?

@@ -1,0 +1,18 @@
+### A delivery-ready grouped in-app digest. A later integration may deliver it
+### as push; this worker only records the durable, deduplicated message.
+class: ReviewDigest
+table: review_digest
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  digestKey: String
+  localDate: String
+  body: String
+  itemCount: int
+  createdAt: DateTime, default=now
+indexes:
+  review_digest_owner_key_idx:
+    fields: ownerId, digestKey
+    unique: true
+  review_digest_owner_created_idx:
+    fields: ownerId, createdAt

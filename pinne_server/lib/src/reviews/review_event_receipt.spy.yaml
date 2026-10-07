@@ -1,0 +1,4 @@
+class: ReviewEventReceipt
+fields:
+  event: ReviewEvent
+  progress: ItemProgress

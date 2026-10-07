@@ -1,0 +1,14 @@
+### Item-specific reminder controls. Snooze and pause override broader rules.
+class: ItemReviewControl
+table: item_review_control
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  snoozedUntil: DateTime?
+  remindersPaused: bool, default=false
+  lastDismissedAt: DateTime?
+indexes:
+  item_review_control_owner_item_idx:
+    fields: ownerId, itemId
+    unique: true

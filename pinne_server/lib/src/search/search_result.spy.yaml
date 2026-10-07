@@ -1,0 +1,5 @@
+class: SearchResult
+fields:
+  item: Item
+  evidence: List<SearchEvidence>
+  score: double

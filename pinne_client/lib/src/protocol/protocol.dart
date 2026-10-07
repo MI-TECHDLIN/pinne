@@ -98,9 +98,23 @@ import 'planning/session_view.dart' as _iyjcmdi4;
 import 'profile/pinne_profile.dart' as _ijguvy1g;
 import 'profile/profile_draft.dart' as _ij8joe28;
 import 'reminders/reminder_rule.dart' as _i6ljcdoh;
+import 'reminders/reminder_settings.dart' as _i0v594yd;
+import 'reminders/reminder_settings_draft.dart' as _i2m53qgo;
 import 'reminders/reminder_window.dart' as _iswi3gl6;
+import 'reminders/review_digest.dart' as _isu905ko;
+import 'reviews/item_progress.dart' as _iv91gdem;
+import 'reviews/item_review_control.dart' as _il1zbvt2;
 import 'reviews/review_event.dart' as _i0pv2k4n;
+import 'reviews/review_event_draft.dart' as _i4vpgh88;
+import 'reviews/review_event_receipt.dart' as _i5hoegii;
 import 'reviews/review_event_type.dart' as _i5mz8id3;
+import 'reviews/review_queue_entry.dart' as _ia978e3v;
+import 'reviews/review_queue_result.dart' as _igp65vp8;
+import 'search/item_note.dart' as _i1podblr;
+import 'search/review_status_filter.dart' as _ive6le5b;
+import 'search/search_evidence.dart' as _igqcqr3d;
+import 'search/search_page.dart' as _ic5aviky;
+import 'search/search_result.dart' as _iyyp88jv;
 import 'tags/item_tag.dart' as _iv0vmssg;
 import 'tags/tag.dart' as _iopagaq8;
 export 'ai/ai_daily_usage.dart';
@@ -169,9 +183,23 @@ export 'planning/session_view.dart';
 export 'profile/pinne_profile.dart';
 export 'profile/profile_draft.dart';
 export 'reminders/reminder_rule.dart';
+export 'reminders/reminder_settings.dart';
+export 'reminders/reminder_settings_draft.dart';
 export 'reminders/reminder_window.dart';
+export 'reminders/review_digest.dart';
+export 'reviews/item_progress.dart';
+export 'reviews/item_review_control.dart';
 export 'reviews/review_event.dart';
+export 'reviews/review_event_draft.dart';
+export 'reviews/review_event_receipt.dart';
 export 'reviews/review_event_type.dart';
+export 'reviews/review_queue_entry.dart';
+export 'reviews/review_queue_result.dart';
+export 'search/item_note.dart';
+export 'search/review_status_filter.dart';
+export 'search/search_evidence.dart';
+export 'search/search_page.dart';
+export 'search/search_result.dart';
 export 'tags/item_tag.dart';
 export 'tags/tag.dart';
 export 'client.dart';
@@ -408,14 +436,56 @@ class Protocol extends _isc.SerializationManager {
     if (t == _i6ljcdoh.ReminderRule) {
       return _i6ljcdoh.ReminderRule.fromJson(data) as T;
     }
+    if (t == _i0v594yd.ReminderSettings) {
+      return _i0v594yd.ReminderSettings.fromJson(data) as T;
+    }
+    if (t == _i2m53qgo.ReminderSettingsDraft) {
+      return _i2m53qgo.ReminderSettingsDraft.fromJson(data) as T;
+    }
     if (t == _iswi3gl6.ReminderWindow) {
       return _iswi3gl6.ReminderWindow.fromJson(data) as T;
+    }
+    if (t == _isu905ko.ReviewDigest) {
+      return _isu905ko.ReviewDigest.fromJson(data) as T;
+    }
+    if (t == _iv91gdem.ItemProgress) {
+      return _iv91gdem.ItemProgress.fromJson(data) as T;
+    }
+    if (t == _il1zbvt2.ItemReviewControl) {
+      return _il1zbvt2.ItemReviewControl.fromJson(data) as T;
     }
     if (t == _i0pv2k4n.ReviewEvent) {
       return _i0pv2k4n.ReviewEvent.fromJson(data) as T;
     }
+    if (t == _i4vpgh88.ReviewEventDraft) {
+      return _i4vpgh88.ReviewEventDraft.fromJson(data) as T;
+    }
+    if (t == _i5hoegii.ReviewEventReceipt) {
+      return _i5hoegii.ReviewEventReceipt.fromJson(data) as T;
+    }
     if (t == _i5mz8id3.ReviewEventType) {
       return _i5mz8id3.ReviewEventType.fromJson(data) as T;
+    }
+    if (t == _ia978e3v.ReviewQueueEntry) {
+      return _ia978e3v.ReviewQueueEntry.fromJson(data) as T;
+    }
+    if (t == _igp65vp8.ReviewQueueResult) {
+      return _igp65vp8.ReviewQueueResult.fromJson(data) as T;
+    }
+    if (t == _i1podblr.ItemNote) {
+      return _i1podblr.ItemNote.fromJson(data) as T;
+    }
+    if (t == _ive6le5b.ReviewStatusFilter) {
+      return _ive6le5b.ReviewStatusFilter.fromJson(data) as T;
+    }
+    if (t == _igqcqr3d.SearchEvidence) {
+      return _igqcqr3d.SearchEvidence.fromJson(data) as T;
+    }
+    if (t == _ic5aviky.SearchPage) {
+      return _ic5aviky.SearchPage.fromJson(data) as T;
+    }
+    if (t == _iyyp88jv.SearchResult) {
+      return _iyyp88jv.SearchResult.fromJson(data) as T;
     }
     if (t == _iv0vmssg.ItemTag) {
       return _iv0vmssg.ItemTag.fromJson(data) as T;
@@ -691,16 +761,69 @@ class Protocol extends _isc.SerializationManager {
     if (t == _isc.getType<_i6ljcdoh.ReminderRule?>()) {
       return (data != null ? _i6ljcdoh.ReminderRule.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_i0v594yd.ReminderSettings?>()) {
+      return (data != null ? _i0v594yd.ReminderSettings.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i2m53qgo.ReminderSettingsDraft?>()) {
+      return (data != null
+              ? _i2m53qgo.ReminderSettingsDraft.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _isc.getType<_iswi3gl6.ReminderWindow?>()) {
       return (data != null ? _iswi3gl6.ReminderWindow.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_isu905ko.ReviewDigest?>()) {
+      return (data != null ? _isu905ko.ReviewDigest.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iv91gdem.ItemProgress?>()) {
+      return (data != null ? _iv91gdem.ItemProgress.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_il1zbvt2.ItemReviewControl?>()) {
+      return (data != null ? _il1zbvt2.ItemReviewControl.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_i0pv2k4n.ReviewEvent?>()) {
       return (data != null ? _i0pv2k4n.ReviewEvent.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_i4vpgh88.ReviewEventDraft?>()) {
+      return (data != null ? _i4vpgh88.ReviewEventDraft.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i5hoegii.ReviewEventReceipt?>()) {
+      return (data != null ? _i5hoegii.ReviewEventReceipt.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_i5mz8id3.ReviewEventType?>()) {
       return (data != null ? _i5mz8id3.ReviewEventType.fromJson(data) : null)
           as T;
+    }
+    if (t == _isc.getType<_ia978e3v.ReviewQueueEntry?>()) {
+      return (data != null ? _ia978e3v.ReviewQueueEntry.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_igp65vp8.ReviewQueueResult?>()) {
+      return (data != null ? _igp65vp8.ReviewQueueResult.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i1podblr.ItemNote?>()) {
+      return (data != null ? _i1podblr.ItemNote.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ive6le5b.ReviewStatusFilter?>()) {
+      return (data != null ? _ive6le5b.ReviewStatusFilter.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_igqcqr3d.SearchEvidence?>()) {
+      return (data != null ? _igqcqr3d.SearchEvidence.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ic5aviky.SearchPage?>()) {
+      return (data != null ? _ic5aviky.SearchPage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iyyp88jv.SearchResult?>()) {
+      return (data != null ? _iyyp88jv.SearchResult.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_iv0vmssg.ItemTag?>()) {
       return (data != null ? _iv0vmssg.ItemTag.fromJson(data) : null) as T;
@@ -783,6 +906,24 @@ class Protocol extends _isc.SerializationManager {
                     .map((e) => deserialize<_iswi3gl6.ReminderWindow>(e))
                     .toList()
               : null)
+          as T;
+    }
+    if (t == List<_ia978e3v.ReviewQueueEntry>) {
+      return (data as List)
+              .map((e) => deserialize<_ia978e3v.ReviewQueueEntry>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iyyp88jv.SearchResult>) {
+      return (data as List)
+              .map((e) => deserialize<_iyyp88jv.SearchResult>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_igqcqr3d.SearchEvidence>) {
+      return (data as List)
+              .map((e) => deserialize<_igqcqr3d.SearchEvidence>(e))
+              .toList()
           as T;
     }
     if (t == List<_iq5krdy3.AiSuggestion>) {
@@ -918,9 +1059,23 @@ class Protocol extends _isc.SerializationManager {
       _ijguvy1g.PinneProfile => 'PinneProfile',
       _ij8joe28.ProfileDraft => 'ProfileDraft',
       _i6ljcdoh.ReminderRule => 'ReminderRule',
+      _i0v594yd.ReminderSettings => 'ReminderSettings',
+      _i2m53qgo.ReminderSettingsDraft => 'ReminderSettingsDraft',
       _iswi3gl6.ReminderWindow => 'ReminderWindow',
+      _isu905ko.ReviewDigest => 'ReviewDigest',
+      _iv91gdem.ItemProgress => 'ItemProgress',
+      _il1zbvt2.ItemReviewControl => 'ItemReviewControl',
       _i0pv2k4n.ReviewEvent => 'ReviewEvent',
+      _i4vpgh88.ReviewEventDraft => 'ReviewEventDraft',
+      _i5hoegii.ReviewEventReceipt => 'ReviewEventReceipt',
       _i5mz8id3.ReviewEventType => 'ReviewEventType',
+      _ia978e3v.ReviewQueueEntry => 'ReviewQueueEntry',
+      _igp65vp8.ReviewQueueResult => 'ReviewQueueResult',
+      _i1podblr.ItemNote => 'ItemNote',
+      _ive6le5b.ReviewStatusFilter => 'ReviewStatusFilter',
+      _igqcqr3d.SearchEvidence => 'SearchEvidence',
+      _ic5aviky.SearchPage => 'SearchPage',
+      _iyyp88jv.SearchResult => 'SearchResult',
       _iv0vmssg.ItemTag => 'ItemTag',
       _iopagaq8.Tag => 'Tag',
       _ => null,
@@ -1069,12 +1224,40 @@ class Protocol extends _isc.SerializationManager {
         return 'ProfileDraft';
       case _i6ljcdoh.ReminderRule():
         return 'ReminderRule';
+      case _i0v594yd.ReminderSettings():
+        return 'ReminderSettings';
+      case _i2m53qgo.ReminderSettingsDraft():
+        return 'ReminderSettingsDraft';
       case _iswi3gl6.ReminderWindow():
         return 'ReminderWindow';
+      case _isu905ko.ReviewDigest():
+        return 'ReviewDigest';
+      case _iv91gdem.ItemProgress():
+        return 'ItemProgress';
+      case _il1zbvt2.ItemReviewControl():
+        return 'ItemReviewControl';
       case _i0pv2k4n.ReviewEvent():
         return 'ReviewEvent';
+      case _i4vpgh88.ReviewEventDraft():
+        return 'ReviewEventDraft';
+      case _i5hoegii.ReviewEventReceipt():
+        return 'ReviewEventReceipt';
       case _i5mz8id3.ReviewEventType():
         return 'ReviewEventType';
+      case _ia978e3v.ReviewQueueEntry():
+        return 'ReviewQueueEntry';
+      case _igp65vp8.ReviewQueueResult():
+        return 'ReviewQueueResult';
+      case _i1podblr.ItemNote():
+        return 'ItemNote';
+      case _ive6le5b.ReviewStatusFilter():
+        return 'ReviewStatusFilter';
+      case _igqcqr3d.SearchEvidence():
+        return 'SearchEvidence';
+      case _ic5aviky.SearchPage():
+        return 'SearchPage';
+      case _iyyp88jv.SearchResult():
+        return 'SearchResult';
       case _iv0vmssg.ItemTag():
         return 'ItemTag';
       case _iopagaq8.Tag():
@@ -1299,14 +1482,56 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName == 'ReminderRule') {
       return deserialize<_i6ljcdoh.ReminderRule>(data['data']);
     }
+    if (dataClassName == 'ReminderSettings') {
+      return deserialize<_i0v594yd.ReminderSettings>(data['data']);
+    }
+    if (dataClassName == 'ReminderSettingsDraft') {
+      return deserialize<_i2m53qgo.ReminderSettingsDraft>(data['data']);
+    }
     if (dataClassName == 'ReminderWindow') {
       return deserialize<_iswi3gl6.ReminderWindow>(data['data']);
+    }
+    if (dataClassName == 'ReviewDigest') {
+      return deserialize<_isu905ko.ReviewDigest>(data['data']);
+    }
+    if (dataClassName == 'ItemProgress') {
+      return deserialize<_iv91gdem.ItemProgress>(data['data']);
+    }
+    if (dataClassName == 'ItemReviewControl') {
+      return deserialize<_il1zbvt2.ItemReviewControl>(data['data']);
     }
     if (dataClassName == 'ReviewEvent') {
       return deserialize<_i0pv2k4n.ReviewEvent>(data['data']);
     }
+    if (dataClassName == 'ReviewEventDraft') {
+      return deserialize<_i4vpgh88.ReviewEventDraft>(data['data']);
+    }
+    if (dataClassName == 'ReviewEventReceipt') {
+      return deserialize<_i5hoegii.ReviewEventReceipt>(data['data']);
+    }
     if (dataClassName == 'ReviewEventType') {
       return deserialize<_i5mz8id3.ReviewEventType>(data['data']);
+    }
+    if (dataClassName == 'ReviewQueueEntry') {
+      return deserialize<_ia978e3v.ReviewQueueEntry>(data['data']);
+    }
+    if (dataClassName == 'ReviewQueueResult') {
+      return deserialize<_igp65vp8.ReviewQueueResult>(data['data']);
+    }
+    if (dataClassName == 'ItemNote') {
+      return deserialize<_i1podblr.ItemNote>(data['data']);
+    }
+    if (dataClassName == 'ReviewStatusFilter') {
+      return deserialize<_ive6le5b.ReviewStatusFilter>(data['data']);
+    }
+    if (dataClassName == 'SearchEvidence') {
+      return deserialize<_igqcqr3d.SearchEvidence>(data['data']);
+    }
+    if (dataClassName == 'SearchPage') {
+      return deserialize<_ic5aviky.SearchPage>(data['data']);
+    }
+    if (dataClassName == 'SearchResult') {
+      return deserialize<_iyyp88jv.SearchResult>(data['data']);
     }
     if (dataClassName == 'ItemTag') {
       return deserialize<_iv0vmssg.ItemTag>(data['data']);

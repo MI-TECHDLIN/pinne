@@ -1,0 +1,11 @@
+class: ReminderSettingsDraft
+fields:
+  delayHours: int
+  timezone: String
+  timezoneOffsetMinutes: int
+  quietStartMinute: int?
+  quietEndMinute: int?
+  dailyCap: int
+  remindersPaused: bool
+  queueLimit: int
+  dismissCooldownMinutes: int

@@ -15,6 +15,7 @@ import 'dart:async' as _ida;
 import 'package:clock/clock.dart' as _io0w16m8;
 import 'package:serverpod/serverpod.dart' as _is;
 import '../ai/ai_organize_future_call.dart' as _iawa1gig;
+import '../reminders/reminder_digest_future_call.dart' as _izsl17q0;
 import 'future_calls_generated_models/ai_organize_future_call_process_model.dart'
     as _is4ugn9t;
 
@@ -61,6 +62,7 @@ class FutureCalls extends _is.FutureCallDispatch<_FutureCallRef> {
   ) {
     var registeredFutureCalls = <String, _is.InvokableFutureCall>{
       'AiOrganizeProcessFutureCall': AiOrganizeProcessFutureCall(),
+      'ReminderDigestRecomputeFutureCall': ReminderDigestRecomputeFutureCall(),
     };
     _futureCallManager = futureCallManager;
     _serverId = serverId;
@@ -182,6 +184,10 @@ class _FutureCallRef {
   final _InvokeFutureCall _invokeFutureCall;
 
   late final aiOrganize = _AiOrganizeFutureCallDispatcher(_invokeFutureCall);
+
+  late final reminderDigest = _ReminderDigestFutureCallDispatcher(
+    _invokeFutureCall,
+  );
 }
 
 class _AiOrganizeFutureCallDispatcher {
@@ -204,6 +210,19 @@ class _AiOrganizeFutureCallDispatcher {
   }
 }
 
+class _ReminderDigestFutureCallDispatcher {
+  _ReminderDigestFutureCallDispatcher(this._invokeFutureCall);
+
+  final _InvokeFutureCall _invokeFutureCall;
+
+  Future<void> recompute() {
+    return _invokeFutureCall(
+      'ReminderDigestRecomputeFutureCall',
+      null,
+    );
+  }
+}
+
 class AiOrganizeProcessFutureCall
     extends _is.FutureCall<_is4ugn9t.AiOrganizeFutureCallProcessModel>
     implements
@@ -220,5 +239,16 @@ class AiOrganizeProcessFutureCall
         object.ownerId,
       );
     }
+  }
+}
+
+class ReminderDigestRecomputeFutureCall extends _is.FutureCall
+    implements _is.InvokableFutureCall {
+  @override
+  _ida.Future<void> invoke(
+    _is.Session session,
+    _is.SerializableModel? object,
+  ) async {
+    await _izsl17q0.ReminderDigestFutureCall().recompute(session);
   }
 }

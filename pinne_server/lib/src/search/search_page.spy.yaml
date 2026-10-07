@@ -1,0 +1,4 @@
+class: SearchPage
+fields:
+  results: List<SearchResult>
+  nextCursor: String?

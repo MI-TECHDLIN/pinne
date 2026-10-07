@@ -1,0 +1,7 @@
+class: ReviewQueueEntry
+fields:
+  item: Item
+  dueAt: DateTime
+  overdueMinutes: int
+  estimatedMinutes: int
+  selectionReason: String
