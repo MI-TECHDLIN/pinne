@@ -1,0 +1,12 @@
+### User-authored notes are searchable independently of enrichment text.
+class: ItemNote
+table: item_note
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  body: String
+  createdAt: DateTime, default=now
+indexes:
+  item_note_owner_item_idx:
+    fields: ownerId, itemId, createdAt

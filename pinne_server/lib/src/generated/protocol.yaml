@@ -57,3 +57,15 @@ planner:
 profile:
   - get:
   - upsert:
+review:
+  - record:
+  - progress:
+reviewQueue:
+  - get:
+  - snooze:
+  - pause:
+  - archive:
+  - settings:
+  - updateSettings:
+search:
+  - keyword:

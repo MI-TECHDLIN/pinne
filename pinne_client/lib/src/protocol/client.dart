@@ -32,8 +32,11 @@ import 'package:pinne_client/src/protocol/items/capture_draft.dart'
     as _ium6vjfl;
 import 'package:pinne_client/src/protocol/items/capture_result.dart'
     as _ibc30ndw;
+import 'package:pinne_client/src/protocol/items/content_type.dart' as _iko5ua42;
 import 'package:pinne_client/src/protocol/items/item.dart' as _itiiwgx0;
 import 'package:pinne_client/src/protocol/items/item_draft.dart' as _ixoujeet;
+import 'package:pinne_client/src/protocol/items/source_platform.dart'
+    as _iv65j95k;
 import 'package:pinne_client/src/protocol/planning/calendar_write.dart'
     as _i4bu6rte;
 import 'package:pinne_client/src/protocol/planning/calendar_write_result.dart'
@@ -60,6 +63,23 @@ import 'package:pinne_client/src/protocol/profile/pinne_profile.dart'
     as _i1myizpd;
 import 'package:pinne_client/src/protocol/profile/profile_draft.dart'
     as _iyve154t;
+import 'package:pinne_client/src/protocol/reminders/reminder_settings.dart'
+    as _iyth9g0m;
+import 'package:pinne_client/src/protocol/reminders/reminder_settings_draft.dart'
+    as _igain2cy;
+import 'package:pinne_client/src/protocol/reviews/item_progress.dart'
+    as _iuhlloa5;
+import 'package:pinne_client/src/protocol/reviews/item_review_control.dart'
+    as _ifbx23tg;
+import 'package:pinne_client/src/protocol/reviews/review_event_draft.dart'
+    as _ioof6v6o;
+import 'package:pinne_client/src/protocol/reviews/review_event_receipt.dart'
+    as _iw9f3x24;
+import 'package:pinne_client/src/protocol/reviews/review_queue_result.dart'
+    as _inrlk828;
+import 'package:pinne_client/src/protocol/search/review_status_filter.dart'
+    as _iqvvm671;
+import 'package:pinne_client/src/protocol/search/search_page.dart' as _ismw7fr7;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
@@ -730,6 +750,121 @@ class EndpointProfile extends _isc.EndpointRef {
       );
 }
 
+/// {@category Endpoint}
+class EndpointReview extends _isc.EndpointRef {
+  EndpointReview(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'review';
+
+  _ida.Future<_iw9f3x24.ReviewEventReceipt> record(
+    _ioof6v6o.ReviewEventDraft draft,
+  ) => caller.callServerEndpoint<_iw9f3x24.ReviewEventReceipt>(
+    'review',
+    'record',
+    {'draft': draft},
+  );
+
+  _ida.Future<_iuhlloa5.ItemProgress?> progress(_isc.UuidValue itemId) =>
+      caller.callServerEndpoint<_iuhlloa5.ItemProgress?>(
+        'review',
+        'progress',
+        {'itemId': itemId},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointReviewQueue extends _isc.EndpointRef {
+  EndpointReviewQueue(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'reviewQueue';
+
+  _ida.Future<_inrlk828.ReviewQueueResult> get({
+    required int timeBudgetMinutes,
+  }) => caller.callServerEndpoint<_inrlk828.ReviewQueueResult>(
+    'reviewQueue',
+    'get',
+    {'timeBudgetMinutes': timeBudgetMinutes},
+  );
+
+  _ida.Future<_ifbx23tg.ItemReviewControl> snooze(
+    _isc.UuidValue itemId,
+    DateTime until,
+  ) => caller.callServerEndpoint<_ifbx23tg.ItemReviewControl>(
+    'reviewQueue',
+    'snooze',
+    {
+      'itemId': itemId,
+      'until': until,
+    },
+  );
+
+  _ida.Future<_ifbx23tg.ItemReviewControl> pause(
+    _isc.UuidValue itemId,
+    bool paused,
+  ) => caller.callServerEndpoint<_ifbx23tg.ItemReviewControl>(
+    'reviewQueue',
+    'pause',
+    {
+      'itemId': itemId,
+      'paused': paused,
+    },
+  );
+
+  _ida.Future<_itiiwgx0.Item> archive(_isc.UuidValue itemId) =>
+      caller.callServerEndpoint<_itiiwgx0.Item>(
+        'reviewQueue',
+        'archive',
+        {'itemId': itemId},
+      );
+
+  _ida.Future<_iyth9g0m.ReminderSettings> settings() =>
+      caller.callServerEndpoint<_iyth9g0m.ReminderSettings>(
+        'reviewQueue',
+        'settings',
+        {},
+      );
+
+  _ida.Future<_iyth9g0m.ReminderSettings> updateSettings(
+    _igain2cy.ReminderSettingsDraft draft,
+  ) => caller.callServerEndpoint<_iyth9g0m.ReminderSettings>(
+    'reviewQueue',
+    'updateSettings',
+    {'draft': draft},
+  );
+}
+
+/// {@category Endpoint}
+class EndpointSearch extends _isc.EndpointRef {
+  EndpointSearch(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'search';
+
+  _ida.Future<_ismw7fr7.SearchPage> keyword({
+    required String query,
+    _iv65j95k.SourcePlatform? source,
+    _iko5ua42.ContentType? contentType,
+    _isc.UuidValue? collectionId,
+    _iqvvm671.ReviewStatusFilter? reviewStatus,
+    String? cursor,
+    int? limit,
+  }) => caller.callServerEndpoint<_ismw7fr7.SearchPage>(
+    'search',
+    'keyword',
+    {
+      'query': query,
+      'source': source,
+      'contentType': contentType,
+      'collectionId': collectionId,
+      'reviewStatus': reviewStatus,
+      'cursor': cursor,
+      'limit': limit,
+    },
+  );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _iaic.Caller(client);
@@ -778,6 +913,9 @@ class Client extends _isc.ServerpodClientShared {
     item = EndpointItem(this);
     planner = EndpointPlanner(this);
     profile = EndpointProfile(this);
+    review = EndpointReview(this);
+    reviewQueue = EndpointReviewQueue(this);
+    search = EndpointSearch(this);
     modules = Modules(this);
   }
 
@@ -801,6 +939,12 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointProfile profile;
 
+  late final EndpointReview review;
+
+  late final EndpointReviewQueue reviewQueue;
+
+  late final EndpointSearch search;
+
   late final Modules modules;
 
   @override
@@ -815,6 +959,9 @@ class Client extends _isc.ServerpodClientShared {
     'item': item,
     'planner': planner,
     'profile': profile,
+    'review': review,
+    'reviewQueue': reviewQueue,
+    'search': search,
   };
 
   @override

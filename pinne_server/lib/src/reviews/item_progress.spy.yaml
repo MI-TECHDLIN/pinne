@@ -1,0 +1,21 @@
+### Rebuildable projection of valid review events for one owned item.
+class: ItemProgress
+table: item_progress
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  firstOpenedAt: DateTime?
+  lastOpenedAt: DateTime?
+  openCount: int, default=0
+  firstReviewedAt: DateTime?
+  lastReviewedAt: DateTime?
+  completedAt: DateTime?
+  appliedAt: DateTime?
+  rebuiltAt: DateTime, default=now
+indexes:
+  item_progress_owner_item_idx:
+    fields: ownerId, itemId
+    unique: true
+  item_progress_owner_reviewed_idx:
+    fields: ownerId, firstReviewedAt

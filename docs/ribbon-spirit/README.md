@@ -38,10 +38,10 @@ outside 0–5 and seeds outside 0–2147483646 are rejected. Until a profile is
 saved, `RibbonRecipe.seedForUser` deterministically derives a seed from the
 authenticated user id. Signing out or switching accounts invalidates it.
 
-Today reads `todayHasDueProvider`, currently a local flag defaulting to false.
-The due preview has a lime card and an excited spirit, floating gently together
-unless motion is reduced. The empty queue uses a
-dark card and a sleepy spirit. The spirit itself never uses lime.
+Today reads the real owner-scoped queue from `todayQueueProvider`. A due item
+has a lime card and an excited spirit, floating gently together unless motion
+is reduced. The empty queue uses a dark card and a sleepy spirit. The spirit
+itself never uses lime.
 
 ## Stable recipes
 

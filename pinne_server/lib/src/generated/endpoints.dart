@@ -21,8 +21,12 @@ import 'package:pinne_server/src/generated/collections/collection_draft.dart'
 import 'package:pinne_server/src/generated/future_calls.dart' as _ifh9pad3;
 import 'package:pinne_server/src/generated/items/capture_draft.dart'
     as _iushcgme;
+import 'package:pinne_server/src/generated/items/content_type.dart'
+    as _iyxjktn1;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/items/item_draft.dart' as _ittgmzop;
+import 'package:pinne_server/src/generated/items/source_platform.dart'
+    as _i72i2l8c;
 import 'package:pinne_server/src/generated/planning/calendar_write_result.dart'
     as _iaiz9j0d;
 import 'package:pinne_server/src/generated/planning/plan_commit_request.dart'
@@ -35,6 +39,12 @@ import 'package:pinne_server/src/generated/planning/session_move_request.dart'
     as _ijei0lg9;
 import 'package:pinne_server/src/generated/profile/profile_draft.dart'
     as _i2c58fcj;
+import 'package:pinne_server/src/generated/reminders/reminder_settings_draft.dart'
+    as _if8nlr1i;
+import 'package:pinne_server/src/generated/reviews/review_event_draft.dart'
+    as _ikmeff8s;
+import 'package:pinne_server/src/generated/search/review_status_filter.dart'
+    as _i7xfwskj;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -50,6 +60,9 @@ import '../health/health_endpoint.dart' as _id9paj9q;
 import '../items/item_endpoint.dart' as _i97sinw1;
 import '../planning/planner_endpoint.dart' as _icn41d99;
 import '../profile/profile_endpoint.dart' as _i6ky944g;
+import '../reviews/review_endpoint.dart' as _i1vkl601;
+import '../reviews/review_queue_endpoint.dart' as _il9fx142;
+import '../search/search_endpoint.dart' as _i2f0v2ey;
 export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _is.EndpointDispatch {
@@ -114,6 +127,24 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'profile',
+          null,
+        ),
+      'review': _i1vkl601.ReviewEndpoint()
+        ..initialize(
+          server,
+          'review',
+          null,
+        ),
+      'reviewQueue': _il9fx142.ReviewQueueEndpoint()
+        ..initialize(
+          server,
+          'reviewQueue',
+          null,
+        ),
+      'search': _i2f0v2ey.SearchEndpoint()
+        ..initialize(
+          server,
+          'search',
           null,
         ),
     };
@@ -1089,6 +1120,240 @@ class Endpoints extends _is.EndpointDispatch {
                   (endpoints['profile'] as _i6ky944g.ProfileEndpoint).upsert(
                     session,
                     params['draft'],
+                  ),
+        ),
+      },
+    );
+    connectors['review'] = _is.EndpointConnector(
+      name: 'review',
+      endpoint: endpoints['review']!,
+      methodConnectors: {
+        'record': _is.MethodConnector(
+          name: 'record',
+          params: {
+            'draft': _is.ParameterDescription(
+              name: 'draft',
+              type: _is.getType<_ikmeff8s.ReviewEventDraft>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['review'] as _i1vkl601.ReviewEndpoint).record(
+                    session,
+                    params['draft'],
+                  ),
+        ),
+        'progress': _is.MethodConnector(
+          name: 'progress',
+          params: {
+            'itemId': _is.ParameterDescription(
+              name: 'itemId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['review'] as _i1vkl601.ReviewEndpoint).progress(
+                    session,
+                    params['itemId'],
+                  ),
+        ),
+      },
+    );
+    connectors['reviewQueue'] = _is.EndpointConnector(
+      name: 'reviewQueue',
+      endpoint: endpoints['reviewQueue']!,
+      methodConnectors: {
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'timeBudgetMinutes': _is.ParameterDescription(
+              name: 'timeBudgetMinutes',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['reviewQueue'] as _il9fx142.ReviewQueueEndpoint)
+                      .get(
+                        session,
+                        timeBudgetMinutes: params['timeBudgetMinutes'],
+                      ),
+        ),
+        'snooze': _is.MethodConnector(
+          name: 'snooze',
+          params: {
+            'itemId': _is.ParameterDescription(
+              name: 'itemId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'until': _is.ParameterDescription(
+              name: 'until',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['reviewQueue'] as _il9fx142.ReviewQueueEndpoint)
+                      .snooze(
+                        session,
+                        params['itemId'],
+                        params['until'],
+                      ),
+        ),
+        'pause': _is.MethodConnector(
+          name: 'pause',
+          params: {
+            'itemId': _is.ParameterDescription(
+              name: 'itemId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'paused': _is.ParameterDescription(
+              name: 'paused',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['reviewQueue'] as _il9fx142.ReviewQueueEndpoint)
+                      .pause(
+                        session,
+                        params['itemId'],
+                        params['paused'],
+                      ),
+        ),
+        'archive': _is.MethodConnector(
+          name: 'archive',
+          params: {
+            'itemId': _is.ParameterDescription(
+              name: 'itemId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['reviewQueue'] as _il9fx142.ReviewQueueEndpoint)
+                      .archive(
+                        session,
+                        params['itemId'],
+                      ),
+        ),
+        'settings': _is.MethodConnector(
+          name: 'settings',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['reviewQueue'] as _il9fx142.ReviewQueueEndpoint)
+                      .settings(session),
+        ),
+        'updateSettings': _is.MethodConnector(
+          name: 'updateSettings',
+          params: {
+            'draft': _is.ParameterDescription(
+              name: 'draft',
+              type: _is.getType<_if8nlr1i.ReminderSettingsDraft>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['reviewQueue'] as _il9fx142.ReviewQueueEndpoint)
+                      .updateSettings(
+                        session,
+                        params['draft'],
+                      ),
+        ),
+      },
+    );
+    connectors['search'] = _is.EndpointConnector(
+      name: 'search',
+      endpoint: endpoints['search']!,
+      methodConnectors: {
+        'keyword': _is.MethodConnector(
+          name: 'keyword',
+          params: {
+            'query': _is.ParameterDescription(
+              name: 'query',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'source': _is.ParameterDescription(
+              name: 'source',
+              type: _is.getType<_i72i2l8c.SourcePlatform?>(),
+              nullable: true,
+            ),
+            'contentType': _is.ParameterDescription(
+              name: 'contentType',
+              type: _is.getType<_iyxjktn1.ContentType?>(),
+              nullable: true,
+            ),
+            'collectionId': _is.ParameterDescription(
+              name: 'collectionId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'reviewStatus': _is.ParameterDescription(
+              name: 'reviewStatus',
+              type: _is.getType<_i7xfwskj.ReviewStatusFilter?>(),
+              nullable: true,
+            ),
+            'cursor': _is.ParameterDescription(
+              name: 'cursor',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['search'] as _i2f0v2ey.SearchEndpoint).keyword(
+                    session,
+                    query: params['query'],
+                    source: params['source'],
+                    contentType: params['contentType'],
+                    collectionId: params['collectionId'],
+                    reviewStatus: params['reviewStatus'],
+                    cursor: params['cursor'],
+                    limit: params['limit'],
                   ),
         ),
       },

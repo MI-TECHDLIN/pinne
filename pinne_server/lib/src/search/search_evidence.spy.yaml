@@ -1,0 +1,5 @@
+### A short, human-readable explanation of why a result matched.
+class: SearchEvidence
+fields:
+  field: String
+  snippet: String

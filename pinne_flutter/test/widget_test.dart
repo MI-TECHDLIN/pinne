@@ -62,7 +62,7 @@ void main() {
 
     final tabs = {
       'collections': 'collections',
-      'search': 'what you remember',
+      'search': 'your way',
       'progress': 'progress',
       'today': 'a few good saves',
     };

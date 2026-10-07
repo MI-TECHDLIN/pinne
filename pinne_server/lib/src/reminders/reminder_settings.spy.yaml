@@ -1,0 +1,22 @@
+### Account-wide reminder preferences. Collection-specific delay overrides live
+### in ReminderRule and item controls take precedence over both.
+class: ReminderSettings
+table: reminder_settings
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  delayHours: int, default=24
+  timezone: String, default='UTC'
+  ### Offset captured with the IANA timezone so quiet hours are deterministic
+  ### even when a worker cannot load platform timezone data.
+  timezoneOffsetMinutes: int, default=0
+  quietStartMinute: int?
+  quietEndMinute: int?
+  dailyCap: int, default=1
+  remindersPaused: bool, default=false
+  queueLimit: int, default=5
+  dismissCooldownMinutes: int, default=120
+indexes:
+  reminder_settings_owner_idx:
+    fields: ownerId
+    unique: true

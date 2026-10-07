@@ -1,0 +1,10 @@
+class: ReviewQueueResult
+fields:
+  entries: List<ReviewQueueEntry>
+  timeBudgetMinutes: int
+  ### All currently eligible items before queue-size and time-budget limits.
+  eligibleCount: int, default=0
+  ### Most recent eligibility instant, used to avoid repeat digests when
+  ### nothing new became due.
+  latestDueAt: DateTime?
+  digestText: String?
