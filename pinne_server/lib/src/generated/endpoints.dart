@@ -18,6 +18,7 @@ import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
 import 'package:pinne_server/src/generated/collections/collection_draft.dart'
     as _imy5wtcu;
+import 'package:pinne_server/src/generated/future_calls.dart' as _ifh9pad3;
 import 'package:pinne_server/src/generated/items/capture_draft.dart'
     as _iushcgme;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
@@ -39,6 +40,7 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import '../ai/ai_organizing_endpoint.dart' as _icvqao4l;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/google_idp_endpoint.dart' as _i71axiz0;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
@@ -48,11 +50,18 @@ import '../health/health_endpoint.dart' as _id9paj9q;
 import '../items/item_endpoint.dart' as _i97sinw1;
 import '../planning/planner_endpoint.dart' as _icn41d99;
 import '../profile/profile_endpoint.dart' as _i6ky944g;
+export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
   void initializeEndpoints(_is.Server server) {
     var endpoints = <String, _is.Endpoint>{
+      'aiOrganizing': _icvqao4l.AiOrganizingEndpoint()
+        ..initialize(
+          server,
+          'aiOrganizing',
+          null,
+        ),
       'emailIdp': _iuc1hd5t.EmailIdpEndpoint()
         ..initialize(
           server,
@@ -108,6 +117,123 @@ class Endpoints extends _is.EndpointDispatch {
           null,
         ),
     };
+    connectors['aiOrganizing'] = _is.EndpointConnector(
+      name: 'aiOrganizing',
+      endpoint: endpoints['aiOrganizing']!,
+      methodConnectors: {
+        'getSettings': _is.MethodConnector(
+          name: 'getSettings',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['aiOrganizing'] as _icvqao4l.AiOrganizingEndpoint)
+                      .getSettings(session),
+        ),
+        'setEnabled': _is.MethodConnector(
+          name: 'setEnabled',
+          params: {
+            'enabled': _is.ParameterDescription(
+              name: 'enabled',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['aiOrganizing'] as _icvqao4l.AiOrganizingEndpoint)
+                      .setEnabled(
+                        session,
+                        params['enabled'],
+                      ),
+        ),
+        'listSuggestions': _is.MethodConnector(
+          name: 'listSuggestions',
+          params: {
+            'itemId': _is.ParameterDescription(
+              name: 'itemId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['aiOrganizing'] as _icvqao4l.AiOrganizingEndpoint)
+                      .listSuggestions(
+                        session,
+                        params['itemId'],
+                      ),
+        ),
+        'reprocess': _is.MethodConnector(
+          name: 'reprocess',
+          params: {
+            'itemId': _is.ParameterDescription(
+              name: 'itemId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['aiOrganizing'] as _icvqao4l.AiOrganizingEndpoint)
+                      .reprocess(
+                        session,
+                        params['itemId'],
+                      ),
+        ),
+        'accept': _is.MethodConnector(
+          name: 'accept',
+          params: {
+            'suggestionId': _is.ParameterDescription(
+              name: 'suggestionId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['aiOrganizing'] as _icvqao4l.AiOrganizingEndpoint)
+                      .accept(
+                        session,
+                        params['suggestionId'],
+                      ),
+        ),
+        'reject': _is.MethodConnector(
+          name: 'reject',
+          params: {
+            'suggestionId': _is.ParameterDescription(
+              name: 'suggestionId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['aiOrganizing'] as _icvqao4l.AiOrganizingEndpoint)
+                      .reject(
+                        session,
+                        params['suggestionId'],
+                      ),
+        ),
+      },
+    );
     connectors['emailIdp'] = _is.EndpointConnector(
       name: 'emailIdp',
       endpoint: endpoints['emailIdp']!,
@@ -971,5 +1097,10 @@ class Endpoints extends _is.EndpointDispatch {
       ..initializeEndpoints(server);
     modules['serverpod_auth_core'] = _iacs.Endpoints()
       ..initializeEndpoints(server);
+  }
+
+  @override
+  _is.FutureCallDispatch? get futureCalls {
+    return _ifh9pad3.FutureCalls();
   }
 }

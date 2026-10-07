@@ -7,6 +7,8 @@ fields:
   itemId: UuidValue, relation(parent=item, onDelete=Cascade)
   tagId: UuidValue, relation(parent=tag, onDelete=Cascade)
   origin: AssignmentOrigin, default=manual
+  ### True when the owner explicitly chose or protected this assignment.
+  manuallyLocked: bool, default=false
 indexes:
   item_tag_unique_idx:
     fields: itemId, tagId

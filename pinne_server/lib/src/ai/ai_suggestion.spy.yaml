@@ -1,0 +1,21 @@
+### A proposed organization change. Suggestions remain separate from manual
+### collection memberships and tags until the owner accepts them.
+class: AiSuggestion
+table: ai_suggestion
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  kind: AiSuggestionKind
+  origin: AssignmentOrigin, default=ai
+  collectionId: UuidValue?, relation(parent=collection, onDelete=Cascade)
+  value: String?
+  rationale: String
+  evidenceCoverage: AiEvidenceCoverage, default=metadataOnly
+  uncertain: bool, default=false
+  status: AiSuggestionStatus, default=pending
+  createdAt: DateTime, default=now
+  resolvedAt: DateTime?
+indexes:
+  ai_suggestion_owner_item_idx:
+    fields: ownerId, itemId, status

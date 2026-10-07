@@ -12,6 +12,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
+import 'package:pinne_client/src/protocol/ai/ai_settings.dart' as _iqo53bjr;
+import 'package:pinne_client/src/protocol/ai/ai_suggestion.dart' as _iq5krdy3;
 import 'package:pinne_client/src/protocol/calendar/calendar_connection_view.dart'
     as _i0t8t4zu;
 import 'package:pinne_client/src/protocol/calendar/calendar_route_status.dart'
@@ -64,6 +66,57 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'protocol.dart' as _il2as5qe;
+
+/// {@category Endpoint}
+class EndpointAiOrganizing extends _isc.EndpointRef {
+  EndpointAiOrganizing(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'aiOrganizing';
+
+  _ida.Future<_iqo53bjr.AiSettings> getSettings() =>
+      caller.callServerEndpoint<_iqo53bjr.AiSettings>(
+        'aiOrganizing',
+        'getSettings',
+        {},
+      );
+
+  _ida.Future<_iqo53bjr.AiSettings> setEnabled(bool enabled) =>
+      caller.callServerEndpoint<_iqo53bjr.AiSettings>(
+        'aiOrganizing',
+        'setEnabled',
+        {'enabled': enabled},
+      );
+
+  _ida.Future<List<_iq5krdy3.AiSuggestion>> listSuggestions(
+    _isc.UuidValue itemId,
+  ) => caller.callServerEndpoint<List<_iq5krdy3.AiSuggestion>>(
+    'aiOrganizing',
+    'listSuggestions',
+    {'itemId': itemId},
+  );
+
+  _ida.Future<void> reprocess(_isc.UuidValue itemId) =>
+      caller.callServerEndpoint<void>(
+        'aiOrganizing',
+        'reprocess',
+        {'itemId': itemId},
+      );
+
+  _ida.Future<_iq5krdy3.AiSuggestion> accept(_isc.UuidValue suggestionId) =>
+      caller.callServerEndpoint<_iq5krdy3.AiSuggestion>(
+        'aiOrganizing',
+        'accept',
+        {'suggestionId': suggestionId},
+      );
+
+  _ida.Future<_iq5krdy3.AiSuggestion> reject(_isc.UuidValue suggestionId) =>
+      caller.callServerEndpoint<_iq5krdy3.AiSuggestion>(
+        'aiOrganizing',
+        'reject',
+        {'suggestionId': suggestionId},
+      );
+}
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -715,6 +768,7 @@ class Client extends _isc.ServerpodClientShared {
              disconnectStreamsOnLostInternetConnection,
          httpClientOverride: httpClientOverride,
        ) {
+    aiOrganizing = EndpointAiOrganizing(this);
     emailIdp = EndpointEmailIdp(this);
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
@@ -726,6 +780,8 @@ class Client extends _isc.ServerpodClientShared {
     profile = EndpointProfile(this);
     modules = Modules(this);
   }
+
+  late final EndpointAiOrganizing aiOrganizing;
 
   late final EndpointEmailIdp emailIdp;
 
@@ -749,6 +805,7 @@ class Client extends _isc.ServerpodClientShared {
 
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
+    'aiOrganizing': aiOrganizing,
     'emailIdp': emailIdp,
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,

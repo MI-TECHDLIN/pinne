@@ -1,0 +1,11 @@
+### The owner's privacy control. Absence means the default: enabled.
+class: AiPreference
+table: ai_preference
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  enabled: bool, default=true
+indexes:
+  ai_preference_owner_unique:
+    fields: ownerId
+    unique: true

@@ -1,0 +1,12 @@
+### Per-owner calls of the remote provider. Date keys are UTC YYYY-MM-DD.
+class: AiDailyUsage
+table: ai_daily_usage
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  dateKey: String
+  requestCount: int, default=0
+indexes:
+  ai_daily_usage_owner_date_unique:
+    fields: ownerId, dateKey
+    unique: true

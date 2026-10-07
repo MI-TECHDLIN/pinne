@@ -1,0 +1,6 @@
+enum: AiProcessingState
+serialized: byName
+values:
+  - queued
+  - processing
+  - completed

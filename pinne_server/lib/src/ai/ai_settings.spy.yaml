@@ -1,0 +1,5 @@
+### Client-facing settings without a client-supplied owner id.
+class: AiSettings
+fields:
+  enabled: bool
+  disclosure: String

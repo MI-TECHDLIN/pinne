@@ -1,0 +1,6 @@
+enum: AiSuggestionKind
+serialized: byName
+values:
+  - collection
+  - tag
+  - summary

@@ -1,0 +1,21 @@
+### Durable idempotency record for the at-least-once future call.
+class: AiOrganizeTask
+table: ai_organize_task
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  itemId: UuidValue, relation(parent=item, onDelete=Cascade)
+  state: AiProcessingState, default=queued
+  requestedVersion: int, default=1
+  processedVersion: int, default=0
+  dailySlotClaimed: bool, default=false
+  quotaDateKey: String?
+  claimedAt: DateTime?
+  completedAt: DateTime?
+  provider: String?
+indexes:
+  ai_organize_task_item_unique:
+    fields: itemId
+    unique: true
+  ai_organize_task_owner_state_idx:
+    fields: ownerId, state

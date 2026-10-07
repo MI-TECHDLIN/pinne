@@ -2,7 +2,8 @@
 
 Saved-content review app (spec: chapters 02-05 of the captain's "idea synopsis"
 doc; it is not in this repo). Fully Serverpod 4 backend plus a Flutter app.
-Claude is the planned AI provider. Run steps and commands are in `README.md`.
+Gemini is the AI organizing provider; its verified model, privacy terms and
+fallback behavior are in `docs/ai.md`. Run steps and commands are in `README.md`.
 
 ## Stack
 

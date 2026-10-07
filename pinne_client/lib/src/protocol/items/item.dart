@@ -11,6 +11,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import '../common/assignment_origin.dart' as _i12d5boj;
 import '../items/access_state.dart' as _idll96tf;
 import '../items/content_type.dart' as _ic14w5wg;
 import '../items/enrichment_state.dart' as _iib6h77f;
@@ -33,6 +34,9 @@ abstract class Item
     this.noteText,
     _ic14w5wg.ContentType? contentType,
     this.intention,
+    this.summary,
+    this.summaryOrigin,
+    bool? summaryManuallyLocked,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
@@ -41,6 +45,7 @@ abstract class Item
     int? revision,
   }) : sourcePlatform = sourcePlatform ?? _ixm5zqtz.SourcePlatform.web,
        contentType = contentType ?? _ic14w5wg.ContentType.other,
+       summaryManuallyLocked = summaryManuallyLocked ?? false,
        priority = priority ?? 0,
        lifecycle = lifecycle ?? _i6i14d93.ItemLifecycle.active,
        savedAt = savedAt ?? DateTime.now(),
@@ -60,6 +65,9 @@ abstract class Item
     String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
+    String? summary,
+    _i12d5boj.AssignmentOrigin? summaryOrigin,
+    bool? summaryManuallyLocked,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
@@ -97,6 +105,17 @@ abstract class Item
               (jsonSerialization['contentType'] as String),
             ),
       intention: jsonSerialization['intention'] as String?,
+      summary: jsonSerialization['summary'] as String?,
+      summaryOrigin: jsonSerialization['summaryOrigin'] == null
+          ? null
+          : _i12d5boj.AssignmentOrigin.fromJson(
+              (jsonSerialization['summaryOrigin'] as String),
+            ),
+      summaryManuallyLocked: jsonSerialization['summaryManuallyLocked'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(
+              jsonSerialization['summaryManuallyLocked'],
+            ),
       priority: jsonSerialization['priority'] as int?,
       lifecycle: jsonSerialization['lifecycle'] == null
           ? null
@@ -154,6 +173,13 @@ abstract class Item
   /// The user's own note on why they saved this item.
   String? intention;
 
+  /// Accepted AI summary. It never replaces text the user has locked.
+  String? summary;
+
+  _i12d5boj.AssignmentOrigin? summaryOrigin;
+
+  bool summaryManuallyLocked;
+
   int priority;
 
   _i6i14d93.ItemLifecycle lifecycle;
@@ -184,6 +210,9 @@ abstract class Item
     String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
+    String? summary,
+    _i12d5boj.AssignmentOrigin? summaryOrigin,
+    bool? summaryManuallyLocked,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
@@ -206,6 +235,9 @@ abstract class Item
       if (noteText != null) 'noteText': noteText,
       'contentType': contentType.toJson(),
       if (intention != null) 'intention': intention,
+      if (summary != null) 'summary': summary,
+      if (summaryOrigin != null) 'summaryOrigin': summaryOrigin?.toJson(),
+      'summaryManuallyLocked': summaryManuallyLocked,
       'priority': priority,
       'lifecycle': lifecycle.toJson(),
       'savedAt': savedAt.toJson(),
@@ -230,6 +262,9 @@ abstract class Item
       if (noteText != null) 'noteText': noteText,
       'contentType': contentType.toJson(),
       if (intention != null) 'intention': intention,
+      if (summary != null) 'summary': summary,
+      if (summaryOrigin != null) 'summaryOrigin': summaryOrigin?.toJson(),
+      'summaryManuallyLocked': summaryManuallyLocked,
       'priority': priority,
       'lifecycle': lifecycle.toJson(),
       'savedAt': savedAt.toJson(),
@@ -260,6 +295,9 @@ class _ItemImpl extends Item {
     String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
+    String? summary,
+    _i12d5boj.AssignmentOrigin? summaryOrigin,
+    bool? summaryManuallyLocked,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
@@ -278,6 +316,9 @@ class _ItemImpl extends Item {
          noteText: noteText,
          contentType: contentType,
          intention: intention,
+         summary: summary,
+         summaryOrigin: summaryOrigin,
+         summaryManuallyLocked: summaryManuallyLocked,
          priority: priority,
          lifecycle: lifecycle,
          savedAt: savedAt,
@@ -302,6 +343,9 @@ class _ItemImpl extends Item {
     Object? noteText = _Undefined,
     _ic14w5wg.ContentType? contentType,
     Object? intention = _Undefined,
+    Object? summary = _Undefined,
+    Object? summaryOrigin = _Undefined,
+    bool? summaryManuallyLocked,
     int? priority,
     _i6i14d93.ItemLifecycle? lifecycle,
     DateTime? savedAt,
@@ -323,6 +367,12 @@ class _ItemImpl extends Item {
       noteText: noteText is String? ? noteText : this.noteText,
       contentType: contentType ?? this.contentType,
       intention: intention is String? ? intention : this.intention,
+      summary: summary is String? ? summary : this.summary,
+      summaryOrigin: summaryOrigin is _i12d5boj.AssignmentOrigin?
+          ? summaryOrigin
+          : this.summaryOrigin,
+      summaryManuallyLocked:
+          summaryManuallyLocked ?? this.summaryManuallyLocked,
       priority: priority ?? this.priority,
       lifecycle: lifecycle ?? this.lifecycle,
       savedAt: savedAt ?? this.savedAt,

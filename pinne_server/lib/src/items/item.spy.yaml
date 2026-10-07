@@ -23,6 +23,10 @@ fields:
   contentType: ContentType, default=other
   ### The user's own note on why they saved this item.
   intention: String?
+  ### Accepted AI summary. It never replaces text the user has locked.
+  summary: String?
+  summaryOrigin: AssignmentOrigin?
+  summaryManuallyLocked: bool, default=false
   priority: int, default=0
   lifecycle: ItemLifecycle, default=active
   ### When the user first saved it, on their device. Never moved by a later
