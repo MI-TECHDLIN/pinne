@@ -2,7 +2,7 @@
   "about": "Still AI art of the Ribbon Spirit. Prompts, seeds and licences: docs/ai-art/README.md. Not used by any screen yet.",
   "model": "black-forest-labs/FLUX.2-klein-4B (distilled, 4 steps, guidance 1.0), Apache-2.0",
   "route": "Hugging Face Space black-forest-labs/FLUX.2-klein-4B, Gradio API /infer",
-  "cutout": "rembg 2.0.85 + isnet-general-use, local CPU",
+  "cutout": "rembg 2.0.85, local CPU: isnet-general-use for the master, silueta + luminance hole key for the moods",
   "assets": [
     {
       "file": "ribbon_spirit_master.webp",
@@ -20,6 +20,65 @@
       "size": [567, 717],
       "background": "transparent",
       "usable": true
+    },
+    {
+      "file": "ribbon_spirit_idle.webp",
+      "piece": "mood: idle",
+      "generation": "mood-idle",
+      "seed": 410011,
+      "reference": "ribbon_spirit_master.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true,
+      "note": "right eye sits on the inner edge"
+    },
+    {
+      "file": "cutout/ribbon_spirit_idle.webp",
+      "piece": "mood: idle cut-out",
+      "source": "ribbon_spirit_idle.webp",
+      "size": [571, 706],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
+    },
+    {
+      "file": "ribbon_spirit_happy.webp",
+      "piece": "mood: happy",
+      "generation": "mood-happy-3",
+      "seed": 410014,
+      "reference": "ribbon_spirit_idle.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true,
+      "note": "mild: idle plus sparkles"
+    },
+    {
+      "file": "cutout/ribbon_spirit_happy.webp",
+      "piece": "mood: happy cut-out",
+      "source": "ribbon_spirit_happy.webp",
+      "size": [656, 684],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
+    },
+    {
+      "file": "ribbon_spirit_sleepy.webp",
+      "piece": "mood: sleepy",
+      "generation": "mood-sleepy-2",
+      "seed": 410016,
+      "reference": "ribbon_spirit_idle.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true
+    },
+    {
+      "file": "cutout/ribbon_spirit_sleepy.webp",
+      "piece": "mood: sleepy cut-out",
+      "source": "ribbon_spirit_sleepy.webp",
+      "size": [686, 769],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
     }
   ]
 }
