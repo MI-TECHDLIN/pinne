@@ -11,15 +11,39 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:pinne_server/src/generated/calendar/calendar_connection_view.dart'
+    as _i0xb4k4o;
+import 'package:pinne_server/src/generated/calendar/calendar_route_status.dart'
+    as _ia8eyaw8;
+import 'package:pinne_server/src/generated/calendar/calendar_selection_choice.dart'
+    as _i396ixoa;
 import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
+import 'package:pinne_server/src/generated/planning/calendar_write.dart'
+    as _ijx3xba9;
+import 'package:pinne_server/src/generated/planning/calendar_write_result.dart'
+    as _iaiz9j0d;
+import 'package:pinne_server/src/generated/planning/session_view.dart'
+    as _ie9b2ryt;
 import 'package:serverpod/protocol.dart' as _isp;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import 'calendar/calendar_connection.dart' as _iqtchur3;
+import 'calendar/calendar_connection_view.dart' as _ijwz5xp0;
+import 'calendar/calendar_event_link.dart' as _ily35bfr;
+import 'calendar/calendar_permission.dart' as _ika1a9r5;
+import 'calendar/calendar_route.dart' as _iq08ggdy;
+import 'calendar/calendar_route_exception.dart' as _igxvbit5;
+import 'calendar/calendar_route_status.dart' as _i7yozl4b;
+import 'calendar/calendar_selection.dart' as _i8v3said;
+import 'calendar/calendar_selection_choice.dart' as _intkkx3w;
+import 'calendar/device_calendar_info.dart' as _ihue00wg;
+import 'calendar/device_calendar_report.dart' as _i4awacjs;
+import 'calendar/event_sync_state.dart' as _i1s71wt9;
 import 'collections/collection.dart' as _iqfgge80;
 import 'collections/collection_draft.dart' as _ivby8odo;
 import 'collections/item_collection.dart' as _ingnmqw7;
@@ -37,6 +61,32 @@ import 'items/item.dart' as _iapziv9t;
 import 'items/item_draft.dart' as _ip8cn60r;
 import 'items/item_lifecycle.dart' as _iveh3zib;
 import 'items/source_platform.dart' as _i072xpry;
+import 'planning/approval_mode.dart' as _id2awq13;
+import 'planning/availability_snapshot.dart' as _i1u9wvnf;
+import 'planning/busy_interval.dart' as _imvtil8c;
+import 'planning/calendar_coverage.dart' as _iadysn2t;
+import 'planning/calendar_write.dart' as _i6oluk1v;
+import 'planning/calendar_write_action.dart' as _iyd6g2oi;
+import 'planning/calendar_write_outcome.dart' as _i3u14n80;
+import 'planning/calendar_write_result.dart' as _i5mmfzwl;
+import 'planning/coverage_state.dart' as _il89vgny;
+import 'planning/plan_commit_request.dart' as _ilaph13t;
+import 'planning/plan_commit_result.dart' as _ixc6g37a;
+import 'planning/plan_horizon.dart' as _ititmozf;
+import 'planning/plan_proposal.dart' as _iv13hf9x;
+import 'planning/plan_request.dart' as _idh5khlu;
+import 'planning/planner_preferences.dart' as _iw1c6zow;
+import 'planning/planner_preferences_draft.dart' as _i03liexf;
+import 'planning/planning_error_code.dart' as _ityq5odj;
+import 'planning/planning_exception.dart' as _iehth582;
+import 'planning/review_plan.dart' as _icv3lfjf;
+import 'planning/review_session.dart' as _indyheef;
+import 'planning/session_change_result.dart' as _in0sx9zc;
+import 'planning/session_item.dart' as _i716ymk1;
+import 'planning/session_item_view.dart' as _i3pyieja;
+import 'planning/session_move_request.dart' as _i91809id;
+import 'planning/session_status.dart' as _izbi9tiy;
+import 'planning/session_view.dart' as _iyjcmdi4;
 import 'profile/pinne_profile.dart' as _ijguvy1g;
 import 'profile/profile_draft.dart' as _ij8joe28;
 import 'reminders/reminder_rule.dart' as _i6ljcdoh;
@@ -45,6 +95,18 @@ import 'reviews/review_event.dart' as _i0pv2k4n;
 import 'reviews/review_event_type.dart' as _i5mz8id3;
 import 'tags/item_tag.dart' as _iv0vmssg;
 import 'tags/tag.dart' as _iopagaq8;
+export 'calendar/calendar_connection.dart';
+export 'calendar/calendar_connection_view.dart';
+export 'calendar/calendar_event_link.dart';
+export 'calendar/calendar_permission.dart';
+export 'calendar/calendar_route.dart';
+export 'calendar/calendar_route_exception.dart';
+export 'calendar/calendar_route_status.dart';
+export 'calendar/calendar_selection.dart';
+export 'calendar/calendar_selection_choice.dart';
+export 'calendar/device_calendar_info.dart';
+export 'calendar/device_calendar_report.dart';
+export 'calendar/event_sync_state.dart';
 export 'collections/collection.dart';
 export 'collections/collection_draft.dart';
 export 'collections/item_collection.dart';
@@ -62,6 +124,32 @@ export 'items/item.dart';
 export 'items/item_draft.dart';
 export 'items/item_lifecycle.dart';
 export 'items/source_platform.dart';
+export 'planning/approval_mode.dart';
+export 'planning/availability_snapshot.dart';
+export 'planning/busy_interval.dart';
+export 'planning/calendar_coverage.dart';
+export 'planning/calendar_write.dart';
+export 'planning/calendar_write_action.dart';
+export 'planning/calendar_write_outcome.dart';
+export 'planning/calendar_write_result.dart';
+export 'planning/coverage_state.dart';
+export 'planning/plan_commit_request.dart';
+export 'planning/plan_commit_result.dart';
+export 'planning/plan_horizon.dart';
+export 'planning/plan_proposal.dart';
+export 'planning/plan_request.dart';
+export 'planning/planner_preferences.dart';
+export 'planning/planner_preferences_draft.dart';
+export 'planning/planning_error_code.dart';
+export 'planning/planning_exception.dart';
+export 'planning/review_plan.dart';
+export 'planning/review_session.dart';
+export 'planning/session_change_result.dart';
+export 'planning/session_item.dart';
+export 'planning/session_item_view.dart';
+export 'planning/session_move_request.dart';
+export 'planning/session_status.dart';
+export 'planning/session_view.dart';
 export 'profile/pinne_profile.dart';
 export 'profile/profile_draft.dart';
 export 'reminders/reminder_rule.dart';
@@ -79,6 +167,393 @@ class Protocol extends _is.DatabaseSerializationManager {
   static final Protocol _instance = Protocol._().._registerHostProtocols();
 
   static List<_isp.TableDefinition> get targetTableDefinitions => [
+    _isp.TableDefinition(
+      name: 'calendar_connection',
+      dartName: 'CalendarConnection',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'route',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:CalendarRoute',
+        ),
+        _isp.ColumnDefinition(
+          name: 'accountKey',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'label',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'deviceId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'permission',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:CalendarPermission',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tokenSecretRef',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastCheckedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'calendar_connection_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'calendar_connection_owner_account_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'route',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'accountKey',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'calendar_event_link',
+      dartName: 'CalendarEventLink',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'sessionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'selectionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'deviceId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'eventUid',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'externalEventId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'providerRevision',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'syncState',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:EventSyncState',
+        ),
+        _isp.ColumnDefinition(
+          name: 'operationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastError',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'calendar_event_link_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'calendar_event_link_fk_1',
+          columns: ['sessionId'],
+          referenceTable: 'review_session',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'calendar_event_link_fk_2',
+          columns: ['selectionId'],
+          referenceTable: 'calendar_selection',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'calendar_event_link_session_selection_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sessionId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'selectionId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'calendar_event_link_owner_device_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'deviceId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'syncState',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'calendar_selection',
+      dartName: 'CalendarSelection',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'connectionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'externalCalendarId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'deviceId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'name',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'accountName',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'readOnly',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _isp.ColumnDefinition(
+          name: 'useForConflicts',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'useForWrites',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'calendar_selection_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'calendar_selection_fk_1',
+          columns: ['connectionId'],
+          referenceTable: 'calendar_connection',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'calendar_selection_connection_calendar_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'connectionId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'externalCalendarId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'calendar_selection_owner_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _isp.TableDefinition(
       name: 'capture_receipt',
       dartName: 'CaptureReceipt',
@@ -811,6 +1286,115 @@ class Protocol extends _is.DatabaseSerializationManager {
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'planner_preferences',
+      dartName: 'PlannerPreferences',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'horizon',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:PlanHorizon',
+        ),
+        _isp.ColumnDefinition(
+          name: 'weekdays',
+          columnType: _isp.ColumnType.json,
+          isNullable: false,
+          dartType: 'List<int>',
+        ),
+        _isp.ColumnDefinition(
+          name: 'windowStartMinute',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'windowEndMinute',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'sessionMinutes',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'maxSessions',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'bufferMinutes',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'minLeadMinutes',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'timezone',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'approvalMode',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:ApprovalMode',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'planner_preferences_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'planner_preferences_owner_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'reminder_rule',
       dartName: 'ReminderRule',
       schema: 'public',
@@ -1044,6 +1628,383 @@ class Protocol extends _is.DatabaseSerializationManager {
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'review_plan',
+      dartName: 'ReviewPlan',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'horizonStart',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'horizonEnd',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'timezone',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'coverage',
+          columnType: _isp.ColumnType.json,
+          isNullable: false,
+          dartType: 'List<protocol:CalendarCoverage>',
+        ),
+        _isp.ColumnDefinition(
+          name: 'availabilityVerified',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _isp.ColumnDefinition(
+          name: 'commitOperationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'committedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'review_plan_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'review_plan_owner_created_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'review_plan_owner_operation_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'commitOperationId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'review_session',
+      dartName: 'ReviewSession',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'planId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'startAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'endAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'timezone',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:SessionStatus',
+        ),
+        _isp.ColumnDefinition(
+          name: 'schedulingMode',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:ApprovalMode',
+        ),
+        _isp.ColumnDefinition(
+          name: 'availabilityVerified',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _isp.ColumnDefinition(
+          name: 'planRevision',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '1',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastOperationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'review_session_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'review_session_fk_1',
+          columns: ['planId'],
+          referenceTable: 'review_plan',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'review_session_owner_start_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'startAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'review_session_plan_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'planId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'session_item',
+      dartName: 'SessionItem',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'sessionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'itemId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'position',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'plannedMinutes',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'estimated',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'session_item_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'session_item_fk_1',
+          columns: ['sessionId'],
+          referenceTable: 'review_session',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'session_item_fk_2',
+          columns: ['itemId'],
+          referenceTable: 'item',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'session_item_session_position_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sessionId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'position',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'session_item_session_item_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sessionId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'itemId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'tag',
       dartName: 'Tag',
       schema: 'public',
@@ -1140,6 +2101,42 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
 
+    if (t == _iqtchur3.CalendarConnection) {
+      return _iqtchur3.CalendarConnection.fromJson(data) as T;
+    }
+    if (t == _ijwz5xp0.CalendarConnectionView) {
+      return _ijwz5xp0.CalendarConnectionView.fromJson(data) as T;
+    }
+    if (t == _ily35bfr.CalendarEventLink) {
+      return _ily35bfr.CalendarEventLink.fromJson(data) as T;
+    }
+    if (t == _ika1a9r5.CalendarPermission) {
+      return _ika1a9r5.CalendarPermission.fromJson(data) as T;
+    }
+    if (t == _iq08ggdy.CalendarRoute) {
+      return _iq08ggdy.CalendarRoute.fromJson(data) as T;
+    }
+    if (t == _igxvbit5.CalendarRouteException) {
+      return _igxvbit5.CalendarRouteException.fromJson(data) as T;
+    }
+    if (t == _i7yozl4b.CalendarRouteStatus) {
+      return _i7yozl4b.CalendarRouteStatus.fromJson(data) as T;
+    }
+    if (t == _i8v3said.CalendarSelection) {
+      return _i8v3said.CalendarSelection.fromJson(data) as T;
+    }
+    if (t == _intkkx3w.CalendarSelectionChoice) {
+      return _intkkx3w.CalendarSelectionChoice.fromJson(data) as T;
+    }
+    if (t == _ihue00wg.DeviceCalendarInfo) {
+      return _ihue00wg.DeviceCalendarInfo.fromJson(data) as T;
+    }
+    if (t == _i4awacjs.DeviceCalendarReport) {
+      return _i4awacjs.DeviceCalendarReport.fromJson(data) as T;
+    }
+    if (t == _i1s71wt9.EventSyncState) {
+      return _i1s71wt9.EventSyncState.fromJson(data) as T;
+    }
     if (t == _iqfgge80.Collection) {
       return _iqfgge80.Collection.fromJson(data) as T;
     }
@@ -1191,6 +2188,84 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _i072xpry.SourcePlatform) {
       return _i072xpry.SourcePlatform.fromJson(data) as T;
     }
+    if (t == _id2awq13.ApprovalMode) {
+      return _id2awq13.ApprovalMode.fromJson(data) as T;
+    }
+    if (t == _i1u9wvnf.AvailabilitySnapshot) {
+      return _i1u9wvnf.AvailabilitySnapshot.fromJson(data) as T;
+    }
+    if (t == _imvtil8c.BusyInterval) {
+      return _imvtil8c.BusyInterval.fromJson(data) as T;
+    }
+    if (t == _iadysn2t.CalendarCoverage) {
+      return _iadysn2t.CalendarCoverage.fromJson(data) as T;
+    }
+    if (t == _i6oluk1v.CalendarWrite) {
+      return _i6oluk1v.CalendarWrite.fromJson(data) as T;
+    }
+    if (t == _iyd6g2oi.CalendarWriteAction) {
+      return _iyd6g2oi.CalendarWriteAction.fromJson(data) as T;
+    }
+    if (t == _i3u14n80.CalendarWriteOutcome) {
+      return _i3u14n80.CalendarWriteOutcome.fromJson(data) as T;
+    }
+    if (t == _i5mmfzwl.CalendarWriteResult) {
+      return _i5mmfzwl.CalendarWriteResult.fromJson(data) as T;
+    }
+    if (t == _il89vgny.CoverageState) {
+      return _il89vgny.CoverageState.fromJson(data) as T;
+    }
+    if (t == _ilaph13t.PlanCommitRequest) {
+      return _ilaph13t.PlanCommitRequest.fromJson(data) as T;
+    }
+    if (t == _ixc6g37a.PlanCommitResult) {
+      return _ixc6g37a.PlanCommitResult.fromJson(data) as T;
+    }
+    if (t == _ititmozf.PlanHorizon) {
+      return _ititmozf.PlanHorizon.fromJson(data) as T;
+    }
+    if (t == _iv13hf9x.PlanProposal) {
+      return _iv13hf9x.PlanProposal.fromJson(data) as T;
+    }
+    if (t == _idh5khlu.PlanRequest) {
+      return _idh5khlu.PlanRequest.fromJson(data) as T;
+    }
+    if (t == _iw1c6zow.PlannerPreferences) {
+      return _iw1c6zow.PlannerPreferences.fromJson(data) as T;
+    }
+    if (t == _i03liexf.PlannerPreferencesDraft) {
+      return _i03liexf.PlannerPreferencesDraft.fromJson(data) as T;
+    }
+    if (t == _ityq5odj.PlanningErrorCode) {
+      return _ityq5odj.PlanningErrorCode.fromJson(data) as T;
+    }
+    if (t == _iehth582.PlanningException) {
+      return _iehth582.PlanningException.fromJson(data) as T;
+    }
+    if (t == _icv3lfjf.ReviewPlan) {
+      return _icv3lfjf.ReviewPlan.fromJson(data) as T;
+    }
+    if (t == _indyheef.ReviewSession) {
+      return _indyheef.ReviewSession.fromJson(data) as T;
+    }
+    if (t == _in0sx9zc.SessionChangeResult) {
+      return _in0sx9zc.SessionChangeResult.fromJson(data) as T;
+    }
+    if (t == _i716ymk1.SessionItem) {
+      return _i716ymk1.SessionItem.fromJson(data) as T;
+    }
+    if (t == _i3pyieja.SessionItemView) {
+      return _i3pyieja.SessionItemView.fromJson(data) as T;
+    }
+    if (t == _i91809id.SessionMoveRequest) {
+      return _i91809id.SessionMoveRequest.fromJson(data) as T;
+    }
+    if (t == _izbi9tiy.SessionStatus) {
+      return _izbi9tiy.SessionStatus.fromJson(data) as T;
+    }
+    if (t == _iyjcmdi4.SessionView) {
+      return _iyjcmdi4.SessionView.fromJson(data) as T;
+    }
     if (t == _ijguvy1g.PinneProfile) {
       return _ijguvy1g.PinneProfile.fromJson(data) as T;
     }
@@ -1214,6 +2289,64 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _iopagaq8.Tag) {
       return _iopagaq8.Tag.fromJson(data) as T;
+    }
+    if (t == _is.getType<_iqtchur3.CalendarConnection?>()) {
+      return (data != null ? _iqtchur3.CalendarConnection.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ijwz5xp0.CalendarConnectionView?>()) {
+      return (data != null
+              ? _ijwz5xp0.CalendarConnectionView.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_ily35bfr.CalendarEventLink?>()) {
+      return (data != null ? _ily35bfr.CalendarEventLink.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ika1a9r5.CalendarPermission?>()) {
+      return (data != null ? _ika1a9r5.CalendarPermission.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iq08ggdy.CalendarRoute?>()) {
+      return (data != null ? _iq08ggdy.CalendarRoute.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_igxvbit5.CalendarRouteException?>()) {
+      return (data != null
+              ? _igxvbit5.CalendarRouteException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i7yozl4b.CalendarRouteStatus?>()) {
+      return (data != null
+              ? _i7yozl4b.CalendarRouteStatus.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i8v3said.CalendarSelection?>()) {
+      return (data != null ? _i8v3said.CalendarSelection.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_intkkx3w.CalendarSelectionChoice?>()) {
+      return (data != null
+              ? _intkkx3w.CalendarSelectionChoice.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_ihue00wg.DeviceCalendarInfo?>()) {
+      return (data != null ? _ihue00wg.DeviceCalendarInfo.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i4awacjs.DeviceCalendarReport?>()) {
+      return (data != null
+              ? _i4awacjs.DeviceCalendarReport.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i1s71wt9.EventSyncState?>()) {
+      return (data != null ? _i1s71wt9.EventSyncState.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_iqfgge80.Collection?>()) {
       return (data != null ? _iqfgge80.Collection.fromJson(data) : null) as T;
@@ -1280,6 +2413,114 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null ? _i072xpry.SourcePlatform.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_id2awq13.ApprovalMode?>()) {
+      return (data != null ? _id2awq13.ApprovalMode.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i1u9wvnf.AvailabilitySnapshot?>()) {
+      return (data != null
+              ? _i1u9wvnf.AvailabilitySnapshot.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_imvtil8c.BusyInterval?>()) {
+      return (data != null ? _imvtil8c.BusyInterval.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iadysn2t.CalendarCoverage?>()) {
+      return (data != null ? _iadysn2t.CalendarCoverage.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i6oluk1v.CalendarWrite?>()) {
+      return (data != null ? _i6oluk1v.CalendarWrite.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iyd6g2oi.CalendarWriteAction?>()) {
+      return (data != null
+              ? _iyd6g2oi.CalendarWriteAction.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i3u14n80.CalendarWriteOutcome?>()) {
+      return (data != null
+              ? _i3u14n80.CalendarWriteOutcome.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i5mmfzwl.CalendarWriteResult?>()) {
+      return (data != null
+              ? _i5mmfzwl.CalendarWriteResult.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_il89vgny.CoverageState?>()) {
+      return (data != null ? _il89vgny.CoverageState.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ilaph13t.PlanCommitRequest?>()) {
+      return (data != null ? _ilaph13t.PlanCommitRequest.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ixc6g37a.PlanCommitResult?>()) {
+      return (data != null ? _ixc6g37a.PlanCommitResult.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ititmozf.PlanHorizon?>()) {
+      return (data != null ? _ititmozf.PlanHorizon.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iv13hf9x.PlanProposal?>()) {
+      return (data != null ? _iv13hf9x.PlanProposal.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_idh5khlu.PlanRequest?>()) {
+      return (data != null ? _idh5khlu.PlanRequest.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iw1c6zow.PlannerPreferences?>()) {
+      return (data != null ? _iw1c6zow.PlannerPreferences.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i03liexf.PlannerPreferencesDraft?>()) {
+      return (data != null
+              ? _i03liexf.PlannerPreferencesDraft.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_ityq5odj.PlanningErrorCode?>()) {
+      return (data != null ? _ityq5odj.PlanningErrorCode.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iehth582.PlanningException?>()) {
+      return (data != null ? _iehth582.PlanningException.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_icv3lfjf.ReviewPlan?>()) {
+      return (data != null ? _icv3lfjf.ReviewPlan.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_indyheef.ReviewSession?>()) {
+      return (data != null ? _indyheef.ReviewSession.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_in0sx9zc.SessionChangeResult?>()) {
+      return (data != null
+              ? _in0sx9zc.SessionChangeResult.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i716ymk1.SessionItem?>()) {
+      return (data != null ? _i716ymk1.SessionItem.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i3pyieja.SessionItemView?>()) {
+      return (data != null ? _i3pyieja.SessionItemView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i91809id.SessionMoveRequest?>()) {
+      return (data != null ? _i91809id.SessionMoveRequest.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_izbi9tiy.SessionStatus?>()) {
+      return (data != null ? _izbi9tiy.SessionStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iyjcmdi4.SessionView?>()) {
+      return (data != null ? _iyjcmdi4.SessionView.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_ijguvy1g.PinneProfile?>()) {
       return (data != null ? _ijguvy1g.PinneProfile.fromJson(data) : null) as T;
     }
@@ -1306,6 +2547,18 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_iopagaq8.Tag?>()) {
       return (data != null ? _iopagaq8.Tag.fromJson(data) : null) as T;
     }
+    if (t == List<_i8v3said.CalendarSelection>) {
+      return (data as List)
+              .map((e) => deserialize<_i8v3said.CalendarSelection>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ihue00wg.DeviceCalendarInfo>) {
+      return (data as List)
+              .map((e) => deserialize<_ihue00wg.DeviceCalendarInfo>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_is.UuidValue>) {
       return (data as List).map((e) => deserialize<_is.UuidValue>(e)).toList()
           as T;
@@ -1316,6 +2569,45 @@ class Protocol extends _is.DatabaseSerializationManager {
                     .map((e) => deserialize<_is.UuidValue>(e))
                     .toList()
               : null)
+          as T;
+    }
+    if (t == List<_imvtil8c.BusyInterval>) {
+      return (data as List)
+              .map((e) => deserialize<_imvtil8c.BusyInterval>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i1u9wvnf.AvailabilitySnapshot>) {
+      return (data as List)
+              .map((e) => deserialize<_i1u9wvnf.AvailabilitySnapshot>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iyjcmdi4.SessionView>) {
+      return (data as List)
+              .map((e) => deserialize<_iyjcmdi4.SessionView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i6oluk1v.CalendarWrite>) {
+      return (data as List)
+              .map((e) => deserialize<_i6oluk1v.CalendarWrite>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<int>) {
+      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
+    if (t == List<_iadysn2t.CalendarCoverage>) {
+      return (data as List)
+              .map((e) => deserialize<_iadysn2t.CalendarCoverage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i3pyieja.SessionItemView>) {
+      return (data as List)
+              .map((e) => deserialize<_i3pyieja.SessionItemView>(e))
+              .toList()
           as T;
     }
     if (t == List<_iswi3gl6.ReminderWindow>) {
@@ -1332,8 +2624,23 @@ class Protocol extends _is.DatabaseSerializationManager {
               : null)
           as T;
     }
-    if (t == List<int>) {
-      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    if (t == List<_ia8eyaw8.CalendarRouteStatus>) {
+      return (data as List)
+              .map((e) => deserialize<_ia8eyaw8.CalendarRouteStatus>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i0xb4k4o.CalendarConnectionView>) {
+      return (data as List)
+              .map((e) => deserialize<_i0xb4k4o.CalendarConnectionView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i396ixoa.CalendarSelectionChoice>) {
+      return (data as List)
+              .map((e) => deserialize<_i396ixoa.CalendarSelectionChoice>(e))
+              .toList()
+          as T;
     }
     if (t == List<_is0jaro3.Collection>) {
       return (data as List)
@@ -1343,6 +2650,28 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == List<_id0tr7gx.Item>) {
       return (data as List).map((e) => deserialize<_id0tr7gx.Item>(e)).toList()
+          as T;
+    }
+    if (t == List<_ie9b2ryt.SessionView>) {
+      return (data as List)
+              .map((e) => deserialize<_ie9b2ryt.SessionView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ijx3xba9.CalendarWrite>) {
+      return (data as List)
+              .map((e) => deserialize<_ijx3xba9.CalendarWrite>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iaiz9j0d.CalendarWriteResult>) {
+      return (data as List)
+              .map((e) => deserialize<_iaiz9j0d.CalendarWriteResult>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_is.UuidValue>) {
+      return (data as List).map((e) => deserialize<_is.UuidValue>(e)).toList()
           as T;
     }
     try {
@@ -1359,6 +2688,18 @@ class Protocol extends _is.DatabaseSerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _iqtchur3.CalendarConnection => 'CalendarConnection',
+      _ijwz5xp0.CalendarConnectionView => 'CalendarConnectionView',
+      _ily35bfr.CalendarEventLink => 'CalendarEventLink',
+      _ika1a9r5.CalendarPermission => 'CalendarPermission',
+      _iq08ggdy.CalendarRoute => 'CalendarRoute',
+      _igxvbit5.CalendarRouteException => 'CalendarRouteException',
+      _i7yozl4b.CalendarRouteStatus => 'CalendarRouteStatus',
+      _i8v3said.CalendarSelection => 'CalendarSelection',
+      _intkkx3w.CalendarSelectionChoice => 'CalendarSelectionChoice',
+      _ihue00wg.DeviceCalendarInfo => 'DeviceCalendarInfo',
+      _i4awacjs.DeviceCalendarReport => 'DeviceCalendarReport',
+      _i1s71wt9.EventSyncState => 'EventSyncState',
       _iqfgge80.Collection => 'Collection',
       _ivby8odo.CollectionDraft => 'CollectionDraft',
       _ingnmqw7.ItemCollection => 'ItemCollection',
@@ -1376,6 +2717,32 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ip8cn60r.ItemDraft => 'ItemDraft',
       _iveh3zib.ItemLifecycle => 'ItemLifecycle',
       _i072xpry.SourcePlatform => 'SourcePlatform',
+      _id2awq13.ApprovalMode => 'ApprovalMode',
+      _i1u9wvnf.AvailabilitySnapshot => 'AvailabilitySnapshot',
+      _imvtil8c.BusyInterval => 'BusyInterval',
+      _iadysn2t.CalendarCoverage => 'CalendarCoverage',
+      _i6oluk1v.CalendarWrite => 'CalendarWrite',
+      _iyd6g2oi.CalendarWriteAction => 'CalendarWriteAction',
+      _i3u14n80.CalendarWriteOutcome => 'CalendarWriteOutcome',
+      _i5mmfzwl.CalendarWriteResult => 'CalendarWriteResult',
+      _il89vgny.CoverageState => 'CoverageState',
+      _ilaph13t.PlanCommitRequest => 'PlanCommitRequest',
+      _ixc6g37a.PlanCommitResult => 'PlanCommitResult',
+      _ititmozf.PlanHorizon => 'PlanHorizon',
+      _iv13hf9x.PlanProposal => 'PlanProposal',
+      _idh5khlu.PlanRequest => 'PlanRequest',
+      _iw1c6zow.PlannerPreferences => 'PlannerPreferences',
+      _i03liexf.PlannerPreferencesDraft => 'PlannerPreferencesDraft',
+      _ityq5odj.PlanningErrorCode => 'PlanningErrorCode',
+      _iehth582.PlanningException => 'PlanningException',
+      _icv3lfjf.ReviewPlan => 'ReviewPlan',
+      _indyheef.ReviewSession => 'ReviewSession',
+      _in0sx9zc.SessionChangeResult => 'SessionChangeResult',
+      _i716ymk1.SessionItem => 'SessionItem',
+      _i3pyieja.SessionItemView => 'SessionItemView',
+      _i91809id.SessionMoveRequest => 'SessionMoveRequest',
+      _izbi9tiy.SessionStatus => 'SessionStatus',
+      _iyjcmdi4.SessionView => 'SessionView',
       _ijguvy1g.PinneProfile => 'PinneProfile',
       _ij8joe28.ProfileDraft => 'ProfileDraft',
       _i6ljcdoh.ReminderRule => 'ReminderRule',
@@ -1398,6 +2765,30 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
 
     switch (data) {
+      case _iqtchur3.CalendarConnection():
+        return 'CalendarConnection';
+      case _ijwz5xp0.CalendarConnectionView():
+        return 'CalendarConnectionView';
+      case _ily35bfr.CalendarEventLink():
+        return 'CalendarEventLink';
+      case _ika1a9r5.CalendarPermission():
+        return 'CalendarPermission';
+      case _iq08ggdy.CalendarRoute():
+        return 'CalendarRoute';
+      case _igxvbit5.CalendarRouteException():
+        return 'CalendarRouteException';
+      case _i7yozl4b.CalendarRouteStatus():
+        return 'CalendarRouteStatus';
+      case _i8v3said.CalendarSelection():
+        return 'CalendarSelection';
+      case _intkkx3w.CalendarSelectionChoice():
+        return 'CalendarSelectionChoice';
+      case _ihue00wg.DeviceCalendarInfo():
+        return 'DeviceCalendarInfo';
+      case _i4awacjs.DeviceCalendarReport():
+        return 'DeviceCalendarReport';
+      case _i1s71wt9.EventSyncState():
+        return 'EventSyncState';
       case _iqfgge80.Collection():
         return 'Collection';
       case _ivby8odo.CollectionDraft():
@@ -1432,6 +2823,58 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'ItemLifecycle';
       case _i072xpry.SourcePlatform():
         return 'SourcePlatform';
+      case _id2awq13.ApprovalMode():
+        return 'ApprovalMode';
+      case _i1u9wvnf.AvailabilitySnapshot():
+        return 'AvailabilitySnapshot';
+      case _imvtil8c.BusyInterval():
+        return 'BusyInterval';
+      case _iadysn2t.CalendarCoverage():
+        return 'CalendarCoverage';
+      case _i6oluk1v.CalendarWrite():
+        return 'CalendarWrite';
+      case _iyd6g2oi.CalendarWriteAction():
+        return 'CalendarWriteAction';
+      case _i3u14n80.CalendarWriteOutcome():
+        return 'CalendarWriteOutcome';
+      case _i5mmfzwl.CalendarWriteResult():
+        return 'CalendarWriteResult';
+      case _il89vgny.CoverageState():
+        return 'CoverageState';
+      case _ilaph13t.PlanCommitRequest():
+        return 'PlanCommitRequest';
+      case _ixc6g37a.PlanCommitResult():
+        return 'PlanCommitResult';
+      case _ititmozf.PlanHorizon():
+        return 'PlanHorizon';
+      case _iv13hf9x.PlanProposal():
+        return 'PlanProposal';
+      case _idh5khlu.PlanRequest():
+        return 'PlanRequest';
+      case _iw1c6zow.PlannerPreferences():
+        return 'PlannerPreferences';
+      case _i03liexf.PlannerPreferencesDraft():
+        return 'PlannerPreferencesDraft';
+      case _ityq5odj.PlanningErrorCode():
+        return 'PlanningErrorCode';
+      case _iehth582.PlanningException():
+        return 'PlanningException';
+      case _icv3lfjf.ReviewPlan():
+        return 'ReviewPlan';
+      case _indyheef.ReviewSession():
+        return 'ReviewSession';
+      case _in0sx9zc.SessionChangeResult():
+        return 'SessionChangeResult';
+      case _i716ymk1.SessionItem():
+        return 'SessionItem';
+      case _i3pyieja.SessionItemView():
+        return 'SessionItemView';
+      case _i91809id.SessionMoveRequest():
+        return 'SessionMoveRequest';
+      case _izbi9tiy.SessionStatus():
+        return 'SessionStatus';
+      case _iyjcmdi4.SessionView():
+        return 'SessionView';
       case _ijguvy1g.PinneProfile():
         return 'PinneProfile';
       case _ij8joe28.ProfileDraft():
@@ -1473,6 +2916,42 @@ class Protocol extends _is.DatabaseSerializationManager {
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'CalendarConnection') {
+      return deserialize<_iqtchur3.CalendarConnection>(data['data']);
+    }
+    if (dataClassName == 'CalendarConnectionView') {
+      return deserialize<_ijwz5xp0.CalendarConnectionView>(data['data']);
+    }
+    if (dataClassName == 'CalendarEventLink') {
+      return deserialize<_ily35bfr.CalendarEventLink>(data['data']);
+    }
+    if (dataClassName == 'CalendarPermission') {
+      return deserialize<_ika1a9r5.CalendarPermission>(data['data']);
+    }
+    if (dataClassName == 'CalendarRoute') {
+      return deserialize<_iq08ggdy.CalendarRoute>(data['data']);
+    }
+    if (dataClassName == 'CalendarRouteException') {
+      return deserialize<_igxvbit5.CalendarRouteException>(data['data']);
+    }
+    if (dataClassName == 'CalendarRouteStatus') {
+      return deserialize<_i7yozl4b.CalendarRouteStatus>(data['data']);
+    }
+    if (dataClassName == 'CalendarSelection') {
+      return deserialize<_i8v3said.CalendarSelection>(data['data']);
+    }
+    if (dataClassName == 'CalendarSelectionChoice') {
+      return deserialize<_intkkx3w.CalendarSelectionChoice>(data['data']);
+    }
+    if (dataClassName == 'DeviceCalendarInfo') {
+      return deserialize<_ihue00wg.DeviceCalendarInfo>(data['data']);
+    }
+    if (dataClassName == 'DeviceCalendarReport') {
+      return deserialize<_i4awacjs.DeviceCalendarReport>(data['data']);
+    }
+    if (dataClassName == 'EventSyncState') {
+      return deserialize<_i1s71wt9.EventSyncState>(data['data']);
     }
     if (dataClassName == 'Collection') {
       return deserialize<_iqfgge80.Collection>(data['data']);
@@ -1524,6 +3003,84 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'SourcePlatform') {
       return deserialize<_i072xpry.SourcePlatform>(data['data']);
+    }
+    if (dataClassName == 'ApprovalMode') {
+      return deserialize<_id2awq13.ApprovalMode>(data['data']);
+    }
+    if (dataClassName == 'AvailabilitySnapshot') {
+      return deserialize<_i1u9wvnf.AvailabilitySnapshot>(data['data']);
+    }
+    if (dataClassName == 'BusyInterval') {
+      return deserialize<_imvtil8c.BusyInterval>(data['data']);
+    }
+    if (dataClassName == 'CalendarCoverage') {
+      return deserialize<_iadysn2t.CalendarCoverage>(data['data']);
+    }
+    if (dataClassName == 'CalendarWrite') {
+      return deserialize<_i6oluk1v.CalendarWrite>(data['data']);
+    }
+    if (dataClassName == 'CalendarWriteAction') {
+      return deserialize<_iyd6g2oi.CalendarWriteAction>(data['data']);
+    }
+    if (dataClassName == 'CalendarWriteOutcome') {
+      return deserialize<_i3u14n80.CalendarWriteOutcome>(data['data']);
+    }
+    if (dataClassName == 'CalendarWriteResult') {
+      return deserialize<_i5mmfzwl.CalendarWriteResult>(data['data']);
+    }
+    if (dataClassName == 'CoverageState') {
+      return deserialize<_il89vgny.CoverageState>(data['data']);
+    }
+    if (dataClassName == 'PlanCommitRequest') {
+      return deserialize<_ilaph13t.PlanCommitRequest>(data['data']);
+    }
+    if (dataClassName == 'PlanCommitResult') {
+      return deserialize<_ixc6g37a.PlanCommitResult>(data['data']);
+    }
+    if (dataClassName == 'PlanHorizon') {
+      return deserialize<_ititmozf.PlanHorizon>(data['data']);
+    }
+    if (dataClassName == 'PlanProposal') {
+      return deserialize<_iv13hf9x.PlanProposal>(data['data']);
+    }
+    if (dataClassName == 'PlanRequest') {
+      return deserialize<_idh5khlu.PlanRequest>(data['data']);
+    }
+    if (dataClassName == 'PlannerPreferences') {
+      return deserialize<_iw1c6zow.PlannerPreferences>(data['data']);
+    }
+    if (dataClassName == 'PlannerPreferencesDraft') {
+      return deserialize<_i03liexf.PlannerPreferencesDraft>(data['data']);
+    }
+    if (dataClassName == 'PlanningErrorCode') {
+      return deserialize<_ityq5odj.PlanningErrorCode>(data['data']);
+    }
+    if (dataClassName == 'PlanningException') {
+      return deserialize<_iehth582.PlanningException>(data['data']);
+    }
+    if (dataClassName == 'ReviewPlan') {
+      return deserialize<_icv3lfjf.ReviewPlan>(data['data']);
+    }
+    if (dataClassName == 'ReviewSession') {
+      return deserialize<_indyheef.ReviewSession>(data['data']);
+    }
+    if (dataClassName == 'SessionChangeResult') {
+      return deserialize<_in0sx9zc.SessionChangeResult>(data['data']);
+    }
+    if (dataClassName == 'SessionItem') {
+      return deserialize<_i716ymk1.SessionItem>(data['data']);
+    }
+    if (dataClassName == 'SessionItemView') {
+      return deserialize<_i3pyieja.SessionItemView>(data['data']);
+    }
+    if (dataClassName == 'SessionMoveRequest') {
+      return deserialize<_i91809id.SessionMoveRequest>(data['data']);
+    }
+    if (dataClassName == 'SessionStatus') {
+      return deserialize<_izbi9tiy.SessionStatus>(data['data']);
+    }
+    if (dataClassName == 'SessionView') {
+      return deserialize<_iyjcmdi4.SessionView>(data['data']);
     }
     if (dataClassName == 'PinneProfile') {
       return deserialize<_ijguvy1g.PinneProfile>(data['data']);
@@ -1590,6 +3147,12 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
     switch (t) {
+      case _iqtchur3.CalendarConnection:
+        return _iqtchur3.CalendarConnection.t;
+      case _ily35bfr.CalendarEventLink:
+        return _ily35bfr.CalendarEventLink.t;
+      case _i8v3said.CalendarSelection:
+        return _i8v3said.CalendarSelection.t;
       case _iqfgge80.Collection:
         return _iqfgge80.Collection.t;
       case _ingnmqw7.ItemCollection:
@@ -1598,6 +3161,14 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _i6e75atc.CaptureReceipt.t;
       case _iapziv9t.Item:
         return _iapziv9t.Item.t;
+      case _iw1c6zow.PlannerPreferences:
+        return _iw1c6zow.PlannerPreferences.t;
+      case _icv3lfjf.ReviewPlan:
+        return _icv3lfjf.ReviewPlan.t;
+      case _indyheef.ReviewSession:
+        return _indyheef.ReviewSession.t;
+      case _i716ymk1.SessionItem:
+        return _i716ymk1.SessionItem.t;
       case _ijguvy1g.PinneProfile:
         return _ijguvy1g.PinneProfile.t;
       case _i6ljcdoh.ReminderRule:

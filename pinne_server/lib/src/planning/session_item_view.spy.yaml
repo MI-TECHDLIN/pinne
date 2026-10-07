@@ -1,0 +1,6 @@
+class: SessionItemView
+fields:
+  itemId: UuidValue
+  title: String
+  plannedMinutes: int
+  estimated: bool

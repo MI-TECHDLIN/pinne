@@ -1,0 +1,14 @@
+### How well one conflict calendar was checked for a plan.
+enum: CoverageState
+serialized: byName
+values:
+  ### Read recently over the whole plan window.
+  - checked
+  ### Read, but too long ago to trust.
+  - stale
+  ### Read, but not over the whole plan window.
+  - partial
+  ### The device could not read it, such as after permission was revoked.
+  - unreadable
+  ### No reading was sent for it.
+  - notChecked

@@ -1,0 +1,6 @@
+### The owner's choice for one calendar.
+class: CalendarSelectionChoice
+fields:
+  selectionId: UuidValue
+  useForConflicts: bool
+  useForWrites: bool

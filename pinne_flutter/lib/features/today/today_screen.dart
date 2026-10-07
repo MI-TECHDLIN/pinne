@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../capture/paste_capture_card.dart';
 import '../../theme/pinne_tokens.dart';
@@ -29,6 +31,8 @@ class TodayScreen extends ConsumerWidget {
         const SizedBox(height: PinneSpacing.md),
         const PasteCaptureCard(),
         const SizedBox(height: PinneSpacing.md),
+        const PlanReviewCard(),
+        const SizedBox(height: PinneSpacing.md),
         const ComingSoonCard(
           title: 'Your queue stays small',
           body:
@@ -36,6 +40,42 @@ class TodayScreen extends ConsumerWidget {
               'with the note you left on why you saved them.',
         ),
       ],
+    );
+  }
+}
+
+/// The way into the Planner from Today.
+class PlanReviewCard extends StatelessWidget {
+  const PlanReviewCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return GlassCard(
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Make time to review', style: theme.textTheme.titleMedium),
+                const SizedBox(height: PinneSpacing.xs),
+                Text(
+                  'Plan short sessions in your free time.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: PinneColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: PinneSpacing.sm),
+          FilledButton(
+            onPressed: () => context.push(Routes.planner),
+            child: const Text('Plan'),
+          ),
+        ],
+      ),
     );
   }
 }

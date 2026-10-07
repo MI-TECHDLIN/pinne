@@ -1,0 +1,22 @@
+### One proposal of review sessions, with the availability it was based on.
+class: ReviewPlan
+table: review_plan
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  createdAt: DateTime, default=now
+  horizonStart: DateTime
+  horizonEnd: DateTime
+  timezone: String
+  coverage: List<CalendarCoverage>
+  ### True only when every conflict calendar was checked recently.
+  availabilityVerified: bool
+  ### Set once accepted; a retry with the same id replays the result.
+  commitOperationId: UuidValue?
+  committedAt: DateTime?
+indexes:
+  review_plan_owner_created_idx:
+    fields: ownerId, createdAt
+  review_plan_owner_operation_idx:
+    fields: ownerId, commitOperationId
+    unique: true

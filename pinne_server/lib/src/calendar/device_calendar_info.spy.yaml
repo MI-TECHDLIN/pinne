@@ -1,0 +1,8 @@
+### One calendar as the device lists it.
+class: DeviceCalendarInfo
+fields:
+  externalCalendarId: String
+  name: String
+  accountName: String?
+  readOnly: bool
+  isPrimary: bool

@@ -1,0 +1,13 @@
+### Editable planning rules. The owner comes from the session.
+class: PlannerPreferencesDraft
+fields:
+  horizon: PlanHorizon
+  weekdays: List<int>
+  windowStartMinute: int
+  windowEndMinute: int
+  sessionMinutes: int
+  maxSessions: int
+  bufferMinutes: int
+  minLeadMinutes: int
+  timezone: String
+  approvalMode: ApprovalMode

@@ -1,0 +1,8 @@
+### A session with what it holds and where its event lives.
+class: SessionView
+fields:
+  session: ReviewSession
+  items: List<SessionItemView>
+  ### The calendar the event is written to, if any.
+  calendarName: String?
+  syncState: EventSyncState?

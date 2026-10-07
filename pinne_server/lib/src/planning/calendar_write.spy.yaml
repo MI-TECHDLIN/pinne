@@ -1,0 +1,17 @@
+### Work for the device that holds the write calendar.
+class: CalendarWrite
+fields:
+  linkId: UuidValue
+  action: CalendarWriteAction
+  sessionId: UuidValue
+  eventUid: String
+  externalCalendarId: String
+  externalEventId: String?
+  startAt: DateTime
+  endAt: DateTime
+  timezone: String
+  title: String
+  notes: String
+  ### The session's `planRevision` this work was built from. A result for
+  ### an older revision does not settle newer work.
+  sessionRevision: int

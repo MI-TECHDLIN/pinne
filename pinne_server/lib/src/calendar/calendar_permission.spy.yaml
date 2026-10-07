@@ -1,0 +1,11 @@
+### The access a route currently has, as last reported.
+enum: CalendarPermission
+serialized: byName
+values:
+  - notRequested
+  - granted
+  ### May add events but cannot read them, so it cannot check availability.
+  - writeOnly
+  - denied
+  - restricted
+  - notConfigured

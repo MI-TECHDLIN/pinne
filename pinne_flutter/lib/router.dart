@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import 'features/auth/sign_in_screen.dart';
 import 'features/collections/collections_screen.dart';
+import 'features/planner/calendar_connections_screen.dart';
+import 'features/planner/planner_screen.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/search/search_screen.dart';
 import 'features/settings/settings_screen.dart';
@@ -14,6 +16,8 @@ import 'ui/ribbon_spirit/ribbon_gallery.dart';
 
 abstract final class Routes {
   static const today = '/today';
+  static const planner = '/today/planner';
+  static const calendarConnections = '/today/planner/calendars';
   static const collections = '/collections';
   static const search = '/search';
   static const progress = '/progress';
@@ -34,7 +38,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(navigationShell: shell),
         branches: [
-          _branch(Routes.today, const TodayScreen()),
+          _branch(
+            Routes.today,
+            const TodayScreen(),
+            routes: [
+              GoRoute(
+                path: 'planner',
+                builder: (context, state) => const PlannerScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'calendars',
+                    builder: (context, state) =>
+                        const CalendarConnectionsScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
           _branch(Routes.collections, const CollectionsScreen()),
           _branch(Routes.search, const SearchScreen()),
           _branch(Routes.progress, const ProgressScreen()),
@@ -51,6 +71,12 @@ final routerProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
-StatefulShellBranch _branch(String path, Widget screen) => StatefulShellBranch(
-  routes: [GoRoute(path: path, builder: (context, state) => screen)],
+StatefulShellBranch _branch(
+  String path,
+  Widget screen, {
+  List<RouteBase> routes = const [],
+}) => StatefulShellBranch(
+  routes: [
+    GoRoute(path: path, builder: (context, state) => screen, routes: routes),
+  ],
 );

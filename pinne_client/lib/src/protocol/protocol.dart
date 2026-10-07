@@ -11,14 +11,38 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:pinne_client/src/protocol/calendar/calendar_connection_view.dart'
+    as _i0t8t4zu;
+import 'package:pinne_client/src/protocol/calendar/calendar_route_status.dart'
+    as _ig4e8y15;
+import 'package:pinne_client/src/protocol/calendar/calendar_selection_choice.dart'
+    as _im02fgk3;
 import 'package:pinne_client/src/protocol/collections/collection.dart'
     as _i9zrdvr8;
 import 'package:pinne_client/src/protocol/items/item.dart' as _itiiwgx0;
+import 'package:pinne_client/src/protocol/planning/calendar_write.dart'
+    as _i4bu6rte;
+import 'package:pinne_client/src/protocol/planning/calendar_write_result.dart'
+    as _ivswpuyg;
+import 'package:pinne_client/src/protocol/planning/session_view.dart'
+    as _i2af9p8a;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import 'calendar/calendar_connection.dart' as _iqtchur3;
+import 'calendar/calendar_connection_view.dart' as _ijwz5xp0;
+import 'calendar/calendar_event_link.dart' as _ily35bfr;
+import 'calendar/calendar_permission.dart' as _ika1a9r5;
+import 'calendar/calendar_route.dart' as _iq08ggdy;
+import 'calendar/calendar_route_exception.dart' as _igxvbit5;
+import 'calendar/calendar_route_status.dart' as _i7yozl4b;
+import 'calendar/calendar_selection.dart' as _i8v3said;
+import 'calendar/calendar_selection_choice.dart' as _intkkx3w;
+import 'calendar/device_calendar_info.dart' as _ihue00wg;
+import 'calendar/device_calendar_report.dart' as _i4awacjs;
+import 'calendar/event_sync_state.dart' as _i1s71wt9;
 import 'collections/collection.dart' as _iqfgge80;
 import 'collections/collection_draft.dart' as _ivby8odo;
 import 'collections/item_collection.dart' as _ingnmqw7;
@@ -35,6 +59,32 @@ import 'items/item.dart' as _iapziv9t;
 import 'items/item_draft.dart' as _ip8cn60r;
 import 'items/item_lifecycle.dart' as _iveh3zib;
 import 'items/source_platform.dart' as _i072xpry;
+import 'planning/approval_mode.dart' as _id2awq13;
+import 'planning/availability_snapshot.dart' as _i1u9wvnf;
+import 'planning/busy_interval.dart' as _imvtil8c;
+import 'planning/calendar_coverage.dart' as _iadysn2t;
+import 'planning/calendar_write.dart' as _i6oluk1v;
+import 'planning/calendar_write_action.dart' as _iyd6g2oi;
+import 'planning/calendar_write_outcome.dart' as _i3u14n80;
+import 'planning/calendar_write_result.dart' as _i5mmfzwl;
+import 'planning/coverage_state.dart' as _il89vgny;
+import 'planning/plan_commit_request.dart' as _ilaph13t;
+import 'planning/plan_commit_result.dart' as _ixc6g37a;
+import 'planning/plan_horizon.dart' as _ititmozf;
+import 'planning/plan_proposal.dart' as _iv13hf9x;
+import 'planning/plan_request.dart' as _idh5khlu;
+import 'planning/planner_preferences.dart' as _iw1c6zow;
+import 'planning/planner_preferences_draft.dart' as _i03liexf;
+import 'planning/planning_error_code.dart' as _ityq5odj;
+import 'planning/planning_exception.dart' as _iehth582;
+import 'planning/review_plan.dart' as _icv3lfjf;
+import 'planning/review_session.dart' as _indyheef;
+import 'planning/session_change_result.dart' as _in0sx9zc;
+import 'planning/session_item.dart' as _i716ymk1;
+import 'planning/session_item_view.dart' as _i3pyieja;
+import 'planning/session_move_request.dart' as _i91809id;
+import 'planning/session_status.dart' as _izbi9tiy;
+import 'planning/session_view.dart' as _iyjcmdi4;
 import 'profile/pinne_profile.dart' as _ijguvy1g;
 import 'profile/profile_draft.dart' as _ij8joe28;
 import 'reminders/reminder_rule.dart' as _i6ljcdoh;
@@ -43,6 +93,18 @@ import 'reviews/review_event.dart' as _i0pv2k4n;
 import 'reviews/review_event_type.dart' as _i5mz8id3;
 import 'tags/item_tag.dart' as _iv0vmssg;
 import 'tags/tag.dart' as _iopagaq8;
+export 'calendar/calendar_connection.dart';
+export 'calendar/calendar_connection_view.dart';
+export 'calendar/calendar_event_link.dart';
+export 'calendar/calendar_permission.dart';
+export 'calendar/calendar_route.dart';
+export 'calendar/calendar_route_exception.dart';
+export 'calendar/calendar_route_status.dart';
+export 'calendar/calendar_selection.dart';
+export 'calendar/calendar_selection_choice.dart';
+export 'calendar/device_calendar_info.dart';
+export 'calendar/device_calendar_report.dart';
+export 'calendar/event_sync_state.dart';
 export 'collections/collection.dart';
 export 'collections/collection_draft.dart';
 export 'collections/item_collection.dart';
@@ -59,6 +121,32 @@ export 'items/item.dart';
 export 'items/item_draft.dart';
 export 'items/item_lifecycle.dart';
 export 'items/source_platform.dart';
+export 'planning/approval_mode.dart';
+export 'planning/availability_snapshot.dart';
+export 'planning/busy_interval.dart';
+export 'planning/calendar_coverage.dart';
+export 'planning/calendar_write.dart';
+export 'planning/calendar_write_action.dart';
+export 'planning/calendar_write_outcome.dart';
+export 'planning/calendar_write_result.dart';
+export 'planning/coverage_state.dart';
+export 'planning/plan_commit_request.dart';
+export 'planning/plan_commit_result.dart';
+export 'planning/plan_horizon.dart';
+export 'planning/plan_proposal.dart';
+export 'planning/plan_request.dart';
+export 'planning/planner_preferences.dart';
+export 'planning/planner_preferences_draft.dart';
+export 'planning/planning_error_code.dart';
+export 'planning/planning_exception.dart';
+export 'planning/review_plan.dart';
+export 'planning/review_session.dart';
+export 'planning/session_change_result.dart';
+export 'planning/session_item.dart';
+export 'planning/session_item_view.dart';
+export 'planning/session_move_request.dart';
+export 'planning/session_status.dart';
+export 'planning/session_view.dart';
 export 'profile/pinne_profile.dart';
 export 'profile/profile_draft.dart';
 export 'reminders/reminder_rule.dart';
@@ -103,6 +191,42 @@ class Protocol extends _isc.SerializationManager {
       }
     }
 
+    if (t == _iqtchur3.CalendarConnection) {
+      return _iqtchur3.CalendarConnection.fromJson(data) as T;
+    }
+    if (t == _ijwz5xp0.CalendarConnectionView) {
+      return _ijwz5xp0.CalendarConnectionView.fromJson(data) as T;
+    }
+    if (t == _ily35bfr.CalendarEventLink) {
+      return _ily35bfr.CalendarEventLink.fromJson(data) as T;
+    }
+    if (t == _ika1a9r5.CalendarPermission) {
+      return _ika1a9r5.CalendarPermission.fromJson(data) as T;
+    }
+    if (t == _iq08ggdy.CalendarRoute) {
+      return _iq08ggdy.CalendarRoute.fromJson(data) as T;
+    }
+    if (t == _igxvbit5.CalendarRouteException) {
+      return _igxvbit5.CalendarRouteException.fromJson(data) as T;
+    }
+    if (t == _i7yozl4b.CalendarRouteStatus) {
+      return _i7yozl4b.CalendarRouteStatus.fromJson(data) as T;
+    }
+    if (t == _i8v3said.CalendarSelection) {
+      return _i8v3said.CalendarSelection.fromJson(data) as T;
+    }
+    if (t == _intkkx3w.CalendarSelectionChoice) {
+      return _intkkx3w.CalendarSelectionChoice.fromJson(data) as T;
+    }
+    if (t == _ihue00wg.DeviceCalendarInfo) {
+      return _ihue00wg.DeviceCalendarInfo.fromJson(data) as T;
+    }
+    if (t == _i4awacjs.DeviceCalendarReport) {
+      return _i4awacjs.DeviceCalendarReport.fromJson(data) as T;
+    }
+    if (t == _i1s71wt9.EventSyncState) {
+      return _i1s71wt9.EventSyncState.fromJson(data) as T;
+    }
     if (t == _iqfgge80.Collection) {
       return _iqfgge80.Collection.fromJson(data) as T;
     }
@@ -151,6 +275,84 @@ class Protocol extends _isc.SerializationManager {
     if (t == _i072xpry.SourcePlatform) {
       return _i072xpry.SourcePlatform.fromJson(data) as T;
     }
+    if (t == _id2awq13.ApprovalMode) {
+      return _id2awq13.ApprovalMode.fromJson(data) as T;
+    }
+    if (t == _i1u9wvnf.AvailabilitySnapshot) {
+      return _i1u9wvnf.AvailabilitySnapshot.fromJson(data) as T;
+    }
+    if (t == _imvtil8c.BusyInterval) {
+      return _imvtil8c.BusyInterval.fromJson(data) as T;
+    }
+    if (t == _iadysn2t.CalendarCoverage) {
+      return _iadysn2t.CalendarCoverage.fromJson(data) as T;
+    }
+    if (t == _i6oluk1v.CalendarWrite) {
+      return _i6oluk1v.CalendarWrite.fromJson(data) as T;
+    }
+    if (t == _iyd6g2oi.CalendarWriteAction) {
+      return _iyd6g2oi.CalendarWriteAction.fromJson(data) as T;
+    }
+    if (t == _i3u14n80.CalendarWriteOutcome) {
+      return _i3u14n80.CalendarWriteOutcome.fromJson(data) as T;
+    }
+    if (t == _i5mmfzwl.CalendarWriteResult) {
+      return _i5mmfzwl.CalendarWriteResult.fromJson(data) as T;
+    }
+    if (t == _il89vgny.CoverageState) {
+      return _il89vgny.CoverageState.fromJson(data) as T;
+    }
+    if (t == _ilaph13t.PlanCommitRequest) {
+      return _ilaph13t.PlanCommitRequest.fromJson(data) as T;
+    }
+    if (t == _ixc6g37a.PlanCommitResult) {
+      return _ixc6g37a.PlanCommitResult.fromJson(data) as T;
+    }
+    if (t == _ititmozf.PlanHorizon) {
+      return _ititmozf.PlanHorizon.fromJson(data) as T;
+    }
+    if (t == _iv13hf9x.PlanProposal) {
+      return _iv13hf9x.PlanProposal.fromJson(data) as T;
+    }
+    if (t == _idh5khlu.PlanRequest) {
+      return _idh5khlu.PlanRequest.fromJson(data) as T;
+    }
+    if (t == _iw1c6zow.PlannerPreferences) {
+      return _iw1c6zow.PlannerPreferences.fromJson(data) as T;
+    }
+    if (t == _i03liexf.PlannerPreferencesDraft) {
+      return _i03liexf.PlannerPreferencesDraft.fromJson(data) as T;
+    }
+    if (t == _ityq5odj.PlanningErrorCode) {
+      return _ityq5odj.PlanningErrorCode.fromJson(data) as T;
+    }
+    if (t == _iehth582.PlanningException) {
+      return _iehth582.PlanningException.fromJson(data) as T;
+    }
+    if (t == _icv3lfjf.ReviewPlan) {
+      return _icv3lfjf.ReviewPlan.fromJson(data) as T;
+    }
+    if (t == _indyheef.ReviewSession) {
+      return _indyheef.ReviewSession.fromJson(data) as T;
+    }
+    if (t == _in0sx9zc.SessionChangeResult) {
+      return _in0sx9zc.SessionChangeResult.fromJson(data) as T;
+    }
+    if (t == _i716ymk1.SessionItem) {
+      return _i716ymk1.SessionItem.fromJson(data) as T;
+    }
+    if (t == _i3pyieja.SessionItemView) {
+      return _i3pyieja.SessionItemView.fromJson(data) as T;
+    }
+    if (t == _i91809id.SessionMoveRequest) {
+      return _i91809id.SessionMoveRequest.fromJson(data) as T;
+    }
+    if (t == _izbi9tiy.SessionStatus) {
+      return _izbi9tiy.SessionStatus.fromJson(data) as T;
+    }
+    if (t == _iyjcmdi4.SessionView) {
+      return _iyjcmdi4.SessionView.fromJson(data) as T;
+    }
     if (t == _ijguvy1g.PinneProfile) {
       return _ijguvy1g.PinneProfile.fromJson(data) as T;
     }
@@ -174,6 +376,64 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _iopagaq8.Tag) {
       return _iopagaq8.Tag.fromJson(data) as T;
+    }
+    if (t == _isc.getType<_iqtchur3.CalendarConnection?>()) {
+      return (data != null ? _iqtchur3.CalendarConnection.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ijwz5xp0.CalendarConnectionView?>()) {
+      return (data != null
+              ? _ijwz5xp0.CalendarConnectionView.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_ily35bfr.CalendarEventLink?>()) {
+      return (data != null ? _ily35bfr.CalendarEventLink.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ika1a9r5.CalendarPermission?>()) {
+      return (data != null ? _ika1a9r5.CalendarPermission.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iq08ggdy.CalendarRoute?>()) {
+      return (data != null ? _iq08ggdy.CalendarRoute.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_igxvbit5.CalendarRouteException?>()) {
+      return (data != null
+              ? _igxvbit5.CalendarRouteException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i7yozl4b.CalendarRouteStatus?>()) {
+      return (data != null
+              ? _i7yozl4b.CalendarRouteStatus.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i8v3said.CalendarSelection?>()) {
+      return (data != null ? _i8v3said.CalendarSelection.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_intkkx3w.CalendarSelectionChoice?>()) {
+      return (data != null
+              ? _intkkx3w.CalendarSelectionChoice.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_ihue00wg.DeviceCalendarInfo?>()) {
+      return (data != null ? _ihue00wg.DeviceCalendarInfo.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i4awacjs.DeviceCalendarReport?>()) {
+      return (data != null
+              ? _i4awacjs.DeviceCalendarReport.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i1s71wt9.EventSyncState?>()) {
+      return (data != null ? _i1s71wt9.EventSyncState.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_iqfgge80.Collection?>()) {
       return (data != null ? _iqfgge80.Collection.fromJson(data) : null) as T;
@@ -236,6 +496,114 @@ class Protocol extends _isc.SerializationManager {
       return (data != null ? _i072xpry.SourcePlatform.fromJson(data) : null)
           as T;
     }
+    if (t == _isc.getType<_id2awq13.ApprovalMode?>()) {
+      return (data != null ? _id2awq13.ApprovalMode.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i1u9wvnf.AvailabilitySnapshot?>()) {
+      return (data != null
+              ? _i1u9wvnf.AvailabilitySnapshot.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_imvtil8c.BusyInterval?>()) {
+      return (data != null ? _imvtil8c.BusyInterval.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iadysn2t.CalendarCoverage?>()) {
+      return (data != null ? _iadysn2t.CalendarCoverage.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i6oluk1v.CalendarWrite?>()) {
+      return (data != null ? _i6oluk1v.CalendarWrite.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iyd6g2oi.CalendarWriteAction?>()) {
+      return (data != null
+              ? _iyd6g2oi.CalendarWriteAction.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i3u14n80.CalendarWriteOutcome?>()) {
+      return (data != null
+              ? _i3u14n80.CalendarWriteOutcome.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i5mmfzwl.CalendarWriteResult?>()) {
+      return (data != null
+              ? _i5mmfzwl.CalendarWriteResult.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_il89vgny.CoverageState?>()) {
+      return (data != null ? _il89vgny.CoverageState.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ilaph13t.PlanCommitRequest?>()) {
+      return (data != null ? _ilaph13t.PlanCommitRequest.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ixc6g37a.PlanCommitResult?>()) {
+      return (data != null ? _ixc6g37a.PlanCommitResult.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ititmozf.PlanHorizon?>()) {
+      return (data != null ? _ititmozf.PlanHorizon.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iv13hf9x.PlanProposal?>()) {
+      return (data != null ? _iv13hf9x.PlanProposal.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_idh5khlu.PlanRequest?>()) {
+      return (data != null ? _idh5khlu.PlanRequest.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iw1c6zow.PlannerPreferences?>()) {
+      return (data != null ? _iw1c6zow.PlannerPreferences.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i03liexf.PlannerPreferencesDraft?>()) {
+      return (data != null
+              ? _i03liexf.PlannerPreferencesDraft.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_ityq5odj.PlanningErrorCode?>()) {
+      return (data != null ? _ityq5odj.PlanningErrorCode.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iehth582.PlanningException?>()) {
+      return (data != null ? _iehth582.PlanningException.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_icv3lfjf.ReviewPlan?>()) {
+      return (data != null ? _icv3lfjf.ReviewPlan.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_indyheef.ReviewSession?>()) {
+      return (data != null ? _indyheef.ReviewSession.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_in0sx9zc.SessionChangeResult?>()) {
+      return (data != null
+              ? _in0sx9zc.SessionChangeResult.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i716ymk1.SessionItem?>()) {
+      return (data != null ? _i716ymk1.SessionItem.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i3pyieja.SessionItemView?>()) {
+      return (data != null ? _i3pyieja.SessionItemView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i91809id.SessionMoveRequest?>()) {
+      return (data != null ? _i91809id.SessionMoveRequest.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_izbi9tiy.SessionStatus?>()) {
+      return (data != null ? _izbi9tiy.SessionStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iyjcmdi4.SessionView?>()) {
+      return (data != null ? _iyjcmdi4.SessionView.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_ijguvy1g.PinneProfile?>()) {
       return (data != null ? _ijguvy1g.PinneProfile.fromJson(data) : null) as T;
     }
@@ -262,6 +630,18 @@ class Protocol extends _isc.SerializationManager {
     if (t == _isc.getType<_iopagaq8.Tag?>()) {
       return (data != null ? _iopagaq8.Tag.fromJson(data) : null) as T;
     }
+    if (t == List<_i8v3said.CalendarSelection>) {
+      return (data as List)
+              .map((e) => deserialize<_i8v3said.CalendarSelection>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ihue00wg.DeviceCalendarInfo>) {
+      return (data as List)
+              .map((e) => deserialize<_ihue00wg.DeviceCalendarInfo>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_isc.UuidValue>) {
       return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
           as T;
@@ -272,6 +652,45 @@ class Protocol extends _isc.SerializationManager {
                     .map((e) => deserialize<_isc.UuidValue>(e))
                     .toList()
               : null)
+          as T;
+    }
+    if (t == List<_imvtil8c.BusyInterval>) {
+      return (data as List)
+              .map((e) => deserialize<_imvtil8c.BusyInterval>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i1u9wvnf.AvailabilitySnapshot>) {
+      return (data as List)
+              .map((e) => deserialize<_i1u9wvnf.AvailabilitySnapshot>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iyjcmdi4.SessionView>) {
+      return (data as List)
+              .map((e) => deserialize<_iyjcmdi4.SessionView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i6oluk1v.CalendarWrite>) {
+      return (data as List)
+              .map((e) => deserialize<_i6oluk1v.CalendarWrite>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<int>) {
+      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
+    if (t == List<_iadysn2t.CalendarCoverage>) {
+      return (data as List)
+              .map((e) => deserialize<_iadysn2t.CalendarCoverage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i3pyieja.SessionItemView>) {
+      return (data as List)
+              .map((e) => deserialize<_i3pyieja.SessionItemView>(e))
+              .toList()
           as T;
     }
     if (t == List<_iswi3gl6.ReminderWindow>) {
@@ -288,8 +707,23 @@ class Protocol extends _isc.SerializationManager {
               : null)
           as T;
     }
-    if (t == List<int>) {
-      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    if (t == List<_ig4e8y15.CalendarRouteStatus>) {
+      return (data as List)
+              .map((e) => deserialize<_ig4e8y15.CalendarRouteStatus>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i0t8t4zu.CalendarConnectionView>) {
+      return (data as List)
+              .map((e) => deserialize<_i0t8t4zu.CalendarConnectionView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_im02fgk3.CalendarSelectionChoice>) {
+      return (data as List)
+              .map((e) => deserialize<_im02fgk3.CalendarSelectionChoice>(e))
+              .toList()
+          as T;
     }
     if (t == List<_i9zrdvr8.Collection>) {
       return (data as List)
@@ -299,6 +733,28 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == List<_itiiwgx0.Item>) {
       return (data as List).map((e) => deserialize<_itiiwgx0.Item>(e)).toList()
+          as T;
+    }
+    if (t == List<_i2af9p8a.SessionView>) {
+      return (data as List)
+              .map((e) => deserialize<_i2af9p8a.SessionView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i4bu6rte.CalendarWrite>) {
+      return (data as List)
+              .map((e) => deserialize<_i4bu6rte.CalendarWrite>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ivswpuyg.CalendarWriteResult>) {
+      return (data as List)
+              .map((e) => deserialize<_ivswpuyg.CalendarWriteResult>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_isc.UuidValue>) {
+      return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
           as T;
     }
     try {
@@ -312,6 +768,18 @@ class Protocol extends _isc.SerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _iqtchur3.CalendarConnection => 'CalendarConnection',
+      _ijwz5xp0.CalendarConnectionView => 'CalendarConnectionView',
+      _ily35bfr.CalendarEventLink => 'CalendarEventLink',
+      _ika1a9r5.CalendarPermission => 'CalendarPermission',
+      _iq08ggdy.CalendarRoute => 'CalendarRoute',
+      _igxvbit5.CalendarRouteException => 'CalendarRouteException',
+      _i7yozl4b.CalendarRouteStatus => 'CalendarRouteStatus',
+      _i8v3said.CalendarSelection => 'CalendarSelection',
+      _intkkx3w.CalendarSelectionChoice => 'CalendarSelectionChoice',
+      _ihue00wg.DeviceCalendarInfo => 'DeviceCalendarInfo',
+      _i4awacjs.DeviceCalendarReport => 'DeviceCalendarReport',
+      _i1s71wt9.EventSyncState => 'EventSyncState',
       _iqfgge80.Collection => 'Collection',
       _ivby8odo.CollectionDraft => 'CollectionDraft',
       _ingnmqw7.ItemCollection => 'ItemCollection',
@@ -328,6 +796,32 @@ class Protocol extends _isc.SerializationManager {
       _ip8cn60r.ItemDraft => 'ItemDraft',
       _iveh3zib.ItemLifecycle => 'ItemLifecycle',
       _i072xpry.SourcePlatform => 'SourcePlatform',
+      _id2awq13.ApprovalMode => 'ApprovalMode',
+      _i1u9wvnf.AvailabilitySnapshot => 'AvailabilitySnapshot',
+      _imvtil8c.BusyInterval => 'BusyInterval',
+      _iadysn2t.CalendarCoverage => 'CalendarCoverage',
+      _i6oluk1v.CalendarWrite => 'CalendarWrite',
+      _iyd6g2oi.CalendarWriteAction => 'CalendarWriteAction',
+      _i3u14n80.CalendarWriteOutcome => 'CalendarWriteOutcome',
+      _i5mmfzwl.CalendarWriteResult => 'CalendarWriteResult',
+      _il89vgny.CoverageState => 'CoverageState',
+      _ilaph13t.PlanCommitRequest => 'PlanCommitRequest',
+      _ixc6g37a.PlanCommitResult => 'PlanCommitResult',
+      _ititmozf.PlanHorizon => 'PlanHorizon',
+      _iv13hf9x.PlanProposal => 'PlanProposal',
+      _idh5khlu.PlanRequest => 'PlanRequest',
+      _iw1c6zow.PlannerPreferences => 'PlannerPreferences',
+      _i03liexf.PlannerPreferencesDraft => 'PlannerPreferencesDraft',
+      _ityq5odj.PlanningErrorCode => 'PlanningErrorCode',
+      _iehth582.PlanningException => 'PlanningException',
+      _icv3lfjf.ReviewPlan => 'ReviewPlan',
+      _indyheef.ReviewSession => 'ReviewSession',
+      _in0sx9zc.SessionChangeResult => 'SessionChangeResult',
+      _i716ymk1.SessionItem => 'SessionItem',
+      _i3pyieja.SessionItemView => 'SessionItemView',
+      _i91809id.SessionMoveRequest => 'SessionMoveRequest',
+      _izbi9tiy.SessionStatus => 'SessionStatus',
+      _iyjcmdi4.SessionView => 'SessionView',
       _ijguvy1g.PinneProfile => 'PinneProfile',
       _ij8joe28.ProfileDraft => 'ProfileDraft',
       _i6ljcdoh.ReminderRule => 'ReminderRule',
@@ -350,6 +844,30 @@ class Protocol extends _isc.SerializationManager {
     }
 
     switch (data) {
+      case _iqtchur3.CalendarConnection():
+        return 'CalendarConnection';
+      case _ijwz5xp0.CalendarConnectionView():
+        return 'CalendarConnectionView';
+      case _ily35bfr.CalendarEventLink():
+        return 'CalendarEventLink';
+      case _ika1a9r5.CalendarPermission():
+        return 'CalendarPermission';
+      case _iq08ggdy.CalendarRoute():
+        return 'CalendarRoute';
+      case _igxvbit5.CalendarRouteException():
+        return 'CalendarRouteException';
+      case _i7yozl4b.CalendarRouteStatus():
+        return 'CalendarRouteStatus';
+      case _i8v3said.CalendarSelection():
+        return 'CalendarSelection';
+      case _intkkx3w.CalendarSelectionChoice():
+        return 'CalendarSelectionChoice';
+      case _ihue00wg.DeviceCalendarInfo():
+        return 'DeviceCalendarInfo';
+      case _i4awacjs.DeviceCalendarReport():
+        return 'DeviceCalendarReport';
+      case _i1s71wt9.EventSyncState():
+        return 'EventSyncState';
       case _iqfgge80.Collection():
         return 'Collection';
       case _ivby8odo.CollectionDraft():
@@ -382,6 +900,58 @@ class Protocol extends _isc.SerializationManager {
         return 'ItemLifecycle';
       case _i072xpry.SourcePlatform():
         return 'SourcePlatform';
+      case _id2awq13.ApprovalMode():
+        return 'ApprovalMode';
+      case _i1u9wvnf.AvailabilitySnapshot():
+        return 'AvailabilitySnapshot';
+      case _imvtil8c.BusyInterval():
+        return 'BusyInterval';
+      case _iadysn2t.CalendarCoverage():
+        return 'CalendarCoverage';
+      case _i6oluk1v.CalendarWrite():
+        return 'CalendarWrite';
+      case _iyd6g2oi.CalendarWriteAction():
+        return 'CalendarWriteAction';
+      case _i3u14n80.CalendarWriteOutcome():
+        return 'CalendarWriteOutcome';
+      case _i5mmfzwl.CalendarWriteResult():
+        return 'CalendarWriteResult';
+      case _il89vgny.CoverageState():
+        return 'CoverageState';
+      case _ilaph13t.PlanCommitRequest():
+        return 'PlanCommitRequest';
+      case _ixc6g37a.PlanCommitResult():
+        return 'PlanCommitResult';
+      case _ititmozf.PlanHorizon():
+        return 'PlanHorizon';
+      case _iv13hf9x.PlanProposal():
+        return 'PlanProposal';
+      case _idh5khlu.PlanRequest():
+        return 'PlanRequest';
+      case _iw1c6zow.PlannerPreferences():
+        return 'PlannerPreferences';
+      case _i03liexf.PlannerPreferencesDraft():
+        return 'PlannerPreferencesDraft';
+      case _ityq5odj.PlanningErrorCode():
+        return 'PlanningErrorCode';
+      case _iehth582.PlanningException():
+        return 'PlanningException';
+      case _icv3lfjf.ReviewPlan():
+        return 'ReviewPlan';
+      case _indyheef.ReviewSession():
+        return 'ReviewSession';
+      case _in0sx9zc.SessionChangeResult():
+        return 'SessionChangeResult';
+      case _i716ymk1.SessionItem():
+        return 'SessionItem';
+      case _i3pyieja.SessionItemView():
+        return 'SessionItemView';
+      case _i91809id.SessionMoveRequest():
+        return 'SessionMoveRequest';
+      case _izbi9tiy.SessionStatus():
+        return 'SessionStatus';
+      case _iyjcmdi4.SessionView():
+        return 'SessionView';
       case _ijguvy1g.PinneProfile():
         return 'PinneProfile';
       case _ij8joe28.ProfileDraft():
@@ -419,6 +989,42 @@ class Protocol extends _isc.SerializationManager {
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'CalendarConnection') {
+      return deserialize<_iqtchur3.CalendarConnection>(data['data']);
+    }
+    if (dataClassName == 'CalendarConnectionView') {
+      return deserialize<_ijwz5xp0.CalendarConnectionView>(data['data']);
+    }
+    if (dataClassName == 'CalendarEventLink') {
+      return deserialize<_ily35bfr.CalendarEventLink>(data['data']);
+    }
+    if (dataClassName == 'CalendarPermission') {
+      return deserialize<_ika1a9r5.CalendarPermission>(data['data']);
+    }
+    if (dataClassName == 'CalendarRoute') {
+      return deserialize<_iq08ggdy.CalendarRoute>(data['data']);
+    }
+    if (dataClassName == 'CalendarRouteException') {
+      return deserialize<_igxvbit5.CalendarRouteException>(data['data']);
+    }
+    if (dataClassName == 'CalendarRouteStatus') {
+      return deserialize<_i7yozl4b.CalendarRouteStatus>(data['data']);
+    }
+    if (dataClassName == 'CalendarSelection') {
+      return deserialize<_i8v3said.CalendarSelection>(data['data']);
+    }
+    if (dataClassName == 'CalendarSelectionChoice') {
+      return deserialize<_intkkx3w.CalendarSelectionChoice>(data['data']);
+    }
+    if (dataClassName == 'DeviceCalendarInfo') {
+      return deserialize<_ihue00wg.DeviceCalendarInfo>(data['data']);
+    }
+    if (dataClassName == 'DeviceCalendarReport') {
+      return deserialize<_i4awacjs.DeviceCalendarReport>(data['data']);
+    }
+    if (dataClassName == 'EventSyncState') {
+      return deserialize<_i1s71wt9.EventSyncState>(data['data']);
     }
     if (dataClassName == 'Collection') {
       return deserialize<_iqfgge80.Collection>(data['data']);
@@ -467,6 +1073,84 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'SourcePlatform') {
       return deserialize<_i072xpry.SourcePlatform>(data['data']);
+    }
+    if (dataClassName == 'ApprovalMode') {
+      return deserialize<_id2awq13.ApprovalMode>(data['data']);
+    }
+    if (dataClassName == 'AvailabilitySnapshot') {
+      return deserialize<_i1u9wvnf.AvailabilitySnapshot>(data['data']);
+    }
+    if (dataClassName == 'BusyInterval') {
+      return deserialize<_imvtil8c.BusyInterval>(data['data']);
+    }
+    if (dataClassName == 'CalendarCoverage') {
+      return deserialize<_iadysn2t.CalendarCoverage>(data['data']);
+    }
+    if (dataClassName == 'CalendarWrite') {
+      return deserialize<_i6oluk1v.CalendarWrite>(data['data']);
+    }
+    if (dataClassName == 'CalendarWriteAction') {
+      return deserialize<_iyd6g2oi.CalendarWriteAction>(data['data']);
+    }
+    if (dataClassName == 'CalendarWriteOutcome') {
+      return deserialize<_i3u14n80.CalendarWriteOutcome>(data['data']);
+    }
+    if (dataClassName == 'CalendarWriteResult') {
+      return deserialize<_i5mmfzwl.CalendarWriteResult>(data['data']);
+    }
+    if (dataClassName == 'CoverageState') {
+      return deserialize<_il89vgny.CoverageState>(data['data']);
+    }
+    if (dataClassName == 'PlanCommitRequest') {
+      return deserialize<_ilaph13t.PlanCommitRequest>(data['data']);
+    }
+    if (dataClassName == 'PlanCommitResult') {
+      return deserialize<_ixc6g37a.PlanCommitResult>(data['data']);
+    }
+    if (dataClassName == 'PlanHorizon') {
+      return deserialize<_ititmozf.PlanHorizon>(data['data']);
+    }
+    if (dataClassName == 'PlanProposal') {
+      return deserialize<_iv13hf9x.PlanProposal>(data['data']);
+    }
+    if (dataClassName == 'PlanRequest') {
+      return deserialize<_idh5khlu.PlanRequest>(data['data']);
+    }
+    if (dataClassName == 'PlannerPreferences') {
+      return deserialize<_iw1c6zow.PlannerPreferences>(data['data']);
+    }
+    if (dataClassName == 'PlannerPreferencesDraft') {
+      return deserialize<_i03liexf.PlannerPreferencesDraft>(data['data']);
+    }
+    if (dataClassName == 'PlanningErrorCode') {
+      return deserialize<_ityq5odj.PlanningErrorCode>(data['data']);
+    }
+    if (dataClassName == 'PlanningException') {
+      return deserialize<_iehth582.PlanningException>(data['data']);
+    }
+    if (dataClassName == 'ReviewPlan') {
+      return deserialize<_icv3lfjf.ReviewPlan>(data['data']);
+    }
+    if (dataClassName == 'ReviewSession') {
+      return deserialize<_indyheef.ReviewSession>(data['data']);
+    }
+    if (dataClassName == 'SessionChangeResult') {
+      return deserialize<_in0sx9zc.SessionChangeResult>(data['data']);
+    }
+    if (dataClassName == 'SessionItem') {
+      return deserialize<_i716ymk1.SessionItem>(data['data']);
+    }
+    if (dataClassName == 'SessionItemView') {
+      return deserialize<_i3pyieja.SessionItemView>(data['data']);
+    }
+    if (dataClassName == 'SessionMoveRequest') {
+      return deserialize<_i91809id.SessionMoveRequest>(data['data']);
+    }
+    if (dataClassName == 'SessionStatus') {
+      return deserialize<_izbi9tiy.SessionStatus>(data['data']);
+    }
+    if (dataClassName == 'SessionView') {
+      return deserialize<_iyjcmdi4.SessionView>(data['data']);
     }
     if (dataClassName == 'PinneProfile') {
       return deserialize<_ijguvy1g.PinneProfile>(data['data']);

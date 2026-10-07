@@ -10,6 +10,8 @@ resolution: workspace
 
 dependencies:
   crypto: ^3.0.6
+  pinne_calendar:
+    path: ../pinne_calendar
   pinne_capture:
     path: ../pinne_capture
   serverpod: 4.0.3

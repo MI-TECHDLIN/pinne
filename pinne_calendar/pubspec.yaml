@@ -1,0 +1,18 @@
+name: pinne_calendar
+description: >-
+  Pure Dart calendar rules shared by the Pinne server and app: normalized busy
+  intervals, the provider-independent calendar adapter contract, the
+  deterministic session slot planner and iCalendar export.
+publish_to: none
+
+environment:
+  sdk: '^3.12.2'
+
+resolution: workspace
+
+dependencies:
+  timezone: ^0.11.1
+
+dev_dependencies:
+  lints: '>=3.0.0 <7.0.0'
+  test: ^1.25.5

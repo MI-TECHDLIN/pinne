@@ -46,7 +46,7 @@ jobs:
           git diff --exit-code -- lib/src/generated ../pinne_client
 
       - name: Check formatting
-        run: dart format --set-exit-if-changed pinne_capture/lib pinne_capture/test pinne_server/lib pinne_server/test pinne_server/bin pinne_flutter/lib pinne_flutter/test
+        run: dart format --set-exit-if-changed pinne_calendar/lib pinne_calendar/test pinne_capture/lib pinne_capture/test pinne_server/lib pinne_server/test pinne_server/bin pinne_flutter/lib pinne_flutter/test
 
       - name: Analyze shared capture rules
         working-directory: pinne_capture
@@ -54,6 +54,14 @@ jobs:
 
       - name: Shared capture rules tests
         working-directory: pinne_capture
+        run: dart test
+
+      - name: Analyze shared calendar rules
+        working-directory: pinne_calendar
+        run: dart analyze --fatal-infos
+
+      - name: Shared calendar rules tests
+        working-directory: pinne_calendar
         run: dart test
 
       - name: Analyze server

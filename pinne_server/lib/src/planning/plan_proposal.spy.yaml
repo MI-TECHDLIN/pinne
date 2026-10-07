@@ -1,0 +1,15 @@
+### Sessions that are not committed yet, with the availability coverage
+### behind them.
+class: PlanProposal
+fields:
+  plan: ReviewPlan
+  sessions: List<SessionView>
+  approvalMode: ApprovalMode
+  ### Whether the user may accept this plan as checked.
+  canCommit: bool
+  ### Why not, in plain language.
+  commitBlockedReason: String?
+  ### Why fewer sessions than asked, if so.
+  shortfall: String?
+  ### Where accepted sessions will be written, if anywhere.
+  writeCalendarName: String?

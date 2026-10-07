@@ -1,0 +1,25 @@
+### A planned block of review time. Its calendar event is a separate link;
+### an elapsed session does not mean its items were reviewed.
+class: ReviewSession
+table: review_session
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  planId: UuidValue?, relation(parent=review_plan, onDelete=SetNull)
+  startAt: DateTime
+  endAt: DateTime
+  timezone: String
+  status: SessionStatus
+  schedulingMode: ApprovalMode
+  ### False when the user kept it without a calendar check.
+  availabilityVerified: bool
+  ### Bumped on every move.
+  planRevision: int, default=1
+  ### The last move or cancel, so a retry is answered without repeating it.
+  lastOperationId: UuidValue?
+  createdAt: DateTime, default=now
+indexes:
+  review_session_owner_start_idx:
+    fields: ownerId, startAt
+  review_session_plan_idx:
+    fields: planId

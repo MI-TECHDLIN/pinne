@@ -1,0 +1,13 @@
+### Where a session's calendar event stands.
+enum: EventSyncState
+serialized: byName
+values:
+  - pendingCreate
+  - synced
+  - pendingUpdate
+  - pendingDelete
+  - deleted
+  ### The event disappeared from the calendar outside Pinne.
+  - missing
+  ### The id now points at an event Pinne did not create; left untouched.
+  - foreign

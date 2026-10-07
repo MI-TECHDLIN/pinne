@@ -1,0 +1,6 @@
+### A planning rule refused the request; `message` says what to do.
+exception: PlanningException
+fields:
+  code: PlanningErrorCode
+  message: String
+  sessionIds: List<UuidValue>?

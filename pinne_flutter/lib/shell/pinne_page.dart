@@ -13,8 +13,12 @@ class PinnePage extends StatelessWidget {
     required this.headline,
     this.headlineBold,
     this.subtitle,
+    this.leading,
     this.children = const [],
   });
+
+  /// Shown above the headline, such as a back button on pushed screens.
+  final Widget? leading;
 
   final String headline;
   final String? headlineBold;
@@ -43,6 +47,10 @@ class PinnePage extends StatelessWidget {
             PinneSpacing.navClearance,
           ),
           children: [
+            if (leading != null) ...[
+              Align(alignment: Alignment.centerLeft, child: leading),
+              const SizedBox(height: PinneSpacing.sm),
+            ],
             Semantics(
               header: true,
               child: Text.rich(

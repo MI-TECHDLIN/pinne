@@ -10,6 +10,10 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:pinne_server/src/generated/calendar/calendar_selection_choice.dart'
+    as _i396ixoa;
+import 'package:pinne_server/src/generated/calendar/device_calendar_report.dart'
+    as _ixwdetx3;
 import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
 import 'package:pinne_server/src/generated/collections/collection_draft.dart'
@@ -18,6 +22,16 @@ import 'package:pinne_server/src/generated/items/capture_draft.dart'
     as _iushcgme;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/items/item_draft.dart' as _ittgmzop;
+import 'package:pinne_server/src/generated/planning/calendar_write_result.dart'
+    as _iaiz9j0d;
+import 'package:pinne_server/src/generated/planning/plan_commit_request.dart'
+    as _icuwwueq;
+import 'package:pinne_server/src/generated/planning/plan_request.dart'
+    as _i6zrjude;
+import 'package:pinne_server/src/generated/planning/planner_preferences_draft.dart'
+    as _iq9m58hd;
+import 'package:pinne_server/src/generated/planning/session_move_request.dart'
+    as _ijei0lg9;
 import 'package:pinne_server/src/generated/profile/profile_draft.dart'
     as _i2c58fcj;
 import 'package:serverpod/serverpod.dart' as _is;
@@ -28,9 +42,11 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/google_idp_endpoint.dart' as _i71axiz0;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
+import '../calendar/calendar_endpoint.dart' as _i7b5ov6a;
 import '../collections/collection_endpoint.dart' as _i5j0184s;
 import '../health/health_endpoint.dart' as _id9paj9q;
 import '../items/item_endpoint.dart' as _i97sinw1;
+import '../planning/planner_endpoint.dart' as _icn41d99;
 import '../profile/profile_endpoint.dart' as _i6ky944g;
 
 class Endpoints extends _is.EndpointDispatch {
@@ -55,6 +71,12 @@ class Endpoints extends _is.EndpointDispatch {
           'jwtRefresh',
           null,
         ),
+      'calendar': _i7b5ov6a.CalendarEndpoint()
+        ..initialize(
+          server,
+          'calendar',
+          null,
+        ),
       'collection': _i5j0184s.CollectionEndpoint()
         ..initialize(
           server,
@@ -71,6 +93,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'item',
+          null,
+        ),
+      'planner': _icn41d99.PlannerEndpoint()
+        ..initialize(
+          server,
+          'planner',
           null,
         ),
       'profile': _i6ky944g.ProfileEndpoint()
@@ -358,6 +386,105 @@ class Endpoints extends _is.EndpointDispatch {
         ),
       },
     );
+    connectors['calendar'] = _is.EndpointConnector(
+      name: 'calendar',
+      endpoint: endpoints['calendar']!,
+      methodConnectors: {
+        'routes': _is.MethodConnector(
+          name: 'routes',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['calendar'] as _i7b5ov6a.CalendarEndpoint)
+                  .routes(session),
+        ),
+        'authorizeGoogle': _is.MethodConnector(
+          name: 'authorizeGoogle',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['calendar'] as _i7b5ov6a.CalendarEndpoint)
+                  .authorizeGoogle(session),
+        ),
+        'connections': _is.MethodConnector(
+          name: 'connections',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['calendar'] as _i7b5ov6a.CalendarEndpoint)
+                  .connections(session),
+        ),
+        'syncDeviceCalendars': _is.MethodConnector(
+          name: 'syncDeviceCalendars',
+          params: {
+            'report': _is.ParameterDescription(
+              name: 'report',
+              type: _is.getType<_ixwdetx3.DeviceCalendarReport>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['calendar'] as _i7b5ov6a.CalendarEndpoint)
+                  .syncDeviceCalendars(
+                    session,
+                    params['report'],
+                  ),
+        ),
+        'setSelections': _is.MethodConnector(
+          name: 'setSelections',
+          params: {
+            'connectionId': _is.ParameterDescription(
+              name: 'connectionId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'choices': _is.ParameterDescription(
+              name: 'choices',
+              type: _is.getType<List<_i396ixoa.CalendarSelectionChoice>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['calendar'] as _i7b5ov6a.CalendarEndpoint)
+                  .setSelections(
+                    session,
+                    params['connectionId'],
+                    params['choices'],
+                  ),
+        ),
+        'disconnect': _is.MethodConnector(
+          name: 'disconnect',
+          params: {
+            'connectionId': _is.ParameterDescription(
+              name: 'connectionId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['calendar'] as _i7b5ov6a.CalendarEndpoint)
+                  .disconnect(
+                    session,
+                    params['connectionId'],
+                  ),
+        ),
+      },
+    );
     connectors['collection'] = _is.EndpointConnector(
       name: 'collection',
       endpoint: endpoints['collection']!,
@@ -587,6 +714,221 @@ class Endpoints extends _is.EndpointDispatch {
                 session,
                 params['id'],
               ),
+        ),
+      },
+    );
+    connectors['planner'] = _is.EndpointConnector(
+      name: 'planner',
+      endpoint: endpoints['planner']!,
+      methodConnectors: {
+        'preferences': _is.MethodConnector(
+          name: 'preferences',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['planner'] as _icn41d99.PlannerEndpoint)
+                  .preferences(session),
+        ),
+        'savePreferences': _is.MethodConnector(
+          name: 'savePreferences',
+          params: {
+            'draft': _is.ParameterDescription(
+              name: 'draft',
+              type: _is.getType<_iq9m58hd.PlannerPreferencesDraft>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['planner'] as _icn41d99.PlannerEndpoint)
+                  .savePreferences(
+                    session,
+                    params['draft'],
+                  ),
+        ),
+        'propose': _is.MethodConnector(
+          name: 'propose',
+          params: {
+            'request': _is.ParameterDescription(
+              name: 'request',
+              type: _is.getType<_i6zrjude.PlanRequest>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['planner'] as _icn41d99.PlannerEndpoint).propose(
+                    session,
+                    params['request'],
+                  ),
+        ),
+        'currentProposal': _is.MethodConnector(
+          name: 'currentProposal',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['planner'] as _icn41d99.PlannerEndpoint)
+                  .currentProposal(session),
+        ),
+        'commit': _is.MethodConnector(
+          name: 'commit',
+          params: {
+            'request': _is.ParameterDescription(
+              name: 'request',
+              type: _is.getType<_icuwwueq.PlanCommitRequest>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['planner'] as _icn41d99.PlannerEndpoint).commit(
+                    session,
+                    params['request'],
+                  ),
+        ),
+        'sessions': _is.MethodConnector(
+          name: 'sessions',
+          params: {
+            'from': _is.ParameterDescription(
+              name: 'from',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+            'to': _is.ParameterDescription(
+              name: 'to',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['planner'] as _icn41d99.PlannerEndpoint).sessions(
+                    session,
+                    params['from'],
+                    params['to'],
+                  ),
+        ),
+        'moveSession': _is.MethodConnector(
+          name: 'moveSession',
+          params: {
+            'request': _is.ParameterDescription(
+              name: 'request',
+              type: _is.getType<_ijei0lg9.SessionMoveRequest>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['planner'] as _icn41d99.PlannerEndpoint)
+                  .moveSession(
+                    session,
+                    params['request'],
+                  ),
+        ),
+        'cancelSession': _is.MethodConnector(
+          name: 'cancelSession',
+          params: {
+            'sessionId': _is.ParameterDescription(
+              name: 'sessionId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'operationId': _is.ParameterDescription(
+              name: 'operationId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'deviceId': _is.ParameterDescription(
+              name: 'deviceId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['planner'] as _icn41d99.PlannerEndpoint)
+                  .cancelSession(
+                    session,
+                    params['sessionId'],
+                    params['operationId'],
+                    params['deviceId'],
+                  ),
+        ),
+        'deviceWork': _is.MethodConnector(
+          name: 'deviceWork',
+          params: {
+            'deviceId': _is.ParameterDescription(
+              name: 'deviceId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['planner'] as _icn41d99.PlannerEndpoint)
+                  .deviceWork(
+                    session,
+                    params['deviceId'],
+                  ),
+        ),
+        'reportWrites': _is.MethodConnector(
+          name: 'reportWrites',
+          params: {
+            'results': _is.ParameterDescription(
+              name: 'results',
+              type: _is.getType<List<_iaiz9j0d.CalendarWriteResult>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['planner'] as _icn41d99.PlannerEndpoint)
+                  .reportWrites(
+                    session,
+                    params['results'],
+                  ),
+        ),
+        'exportIcs': _is.MethodConnector(
+          name: 'exportIcs',
+          params: {
+            'sessionIds': _is.ParameterDescription(
+              name: 'sessionIds',
+              type: _is.getType<List<_is.UuidValue>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['planner'] as _icn41d99.PlannerEndpoint).exportIcs(
+                    session,
+                    params['sessionIds'],
+                  ),
         ),
       },
     );

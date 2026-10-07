@@ -1,0 +1,8 @@
+### Which calendar was checked for a plan, and how well.
+class: CalendarCoverage
+fields:
+  selectionId: UuidValue
+  calendarName: String
+  route: CalendarRoute
+  state: CoverageState
+  checkedAt: DateTime?

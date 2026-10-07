@@ -1,0 +1,26 @@
+### Maps a review session to the event written for it. The remote event id
+### is stored only after the device or provider confirms it.
+class: CalendarEventLink
+table: calendar_event_link
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  sessionId: UuidValue, relation(parent=review_session, onDelete=Cascade)
+  selectionId: UuidValue, relation(parent=calendar_selection, onDelete=Cascade)
+  ### The install that writes the event, for device routes.
+  deviceId: UuidValue?
+  ### Stable for the session; stored in the event so a retry finds it.
+  eventUid: String
+  externalEventId: String?
+  providerRevision: String?
+  syncState: EventSyncState
+  ### The commit, move or cancel that last changed this link.
+  operationId: UuidValue
+  lastError: String?
+  updatedAt: DateTime, default=now
+indexes:
+  calendar_event_link_session_selection_idx:
+    fields: sessionId, selectionId
+    unique: true
+  calendar_event_link_owner_device_idx:
+    fields: ownerId, deviceId, syncState

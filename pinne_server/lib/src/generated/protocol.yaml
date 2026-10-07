@@ -13,6 +13,13 @@ googleIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+calendar:
+  - routes:
+  - authorizeGoogle:
+  - connections:
+  - syncDeviceCalendars:
+  - setSelections:
+  - disconnect:
 collection:
   - list:
   - get:
@@ -28,6 +35,18 @@ item:
   - create:
   - update:
   - delete:
+planner:
+  - preferences:
+  - savePreferences:
+  - propose:
+  - currentProposal:
+  - commit:
+  - sessions:
+  - moveSession:
+  - cancelSession:
+  - deviceWork:
+  - reportWrites:
+  - exportIcs:
 profile:
   - get:
   - upsert:

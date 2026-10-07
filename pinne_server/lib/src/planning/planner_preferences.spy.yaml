@@ -1,0 +1,23 @@
+### The owner's planning rules. Times are local to `timezone`.
+class: PlannerPreferences
+table: planner_preferences
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  horizon: PlanHorizon
+  ### ISO weekdays, 1 Monday to 7 Sunday.
+  weekdays: List<int>
+  ### Minutes after local midnight.
+  windowStartMinute: int
+  windowEndMinute: int
+  sessionMinutes: int
+  maxSessions: int
+  bufferMinutes: int
+  minLeadMinutes: int
+  ### IANA time zone, such as Africa/Lagos.
+  timezone: String
+  approvalMode: ApprovalMode
+indexes:
+  planner_preferences_owner_idx:
+    fields: ownerId
+    unique: true
