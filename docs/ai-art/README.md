@@ -12,12 +12,15 @@ images do not replace it and no screen uses them yet.
 |---|---|---|
 | Master character | done, usable | `pinne_flutter/assets/art/ribbon_spirit_master.webp` |
 | Master cut-out | done, usable | `pinne_flutter/assets/art/cutout/ribbon_spirit_master.webp` |
-| Concept sheet (idle, happy, sleepy, excited) | pending: free quota | |
+| Mood: idle | done, usable (right eye on the inner edge) | `ribbon_spirit_idle.webp`, `cutout/ribbon_spirit_idle.webp` |
+| Mood: happy | done, usable but mild (reads as idle plus sparkles) | `ribbon_spirit_happy.webp`, `cutout/ribbon_spirit_happy.webp` |
+| Mood: sleepy | done, usable | `ribbon_spirit_sleepy.webp`, `cutout/ribbon_spirit_sleepy.webp` |
+| Mood: excited | pending: free quota (one rejected try) | |
 | Welcome hero | pending: free quota | |
 | Empty collection / empty review queue / no search results | pending: free quota | |
 
-The free ZeroGPU quota ended after 8 generations on 2026-10-06 (see
-[Access and quota](#access-and-quota)).
+The free ZeroGPU quota ended after 8 generations on 2026-10-06 and after 7
+more on 2026-10-07 (see [Access and quota](#access-and-quota)).
 
 `pinne_flutter/assets/art/manifest.json` lists every shipped file with its
 source generation, seed and size.
@@ -120,16 +123,54 @@ renders on `origin/main` at `f33fad9`).
   or empty state, but not close enough to sit next to the animated spirit on
   the same screen as if they were one drawing.
 
+## Mood poses
+
+Every mood is a reference edit (`input_images`) at 1024x1024, seeds 410011
+onward. Each prompt asked for the eyes in the upper part of the curl, because
+the master's eyes sit low on the body and can read like feet. The first edit
+(idle) did this from the master; the later moods use the accepted idle still
+as their reference, because edits of the master kept dropping one eye or
+adding pupils. Exact prompts are in the log.
+
+| Seed | Name | Reference | Verdict |
+|---|---|---|---|
+| 410011 | mood-idle | master | **Accepted as idle** |
+| 410012 | mood-happy | master | Rejected: pupils and heavy lids, reads sceptical |
+| 410013 | mood-happy-2 | master | Rejected: one eye |
+| 410014 | mood-happy-3 | idle | **Accepted as happy**: tilt plus pink and mint sparkles |
+| 410015 | mood-sleepy | idle | Rejected: lower body twisted into a malformed knot, moon stuck to the tail |
+| 410016 | mood-sleepy-2 | idle | **Accepted as sleepy**: closed arc eyes, separate crescent moon |
+| 410017 | mood-excited | idle | Rejected: one eye, body reshaped into a thin hook |
+| 410018 | mood-excited-2 | idle | Failed: quota |
+
+**Eyes:** moving them up worked. In all three accepted moods both eyes sit
+in the upper part of the curl and read as a face. The catch: the right eye
+lands on the inner edge of the curl, over the open centre, so on a close look
+it floats slightly instead of sitting fully on the ribbon.
+
+**Weak points:** happy differs from idle mostly by the sparkles and a small
+tilt. The edits are a little softer than the master and keep the Space's lossy
+WebP. All three have the same silhouette, so they work as a set.
+
 ## Cut-outs
 
-Transparent versions are made locally on CPU with rembg 2.0.85 and the
-`isnet-general-use` model, then trimmed, padded by 24 px and saved as WebP
-under 250 KB ([`scripts/cutout.py`](scripts/cutout.py)). BiRefNet
-(`birefnet-general` and `birefnet-general-lite`) was tried first, but on this
-8 GB codespace it peaked at about 3.7 GB and was killed by the memory guard
-every time, so it produced no output. The ISNet cut of the master has a clean
-edge with a faint dark rim from the original background, which disappears on
-Pinne's dark surfaces and shows slightly on white.
+Transparent versions are made locally on CPU with rembg 2.0.85, then
+trimmed, padded by 24 px and saved as WebP under 250 KB
+([`scripts/cutout.py`](scripts/cutout.py)).
+
+- **Master:** the `isnet-general-use` model. It has a clean edge with a faint
+  dark rim from the original background, which disappears on Pinne's dark
+  surfaces and shows slightly on white.
+- **Moods:** ISNet was killed by the codespace memory guard while other jobs
+  ran, so these use the small `silueta` model (about 0.6 GB peak, one thread).
+  On its own silueta keeps the swirl's open centre as a dark blob, so the
+  script multiplies its mask by a luminance key against the plain dark
+  background (`HOLE_KEY=1`). That clears the centre and the floor and keeps
+  the sparkles and moon. They look clean on dark surfaces. On white, the
+  bottom edge is a little soft and the right eye keeps a thin dark shadow rim
+  where it sits over the open centre.
+- BiRefNet (`birefnet-general` and `birefnet-general-lite`) peaked at about
+  3.7 GB and was killed every time, so it produced no output.
 
 ## Access and quota
 
@@ -144,12 +185,20 @@ hours after the first use (<https://huggingface.co/docs/hub/spaces-zerogpu>).
 The Space reserves up to 85 s per call (`@spaces.GPU(duration=85)`); each
 call took 2-9 s end to end. The failed calls returned in under a second.
 
+2026-10-07: 1 generation at 10:15 UTC and 6 more at 16:06-16:08 UTC, then the
+same message at 16:08 UTC. So the free account gives about 7-8 calls a day
+with this Space. The remaining five pieces (excited, hero, three empty states)
+need about one or two more free days at the current reject rate. Hugging Face
+PRO (US$9 a month) raises ZeroGPU to 40 minutes a day, which would finish
+them in one sitting.
+
 ## Generation count
 
 | Batch | Calls | Succeeded |
 |---|---|---|
-| Master candidates | 10 | 8 |
-| **Total** | **10** | **8** |
+| Master candidates (2026-10-06) | 10 | 8 |
+| Mood edits (2026-10-07) | 8 | 7 |
+| **Total** | **18** | **15** |
 
 Budget: at most 40 generations.
 
@@ -160,6 +209,7 @@ Budget: at most 40 generations.
 | FLUX.2 [klein] 4B weights | Apache-2.0 | <https://huggingface.co/black-forest-labs/FLUX.2-klein-4B> |
 | rembg 2.0.85 | MIT | <https://github.com/danielgatis/rembg> |
 | ISNet (`isnet-general-use`, DIS) | Apache-2.0 | <https://github.com/xuebinqin/DIS> |
+| silueta (rembg's reduced U²-Net) | Apache-2.0 | <https://github.com/xuebinqin/U-2-Net> |
 | BiRefNet (tried, not used) | MIT | <https://github.com/ZhengPeng7/BiRefNet> |
 
 Apache-2.0 puts no restriction on generated outputs. Prompt-only images are
@@ -173,8 +223,8 @@ generally not copyrightable (US Copyright Office, Part 2 report, January
 > Black Forest Labs, an open-weight model under the Apache-2.0 licence, run
 > through its official Hugging Face Space. We wrote the prompts, generated a
 > small batch, picked the images by hand and removed backgrounds locally with
-> rembg (MIT) and the ISNet model (Apache-2.0). The animated Ribbon Spirit in
-> the app is drawn in Flutter code, not generated. Prompts, seeds and the
+> rembg (MIT) and the ISNet and U²-Net models (Apache-2.0). The animated
+> Ribbon Spirit in the app is drawn in Flutter code, not generated. Prompts, seeds and the
 > licence record are in `docs/ai-art/` in the repository.
 
 ## Reproduce
@@ -185,6 +235,9 @@ python3 -m venv /tmp/art-venv
 export HF_TOKEN=...   # a Hugging Face read token; never commit it
 /tmp/art-venv/bin/python -I docs/ai-art/scripts/gen.py master-05 "<prompt>" 410005 1024 1024
 /tmp/art-venv/bin/python -I docs/ai-art/scripts/cutout.py out/master-05.webp cutout.webp
+# a mood edit: pass the reference image after the size; light cut-out
+/tmp/art-venv/bin/python -I docs/ai-art/scripts/gen.py mood-sleepy-2 "<prompt>" 410016 1024 1024 ribbon_spirit_idle.webp
+REMBG_MODEL=silueta HOLE_KEY=1 /tmp/art-venv/bin/python -I docs/ai-art/scripts/cutout.py out/mood-sleepy-2.webp cutout.webp
 ```
 
 `gen.py` writes to an `out/` folder next to itself; run a copy outside the repo.
