@@ -11,6 +11,7 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:pinne_client/src/protocol/ai/ai_suggestion.dart' as _iq5krdy3;
 import 'package:pinne_client/src/protocol/calendar/calendar_connection_view.dart'
     as _i0t8t4zu;
 import 'package:pinne_client/src/protocol/calendar/calendar_route_status.dart'
@@ -31,6 +32,15 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import 'ai/ai_daily_usage.dart' as _ieqt63qc;
+import 'ai/ai_evidence_coverage.dart' as _ike1rdmf;
+import 'ai/ai_organize_task.dart' as _i3rayejx;
+import 'ai/ai_preference.dart' as _irbaoatq;
+import 'ai/ai_processing_state.dart' as _iuqfkn3x;
+import 'ai/ai_settings.dart' as _i8oswxfq;
+import 'ai/ai_suggestion.dart' as _ispfx06l;
+import 'ai/ai_suggestion_kind.dart' as _il1lz8eg;
+import 'ai/ai_suggestion_status.dart' as _it1ujq25;
 import 'calendar/calendar_connection.dart' as _iqtchur3;
 import 'calendar/calendar_connection_view.dart' as _ijwz5xp0;
 import 'calendar/calendar_event_link.dart' as _ily35bfr;
@@ -93,6 +103,15 @@ import 'reviews/review_event.dart' as _i0pv2k4n;
 import 'reviews/review_event_type.dart' as _i5mz8id3;
 import 'tags/item_tag.dart' as _iv0vmssg;
 import 'tags/tag.dart' as _iopagaq8;
+export 'ai/ai_daily_usage.dart';
+export 'ai/ai_evidence_coverage.dart';
+export 'ai/ai_organize_task.dart';
+export 'ai/ai_preference.dart';
+export 'ai/ai_processing_state.dart';
+export 'ai/ai_settings.dart';
+export 'ai/ai_suggestion.dart';
+export 'ai/ai_suggestion_kind.dart';
+export 'ai/ai_suggestion_status.dart';
 export 'calendar/calendar_connection.dart';
 export 'calendar/calendar_connection_view.dart';
 export 'calendar/calendar_event_link.dart';
@@ -191,6 +210,33 @@ class Protocol extends _isc.SerializationManager {
       }
     }
 
+    if (t == _ieqt63qc.AiDailyUsage) {
+      return _ieqt63qc.AiDailyUsage.fromJson(data) as T;
+    }
+    if (t == _ike1rdmf.AiEvidenceCoverage) {
+      return _ike1rdmf.AiEvidenceCoverage.fromJson(data) as T;
+    }
+    if (t == _i3rayejx.AiOrganizeTask) {
+      return _i3rayejx.AiOrganizeTask.fromJson(data) as T;
+    }
+    if (t == _irbaoatq.AiPreference) {
+      return _irbaoatq.AiPreference.fromJson(data) as T;
+    }
+    if (t == _iuqfkn3x.AiProcessingState) {
+      return _iuqfkn3x.AiProcessingState.fromJson(data) as T;
+    }
+    if (t == _i8oswxfq.AiSettings) {
+      return _i8oswxfq.AiSettings.fromJson(data) as T;
+    }
+    if (t == _ispfx06l.AiSuggestion) {
+      return _ispfx06l.AiSuggestion.fromJson(data) as T;
+    }
+    if (t == _il1lz8eg.AiSuggestionKind) {
+      return _il1lz8eg.AiSuggestionKind.fromJson(data) as T;
+    }
+    if (t == _it1ujq25.AiSuggestionStatus) {
+      return _it1ujq25.AiSuggestionStatus.fromJson(data) as T;
+    }
     if (t == _iqtchur3.CalendarConnection) {
       return _iqtchur3.CalendarConnection.fromJson(data) as T;
     }
@@ -376,6 +422,38 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _iopagaq8.Tag) {
       return _iopagaq8.Tag.fromJson(data) as T;
+    }
+    if (t == _isc.getType<_ieqt63qc.AiDailyUsage?>()) {
+      return (data != null ? _ieqt63qc.AiDailyUsage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ike1rdmf.AiEvidenceCoverage?>()) {
+      return (data != null ? _ike1rdmf.AiEvidenceCoverage.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i3rayejx.AiOrganizeTask?>()) {
+      return (data != null ? _i3rayejx.AiOrganizeTask.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_irbaoatq.AiPreference?>()) {
+      return (data != null ? _irbaoatq.AiPreference.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iuqfkn3x.AiProcessingState?>()) {
+      return (data != null ? _iuqfkn3x.AiProcessingState.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i8oswxfq.AiSettings?>()) {
+      return (data != null ? _i8oswxfq.AiSettings.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ispfx06l.AiSuggestion?>()) {
+      return (data != null ? _ispfx06l.AiSuggestion.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_il1lz8eg.AiSuggestionKind?>()) {
+      return (data != null ? _il1lz8eg.AiSuggestionKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_it1ujq25.AiSuggestionStatus?>()) {
+      return (data != null ? _it1ujq25.AiSuggestionStatus.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_iqtchur3.CalendarConnection?>()) {
       return (data != null ? _iqtchur3.CalendarConnection.fromJson(data) : null)
@@ -707,6 +785,12 @@ class Protocol extends _isc.SerializationManager {
               : null)
           as T;
     }
+    if (t == List<_iq5krdy3.AiSuggestion>) {
+      return (data as List)
+              .map((e) => deserialize<_iq5krdy3.AiSuggestion>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_ig4e8y15.CalendarRouteStatus>) {
       return (data as List)
               .map((e) => deserialize<_ig4e8y15.CalendarRouteStatus>(e))
@@ -768,6 +852,15 @@ class Protocol extends _isc.SerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _ieqt63qc.AiDailyUsage => 'AiDailyUsage',
+      _ike1rdmf.AiEvidenceCoverage => 'AiEvidenceCoverage',
+      _i3rayejx.AiOrganizeTask => 'AiOrganizeTask',
+      _irbaoatq.AiPreference => 'AiPreference',
+      _iuqfkn3x.AiProcessingState => 'AiProcessingState',
+      _i8oswxfq.AiSettings => 'AiSettings',
+      _ispfx06l.AiSuggestion => 'AiSuggestion',
+      _il1lz8eg.AiSuggestionKind => 'AiSuggestionKind',
+      _it1ujq25.AiSuggestionStatus => 'AiSuggestionStatus',
       _iqtchur3.CalendarConnection => 'CalendarConnection',
       _ijwz5xp0.CalendarConnectionView => 'CalendarConnectionView',
       _ily35bfr.CalendarEventLink => 'CalendarEventLink',
@@ -844,6 +937,24 @@ class Protocol extends _isc.SerializationManager {
     }
 
     switch (data) {
+      case _ieqt63qc.AiDailyUsage():
+        return 'AiDailyUsage';
+      case _ike1rdmf.AiEvidenceCoverage():
+        return 'AiEvidenceCoverage';
+      case _i3rayejx.AiOrganizeTask():
+        return 'AiOrganizeTask';
+      case _irbaoatq.AiPreference():
+        return 'AiPreference';
+      case _iuqfkn3x.AiProcessingState():
+        return 'AiProcessingState';
+      case _i8oswxfq.AiSettings():
+        return 'AiSettings';
+      case _ispfx06l.AiSuggestion():
+        return 'AiSuggestion';
+      case _il1lz8eg.AiSuggestionKind():
+        return 'AiSuggestionKind';
+      case _it1ujq25.AiSuggestionStatus():
+        return 'AiSuggestionStatus';
       case _iqtchur3.CalendarConnection():
         return 'CalendarConnection';
       case _ijwz5xp0.CalendarConnectionView():
@@ -989,6 +1100,33 @@ class Protocol extends _isc.SerializationManager {
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'AiDailyUsage') {
+      return deserialize<_ieqt63qc.AiDailyUsage>(data['data']);
+    }
+    if (dataClassName == 'AiEvidenceCoverage') {
+      return deserialize<_ike1rdmf.AiEvidenceCoverage>(data['data']);
+    }
+    if (dataClassName == 'AiOrganizeTask') {
+      return deserialize<_i3rayejx.AiOrganizeTask>(data['data']);
+    }
+    if (dataClassName == 'AiPreference') {
+      return deserialize<_irbaoatq.AiPreference>(data['data']);
+    }
+    if (dataClassName == 'AiProcessingState') {
+      return deserialize<_iuqfkn3x.AiProcessingState>(data['data']);
+    }
+    if (dataClassName == 'AiSettings') {
+      return deserialize<_i8oswxfq.AiSettings>(data['data']);
+    }
+    if (dataClassName == 'AiSuggestion') {
+      return deserialize<_ispfx06l.AiSuggestion>(data['data']);
+    }
+    if (dataClassName == 'AiSuggestionKind') {
+      return deserialize<_il1lz8eg.AiSuggestionKind>(data['data']);
+    }
+    if (dataClassName == 'AiSuggestionStatus') {
+      return deserialize<_it1ujq25.AiSuggestionStatus>(data['data']);
     }
     if (dataClassName == 'CalendarConnection') {
       return deserialize<_iqtchur3.CalendarConnection>(data['data']);

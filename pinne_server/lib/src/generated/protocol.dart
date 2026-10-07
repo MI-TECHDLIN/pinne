@@ -11,6 +11,7 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:pinne_server/src/generated/ai/ai_suggestion.dart' as _i9k1kmrj;
 import 'package:pinne_server/src/generated/calendar/calendar_connection_view.dart'
     as _i0xb4k4o;
 import 'package:pinne_server/src/generated/calendar/calendar_route_status.dart'
@@ -32,6 +33,15 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import 'ai/ai_daily_usage.dart' as _ieqt63qc;
+import 'ai/ai_evidence_coverage.dart' as _ike1rdmf;
+import 'ai/ai_organize_task.dart' as _i3rayejx;
+import 'ai/ai_preference.dart' as _irbaoatq;
+import 'ai/ai_processing_state.dart' as _iuqfkn3x;
+import 'ai/ai_settings.dart' as _i8oswxfq;
+import 'ai/ai_suggestion.dart' as _ispfx06l;
+import 'ai/ai_suggestion_kind.dart' as _il1lz8eg;
+import 'ai/ai_suggestion_status.dart' as _it1ujq25;
 import 'calendar/calendar_connection.dart' as _iqtchur3;
 import 'calendar/calendar_connection_view.dart' as _ijwz5xp0;
 import 'calendar/calendar_event_link.dart' as _ily35bfr;
@@ -50,6 +60,8 @@ import 'collections/item_collection.dart' as _ingnmqw7;
 import 'common/assignment_origin.dart' as _izy6d885;
 import 'common/record_not_found_exception.dart' as _ilf890y8;
 import 'common/validation_exception.dart' as _ifwcmx8g;
+import 'future_calls_generated_models/ai_organize_future_call_process_model.dart'
+    as _is4ugn9t;
 import 'health/server_health.dart' as _iozgwprg;
 import 'items/access_state.dart' as _imhj9b3j;
 import 'items/capture_draft.dart' as _idav3wwe;
@@ -95,6 +107,15 @@ import 'reviews/review_event.dart' as _i0pv2k4n;
 import 'reviews/review_event_type.dart' as _i5mz8id3;
 import 'tags/item_tag.dart' as _iv0vmssg;
 import 'tags/tag.dart' as _iopagaq8;
+export 'ai/ai_daily_usage.dart';
+export 'ai/ai_evidence_coverage.dart';
+export 'ai/ai_organize_task.dart';
+export 'ai/ai_preference.dart';
+export 'ai/ai_processing_state.dart';
+export 'ai/ai_settings.dart';
+export 'ai/ai_suggestion.dart';
+export 'ai/ai_suggestion_kind.dart';
+export 'ai/ai_suggestion_status.dart';
 export 'calendar/calendar_connection.dart';
 export 'calendar/calendar_connection_view.dart';
 export 'calendar/calendar_event_link.dart';
@@ -167,6 +188,410 @@ class Protocol extends _is.DatabaseSerializationManager {
   static final Protocol _instance = Protocol._().._registerHostProtocols();
 
   static List<_isp.TableDefinition> get targetTableDefinitions => [
+    _isp.TableDefinition(
+      name: 'ai_daily_usage',
+      dartName: 'AiDailyUsage',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'dateKey',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'requestCount',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'ai_daily_usage_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'ai_daily_usage_owner_date_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'dateKey',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'ai_organize_task',
+      dartName: 'AiOrganizeTask',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'itemId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'state',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AiProcessingState',
+          columnDefault: '\'queued\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'requestedVersion',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '1',
+        ),
+        _isp.ColumnDefinition(
+          name: 'processedVersion',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'dailySlotClaimed',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'quotaDateKey',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'claimedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'completedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'provider',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'ai_organize_task_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'ai_organize_task_fk_1',
+          columns: ['itemId'],
+          referenceTable: 'item',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'ai_organize_task_item_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'itemId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'ai_organize_task_owner_state_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'state',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'ai_preference',
+      dartName: 'AiPreference',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'enabled',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'true',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'ai_preference_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'ai_preference_owner_unique',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'ai_suggestion',
+      dartName: 'AiSuggestion',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'itemId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'kind',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AiSuggestionKind',
+        ),
+        _isp.ColumnDefinition(
+          name: 'origin',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AssignmentOrigin',
+          columnDefault: '\'ai\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'collectionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'value',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'rationale',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'evidenceCoverage',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AiEvidenceCoverage',
+          columnDefault: '\'metadataOnly\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'uncertain',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AiSuggestionStatus',
+          columnDefault: '\'pending\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'resolvedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'ai_suggestion_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'ai_suggestion_fk_1',
+          columns: ['itemId'],
+          referenceTable: 'item',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'ai_suggestion_fk_2',
+          columns: ['collectionId'],
+          referenceTable: 'collection',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'ai_suggestion_owner_item_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'itemId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'status',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _isp.TableDefinition(
       name: 'calendar_connection',
       dartName: 'CalendarConnection',
@@ -842,6 +1267,25 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'String?',
         ),
         _isp.ColumnDefinition(
+          name: 'summary',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'summaryOrigin',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'protocol:AssignmentOrigin?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'summaryManuallyLocked',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
           name: 'priority',
           columnType: _isp.ColumnType.bigint,
           isNullable: false,
@@ -1146,6 +1590,13 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: false,
           dartType: 'protocol:AssignmentOrigin',
           columnDefault: '\'manual\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'manuallyLocked',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
         ),
       ],
       foreignKeys: [
@@ -2101,6 +2552,33 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
 
+    if (t == _ieqt63qc.AiDailyUsage) {
+      return _ieqt63qc.AiDailyUsage.fromJson(data) as T;
+    }
+    if (t == _ike1rdmf.AiEvidenceCoverage) {
+      return _ike1rdmf.AiEvidenceCoverage.fromJson(data) as T;
+    }
+    if (t == _i3rayejx.AiOrganizeTask) {
+      return _i3rayejx.AiOrganizeTask.fromJson(data) as T;
+    }
+    if (t == _irbaoatq.AiPreference) {
+      return _irbaoatq.AiPreference.fromJson(data) as T;
+    }
+    if (t == _iuqfkn3x.AiProcessingState) {
+      return _iuqfkn3x.AiProcessingState.fromJson(data) as T;
+    }
+    if (t == _i8oswxfq.AiSettings) {
+      return _i8oswxfq.AiSettings.fromJson(data) as T;
+    }
+    if (t == _ispfx06l.AiSuggestion) {
+      return _ispfx06l.AiSuggestion.fromJson(data) as T;
+    }
+    if (t == _il1lz8eg.AiSuggestionKind) {
+      return _il1lz8eg.AiSuggestionKind.fromJson(data) as T;
+    }
+    if (t == _it1ujq25.AiSuggestionStatus) {
+      return _it1ujq25.AiSuggestionStatus.fromJson(data) as T;
+    }
     if (t == _iqtchur3.CalendarConnection) {
       return _iqtchur3.CalendarConnection.fromJson(data) as T;
     }
@@ -2154,6 +2632,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _ifwcmx8g.ValidationException) {
       return _ifwcmx8g.ValidationException.fromJson(data) as T;
+    }
+    if (t == _is4ugn9t.AiOrganizeFutureCallProcessModel) {
+      return _is4ugn9t.AiOrganizeFutureCallProcessModel.fromJson(data) as T;
     }
     if (t == _iozgwprg.ServerHealth) {
       return _iozgwprg.ServerHealth.fromJson(data) as T;
@@ -2290,6 +2771,38 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _iopagaq8.Tag) {
       return _iopagaq8.Tag.fromJson(data) as T;
     }
+    if (t == _is.getType<_ieqt63qc.AiDailyUsage?>()) {
+      return (data != null ? _ieqt63qc.AiDailyUsage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ike1rdmf.AiEvidenceCoverage?>()) {
+      return (data != null ? _ike1rdmf.AiEvidenceCoverage.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i3rayejx.AiOrganizeTask?>()) {
+      return (data != null ? _i3rayejx.AiOrganizeTask.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_irbaoatq.AiPreference?>()) {
+      return (data != null ? _irbaoatq.AiPreference.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iuqfkn3x.AiProcessingState?>()) {
+      return (data != null ? _iuqfkn3x.AiProcessingState.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i8oswxfq.AiSettings?>()) {
+      return (data != null ? _i8oswxfq.AiSettings.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ispfx06l.AiSuggestion?>()) {
+      return (data != null ? _ispfx06l.AiSuggestion.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_il1lz8eg.AiSuggestionKind?>()) {
+      return (data != null ? _il1lz8eg.AiSuggestionKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_it1ujq25.AiSuggestionStatus?>()) {
+      return (data != null ? _it1ujq25.AiSuggestionStatus.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_iqtchur3.CalendarConnection?>()) {
       return (data != null ? _iqtchur3.CalendarConnection.fromJson(data) : null)
           as T;
@@ -2372,6 +2885,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_ifwcmx8g.ValidationException?>()) {
       return (data != null
               ? _ifwcmx8g.ValidationException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_is4ugn9t.AiOrganizeFutureCallProcessModel?>()) {
+      return (data != null
+              ? _is4ugn9t.AiOrganizeFutureCallProcessModel.fromJson(data)
               : null)
           as T;
     }
@@ -2624,6 +3143,12 @@ class Protocol extends _is.DatabaseSerializationManager {
               : null)
           as T;
     }
+    if (t == List<_i9k1kmrj.AiSuggestion>) {
+      return (data as List)
+              .map((e) => deserialize<_i9k1kmrj.AiSuggestion>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_ia8eyaw8.CalendarRouteStatus>) {
       return (data as List)
               .map((e) => deserialize<_ia8eyaw8.CalendarRouteStatus>(e))
@@ -2688,6 +3213,15 @@ class Protocol extends _is.DatabaseSerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _ieqt63qc.AiDailyUsage => 'AiDailyUsage',
+      _ike1rdmf.AiEvidenceCoverage => 'AiEvidenceCoverage',
+      _i3rayejx.AiOrganizeTask => 'AiOrganizeTask',
+      _irbaoatq.AiPreference => 'AiPreference',
+      _iuqfkn3x.AiProcessingState => 'AiProcessingState',
+      _i8oswxfq.AiSettings => 'AiSettings',
+      _ispfx06l.AiSuggestion => 'AiSuggestion',
+      _il1lz8eg.AiSuggestionKind => 'AiSuggestionKind',
+      _it1ujq25.AiSuggestionStatus => 'AiSuggestionStatus',
       _iqtchur3.CalendarConnection => 'CalendarConnection',
       _ijwz5xp0.CalendarConnectionView => 'CalendarConnectionView',
       _ily35bfr.CalendarEventLink => 'CalendarEventLink',
@@ -2706,6 +3240,8 @@ class Protocol extends _is.DatabaseSerializationManager {
       _izy6d885.AssignmentOrigin => 'AssignmentOrigin',
       _ilf890y8.RecordNotFoundException => 'RecordNotFoundException',
       _ifwcmx8g.ValidationException => 'ValidationException',
+      _is4ugn9t.AiOrganizeFutureCallProcessModel =>
+        'AiOrganizeFutureCallProcessModel',
       _iozgwprg.ServerHealth => 'ServerHealth',
       _imhj9b3j.AccessState => 'AccessState',
       _idav3wwe.CaptureDraft => 'CaptureDraft',
@@ -2765,6 +3301,24 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
 
     switch (data) {
+      case _ieqt63qc.AiDailyUsage():
+        return 'AiDailyUsage';
+      case _ike1rdmf.AiEvidenceCoverage():
+        return 'AiEvidenceCoverage';
+      case _i3rayejx.AiOrganizeTask():
+        return 'AiOrganizeTask';
+      case _irbaoatq.AiPreference():
+        return 'AiPreference';
+      case _iuqfkn3x.AiProcessingState():
+        return 'AiProcessingState';
+      case _i8oswxfq.AiSettings():
+        return 'AiSettings';
+      case _ispfx06l.AiSuggestion():
+        return 'AiSuggestion';
+      case _il1lz8eg.AiSuggestionKind():
+        return 'AiSuggestionKind';
+      case _it1ujq25.AiSuggestionStatus():
+        return 'AiSuggestionStatus';
       case _iqtchur3.CalendarConnection():
         return 'CalendarConnection';
       case _ijwz5xp0.CalendarConnectionView():
@@ -2801,6 +3355,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'RecordNotFoundException';
       case _ifwcmx8g.ValidationException():
         return 'ValidationException';
+      case _is4ugn9t.AiOrganizeFutureCallProcessModel():
+        return 'AiOrganizeFutureCallProcessModel';
       case _iozgwprg.ServerHealth():
         return 'ServerHealth';
       case _imhj9b3j.AccessState():
@@ -2917,6 +3473,33 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'AiDailyUsage') {
+      return deserialize<_ieqt63qc.AiDailyUsage>(data['data']);
+    }
+    if (dataClassName == 'AiEvidenceCoverage') {
+      return deserialize<_ike1rdmf.AiEvidenceCoverage>(data['data']);
+    }
+    if (dataClassName == 'AiOrganizeTask') {
+      return deserialize<_i3rayejx.AiOrganizeTask>(data['data']);
+    }
+    if (dataClassName == 'AiPreference') {
+      return deserialize<_irbaoatq.AiPreference>(data['data']);
+    }
+    if (dataClassName == 'AiProcessingState') {
+      return deserialize<_iuqfkn3x.AiProcessingState>(data['data']);
+    }
+    if (dataClassName == 'AiSettings') {
+      return deserialize<_i8oswxfq.AiSettings>(data['data']);
+    }
+    if (dataClassName == 'AiSuggestion') {
+      return deserialize<_ispfx06l.AiSuggestion>(data['data']);
+    }
+    if (dataClassName == 'AiSuggestionKind') {
+      return deserialize<_il1lz8eg.AiSuggestionKind>(data['data']);
+    }
+    if (dataClassName == 'AiSuggestionStatus') {
+      return deserialize<_it1ujq25.AiSuggestionStatus>(data['data']);
+    }
     if (dataClassName == 'CalendarConnection') {
       return deserialize<_iqtchur3.CalendarConnection>(data['data']);
     }
@@ -2970,6 +3553,11 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'ValidationException') {
       return deserialize<_ifwcmx8g.ValidationException>(data['data']);
+    }
+    if (dataClassName == 'AiOrganizeFutureCallProcessModel') {
+      return deserialize<_is4ugn9t.AiOrganizeFutureCallProcessModel>(
+        data['data'],
+      );
     }
     if (dataClassName == 'ServerHealth') {
       return deserialize<_iozgwprg.ServerHealth>(data['data']);
@@ -3147,6 +3735,14 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
     switch (t) {
+      case _ieqt63qc.AiDailyUsage:
+        return _ieqt63qc.AiDailyUsage.t;
+      case _i3rayejx.AiOrganizeTask:
+        return _i3rayejx.AiOrganizeTask.t;
+      case _irbaoatq.AiPreference:
+        return _irbaoatq.AiPreference.t;
+      case _ispfx06l.AiSuggestion:
+        return _ispfx06l.AiSuggestion.t;
       case _iqtchur3.CalendarConnection:
         return _iqtchur3.CalendarConnection.t;
       case _ily35bfr.CalendarEventLink:

@@ -1,0 +1,6 @@
+### Evidence available to an organizer. This task deliberately does not fetch
+### the saved URL or send page contents.
+enum: AiEvidenceCoverage
+serialized: byName
+values:
+  - metadataOnly

@@ -1,7 +1,7 @@
-import 'package:serverpod/serverpod.dart';
-
+import '../ai/ai_organization_service.dart';
 import '../auth/owner.dart';
 import '../generated/protocol.dart';
+import '../generated/serverpod.dart';
 import 'item_capture.dart';
 
 /// Owner-scoped CRUD for saved items. Every query filters on the signed-in
@@ -46,12 +46,18 @@ class ItemEndpoint extends Endpoint {
   /// operation id. A recognised duplicate returns the existing item with
   /// `duplicate` set; its notes, collections and first `savedAt` are kept.
   /// The answer never waits for enrichment, which starts as `pending`.
-  Future<CaptureResult> capture(Session session, CaptureDraft draft) {
-    return ItemCapture(session, session.ownerId).capture(draft);
+  Future<CaptureResult> capture(Session session, CaptureDraft draft) async {
+    final result = await ItemCapture(session, session.ownerId).capture(draft);
+    await _scheduleOrganizing(
+      session,
+      result.itemId,
+      session.ownerId,
+    );
+    return result;
   }
 
   Future<Item> create(Session session, ItemDraft draft) async {
-    return Item.db.insertRow(
+    final item = await Item.db.insertRow(
       session,
       Item(
         ownerId: session.ownerId,
@@ -64,6 +70,34 @@ class ItemEndpoint extends Endpoint {
         savedAt: draft.savedAt?.toUtc() ?? DateTime.now().toUtc(),
       ),
     );
+    await _scheduleOrganizing(
+      session,
+      item.id!,
+      item.ownerId,
+    );
+    return item;
+  }
+
+  Future<void> _scheduleOrganizing(
+    Session session,
+    UuidValue itemId,
+    UuidValue ownerId,
+  ) async {
+    // Organizing is background work. Configuration, scheduling, or provider
+    // failures must never turn a successful save into a failed save.
+    try {
+      await AiOrganizationService.instance.ensureQueued(
+        session,
+        ownerId: ownerId,
+        itemId: itemId,
+      );
+      await session.serverpod.futureCalls
+          .callWithDelay(Duration.zero, identifier: 'ai-organize-$itemId')
+          .aiOrganize
+          .process(itemId, ownerId);
+    } catch (_) {
+      // The explicit reprocess endpoint can enqueue it again later.
+    }
   }
 
   /// Applies the user-editable fields of [item]. The stored owner, saved time

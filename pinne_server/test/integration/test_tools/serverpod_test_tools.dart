@@ -13,6 +13,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'dart:io' as _idi;
+import 'package:pinne_server/src/generated/ai/ai_settings.dart' as _ibk13w13;
+import 'package:pinne_server/src/generated/ai/ai_suggestion.dart' as _i9k1kmrj;
 import 'package:pinne_server/src/generated/calendar/calendar_connection_view.dart'
     as _i0xb4k4o;
 import 'package:pinne_server/src/generated/calendar/calendar_route_status.dart'
@@ -25,6 +27,9 @@ import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
 import 'package:pinne_server/src/generated/collections/collection_draft.dart'
     as _imy5wtcu;
+import 'package:pinne_server/src/generated/future_calls.dart' as _ifh9pad3;
+import 'package:pinne_server/src/generated/future_calls_generated_models/ai_organize_future_call_process_model.dart'
+    as _iqip40ut;
 import 'package:pinne_server/src/generated/health/server_health.dart'
     as _iq4esrxi;
 import 'package:pinne_server/src/generated/items/capture_draft.dart'
@@ -196,6 +201,10 @@ void withServerpod(
 }
 
 class TestEndpoints {
+  late final futureCalls = _FutureCalls();
+
+  late final _AiOrganizingEndpoint aiOrganizing;
+
   late final _EmailIdpEndpoint emailIdp;
 
   late final _GoogleIdpEndpoint googleIdp;
@@ -222,6 +231,10 @@ class _InternalTestEndpoints extends TestEndpoints
     _is.SerializationManager serializationManager,
     _is.EndpointDispatch endpoints,
   ) {
+    aiOrganizing = _AiOrganizingEndpoint(
+      endpoints,
+      serializationManager,
+    );
     emailIdp = _EmailIdpEndpoint(
       endpoints,
       serializationManager,
@@ -258,6 +271,206 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
+  }
+}
+
+class _FutureCalls {
+  late final aiOrganize = _AiOrganizeFutureCall();
+}
+
+class _AiOrganizingEndpoint {
+  _AiOrganizingEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_ibk13w13.AiSettings> getSettings(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiOrganizing',
+            method: 'getSettings',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiOrganizing',
+          methodName: 'getSettings',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ibk13w13.AiSettings>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ibk13w13.AiSettings> setEnabled(
+    _ist.TestSessionBuilder sessionBuilder,
+    bool enabled,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiOrganizing',
+            method: 'setEnabled',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiOrganizing',
+          methodName: 'setEnabled',
+          parameters: _ist.testObjectToJson({'enabled': enabled}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ibk13w13.AiSettings>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i9k1kmrj.AiSuggestion>> listSuggestions(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiOrganizing',
+            method: 'listSuggestions',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiOrganizing',
+          methodName: 'listSuggestions',
+          parameters: _ist.testObjectToJson({'itemId': itemId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_i9k1kmrj.AiSuggestion>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<void> reprocess(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiOrganizing',
+            method: 'reprocess',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiOrganizing',
+          methodName: 'reprocess',
+          parameters: _ist.testObjectToJson({'itemId': itemId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i9k1kmrj.AiSuggestion> accept(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue suggestionId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiOrganizing',
+            method: 'accept',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiOrganizing',
+          methodName: 'accept',
+          parameters: _ist.testObjectToJson({'suggestionId': suggestionId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i9k1kmrj.AiSuggestion>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i9k1kmrj.AiSuggestion> reject(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue suggestionId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiOrganizing',
+            method: 'reject',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiOrganizing',
+          methodName: 'reject',
+          parameters: _ist.testObjectToJson({'suggestionId': suggestionId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i9k1kmrj.AiSuggestion>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
   }
 }
 
@@ -1724,5 +1937,28 @@ class _ProfileEndpoint {
         await _localUniqueSession.close();
       }
     });
+  }
+}
+
+class _AiOrganizeFutureCall {
+  Future<void> process(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+    _is.UuidValue ownerId,
+  ) async {
+    var object = _iqip40ut.AiOrganizeFutureCallProcessModel(
+      itemId: itemId,
+      ownerId: ownerId,
+    );
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _ifh9pad3.AiOrganizeProcessFutureCall().invoke(
+        _localUniqueSession,
+        object,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
   }
 }

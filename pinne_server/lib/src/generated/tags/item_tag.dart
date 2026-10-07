@@ -22,7 +22,9 @@ abstract class ItemTag
     required this.itemId,
     required this.tagId,
     _i12d5boj.AssignmentOrigin? origin,
-  }) : origin = origin ?? _i12d5boj.AssignmentOrigin.manual;
+    bool? manuallyLocked,
+  }) : origin = origin ?? _i12d5boj.AssignmentOrigin.manual,
+       manuallyLocked = manuallyLocked ?? false;
 
   factory ItemTag({
     _is.UuidValue? id,
@@ -30,6 +32,7 @@ abstract class ItemTag
     required _is.UuidValue itemId,
     required _is.UuidValue tagId,
     _i12d5boj.AssignmentOrigin? origin,
+    bool? manuallyLocked,
   }) = _ItemTagImpl;
 
   factory ItemTag.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -47,6 +50,9 @@ abstract class ItemTag
           : _i12d5boj.AssignmentOrigin.fromJson(
               (jsonSerialization['origin'] as String),
             ),
+      manuallyLocked: jsonSerialization['manuallyLocked'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['manuallyLocked']),
     );
   }
 
@@ -65,6 +71,9 @@ abstract class ItemTag
 
   _i12d5boj.AssignmentOrigin origin;
 
+  /// True when the owner explicitly chose or protected this assignment.
+  bool manuallyLocked;
+
   @override
   _is.Table<_is.UuidValue?> get table => t;
 
@@ -77,6 +86,7 @@ abstract class ItemTag
     _is.UuidValue? itemId,
     _is.UuidValue? tagId,
     _i12d5boj.AssignmentOrigin? origin,
+    bool? manuallyLocked,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -87,6 +97,7 @@ abstract class ItemTag
       'itemId': itemId.toJson(),
       'tagId': tagId.toJson(),
       'origin': origin.toJson(),
+      'manuallyLocked': manuallyLocked,
     };
   }
 
@@ -99,6 +110,7 @@ abstract class ItemTag
       'itemId': itemId.toJson(),
       'tagId': tagId.toJson(),
       'origin': origin.toJson(),
+      'manuallyLocked': manuallyLocked,
     };
   }
 
@@ -139,12 +151,14 @@ class _ItemTagImpl extends ItemTag {
     required _is.UuidValue itemId,
     required _is.UuidValue tagId,
     _i12d5boj.AssignmentOrigin? origin,
+    bool? manuallyLocked,
   }) : super._(
          id: id,
          ownerId: ownerId,
          itemId: itemId,
          tagId: tagId,
          origin: origin,
+         manuallyLocked: manuallyLocked,
        );
 
   /// Returns a shallow copy of this [ItemTag]
@@ -157,6 +171,7 @@ class _ItemTagImpl extends ItemTag {
     _is.UuidValue? itemId,
     _is.UuidValue? tagId,
     _i12d5boj.AssignmentOrigin? origin,
+    bool? manuallyLocked,
   }) {
     return ItemTag(
       id: id is _is.UuidValue? ? id : this.id,
@@ -164,6 +179,7 @@ class _ItemTagImpl extends ItemTag {
       itemId: itemId ?? this.itemId,
       tagId: tagId ?? this.tagId,
       origin: origin ?? this.origin,
+      manuallyLocked: manuallyLocked ?? this.manuallyLocked,
     );
   }
 }
@@ -194,6 +210,11 @@ class ItemTagUpdateTable extends _is.UpdateTable<ItemTagTable> {
     table.origin,
     value,
   );
+
+  _is.ColumnValue<bool, bool> manuallyLocked(bool value) => _is.ColumnValue(
+    table.manuallyLocked,
+    value,
+  );
 }
 
 class ItemTagTable extends _is.Table<_is.UuidValue?> {
@@ -217,6 +238,11 @@ class ItemTagTable extends _is.Table<_is.UuidValue?> {
       _is.EnumSerialization.byName,
       hasDefault: true,
     );
+    manuallyLocked = _is.ColumnBool(
+      'manuallyLocked',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final ItemTagUpdateTable updateTable;
@@ -229,6 +255,9 @@ class ItemTagTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnEnum<_i12d5boj.AssignmentOrigin> origin;
 
+  /// True when the owner explicitly chose or protected this assignment.
+  late final _is.ColumnBool manuallyLocked;
+
   @override
   List<_is.Column> get columns => [
     id,
@@ -236,6 +265,7 @@ class ItemTagTable extends _is.Table<_is.UuidValue?> {
     itemId,
     tagId,
     origin,
+    manuallyLocked,
   ];
 }
 

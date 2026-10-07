@@ -1,0 +1,6 @@
+enum: AiSuggestionStatus
+serialized: byName
+values:
+  - pending
+  - accepted
+  - rejected

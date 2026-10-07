@@ -8,6 +8,7 @@ import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import 'ai_settings_provider.dart';
 import 'profile_card.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -26,12 +27,92 @@ class SettingsScreen extends StatelessWidget {
         const _MotionCard(),
         const SizedBox(height: PinneSpacing.md),
         const ServerHealthCard(),
+        const SizedBox(height: PinneSpacing.md),
+        const _AiOrganizingCard(),
         if (kDebugMode)
           TextButton(
             onPressed: () => context.push(Routes.ribbonGallery),
             child: const Text('Ribbon studio'),
           ),
       ],
+    );
+  }
+}
+
+class _AiOrganizingCard extends ConsumerWidget {
+  const _AiOrganizingCard();
+
+  static const fallbackDisclosure =
+      "When AI organizing is on, Pinne sends the saved item's title, URL, "
+      'source platform, your intention and notes, plus the names and IDs of '
+      "your collections, to Google's Gemini API. It does not fetch the page. "
+      "On Gemini's unpaid tier, Google may use prompts and responses to "
+      'improve its products, and human reviewers may process them. Google '
+      'says not to send sensitive, confidential or personal information. '
+      'Different data terms apply in the EEA, Switzerland and UK. Turn this '
+      'off to keep organizing on this server with simple rules only.';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(aiSettingsProvider);
+    final value = settings.asData?.value;
+    final signedIn = ref.watch(signedInProvider);
+    final theme = Theme.of(context);
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('AI organizing', style: theme.textTheme.titleMedium),
+                    Text(
+                      signedIn
+                          ? 'Suggest collections, tags and a short summary.'
+                          : 'Sign in to change this setting.',
+                      style: const TextStyle(color: PinneColors.muted),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                key: const ValueKey('ai-organizing-toggle'),
+                value: value?.enabled ?? true,
+                activeTrackColor: PinneColors.violet,
+                onChanged: signedIn && value != null && !settings.isLoading
+                    ? (enabled) async {
+                        try {
+                          await ref
+                              .read(aiSettingsProvider.notifier)
+                              .setEnabled(enabled);
+                        } catch (_) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Could not update AI organizing.',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      }
+                    : null,
+              ),
+            ],
+          ),
+          const SizedBox(height: PinneSpacing.sm),
+          Text(
+            value?.disclosure ?? fallbackDisclosure,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: PinneColors.muted,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

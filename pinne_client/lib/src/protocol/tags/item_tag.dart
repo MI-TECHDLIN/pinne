@@ -22,7 +22,9 @@ abstract class ItemTag
     required this.itemId,
     required this.tagId,
     _i12d5boj.AssignmentOrigin? origin,
-  }) : origin = origin ?? _i12d5boj.AssignmentOrigin.manual;
+    bool? manuallyLocked,
+  }) : origin = origin ?? _i12d5boj.AssignmentOrigin.manual,
+       manuallyLocked = manuallyLocked ?? false;
 
   factory ItemTag({
     _isc.UuidValue? id,
@@ -30,6 +32,7 @@ abstract class ItemTag
     required _isc.UuidValue itemId,
     required _isc.UuidValue tagId,
     _i12d5boj.AssignmentOrigin? origin,
+    bool? manuallyLocked,
   }) = _ItemTagImpl;
 
   factory ItemTag.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -47,6 +50,11 @@ abstract class ItemTag
           : _i12d5boj.AssignmentOrigin.fromJson(
               (jsonSerialization['origin'] as String),
             ),
+      manuallyLocked: jsonSerialization['manuallyLocked'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(
+              jsonSerialization['manuallyLocked'],
+            ),
     );
   }
 
@@ -63,6 +71,9 @@ abstract class ItemTag
 
   _i12d5boj.AssignmentOrigin origin;
 
+  /// True when the owner explicitly chose or protected this assignment.
+  bool manuallyLocked;
+
   /// Returns a shallow copy of this [ItemTag]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -72,6 +83,7 @@ abstract class ItemTag
     _isc.UuidValue? itemId,
     _isc.UuidValue? tagId,
     _i12d5boj.AssignmentOrigin? origin,
+    bool? manuallyLocked,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -82,6 +94,7 @@ abstract class ItemTag
       'itemId': itemId.toJson(),
       'tagId': tagId.toJson(),
       'origin': origin.toJson(),
+      'manuallyLocked': manuallyLocked,
     };
   }
 
@@ -94,6 +107,7 @@ abstract class ItemTag
       'itemId': itemId.toJson(),
       'tagId': tagId.toJson(),
       'origin': origin.toJson(),
+      'manuallyLocked': manuallyLocked,
     };
   }
 
@@ -112,12 +126,14 @@ class _ItemTagImpl extends ItemTag {
     required _isc.UuidValue itemId,
     required _isc.UuidValue tagId,
     _i12d5boj.AssignmentOrigin? origin,
+    bool? manuallyLocked,
   }) : super._(
          id: id,
          ownerId: ownerId,
          itemId: itemId,
          tagId: tagId,
          origin: origin,
+         manuallyLocked: manuallyLocked,
        );
 
   /// Returns a shallow copy of this [ItemTag]
@@ -130,6 +146,7 @@ class _ItemTagImpl extends ItemTag {
     _isc.UuidValue? itemId,
     _isc.UuidValue? tagId,
     _i12d5boj.AssignmentOrigin? origin,
+    bool? manuallyLocked,
   }) {
     return ItemTag(
       id: id is _isc.UuidValue? ? id : this.id,
@@ -137,6 +154,7 @@ class _ItemTagImpl extends ItemTag {
       itemId: itemId ?? this.itemId,
       tagId: tagId ?? this.tagId,
       origin: origin ?? this.origin,
+      manuallyLocked: manuallyLocked ?? this.manuallyLocked,
     );
   }
 }
