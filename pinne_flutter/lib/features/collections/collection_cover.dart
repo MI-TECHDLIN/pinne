@@ -135,3 +135,8 @@ class _StableRandom {
 
   double signed(double magnitude) => (nextDouble() * 2 - 1) * magnitude;
 }
+
+/// The flat colour that stands for a collection outside its cover, such as
+/// a progress bar. It is the cover palette's base colour.
+Color collectionAccent(int paletteIndex) =>
+    _coverPalettes[paletteIndex % _coverPalettes.length].first;

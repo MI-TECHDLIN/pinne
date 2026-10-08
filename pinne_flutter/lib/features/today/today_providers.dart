@@ -3,6 +3,7 @@ import 'package:pinne_client/pinne_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/server_client.dart';
+import '../progress/progress_providers.dart';
 
 final reviewQueueEndpointProvider = Provider<EndpointReviewQueue>(
   (ref) => ref.watch(clientProvider).reviewQueue,
@@ -64,7 +65,9 @@ class TodayServerActions implements TodayActionGateway {
   @override
   Future<ReviewEventReceipt> reviewed(Item item) async {
     final receipt = await _record(item, ReviewEventType.reviewed);
-    ref.invalidate(todayQueueProvider);
+    ref
+      ..invalidate(todayQueueProvider)
+      ..invalidate(progressReportProvider);
     return receipt;
   }
 
@@ -75,7 +78,9 @@ class TodayServerActions implements TodayActionGateway {
       ReviewEventType.undo,
       compensatesEventId: eventId,
     );
-    ref.invalidate(todayQueueProvider);
+    ref
+      ..invalidate(todayQueueProvider)
+      ..invalidate(progressReportProvider);
     return receipt;
   }
 

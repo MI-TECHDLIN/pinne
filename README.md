@@ -182,6 +182,15 @@ earliest start, and whether plans need your acceptance or are suggestions
 only. Items in sessions are your active, unreviewed saves for now
 (`SessionItemSource` is the seam for the review queue).
 
+## Progress
+
+The Progress tab shows honest numbers for a save cohort (this week, last
+week or this month): a deck of tilted metric cards you can flick through,
+saved/reviewed/upcoming pills, the review rate with its trend, the weekly
+goal, per-collection rates and review days. New milestones get a one-time
+celebration with the Ribbon Spirit. Formulas, screenshots and how to
+re-render them: [`docs/progress/`](docs/progress/README.md).
+
 ## Checks
 
 ```bash
