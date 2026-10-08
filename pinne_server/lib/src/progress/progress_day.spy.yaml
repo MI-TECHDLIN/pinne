@@ -1,0 +1,12 @@
+### One local day of a progress report.
+class: ProgressDay
+fields:
+  ### Local date, yyyy-MM-dd.
+  date: String
+  ### Distinct items with a valid review that day. Opens never count.
+  reviewedCount: int
+  ### Review rate of the items in the cohort saved by the end of this day.
+  ### Null before anything was saved, and for days still to come.
+  cohortRate: double?
+  isToday: bool
+  isFuture: bool

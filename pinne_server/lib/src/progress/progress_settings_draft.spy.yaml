@@ -1,0 +1,4 @@
+class: ProgressSettingsDraft
+fields:
+  streakEnabled: bool
+  weeklyGoalDays: int

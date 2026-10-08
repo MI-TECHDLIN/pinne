@@ -1,0 +1,10 @@
+### Review rate of the cohort items filed in one collection.
+class: CollectionProgress
+fields:
+  collectionId: UuidValue
+  name: String
+  paletteIndex: int
+  cohortCount: int
+  reviewedCount: int
+  ### Null when no cohort item is in this collection.
+  reviewRate: double?

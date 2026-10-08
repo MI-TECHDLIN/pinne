@@ -101,6 +101,17 @@ import 'planning/session_status.dart' as _izbi9tiy;
 import 'planning/session_view.dart' as _iyjcmdi4;
 import 'profile/pinne_profile.dart' as _ijguvy1g;
 import 'profile/profile_draft.dart' as _ij8joe28;
+import 'progress/celebration_seen.dart' as _i4wj722g;
+import 'progress/collection_progress.dart' as _ib4b75r3;
+import 'progress/milestone_kind.dart' as _iz0l6k27;
+import 'progress/progress_day.dart' as _iv86lxab;
+import 'progress/progress_milestone.dart' as _ism40znx;
+import 'progress/progress_period.dart' as _ick5xr48;
+import 'progress/progress_query.dart' as _iox5xpz3;
+import 'progress/progress_report.dart' as _i5135299;
+import 'progress/progress_settings.dart' as _if1vui5d;
+import 'progress/progress_settings_draft.dart' as _i19ehhj8;
+import 'progress/weekly_goal_progress.dart' as _icoz9lvv;
 import 'reminders/reminder_rule.dart' as _i6ljcdoh;
 import 'reminders/reminder_settings.dart' as _i0v594yd;
 import 'reminders/reminder_settings_draft.dart' as _i2m53qgo;
@@ -187,6 +198,17 @@ export 'planning/session_status.dart';
 export 'planning/session_view.dart';
 export 'profile/pinne_profile.dart';
 export 'profile/profile_draft.dart';
+export 'progress/celebration_seen.dart';
+export 'progress/collection_progress.dart';
+export 'progress/milestone_kind.dart';
+export 'progress/progress_day.dart';
+export 'progress/progress_milestone.dart';
+export 'progress/progress_period.dart';
+export 'progress/progress_query.dart';
+export 'progress/progress_report.dart';
+export 'progress/progress_settings.dart';
+export 'progress/progress_settings_draft.dart';
+export 'progress/weekly_goal_progress.dart';
 export 'reminders/reminder_rule.dart';
 export 'reminders/reminder_settings.dart';
 export 'reminders/reminder_settings_draft.dart';
@@ -1115,6 +1137,72 @@ class Protocol extends _is.DatabaseSerializationManager {
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'clientItemId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'celebration_seen',
+      dartName: 'CelebrationSeen',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'milestoneKey',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'seenAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'celebration_seen_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'celebration_seen_owner_key_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'milestoneKey',
             ),
           ],
           type: 'btree',
@@ -2169,6 +2257,69 @@ class Protocol extends _is.DatabaseSerializationManager {
       indexes: [
         _isp.IndexDefinition(
           indexName: 'planner_preferences_owner_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'progress_settings',
+      dartName: 'ProgressSettings',
+      schema: 'public',
+      module: 'pinne',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'streakEnabled',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'weeklyGoalDays',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '3',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'progress_settings_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'progress_settings_owner_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
@@ -3325,6 +3476,39 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _ij8joe28.ProfileDraft) {
       return _ij8joe28.ProfileDraft.fromJson(data) as T;
     }
+    if (t == _i4wj722g.CelebrationSeen) {
+      return _i4wj722g.CelebrationSeen.fromJson(data) as T;
+    }
+    if (t == _ib4b75r3.CollectionProgress) {
+      return _ib4b75r3.CollectionProgress.fromJson(data) as T;
+    }
+    if (t == _iz0l6k27.MilestoneKind) {
+      return _iz0l6k27.MilestoneKind.fromJson(data) as T;
+    }
+    if (t == _iv86lxab.ProgressDay) {
+      return _iv86lxab.ProgressDay.fromJson(data) as T;
+    }
+    if (t == _ism40znx.ProgressMilestone) {
+      return _ism40znx.ProgressMilestone.fromJson(data) as T;
+    }
+    if (t == _ick5xr48.ProgressPeriod) {
+      return _ick5xr48.ProgressPeriod.fromJson(data) as T;
+    }
+    if (t == _iox5xpz3.ProgressQuery) {
+      return _iox5xpz3.ProgressQuery.fromJson(data) as T;
+    }
+    if (t == _i5135299.ProgressReport) {
+      return _i5135299.ProgressReport.fromJson(data) as T;
+    }
+    if (t == _if1vui5d.ProgressSettings) {
+      return _if1vui5d.ProgressSettings.fromJson(data) as T;
+    }
+    if (t == _i19ehhj8.ProgressSettingsDraft) {
+      return _i19ehhj8.ProgressSettingsDraft.fromJson(data) as T;
+    }
+    if (t == _icoz9lvv.WeeklyGoalProgress) {
+      return _icoz9lvv.WeeklyGoalProgress.fromJson(data) as T;
+    }
     if (t == _i6ljcdoh.ReminderRule) {
       return _i6ljcdoh.ReminderRule.fromJson(data) as T;
     }
@@ -3660,6 +3844,51 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_ij8joe28.ProfileDraft?>()) {
       return (data != null ? _ij8joe28.ProfileDraft.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_i4wj722g.CelebrationSeen?>()) {
+      return (data != null ? _i4wj722g.CelebrationSeen.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ib4b75r3.CollectionProgress?>()) {
+      return (data != null ? _ib4b75r3.CollectionProgress.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iz0l6k27.MilestoneKind?>()) {
+      return (data != null ? _iz0l6k27.MilestoneKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iv86lxab.ProgressDay?>()) {
+      return (data != null ? _iv86lxab.ProgressDay.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ism40znx.ProgressMilestone?>()) {
+      return (data != null ? _ism40znx.ProgressMilestone.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ick5xr48.ProgressPeriod?>()) {
+      return (data != null ? _ick5xr48.ProgressPeriod.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iox5xpz3.ProgressQuery?>()) {
+      return (data != null ? _iox5xpz3.ProgressQuery.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i5135299.ProgressReport?>()) {
+      return (data != null ? _i5135299.ProgressReport.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_if1vui5d.ProgressSettings?>()) {
+      return (data != null ? _if1vui5d.ProgressSettings.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i19ehhj8.ProgressSettingsDraft?>()) {
+      return (data != null
+              ? _i19ehhj8.ProgressSettingsDraft.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_icoz9lvv.WeeklyGoalProgress?>()) {
+      return (data != null ? _icoz9lvv.WeeklyGoalProgress.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_i6ljcdoh.ReminderRule?>()) {
       return (data != null ? _i6ljcdoh.ReminderRule.fromJson(data) : null) as T;
     }
@@ -3796,6 +4025,24 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_iv86lxab.ProgressDay>) {
+      return (data as List)
+              .map((e) => deserialize<_iv86lxab.ProgressDay>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ib4b75r3.CollectionProgress>) {
+      return (data as List)
+              .map((e) => deserialize<_ib4b75r3.CollectionProgress>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ism40znx.ProgressMilestone>) {
+      return (data as List)
+              .map((e) => deserialize<_ism40znx.ProgressMilestone>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_iswi3gl6.ReminderWindow>) {
       return (data as List)
               .map((e) => deserialize<_iswi3gl6.ReminderWindow>(e))
@@ -3884,6 +4131,9 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data as List).map((e) => deserialize<_is.UuidValue>(e)).toList()
           as T;
     }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
     try {
       return _iais.Protocol().deserialize<T>(data, t);
     } on _is.DeserializationTypeNotFoundException catch (_) {}
@@ -3966,6 +4216,17 @@ class Protocol extends _is.DatabaseSerializationManager {
       _iyjcmdi4.SessionView => 'SessionView',
       _ijguvy1g.PinneProfile => 'PinneProfile',
       _ij8joe28.ProfileDraft => 'ProfileDraft',
+      _i4wj722g.CelebrationSeen => 'CelebrationSeen',
+      _ib4b75r3.CollectionProgress => 'CollectionProgress',
+      _iz0l6k27.MilestoneKind => 'MilestoneKind',
+      _iv86lxab.ProgressDay => 'ProgressDay',
+      _ism40znx.ProgressMilestone => 'ProgressMilestone',
+      _ick5xr48.ProgressPeriod => 'ProgressPeriod',
+      _iox5xpz3.ProgressQuery => 'ProgressQuery',
+      _i5135299.ProgressReport => 'ProgressReport',
+      _if1vui5d.ProgressSettings => 'ProgressSettings',
+      _i19ehhj8.ProgressSettingsDraft => 'ProgressSettingsDraft',
+      _icoz9lvv.WeeklyGoalProgress => 'WeeklyGoalProgress',
       _i6ljcdoh.ReminderRule => 'ReminderRule',
       _i0v594yd.ReminderSettings => 'ReminderSettings',
       _i2m53qgo.ReminderSettingsDraft => 'ReminderSettingsDraft',
@@ -4134,6 +4395,28 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'PinneProfile';
       case _ij8joe28.ProfileDraft():
         return 'ProfileDraft';
+      case _i4wj722g.CelebrationSeen():
+        return 'CelebrationSeen';
+      case _ib4b75r3.CollectionProgress():
+        return 'CollectionProgress';
+      case _iz0l6k27.MilestoneKind():
+        return 'MilestoneKind';
+      case _iv86lxab.ProgressDay():
+        return 'ProgressDay';
+      case _ism40znx.ProgressMilestone():
+        return 'ProgressMilestone';
+      case _ick5xr48.ProgressPeriod():
+        return 'ProgressPeriod';
+      case _iox5xpz3.ProgressQuery():
+        return 'ProgressQuery';
+      case _i5135299.ProgressReport():
+        return 'ProgressReport';
+      case _if1vui5d.ProgressSettings():
+        return 'ProgressSettings';
+      case _i19ehhj8.ProgressSettingsDraft():
+        return 'ProgressSettingsDraft';
+      case _icoz9lvv.WeeklyGoalProgress():
+        return 'WeeklyGoalProgress';
       case _i6ljcdoh.ReminderRule():
         return 'ReminderRule';
       case _i0v594yd.ReminderSettings():
@@ -4403,6 +4686,39 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'ProfileDraft') {
       return deserialize<_ij8joe28.ProfileDraft>(data['data']);
     }
+    if (dataClassName == 'CelebrationSeen') {
+      return deserialize<_i4wj722g.CelebrationSeen>(data['data']);
+    }
+    if (dataClassName == 'CollectionProgress') {
+      return deserialize<_ib4b75r3.CollectionProgress>(data['data']);
+    }
+    if (dataClassName == 'MilestoneKind') {
+      return deserialize<_iz0l6k27.MilestoneKind>(data['data']);
+    }
+    if (dataClassName == 'ProgressDay') {
+      return deserialize<_iv86lxab.ProgressDay>(data['data']);
+    }
+    if (dataClassName == 'ProgressMilestone') {
+      return deserialize<_ism40znx.ProgressMilestone>(data['data']);
+    }
+    if (dataClassName == 'ProgressPeriod') {
+      return deserialize<_ick5xr48.ProgressPeriod>(data['data']);
+    }
+    if (dataClassName == 'ProgressQuery') {
+      return deserialize<_iox5xpz3.ProgressQuery>(data['data']);
+    }
+    if (dataClassName == 'ProgressReport') {
+      return deserialize<_i5135299.ProgressReport>(data['data']);
+    }
+    if (dataClassName == 'ProgressSettings') {
+      return deserialize<_if1vui5d.ProgressSettings>(data['data']);
+    }
+    if (dataClassName == 'ProgressSettingsDraft') {
+      return deserialize<_i19ehhj8.ProgressSettingsDraft>(data['data']);
+    }
+    if (dataClassName == 'WeeklyGoalProgress') {
+      return deserialize<_icoz9lvv.WeeklyGoalProgress>(data['data']);
+    }
     if (dataClassName == 'ReminderRule') {
       return deserialize<_i6ljcdoh.ReminderRule>(data['data']);
     }
@@ -4536,6 +4852,10 @@ class Protocol extends _is.DatabaseSerializationManager {
         return _i716ymk1.SessionItem.t;
       case _ijguvy1g.PinneProfile:
         return _ijguvy1g.PinneProfile.t;
+      case _i4wj722g.CelebrationSeen:
+        return _i4wj722g.CelebrationSeen.t;
+      case _if1vui5d.ProgressSettings:
+        return _if1vui5d.ProgressSettings.t;
       case _i6ljcdoh.ReminderRule:
         return _i6ljcdoh.ReminderRule.t;
       case _i0v594yd.ReminderSettings:

@@ -1,0 +1,10 @@
+### Distinct local review days in the current Monday-to-Sunday week.
+class: WeeklyGoalProgress
+fields:
+  ### Local Monday, yyyy-MM-dd.
+  weekStartDate: String
+  goalDays: int
+  reviewDayCount: int
+  reached: bool
+  ### The seven days of the week, Monday first.
+  days: List<ProgressDay>

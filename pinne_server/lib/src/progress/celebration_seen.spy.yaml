@@ -1,0 +1,12 @@
+### A milestone celebration the owner has already seen.
+class: CelebrationSeen
+table: celebration_seen
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  milestoneKey: String
+  seenAt: DateTime, default=now
+indexes:
+  celebration_seen_owner_key_idx:
+    fields: ownerId, milestoneKey
+    unique: true

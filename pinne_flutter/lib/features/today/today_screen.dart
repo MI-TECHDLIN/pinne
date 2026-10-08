@@ -13,6 +13,7 @@ import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../capture/paste_capture_card.dart';
+import '../progress/celebration.dart';
 import '../settings/profile_provider.dart';
 import 'today_providers.dart';
 
@@ -117,6 +118,9 @@ class TodayScreen extends ConsumerWidget {
           ),
         ),
       );
+      await ref
+          .read(celebrationControllerProvider.notifier)
+          .checkAfterReview(context);
     } on Object {
       if (context.mounted) _message(context, 'Could not update your review.');
     }
