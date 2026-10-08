@@ -10,6 +10,7 @@ resolution: workspace
 
 dependencies:
   crypto: ^3.0.6
+  mailer: ^7.2.0
   pinne_calendar:
     path: ../pinne_calendar
   pinne_capture:

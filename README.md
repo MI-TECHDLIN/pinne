@@ -78,8 +78,46 @@ All commands start from the repo root.
 
 ## Sign-in
 
-Email sign-in works out of the box. In development the verification code is
-printed in the server console.
+**Try without an account** creates a normal server-side auth user immediately.
+Its UUID flows through the same `session.ownerId` checks as every other user,
+so guest saves remain isolated. The session credential is held in secure
+storage on that device; signing out, clearing app data or uninstalling can make
+the guest account and its saves unavailable.
+
+Serverpod 4.0.3 marks its anonymous provider experimental and explicitly says
+that [anonymous account linking is not supported yet](https://docs.serverpod.dev/concepts/authentication/providers/anonymous/setup).
+The installed provider creates an `AuthUser` and describes anonymous sessions
+as non-restorable after device access is lost
+([4.0.3 API](https://pub.dev/documentation/serverpod_auth_idp_server/4.0.3/providers_anonymous/AnonymousIdp-class.html)).
+Serverpod separately provides account merging, but applications must implement
+how every owned row and conflict is migrated
+([Serverpod merging guide](https://docs.serverpod.dev/concepts/authentication/working-with-users#merging-accounts)).
+Pinne therefore does not offer a fake “add email” upgrade: Settings explains
+the limitation until an audited merge of all owned Pinne tables is built.
+
+Email/password sign-in remains available and unchanged. In development and
+tests, registration and password-reset codes are printed in the server console.
+For staging or production, configure any SMTP server in the git-ignored
+`pinne_server/config/passwords.yaml` (`smtpHost`, `smtpPort`, optional
+`smtpUsername`/`smtpPassword`, `smtpFromEmail`, `smtpFromName`, `smtpSsl`) or
+with the matching `PINNE_SMTP_*` environment variables. No email vendor is
+required. If SMTP is absent outside development, the server logs a warning,
+rejects code requests instead of silently discarding them, and the app points
+new users to guest access.
+
+To create or verify the empty judge demo account idempotently, set
+`demoAccountEmail` and `demoAccountPassword` in the active secrets section (or
+`PINNE_DEMO_ACCOUNT_EMAIL` / `PINNE_DEMO_ACCOUNT_PASSWORD`) and run while the
+database port is available:
+
+```bash
+cd pinne_server
+dart run bin/main.dart --seed-demo
+```
+
+The command uses Serverpod's email-account admin API, creates no example saves,
+and prints whether it created the account or found it already present. Never
+commit the real judge credentials; supply them only in the submission form.
 
 Google sign-in is wired in but stays off until real credentials exist:
 
@@ -92,6 +130,20 @@ Google sign-in is wired in but stays off until real credentials exist:
 
 Without these the server logs `Google sign-in is disabled` and the app hides
 the Google button. Never commit real credentials.
+
+## Testing instructions for judges
+
+1. Install the supplied Pinne APK and open it while connected to the internet.
+2. Tap **Try without an account**. No email, code or external account is
+   required; the guest gets a private, empty Pinne workspace immediately.
+3. Save a link or note on Today, then confirm it appears in Collections →
+   Saved. Open it from the review queue to complete the core save-and-review
+   flow.
+4. Alternatively, choose email sign-in and use the demo email and password
+   included in the private submission form. That account also starts empty.
+5. Guest access is device-bound. Do not sign out, clear app data or uninstall
+   until testing is complete, because Serverpod 4.0.3 cannot yet link that
+   guest to email in place.
 
 ## Capture
 

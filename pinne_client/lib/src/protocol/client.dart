@@ -146,6 +146,43 @@ class EndpointAiOrganizing extends _isc.EndpointRef {
       );
 }
 
+/// Reports account capabilities from server-owned auth records.
+/// {@category Endpoint}
+class EndpointAccount extends _isc.EndpointRef {
+  EndpointAccount(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'account';
+
+  /// Whether the current auth user is a device-bound anonymous account.
+  _ida.Future<bool> isGuest() => caller.callServerEndpoint<bool>(
+    'account',
+    'isGuest',
+    {},
+  );
+}
+
+/// Creates device-bound guest accounts with ordinary Serverpod auth user ids.
+/// {@category Endpoint}
+class EndpointAnonymousIdp extends _iaic.EndpointAnonymousIdpBase {
+  EndpointAnonymousIdp(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'anonymousIdp';
+
+  /// Creates a new anonymous account and returns its session.
+  ///
+  /// Invokes the [AnonymousIdp.beforeAnonymousAccount] callback if configured,
+  /// which may prevent account creation if the endpoint is protected.
+  @override
+  _ida.Future<_iacc.AuthSuccess> login({String? token}) =>
+      caller.callServerEndpoint<_iacc.AuthSuccess>(
+        'anonymousIdp',
+        'login',
+        {'token': token},
+      );
+}
+
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
 /// on the client.
@@ -549,6 +586,13 @@ class EndpointHealth extends _isc.EndpointRef {
   @override
   String get name => 'health';
 
+  /// Whether new-account and password-reset codes can reach an inbox.
+  _ida.Future<bool> emailDeliveryAvailable() => caller.callServerEndpoint<bool>(
+    'health',
+    'emailDeliveryAvailable',
+    {},
+  );
+
   _ida.Future<_ibqesezf.ServerHealth> check() =>
       caller.callServerEndpoint<_ibqesezf.ServerHealth>(
         'health',
@@ -950,6 +994,8 @@ class Client extends _isc.ServerpodClientShared {
          httpClientOverride: httpClientOverride,
        ) {
     aiOrganizing = EndpointAiOrganizing(this);
+    account = EndpointAccount(this);
+    anonymousIdp = EndpointAnonymousIdp(this);
     emailIdp = EndpointEmailIdp(this);
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
@@ -967,6 +1013,10 @@ class Client extends _isc.ServerpodClientShared {
   }
 
   late final EndpointAiOrganizing aiOrganizing;
+
+  late final EndpointAccount account;
+
+  late final EndpointAnonymousIdp anonymousIdp;
 
   late final EndpointEmailIdp emailIdp;
 
@@ -999,6 +1049,8 @@ class Client extends _isc.ServerpodClientShared {
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'aiOrganizing': aiOrganizing,
+    'account': account,
+    'anonymousIdp': anonymousIdp,
     'emailIdp': emailIdp,
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
