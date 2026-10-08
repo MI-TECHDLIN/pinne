@@ -1,0 +1,173 @@
+{
+  "__className__": "serverpod.DatabaseMigration",
+  "actions": [
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "createTable",
+      "createTable": {
+        "__className__": "serverpod.TableDefinition",
+        "name": "celebration_seen",
+        "dartName": "CelebrationSeen",
+        "module": "pinne",
+        "schema": "public",
+        "columns": [
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "id",
+            "fieldName": "id",
+            "columnType": 7,
+            "isNullable": false,
+            "columnDefault": "random_v7",
+            "dartType": "UuidValue?"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "ownerId",
+            "fieldName": "ownerId",
+            "columnType": 7,
+            "isNullable": false,
+            "dartType": "UuidValue"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "milestoneKey",
+            "fieldName": "milestoneKey",
+            "columnType": 0,
+            "isNullable": false,
+            "dartType": "String"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "seenAt",
+            "fieldName": "seenAt",
+            "columnType": 4,
+            "isNullable": false,
+            "columnDefault": "now",
+            "dartType": "DateTime"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "__className__": "serverpod.ForeignKeyDefinition",
+            "constraintName": "celebration_seen_fk_0",
+            "columns": [
+              "ownerId"
+            ],
+            "referenceTable": "serverpod_auth_core_user",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 4
+          }
+        ],
+        "indexes": [
+          {
+            "__className__": "serverpod.IndexDefinition",
+            "indexName": "celebration_seen_owner_key_idx",
+            "elements": [
+              {
+                "__className__": "serverpod.IndexElementDefinition",
+                "type": 0,
+                "definition": "ownerId"
+              },
+              {
+                "__className__": "serverpod.IndexElementDefinition",
+                "type": 0,
+                "definition": "milestoneKey"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": false
+          }
+        ],
+        "managed": true
+      }
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "createTable",
+      "createTable": {
+        "__className__": "serverpod.TableDefinition",
+        "name": "progress_settings",
+        "dartName": "ProgressSettings",
+        "module": "pinne",
+        "schema": "public",
+        "columns": [
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "id",
+            "fieldName": "id",
+            "columnType": 7,
+            "isNullable": false,
+            "columnDefault": "random_v7",
+            "dartType": "UuidValue?"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "ownerId",
+            "fieldName": "ownerId",
+            "columnType": 7,
+            "isNullable": false,
+            "dartType": "UuidValue"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "streakEnabled",
+            "fieldName": "streakEnabled",
+            "columnType": 1,
+            "isNullable": false,
+            "columnDefault": "false",
+            "dartType": "bool"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "weeklyGoalDays",
+            "fieldName": "weeklyGoalDays",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "3",
+            "dartType": "int"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "__className__": "serverpod.ForeignKeyDefinition",
+            "constraintName": "progress_settings_fk_0",
+            "columns": [
+              "ownerId"
+            ],
+            "referenceTable": "serverpod_auth_core_user",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 4
+          }
+        ],
+        "indexes": [
+          {
+            "__className__": "serverpod.IndexDefinition",
+            "indexName": "progress_settings_owner_idx",
+            "elements": [
+              {
+                "__className__": "serverpod.IndexElementDefinition",
+                "type": 0,
+                "definition": "ownerId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": false
+          }
+        ],
+        "managed": true
+      }
+    }
+  ],
+  "warnings": [],
+  "migrationApiVersion": 1
+}

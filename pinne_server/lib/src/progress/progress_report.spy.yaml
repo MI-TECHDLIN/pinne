@@ -1,0 +1,35 @@
+### Honest progress for one save cohort: the items saved from `startDate`
+### (inclusive) to `endDate` (exclusive), local to the query's offset.
+### Archived items stay in the cohort.
+class: ProgressReport
+fields:
+  period: ProgressPeriod
+  startDate: String
+  endDate: String
+  today: String
+  ### Cohort size.
+  savedCount: int
+  ### Cohort items reviewed at least once, to date.
+  reviewedCount: int
+  ### Cohort items whose first review happened today.
+  firstReviewedTodayCount: int
+  ### Cohort items not reviewed yet.
+  remainingCount: int
+  ### Cohort items marked applied.
+  appliedCount: int
+  ### reviewedCount / savedCount. Null for an empty cohort, never 0%.
+  reviewRate: double?
+  ### Distinct items, from any cohort, reviewed during the period.
+  reviewedInPeriodCount: int
+  ### Distinct items reviewed ever.
+  totalReviewedCount: int
+  days: List<ProgressDay>
+  ### The period day with the most reviews so far (earliest wins a tie).
+  bestDayDate: String?
+  collections: List<CollectionProgress>
+  weeklyGoal: WeeklyGoalProgress
+  streakEnabled: bool
+  ### Consecutive local review days up to today, or up to yesterday while
+  ### today is still open. Null unless streaks are enabled.
+  currentStreakDays: int?
+  milestones: List<ProgressMilestone>

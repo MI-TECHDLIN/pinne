@@ -57,6 +57,11 @@ planner:
 profile:
   - get:
   - upsert:
+progress:
+  - report:
+  - markCelebrated:
+  - settings:
+  - updateSettings:
 review:
   - record:
   - progress:

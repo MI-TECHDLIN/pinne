@@ -39,6 +39,10 @@ import 'package:pinne_server/src/generated/planning/session_move_request.dart'
     as _ijei0lg9;
 import 'package:pinne_server/src/generated/profile/profile_draft.dart'
     as _i2c58fcj;
+import 'package:pinne_server/src/generated/progress/progress_query.dart'
+    as _iubj73k9;
+import 'package:pinne_server/src/generated/progress/progress_settings_draft.dart'
+    as _i7muh27a;
 import 'package:pinne_server/src/generated/reminders/reminder_settings_draft.dart'
     as _if8nlr1i;
 import 'package:pinne_server/src/generated/reviews/review_event_draft.dart'
@@ -60,6 +64,7 @@ import '../health/health_endpoint.dart' as _id9paj9q;
 import '../items/item_endpoint.dart' as _i97sinw1;
 import '../planning/planner_endpoint.dart' as _icn41d99;
 import '../profile/profile_endpoint.dart' as _i6ky944g;
+import '../progress/progress_endpoint.dart' as _i88xesu5;
 import '../reviews/review_endpoint.dart' as _i1vkl601;
 import '../reviews/review_queue_endpoint.dart' as _il9fx142;
 import '../search/search_endpoint.dart' as _i2f0v2ey;
@@ -127,6 +132,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'profile',
+          null,
+        ),
+      'progress': _i88xesu5.ProgressEndpoint()
+        ..initialize(
+          server,
+          'progress',
           null,
         ),
       'review': _i1vkl601.ReviewEndpoint()
@@ -1118,6 +1129,79 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async =>
                   (endpoints['profile'] as _i6ky944g.ProfileEndpoint).upsert(
+                    session,
+                    params['draft'],
+                  ),
+        ),
+      },
+    );
+    connectors['progress'] = _is.EndpointConnector(
+      name: 'progress',
+      endpoint: endpoints['progress']!,
+      methodConnectors: {
+        'report': _is.MethodConnector(
+          name: 'report',
+          params: {
+            'query': _is.ParameterDescription(
+              name: 'query',
+              type: _is.getType<_iubj73k9.ProgressQuery>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['progress'] as _i88xesu5.ProgressEndpoint).report(
+                    session,
+                    params['query'],
+                  ),
+        ),
+        'markCelebrated': _is.MethodConnector(
+          name: 'markCelebrated',
+          params: {
+            'keys': _is.ParameterDescription(
+              name: 'keys',
+              type: _is.getType<List<String>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['progress'] as _i88xesu5.ProgressEndpoint)
+                  .markCelebrated(
+                    session,
+                    params['keys'],
+                  ),
+        ),
+        'settings': _is.MethodConnector(
+          name: 'settings',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['progress'] as _i88xesu5.ProgressEndpoint)
+                  .settings(session),
+        ),
+        'updateSettings': _is.MethodConnector(
+          name: 'updateSettings',
+          params: {
+            'draft': _is.ParameterDescription(
+              name: 'draft',
+              type: _is.getType<_i7muh27a.ProgressSettingsDraft>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['progress'] as _i88xesu5.ProgressEndpoint)
+                  .updateSettings(
                     session,
                     params['draft'],
                   ),

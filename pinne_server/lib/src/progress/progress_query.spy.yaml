@@ -1,0 +1,13 @@
+### What the app asks progress for. The owner comes from the session.
+class: ProgressQuery
+fields:
+  period: ProgressPeriod
+  ### Local start date (yyyy-MM-dd, inclusive). Only for `custom`.
+  customStartDate: String?
+  ### Local end date (yyyy-MM-dd, exclusive). Only for `custom`.
+  customEndDate: String?
+  ### IANA timezone of the device, kept for display and logs.
+  timezone: String
+  ### The device's current UTC offset. Local dates of the cohort are derived
+  ### from it, the same way review events derive their effective local date.
+  timezoneOffsetMinutes: int

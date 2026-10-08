@@ -1,0 +1,10 @@
+### A milestone the owner has reached. `key` is stable, so each one
+### celebrates exactly once.
+class: ProgressMilestone
+fields:
+  key: String
+  kind: MilestoneKind
+  ### The number the milestone is about: reviews, goal days or items
+  ### reviewed today.
+  value: int
+  celebrated: bool

@@ -119,16 +119,7 @@ class ReviewService {
       orderByList: (t) => [t.occurredAt, t.id],
       transaction: transaction,
     );
-    final compensatedIds = events
-        .where((event) => event.eventType == ReviewEventType.undo)
-        .map((event) => event.compensatesEventId)
-        .whereType<UuidValue>()
-        .toSet();
-    final valid = events.where(
-      (event) =>
-          event.eventType != ReviewEventType.undo &&
-          !compensatedIds.contains(event.id),
-    );
+    final valid = validEvents(events);
 
     DateTime? firstOpened;
     DateTime? lastOpened;
@@ -181,6 +172,29 @@ class ReviewService {
       transaction: transaction,
     );
   }
+
+  /// The events that still stand: undo events and the events they
+  /// compensate are dropped. Order is preserved.
+  static Iterable<ReviewEvent> validEvents(Iterable<ReviewEvent> events) {
+    final compensatedIds = events
+        .where((event) => event.eventType == ReviewEventType.undo)
+        .map((event) => event.compensatesEventId)
+        .whereType<UuidValue>()
+        .toSet();
+    return events.where(
+      (event) =>
+          event.eventType != ReviewEventType.undo &&
+          !compensatedIds.contains(event.id),
+    );
+  }
+
+  /// Whether an event counts as reviewing its item. Opening never does.
+  static bool qualifies(ReviewEventType type) => switch (type) {
+    ReviewEventType.reviewed ||
+    ReviewEventType.completed ||
+    ReviewEventType.applied => true,
+    ReviewEventType.opened || ReviewEventType.undo => false,
+  };
 
   static void _validate(ReviewEventDraft draft) {
     final clientId = draft.clientEventId.trim();

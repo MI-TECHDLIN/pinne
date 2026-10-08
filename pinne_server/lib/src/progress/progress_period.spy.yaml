@@ -1,0 +1,8 @@
+### Which save cohort a progress report covers. Weeks start on Monday.
+enum: ProgressPeriod
+serialized: byName
+values:
+  - thisWeek
+  - lastWeek
+  - thisMonth
+  - custom

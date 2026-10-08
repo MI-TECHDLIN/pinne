@@ -63,6 +63,14 @@ import 'package:pinne_client/src/protocol/profile/pinne_profile.dart'
     as _i1myizpd;
 import 'package:pinne_client/src/protocol/profile/profile_draft.dart'
     as _iyve154t;
+import 'package:pinne_client/src/protocol/progress/progress_query.dart'
+    as _if37ddv3;
+import 'package:pinne_client/src/protocol/progress/progress_report.dart'
+    as _iw0pjose;
+import 'package:pinne_client/src/protocol/progress/progress_settings.dart'
+    as _ihbhlwjc;
+import 'package:pinne_client/src/protocol/progress/progress_settings_draft.dart'
+    as _ijs126ng;
 import 'package:pinne_client/src/protocol/reminders/reminder_settings.dart'
     as _iyth9g0m;
 import 'package:pinne_client/src/protocol/reminders/reminder_settings_draft.dart'
@@ -751,6 +759,44 @@ class EndpointProfile extends _isc.EndpointRef {
 }
 
 /// {@category Endpoint}
+class EndpointProgress extends _isc.EndpointRef {
+  EndpointProgress(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'progress';
+
+  _ida.Future<_iw0pjose.ProgressReport> report(_if37ddv3.ProgressQuery query) =>
+      caller.callServerEndpoint<_iw0pjose.ProgressReport>(
+        'progress',
+        'report',
+        {'query': query},
+      );
+
+  /// Marks milestone celebrations as seen so each one shows exactly once.
+  _ida.Future<void> markCelebrated(List<String> keys) =>
+      caller.callServerEndpoint<void>(
+        'progress',
+        'markCelebrated',
+        {'keys': keys},
+      );
+
+  _ida.Future<_ihbhlwjc.ProgressSettings> settings() =>
+      caller.callServerEndpoint<_ihbhlwjc.ProgressSettings>(
+        'progress',
+        'settings',
+        {},
+      );
+
+  _ida.Future<_ihbhlwjc.ProgressSettings> updateSettings(
+    _ijs126ng.ProgressSettingsDraft draft,
+  ) => caller.callServerEndpoint<_ihbhlwjc.ProgressSettings>(
+    'progress',
+    'updateSettings',
+    {'draft': draft},
+  );
+}
+
+/// {@category Endpoint}
 class EndpointReview extends _isc.EndpointRef {
   EndpointReview(_isc.EndpointCaller caller) : super(caller);
 
@@ -913,6 +959,7 @@ class Client extends _isc.ServerpodClientShared {
     item = EndpointItem(this);
     planner = EndpointPlanner(this);
     profile = EndpointProfile(this);
+    progress = EndpointProgress(this);
     review = EndpointReview(this);
     reviewQueue = EndpointReviewQueue(this);
     search = EndpointSearch(this);
@@ -939,6 +986,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointProfile profile;
 
+  late final EndpointProgress progress;
+
   late final EndpointReview review;
 
   late final EndpointReviewQueue reviewQueue;
@@ -959,6 +1008,7 @@ class Client extends _isc.ServerpodClientShared {
     'item': item,
     'planner': planner,
     'profile': profile,
+    'progress': progress,
     'review': review,
     'reviewQueue': reviewQueue,
     'search': search,

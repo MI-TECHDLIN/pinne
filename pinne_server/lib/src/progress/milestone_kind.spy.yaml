@@ -1,0 +1,7 @@
+enum: MilestoneKind
+serialized: byName
+values:
+  - firstReview
+  - reviewCount
+  - weeklyGoal
+  - queueCleared

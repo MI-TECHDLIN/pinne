@@ -68,6 +68,14 @@ import 'package:pinne_server/src/generated/profile/pinne_profile.dart'
     as _ixjrylia;
 import 'package:pinne_server/src/generated/profile/profile_draft.dart'
     as _i2c58fcj;
+import 'package:pinne_server/src/generated/progress/progress_query.dart'
+    as _iubj73k9;
+import 'package:pinne_server/src/generated/progress/progress_report.dart'
+    as _imz0imff;
+import 'package:pinne_server/src/generated/progress/progress_settings.dart'
+    as _ieevbso2;
+import 'package:pinne_server/src/generated/progress/progress_settings_draft.dart'
+    as _i7muh27a;
 import 'package:pinne_server/src/generated/reminders/reminder_settings.dart'
     as _i261tjna;
 import 'package:pinne_server/src/generated/reminders/reminder_settings_draft.dart'
@@ -245,6 +253,8 @@ class TestEndpoints {
 
   late final _ProfileEndpoint profile;
 
+  late final _ProgressEndpoint progress;
+
   late final _ReviewEndpoint review;
 
   late final _ReviewQueueEndpoint reviewQueue;
@@ -296,6 +306,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     profile = _ProfileEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    progress = _ProgressEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1974,6 +1988,140 @@ class _ProfileEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_ixjrylia.PinneProfile>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _ProgressEndpoint {
+  _ProgressEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_imz0imff.ProgressReport> report(
+    _ist.TestSessionBuilder sessionBuilder,
+    _iubj73k9.ProgressQuery query,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'progress',
+            method: 'report',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'progress',
+          methodName: 'report',
+          parameters: _ist.testObjectToJson({'query': query}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_imz0imff.ProgressReport>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<void> markCelebrated(
+    _ist.TestSessionBuilder sessionBuilder,
+    List<String> keys,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'progress',
+            method: 'markCelebrated',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'progress',
+          methodName: 'markCelebrated',
+          parameters: _ist.testObjectToJson({'keys': keys}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ieevbso2.ProgressSettings> settings(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'progress',
+            method: 'settings',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'progress',
+          methodName: 'settings',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ieevbso2.ProgressSettings>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ieevbso2.ProgressSettings> updateSettings(
+    _ist.TestSessionBuilder sessionBuilder,
+    _i7muh27a.ProgressSettingsDraft draft,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'progress',
+            method: 'updateSettings',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'progress',
+          methodName: 'updateSettings',
+          parameters: _ist.testObjectToJson({'draft': draft}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ieevbso2.ProgressSettings>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
