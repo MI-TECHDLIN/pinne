@@ -8,6 +8,9 @@ silueta (about 0.6 GB peak) fills the swirl's open centre with background.
 HOLE_KEY multiplies the silueta mask by a luminance key against the plain
 dark violet background, which clears the centre and the floor, and keeps any
 bright pixel (sparkles, moon) that silueta dropped.
+HOLE_KEY_LO and HOLE_KEY_HI tune the preserved-bright-pixel ramp (defaults
+60 and 100). The hero and remaining pieces use 90 and 140 because their
+background halos otherwise leave more visible violet remnants.
 BiRefNet (REMBG_MODEL=birefnet-general-lite) peaked at about 3.7 GB RSS and was killed.
 """
 import io
@@ -36,7 +39,9 @@ im = Image.open(src).convert("RGB")
 if os.environ.get("HOLE_KEY") == "1":
     mask = np.asarray(remove(im, session=session, only_mask=True, post_process_mask=True)) / 255
     lum = np.asarray(im).astype(np.float32) @ np.array([0.299, 0.587, 0.114], np.float32)
-    alpha = np.maximum(mask * ramp(lum, 44, 64), ramp(lum, 60, 100))
+    key_lo = float(os.environ.get("HOLE_KEY_LO", "60"))
+    key_hi = float(os.environ.get("HOLE_KEY_HI", "100"))
+    alpha = np.maximum(mask * ramp(lum, 44, 64), ramp(lum, key_lo, key_hi))
     matte = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.6))
     out = im.convert("RGBA")
     out.putalpha(matte)

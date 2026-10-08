@@ -15,12 +15,15 @@ images do not replace it and no screen uses them yet.
 | Mood: idle | done, usable (right eye on the inner edge) | `ribbon_spirit_idle.webp`, `cutout/ribbon_spirit_idle.webp` |
 | Mood: happy | done, usable but mild (reads as idle plus sparkles) | `ribbon_spirit_happy.webp`, `cutout/ribbon_spirit_happy.webp` |
 | Mood: sleepy | done, usable | `ribbon_spirit_sleepy.webp`, `cutout/ribbon_spirit_sleepy.webp` |
-| Mood: excited | pending: free quota (one rejected try) | |
-| Welcome hero | pending: free quota | |
-| Empty collection / empty review queue / no search results | pending: free quota | |
+| Mood: excited | done, usable | `ribbon_spirit_excited.webp`, `cutout/ribbon_spirit_excited.webp` |
+| Welcome hero | done, usable | `ribbon_spirit_welcome.webp`, `cutout/ribbon_spirit_welcome.webp` |
+| Empty collection | done, usable | `ribbon_spirit_empty_collection.webp`, `cutout/ribbon_spirit_empty_collection.webp` |
+| Empty review queue | done, usable, but the tray reads more like a round tub | `ribbon_spirit_empty_review_queue.webp`, `cutout/ribbon_spirit_empty_review_queue.webp` |
+| Search with no results | done, usable | `ribbon_spirit_search_no_results.webp`, `cutout/ribbon_spirit_search_no_results.webp` |
 
 The free ZeroGPU quota ended after 8 generations on 2026-10-06 and after 7
-more on 2026-10-07 (see [Access and quota](#access-and-quota)).
+more on 2026-10-07. Seven calls on 2026-10-08 finished the batch without a
+quota failure (see [Access and quota](#access-and-quota)).
 
 `pinne_flutter/assets/art/manifest.json` lists every shipped file with its
 source generation, seed and size.
@@ -38,7 +41,7 @@ source generation, seed and size.
   Hugging Face read token. No GPU was used locally.
 - **Settings for every call:** mode `Distilled (4 steps)`, 4 steps,
   guidance 1.0, prompt upsampling off, fixed seed (randomize off).
-- The Space returns lossy WebP (about 13-17 KB at 1024x1024). The files are
+- The Space returns lossy WebP (about 13-20 KB at these sizes). The files are
   kept exactly as returned; there is no upscaling or retouching.
 
 Not used, because their licences are non-commercial: FLUX.2 [dev],
@@ -142,15 +145,36 @@ adding pupils. Exact prompts are in the log.
 | 410016 | mood-sleepy-2 | idle | **Accepted as sleepy**: closed arc eyes, separate crescent moon |
 | 410017 | mood-excited | idle | Rejected: one eye, body reshaped into a thin hook |
 | 410018 | mood-excited-2 | idle | Failed: quota |
+| 410019 | mood-excited-3 | idle | **Accepted as excited**: both eyes retained, clear halo of sparkles |
 
-**Eyes:** moving them up worked. In all three accepted moods both eyes sit
+**Eyes:** moving them up worked. In all four accepted moods both eyes sit
 in the upper part of the curl and read as a face. The catch: the right eye
 lands on the inner edge of the curl, over the open centre, so on a close look
 it floats slightly instead of sitting fully on the ribbon.
 
 **Weak points:** happy differs from idle mostly by the sparkles and a small
 tilt. The edits are a little softer than the master and keep the Space's lossy
-WebP. All three have the same silhouette, so they work as a set.
+WebP. All four have the same silhouette, so they work as a set.
+
+## Welcome and empty-state pieces
+
+These are reference edits in the same seed family. The full exact prompts,
+including rejected attempts, are in the generation log.
+
+| Seed | Name | Reference | Verdict |
+|---|---|---|---|
+| 410020 | welcome-hero | idle | **Accepted**: strong portrait composition, restrained halo and useful negative space |
+| 410021 | empty-collection | idle | **Accepted**: the open, visibly empty keepsake box reads clearly |
+| 410022 | empty-review-queue | sleepy | **Accepted with a caveat**: calm all-caught-up mood, but the empty rounded tray looks more like a tub than an inbox |
+| 410023 | search-no-results | idle | Rejected: the edit dropped one eye |
+| 410024 | search-no-results-2 | idle | Rejected: two eyes retained, but the magnifying-glass handle became a second loop |
+| 410025 | search-no-results-3 | idle | **Accepted**: two eyes retained and the magnifying glass reads clearly; its handle lightly touches the tail |
+
+All five accepted pieces are good enough for phone-size use on Pinne's dark
+surfaces. The empty-collection image is the strongest of the three empty
+states. The empty-review prop and the search prop's tail contact are visible
+imperfections, so neither should be presented as precision product art. No
+accepted image contains lime.
 
 ## Cut-outs
 
@@ -162,13 +186,16 @@ trimmed, padded by 24 px and saved as WebP under 250 KB
   dark rim from the original background, which disappears on Pinne's dark
   surfaces and shows slightly on white.
 - **Moods:** ISNet was killed by the codespace memory guard while other jobs
-  ran, so these use the small `silueta` model (about 0.6 GB peak, one thread).
+  ran, so these and the remaining five pieces use the small `silueta` model
+  (about 0.6 GB peak, one thread).
   On its own silueta keeps the swirl's open centre as a dark blob, so the
   script multiplies its mask by a luminance key against the plain dark
   background (`HOLE_KEY=1`). That clears the centre and the floor and keeps
-  the sparkles and moon. They look clean on dark surfaces. On white, the
-  bottom edge is a little soft and the right eye keeps a thin dark shadow rim
-  where it sits over the open centre.
+  the sparkles and moon. The later pieces use a stricter 90-140 bright-pixel
+  ramp to reduce their background halos. They look clean on dark surfaces.
+  On white, the bottom edge is a little soft, bright props retain small dark
+  violet remnants, and the right eye keeps a thin dark shadow rim where it
+  sits over the open centre.
 - BiRefNet (`birefnet-general` and `birefnet-general-lite`) peaked at about
   3.7 GB and was killed every time, so it produced no output.
 
@@ -186,11 +213,9 @@ The Space reserves up to 85 s per call (`@spaces.GPU(duration=85)`); each
 call took 2-9 s end to end. The failed calls returned in under a second.
 
 2026-10-07: 1 generation at 10:15 UTC and 6 more at 16:06-16:08 UTC, then the
-same message at 16:08 UTC. So the free account gives about 7-8 calls a day
-with this Space. The remaining five pieces (excited, hero, three empty states)
-need about one or two more free days at the current reject rate. Hugging Face
-PRO (US$9 a month) raises ZeroGPU to 40 minutes a day, which would finish
-them in one sitting.
+same message at 16:08 UTC. On 2026-10-08, 7 generations succeeded at
+16:32-16:35 UTC. That finished the five remaining pieces; the worker stopped
+voluntarily after the seventh call and did not probe the quota with an eighth.
 
 ## Generation count
 
@@ -198,7 +223,8 @@ them in one sitting.
 |---|---|---|
 | Master candidates (2026-10-06) | 10 | 8 |
 | Mood edits (2026-10-07) | 8 | 7 |
-| **Total** | **18** | **15** |
+| Remaining edits (2026-10-08) | 7 | 7 |
+| **Total** | **25** | **22** |
 
 Budget: at most 40 generations.
 
@@ -218,8 +244,9 @@ generally not copyrightable (US Copyright Office, Part 2 report, January
 
 ## AI-use disclosure (paste into the submission text)
 
-> Pinne's still illustrations of its Ribbon Spirit character (the welcome
-> image and empty-state pictures) were generated with FLUX.2 [klein] 4B by
+> Pinne's still illustrations of its Ribbon Spirit character (the master,
+> mood poses, welcome image and empty-state pictures) were generated with
+> FLUX.2 [klein] 4B by
 > Black Forest Labs, an open-weight model under the Apache-2.0 licence, run
 > through its official Hugging Face Space. We wrote the prompts, generated a
 > small batch, picked the images by hand and removed backgrounds locally with
@@ -238,6 +265,8 @@ export HF_TOKEN=...   # a Hugging Face read token; never commit it
 # a mood edit: pass the reference image after the size; light cut-out
 /tmp/art-venv/bin/python -I docs/ai-art/scripts/gen.py mood-sleepy-2 "<prompt>" 410016 1024 1024 ribbon_spirit_idle.webp
 REMBG_MODEL=silueta HOLE_KEY=1 /tmp/art-venv/bin/python -I docs/ai-art/scripts/cutout.py out/mood-sleepy-2.webp cutout.webp
+# stricter key for pieces with a generated halo
+REMBG_MODEL=silueta HOLE_KEY=1 HOLE_KEY_LO=90 HOLE_KEY_HI=140 /tmp/art-venv/bin/python -I docs/ai-art/scripts/cutout.py out/welcome-hero.webp cutout.webp
 ```
 
 `gen.py` writes to an `out/` folder next to itself; run a copy outside the repo.
