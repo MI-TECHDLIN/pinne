@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
+import '../../ui/item_preview.dart';
 import '../settings/profile_provider.dart';
 import 'search_providers.dart';
 
@@ -297,6 +298,10 @@ class SearchResultCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (item.url != null) ...[
+                  PreviewThumbnail(item: item, height: 132),
+                  const SizedBox(height: PinneSpacing.md),
+                ],
                 Text(
                   '${_source(item.sourcePlatform)} · ${_words(item.contentType.name)}',
                   style: const TextStyle(
@@ -306,6 +311,26 @@ class SearchResultCard extends StatelessWidget {
                     letterSpacing: 1.1,
                   ),
                 ),
+                const SizedBox(height: PinneSpacing.sm),
+                PreviewByline(
+                  item: item,
+                  color: PinneColors.ink.withValues(alpha: 0.72),
+                ),
+                if (item.durationSeconds case final seconds?) ...[
+                  const SizedBox(height: PinneSpacing.xs),
+                  Wrap(
+                    spacing: PinneSpacing.xs,
+                    children: [
+                      PreviewSourceChip(
+                        source: item.sourcePlatform,
+                        dark: true,
+                      ),
+                      DurationChip(seconds: seconds, dark: true),
+                    ],
+                  ),
+                ] else ...[
+                  PreviewSourceChip(source: item.sourcePlatform, dark: true),
+                ],
                 const SizedBox(height: PinneSpacing.sm),
                 Text(
                   item.title,

@@ -152,6 +152,10 @@ class AiOrganizationService {
       sourcePlatform: item.sourcePlatform.name,
       intention: item.intention,
       notes: item.noteText,
+      description: item.previewDescription,
+      author: item.previewAuthor,
+      siteName: item.previewSiteName,
+      previewAvailable: item.previewMetadataJson != null,
     );
     final result = await _organizeSafely(provider, evidence, options);
 
@@ -242,6 +246,9 @@ class AiOrganizationService {
       return AiOutputValidator.sanitize(
         raw,
         allowedCollectionIds: options.map((option) => option.id),
+        evidenceCoverage: evidence.previewAvailable
+            ? AiEvidenceCoverage.metadataPlusPreview
+            : AiEvidenceCoverage.metadataOnly,
       );
     } catch (_) {
       // Typed providers are still untrusted. A malformed test double or future

@@ -18,6 +18,9 @@ fields:
   ### with the platform to recognize duplicates.
   sourceItemId: String?
   title: String
+  ### True when the title came from a user edit. Preview jobs must never
+  ### replace it.
+  titleManuallyLocked: bool, default=false
   ### The text of a note-only item. Null for links.
   noteText: String?
   contentType: ContentType, default=other
@@ -34,6 +37,18 @@ fields:
   savedAt: DateTime, default=now
   enrichmentState: EnrichmentState, default=pending
   accessState: AccessState, default=unknown
+  ### Normalized, plain-text preview evidence. Remote HTML is never stored or
+  ### rendered. The image remains a remote URL and is not proxied in v1.
+  previewDescription: String?
+  previewAuthor: String?
+  previewSiteName: String?
+  previewProvider: String?
+  thumbnailUrl: String?
+  durationSeconds: int?
+  previewMetadataJson: String?
+  previewUpdatedAt: DateTime?
+  previewStartedAt: DateTime?
+  previewAttemptCount: int, default=0
   ### Optimistic concurrency counter, bumped on every server-side update.
   revision: int, default=1
 indexes:

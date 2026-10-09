@@ -45,6 +45,7 @@ item:
   - get:
   - capture:
   - create:
+  - refreshPreview:
   - update:
   - delete:
 planner:

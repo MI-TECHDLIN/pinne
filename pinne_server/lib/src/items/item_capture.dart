@@ -141,6 +141,7 @@ class ItemCapture {
         sourcePlatform: read.platform,
         sourceItemId: link?.sourceItemId,
         title: read.title,
+        titleManuallyLocked: draft.title?.trim().isNotEmpty == true,
         noteText: read.input.note,
         contentType: ContentType.values.byName(read.input.contentType.name),
         intention: read.intention,

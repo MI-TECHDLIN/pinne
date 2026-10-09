@@ -651,6 +651,15 @@ class EndpointItem extends _isc.EndpointRef {
         {'draft': draft},
       );
 
+  /// Queues a fresh preview for one owned item. A foreign id is indistinguish-
+  /// able from a missing id and the network work remains asynchronous.
+  _ida.Future<_itiiwgx0.Item> refreshPreview(_isc.UuidValue id) =>
+      caller.callServerEndpoint<_itiiwgx0.Item>(
+        'item',
+        'refreshPreview',
+        {'id': id},
+      );
+
   /// Applies the user-editable fields of [item]. The stored owner, saved time
   /// and canonical URL are kept. Fails when [item] carries a stale revision.
   _ida.Future<_itiiwgx0.Item> update(_itiiwgx0.Item item) =>

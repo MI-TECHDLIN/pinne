@@ -4,3 +4,4 @@ enum: AiEvidenceCoverage
 serialized: byName
 values:
   - metadataOnly
+  - metadataPlusPreview

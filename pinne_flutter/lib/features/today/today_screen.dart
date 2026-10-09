@@ -11,6 +11,7 @@ import '../../shell/pinne_page.dart';
 import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../../ui/item_preview.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../capture/paste_capture_card.dart';
 import '../progress/celebration.dart';
@@ -265,6 +266,10 @@ class TodaySpiritCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 18),
+                if (item?.url != null) ...[
+                  PreviewThumbnail(item: item!, height: 132),
+                  const SizedBox(height: PinneSpacing.md),
+                ],
                 Text(
                   item?.title ??
                       (due ? 'A little rediscovery' : 'Room for a new thought'),
@@ -273,6 +278,30 @@ class TodaySpiritCard extends StatelessWidget {
                   ).textTheme.headlineSmall?.copyWith(color: ink),
                 ),
                 const SizedBox(height: 8),
+                if (item != null) ...[
+                  PreviewByline(
+                    item: item,
+                    color: due
+                        ? ink.withValues(alpha: 0.72)
+                        : PinneColors.muted,
+                  ),
+                  if (item.durationSeconds case final seconds?) ...[
+                    const SizedBox(height: PinneSpacing.xs),
+                    Wrap(
+                      spacing: PinneSpacing.xs,
+                      children: [
+                        PreviewSourceChip(
+                          source: item.sourcePlatform,
+                          dark: due,
+                        ),
+                        DurationChip(seconds: seconds, dark: due),
+                      ],
+                    ),
+                  ] else ...[
+                    PreviewSourceChip(source: item.sourcePlatform, dark: due),
+                  ],
+                  const SizedBox(height: PinneSpacing.xs),
+                ],
                 Text(
                   item == null
                       ? (due

@@ -30,6 +30,8 @@ import 'package:pinne_server/src/generated/collections/collection_draft.dart'
 import 'package:pinne_server/src/generated/future_calls.dart' as _ifh9pad3;
 import 'package:pinne_server/src/generated/future_calls_generated_models/ai_organize_future_call_process_model.dart'
     as _iqip40ut;
+import 'package:pinne_server/src/generated/future_calls_generated_models/link_preview_future_call_process_model.dart'
+    as _i61rcz8a;
 import 'package:pinne_server/src/generated/health/server_health.dart'
     as _iq4esrxi;
 import 'package:pinne_server/src/generated/items/capture_draft.dart'
@@ -342,6 +344,8 @@ class _InternalTestEndpoints extends TestEndpoints
 
 class _FutureCalls {
   late final aiOrganize = _AiOrganizeFutureCall();
+
+  late final linkPreview = _LinkPreviewFutureCall();
 
   late final reminderDigest = _ReminderDigestFutureCall();
 }
@@ -1624,6 +1628,37 @@ class _ItemEndpoint {
     });
   }
 
+  _ida.Future<_id0tr7gx.Item> refreshPreview(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue id,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'item',
+            method: 'refreshPreview',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'item',
+          methodName: 'refreshPreview',
+          parameters: _ist.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_id0tr7gx.Item>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<_id0tr7gx.Item> update(
     _ist.TestSessionBuilder sessionBuilder,
     _id0tr7gx.Item item,
@@ -2602,6 +2637,29 @@ class _AiOrganizeFutureCall {
         (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
     try {
       await _ifh9pad3.AiOrganizeProcessFutureCall().invoke(
+        _localUniqueSession,
+        object,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
+  }
+}
+
+class _LinkPreviewFutureCall {
+  Future<void> process(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+    _is.UuidValue ownerId,
+  ) async {
+    var object = _i61rcz8a.LinkPreviewFutureCallProcessModel(
+      itemId: itemId,
+      ownerId: ownerId,
+    );
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _ifh9pad3.LinkPreviewProcessFutureCall().invoke(
         _localUniqueSession,
         object,
       );

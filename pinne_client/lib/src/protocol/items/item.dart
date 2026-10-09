@@ -31,6 +31,7 @@ abstract class Item
     _ixm5zqtz.SourcePlatform? sourcePlatform,
     this.sourceItemId,
     required this.title,
+    bool? titleManuallyLocked,
     this.noteText,
     _ic14w5wg.ContentType? contentType,
     this.intention,
@@ -42,8 +43,19 @@ abstract class Item
     DateTime? savedAt,
     _iib6h77f.EnrichmentState? enrichmentState,
     _idll96tf.AccessState? accessState,
+    this.previewDescription,
+    this.previewAuthor,
+    this.previewSiteName,
+    this.previewProvider,
+    this.thumbnailUrl,
+    this.durationSeconds,
+    this.previewMetadataJson,
+    this.previewUpdatedAt,
+    this.previewStartedAt,
+    int? previewAttemptCount,
     int? revision,
   }) : sourcePlatform = sourcePlatform ?? _ixm5zqtz.SourcePlatform.web,
+       titleManuallyLocked = titleManuallyLocked ?? false,
        contentType = contentType ?? _ic14w5wg.ContentType.other,
        summaryManuallyLocked = summaryManuallyLocked ?? false,
        priority = priority ?? 0,
@@ -51,6 +63,7 @@ abstract class Item
        savedAt = savedAt ?? DateTime.now(),
        enrichmentState = enrichmentState ?? _iib6h77f.EnrichmentState.pending,
        accessState = accessState ?? _idll96tf.AccessState.unknown,
+       previewAttemptCount = previewAttemptCount ?? 0,
        revision = revision ?? 1;
 
   factory Item({
@@ -62,6 +75,7 @@ abstract class Item
     _ixm5zqtz.SourcePlatform? sourcePlatform,
     String? sourceItemId,
     required String title,
+    bool? titleManuallyLocked,
     String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
@@ -73,6 +87,16 @@ abstract class Item
     DateTime? savedAt,
     _iib6h77f.EnrichmentState? enrichmentState,
     _idll96tf.AccessState? accessState,
+    String? previewDescription,
+    String? previewAuthor,
+    String? previewSiteName,
+    String? previewProvider,
+    String? thumbnailUrl,
+    int? durationSeconds,
+    String? previewMetadataJson,
+    DateTime? previewUpdatedAt,
+    DateTime? previewStartedAt,
+    int? previewAttemptCount,
     int? revision,
   }) = _ItemImpl;
 
@@ -98,6 +122,11 @@ abstract class Item
             ),
       sourceItemId: jsonSerialization['sourceItemId'] as String?,
       title: jsonSerialization['title'] as String,
+      titleManuallyLocked: jsonSerialization['titleManuallyLocked'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(
+              jsonSerialization['titleManuallyLocked'],
+            ),
       noteText: jsonSerialization['noteText'] as String?,
       contentType: jsonSerialization['contentType'] == null
           ? null
@@ -135,6 +164,24 @@ abstract class Item
           : _idll96tf.AccessState.fromJson(
               (jsonSerialization['accessState'] as String),
             ),
+      previewDescription: jsonSerialization['previewDescription'] as String?,
+      previewAuthor: jsonSerialization['previewAuthor'] as String?,
+      previewSiteName: jsonSerialization['previewSiteName'] as String?,
+      previewProvider: jsonSerialization['previewProvider'] as String?,
+      thumbnailUrl: jsonSerialization['thumbnailUrl'] as String?,
+      durationSeconds: jsonSerialization['durationSeconds'] as int?,
+      previewMetadataJson: jsonSerialization['previewMetadataJson'] as String?,
+      previewUpdatedAt: jsonSerialization['previewUpdatedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['previewUpdatedAt'],
+            ),
+      previewStartedAt: jsonSerialization['previewStartedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['previewStartedAt'],
+            ),
+      previewAttemptCount: jsonSerialization['previewAttemptCount'] as int?,
       revision: jsonSerialization['revision'] as int?,
     );
   }
@@ -165,6 +212,10 @@ abstract class Item
 
   String title;
 
+  /// True when the title came from a user edit. Preview jobs must never
+  /// replace it.
+  bool titleManuallyLocked;
+
   /// The text of a note-only item. Null for links.
   String? noteText;
 
@@ -192,6 +243,28 @@ abstract class Item
 
   _idll96tf.AccessState accessState;
 
+  /// Normalized, plain-text preview evidence. Remote HTML is never stored or
+  /// rendered. The image remains a remote URL and is not proxied in v1.
+  String? previewDescription;
+
+  String? previewAuthor;
+
+  String? previewSiteName;
+
+  String? previewProvider;
+
+  String? thumbnailUrl;
+
+  int? durationSeconds;
+
+  String? previewMetadataJson;
+
+  DateTime? previewUpdatedAt;
+
+  DateTime? previewStartedAt;
+
+  int previewAttemptCount;
+
   /// Optimistic concurrency counter, bumped on every server-side update.
   int revision;
 
@@ -207,6 +280,7 @@ abstract class Item
     _ixm5zqtz.SourcePlatform? sourcePlatform,
     String? sourceItemId,
     String? title,
+    bool? titleManuallyLocked,
     String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
@@ -218,6 +292,16 @@ abstract class Item
     DateTime? savedAt,
     _iib6h77f.EnrichmentState? enrichmentState,
     _idll96tf.AccessState? accessState,
+    String? previewDescription,
+    String? previewAuthor,
+    String? previewSiteName,
+    String? previewProvider,
+    String? thumbnailUrl,
+    int? durationSeconds,
+    String? previewMetadataJson,
+    DateTime? previewUpdatedAt,
+    DateTime? previewStartedAt,
+    int? previewAttemptCount,
     int? revision,
   });
   @override
@@ -232,6 +316,7 @@ abstract class Item
       'sourcePlatform': sourcePlatform.toJson(),
       if (sourceItemId != null) 'sourceItemId': sourceItemId,
       'title': title,
+      'titleManuallyLocked': titleManuallyLocked,
       if (noteText != null) 'noteText': noteText,
       'contentType': contentType.toJson(),
       if (intention != null) 'intention': intention,
@@ -243,6 +328,19 @@ abstract class Item
       'savedAt': savedAt.toJson(),
       'enrichmentState': enrichmentState.toJson(),
       'accessState': accessState.toJson(),
+      if (previewDescription != null) 'previewDescription': previewDescription,
+      if (previewAuthor != null) 'previewAuthor': previewAuthor,
+      if (previewSiteName != null) 'previewSiteName': previewSiteName,
+      if (previewProvider != null) 'previewProvider': previewProvider,
+      if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+      if (durationSeconds != null) 'durationSeconds': durationSeconds,
+      if (previewMetadataJson != null)
+        'previewMetadataJson': previewMetadataJson,
+      if (previewUpdatedAt != null)
+        'previewUpdatedAt': previewUpdatedAt?.toJson(),
+      if (previewStartedAt != null)
+        'previewStartedAt': previewStartedAt?.toJson(),
+      'previewAttemptCount': previewAttemptCount,
       'revision': revision,
     };
   }
@@ -259,6 +357,7 @@ abstract class Item
       'sourcePlatform': sourcePlatform.toJson(),
       if (sourceItemId != null) 'sourceItemId': sourceItemId,
       'title': title,
+      'titleManuallyLocked': titleManuallyLocked,
       if (noteText != null) 'noteText': noteText,
       'contentType': contentType.toJson(),
       if (intention != null) 'intention': intention,
@@ -270,6 +369,19 @@ abstract class Item
       'savedAt': savedAt.toJson(),
       'enrichmentState': enrichmentState.toJson(),
       'accessState': accessState.toJson(),
+      if (previewDescription != null) 'previewDescription': previewDescription,
+      if (previewAuthor != null) 'previewAuthor': previewAuthor,
+      if (previewSiteName != null) 'previewSiteName': previewSiteName,
+      if (previewProvider != null) 'previewProvider': previewProvider,
+      if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+      if (durationSeconds != null) 'durationSeconds': durationSeconds,
+      if (previewMetadataJson != null)
+        'previewMetadataJson': previewMetadataJson,
+      if (previewUpdatedAt != null)
+        'previewUpdatedAt': previewUpdatedAt?.toJson(),
+      if (previewStartedAt != null)
+        'previewStartedAt': previewStartedAt?.toJson(),
+      'previewAttemptCount': previewAttemptCount,
       'revision': revision,
     };
   }
@@ -292,6 +404,7 @@ class _ItemImpl extends Item {
     _ixm5zqtz.SourcePlatform? sourcePlatform,
     String? sourceItemId,
     required String title,
+    bool? titleManuallyLocked,
     String? noteText,
     _ic14w5wg.ContentType? contentType,
     String? intention,
@@ -303,6 +416,16 @@ class _ItemImpl extends Item {
     DateTime? savedAt,
     _iib6h77f.EnrichmentState? enrichmentState,
     _idll96tf.AccessState? accessState,
+    String? previewDescription,
+    String? previewAuthor,
+    String? previewSiteName,
+    String? previewProvider,
+    String? thumbnailUrl,
+    int? durationSeconds,
+    String? previewMetadataJson,
+    DateTime? previewUpdatedAt,
+    DateTime? previewStartedAt,
+    int? previewAttemptCount,
     int? revision,
   }) : super._(
          id: id,
@@ -313,6 +436,7 @@ class _ItemImpl extends Item {
          sourcePlatform: sourcePlatform,
          sourceItemId: sourceItemId,
          title: title,
+         titleManuallyLocked: titleManuallyLocked,
          noteText: noteText,
          contentType: contentType,
          intention: intention,
@@ -324,6 +448,16 @@ class _ItemImpl extends Item {
          savedAt: savedAt,
          enrichmentState: enrichmentState,
          accessState: accessState,
+         previewDescription: previewDescription,
+         previewAuthor: previewAuthor,
+         previewSiteName: previewSiteName,
+         previewProvider: previewProvider,
+         thumbnailUrl: thumbnailUrl,
+         durationSeconds: durationSeconds,
+         previewMetadataJson: previewMetadataJson,
+         previewUpdatedAt: previewUpdatedAt,
+         previewStartedAt: previewStartedAt,
+         previewAttemptCount: previewAttemptCount,
          revision: revision,
        );
 
@@ -340,6 +474,7 @@ class _ItemImpl extends Item {
     _ixm5zqtz.SourcePlatform? sourcePlatform,
     Object? sourceItemId = _Undefined,
     String? title,
+    bool? titleManuallyLocked,
     Object? noteText = _Undefined,
     _ic14w5wg.ContentType? contentType,
     Object? intention = _Undefined,
@@ -351,6 +486,16 @@ class _ItemImpl extends Item {
     DateTime? savedAt,
     _iib6h77f.EnrichmentState? enrichmentState,
     _idll96tf.AccessState? accessState,
+    Object? previewDescription = _Undefined,
+    Object? previewAuthor = _Undefined,
+    Object? previewSiteName = _Undefined,
+    Object? previewProvider = _Undefined,
+    Object? thumbnailUrl = _Undefined,
+    Object? durationSeconds = _Undefined,
+    Object? previewMetadataJson = _Undefined,
+    Object? previewUpdatedAt = _Undefined,
+    Object? previewStartedAt = _Undefined,
+    int? previewAttemptCount,
     int? revision,
   }) {
     return Item(
@@ -364,6 +509,7 @@ class _ItemImpl extends Item {
       sourcePlatform: sourcePlatform ?? this.sourcePlatform,
       sourceItemId: sourceItemId is String? ? sourceItemId : this.sourceItemId,
       title: title ?? this.title,
+      titleManuallyLocked: titleManuallyLocked ?? this.titleManuallyLocked,
       noteText: noteText is String? ? noteText : this.noteText,
       contentType: contentType ?? this.contentType,
       intention: intention is String? ? intention : this.intention,
@@ -378,6 +524,32 @@ class _ItemImpl extends Item {
       savedAt: savedAt ?? this.savedAt,
       enrichmentState: enrichmentState ?? this.enrichmentState,
       accessState: accessState ?? this.accessState,
+      previewDescription: previewDescription is String?
+          ? previewDescription
+          : this.previewDescription,
+      previewAuthor: previewAuthor is String?
+          ? previewAuthor
+          : this.previewAuthor,
+      previewSiteName: previewSiteName is String?
+          ? previewSiteName
+          : this.previewSiteName,
+      previewProvider: previewProvider is String?
+          ? previewProvider
+          : this.previewProvider,
+      thumbnailUrl: thumbnailUrl is String? ? thumbnailUrl : this.thumbnailUrl,
+      durationSeconds: durationSeconds is int?
+          ? durationSeconds
+          : this.durationSeconds,
+      previewMetadataJson: previewMetadataJson is String?
+          ? previewMetadataJson
+          : this.previewMetadataJson,
+      previewUpdatedAt: previewUpdatedAt is DateTime?
+          ? previewUpdatedAt
+          : this.previewUpdatedAt,
+      previewStartedAt: previewStartedAt is DateTime?
+          ? previewStartedAt
+          : this.previewStartedAt,
+      previewAttemptCount: previewAttemptCount ?? this.previewAttemptCount,
       revision: revision ?? this.revision,
     );
   }
