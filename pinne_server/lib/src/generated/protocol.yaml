@@ -5,6 +5,10 @@ aiOrganizing:
   - reprocess:
   - accept:
   - reject:
+account:
+  - isGuest:
+anonymousIdp:
+  - login:
 emailIdp:
   - login:
   - startRegistration:
@@ -34,6 +38,7 @@ collection:
   - update:
   - delete:
 health:
+  - emailDeliveryAvailable:
   - check:
 item:
   - list:

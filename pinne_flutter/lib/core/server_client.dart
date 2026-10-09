@@ -44,6 +44,21 @@ final serverHealthProvider = FutureProvider.autoDispose<ServerHealth>(
   (ref) => ref.watch(clientProvider).health.check(),
 );
 
+/// Whether this deployment can deliver email verification and reset codes.
+final emailDeliveryAvailableProvider = FutureProvider.autoDispose<bool>(
+  (ref) => ref.watch(clientProvider).health.emailDeliveryAvailable(),
+);
+
+/// Creates a normal server-side auth user whose session is held by this app.
+/// Kept injectable so the sign-in path can be exercised without a live server.
+final guestSignInActionProvider = Provider<Future<void> Function()>((ref) {
+  return () async {
+    final client = ref.read(clientProvider);
+    final authSuccess = await client.anonymousIdp.login();
+    await client.auth.updateSignedInUser(authSuccess);
+  };
+});
+
 /// Whether a user is signed in, kept in sync with the client's auth state.
 final signedInProvider = NotifierProvider<SignedInNotifier, bool>(
   SignedInNotifier.new,

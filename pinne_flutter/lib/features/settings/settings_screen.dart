@@ -8,6 +8,7 @@ import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import 'account_kind_provider.dart';
 import 'ai_settings_provider.dart';
 import 'profile_card.dart';
 
@@ -123,32 +124,60 @@ class _AccountCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final signedIn = ref.watch(signedInProvider);
+    final accountKind = ref.watch(accountKindProvider).asData?.value;
+    final isGuest = accountKind == AccountKind.guest;
     final theme = Theme.of(context);
     return GlassCard(
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Account', style: theme.textTheme.titleMedium),
-                Text(
-                  signedIn ? 'Signed in' : 'Not signed in',
-                  style: const TextStyle(color: PinneColors.muted),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Account', style: theme.textTheme.titleMedium),
+                    Text(
+                      isGuest
+                          ? 'Guest account'
+                          : signedIn
+                          ? 'Signed in'
+                          : 'Not signed in',
+                      style: const TextStyle(color: PinneColors.muted),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              signedIn
+                  ? TextButton(
+                      onPressed: () =>
+                          ref.read(signedInProvider.notifier).signOut(),
+                      child: const Text('Sign out'),
+                    )
+                  : FilledButton(
+                      onPressed: () => context.push(Routes.signIn),
+                      child: const Text('Sign in'),
+                    ),
+            ],
           ),
-          signedIn
-              ? TextButton(
-                  onPressed: () =>
-                      ref.read(signedInProvider.notifier).signOut(),
-                  child: const Text('Sign out'),
-                )
-              : FilledButton(
-                  onPressed: () => context.push(Routes.signIn),
-                  child: const Text('Sign in'),
-                ),
+          if (isGuest) ...[
+            const SizedBox(height: PinneSpacing.md),
+            const Text(
+              'Guest data belongs to this device\'s account. Signing out, '
+              'clearing app data or uninstalling can make your saves '
+              'unavailable.',
+              key: ValueKey('guest-data-notice'),
+              style: TextStyle(color: PinneColors.muted),
+            ),
+            const SizedBox(height: PinneSpacing.sm),
+            const Text(
+              'Serverpod does not yet support linking a guest directly to '
+              'email, so Pinne cannot safely offer an in-place upgrade yet.',
+              key: ValueKey('guest-linking-unavailable'),
+              style: TextStyle(color: PinneColors.muted),
+            ),
+          ],
         ],
       ),
     );

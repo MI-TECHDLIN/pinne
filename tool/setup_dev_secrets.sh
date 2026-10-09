@@ -2,8 +2,9 @@
 # Creates pinne_server/config/passwords.yaml and pinne_server/.env with fresh
 # random development secrets. Refuses to overwrite existing files unless
 # --force is given. Neither file is committed.
-# Optional provider keys such as geminiApiKey remain commented placeholders;
-# add them only to the generated private passwords.yaml.
+# Optional provider keys such as geminiApiKey and SMTP remain commented;
+# add them only to the generated private passwords.yaml. Demo-account
+# passwords are randomized along with the other development/test secrets.
 set -euo pipefail
 
 server_dir="$(cd "$(dirname "$0")/../pinne_server" && pwd)"

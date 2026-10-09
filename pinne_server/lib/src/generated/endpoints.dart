@@ -55,6 +55,8 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 import '../ai/ai_organizing_endpoint.dart' as _icvqao4l;
+import '../auth/account_endpoint.dart' as _ii6ycf6v;
+import '../auth/anonymous_idp_endpoint.dart' as _in0zita6;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/google_idp_endpoint.dart' as _i71axiz0;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
@@ -78,6 +80,18 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'aiOrganizing',
+          null,
+        ),
+      'account': _ii6ycf6v.AccountEndpoint()
+        ..initialize(
+          server,
+          'account',
+          null,
+        ),
+      'anonymousIdp': _in0zita6.AnonymousIdpEndpoint()
+        ..initialize(
+          server,
+          'anonymousIdp',
           null,
         ),
       'emailIdp': _iuc1hd5t.EmailIdpEndpoint()
@@ -272,6 +286,48 @@ class Endpoints extends _is.EndpointDispatch {
                       .reject(
                         session,
                         params['suggestionId'],
+                      ),
+        ),
+      },
+    );
+    connectors['account'] = _is.EndpointConnector(
+      name: 'account',
+      endpoint: endpoints['account']!,
+      methodConnectors: {
+        'isGuest': _is.MethodConnector(
+          name: 'isGuest',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _ii6ycf6v.AccountEndpoint)
+                  .isGuest(session),
+        ),
+      },
+    );
+    connectors['anonymousIdp'] = _is.EndpointConnector(
+      name: 'anonymousIdp',
+      endpoint: endpoints['anonymousIdp']!,
+      methodConnectors: {
+        'login': _is.MethodConnector(
+          name: 'login',
+          params: {
+            'token': _is.ParameterDescription(
+              name: 'token',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['anonymousIdp'] as _in0zita6.AnonymousIdpEndpoint)
+                      .login(
+                        session,
+                        token: params['token'],
                       ),
         ),
       },
@@ -753,6 +809,16 @@ class Endpoints extends _is.EndpointDispatch {
       name: 'health',
       endpoint: endpoints['health']!,
       methodConnectors: {
+        'emailDeliveryAvailable': _is.MethodConnector(
+          name: 'emailDeliveryAvailable',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['health'] as _id9paj9q.HealthEndpoint)
+                  .emailDeliveryAvailable(session),
+        ),
         'check': _is.MethodConnector(
           name: 'check',
           params: {},
