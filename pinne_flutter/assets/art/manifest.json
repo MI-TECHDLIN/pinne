@@ -1,0 +1,181 @@
+{
+  "about": "Still AI art of the Ribbon Spirit. Prompts, seeds and licences: docs/ai-art/README.md. Not used by any screen yet.",
+  "model": "black-forest-labs/FLUX.2-klein-4B (distilled, 4 steps, guidance 1.0), Apache-2.0",
+  "route": "Hugging Face Space black-forest-labs/FLUX.2-klein-4B, Gradio API /infer",
+  "cutout": "rembg 2.0.85, local CPU: isnet-general-use for the master, silueta + luminance hole key for the moods, hero and empty states",
+  "assets": [
+    {
+      "file": "ribbon_spirit_master.webp",
+      "piece": "master",
+      "generation": "master-05",
+      "seed": 410005,
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true
+    },
+    {
+      "file": "cutout/ribbon_spirit_master.webp",
+      "piece": "master cut-out",
+      "source": "ribbon_spirit_master.webp",
+      "size": [567, 717],
+      "background": "transparent",
+      "usable": true
+    },
+    {
+      "file": "ribbon_spirit_idle.webp",
+      "piece": "mood: idle",
+      "generation": "mood-idle",
+      "seed": 410011,
+      "reference": "ribbon_spirit_master.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true,
+      "note": "right eye sits on the inner edge"
+    },
+    {
+      "file": "cutout/ribbon_spirit_idle.webp",
+      "piece": "mood: idle cut-out",
+      "source": "ribbon_spirit_idle.webp",
+      "size": [571, 706],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
+    },
+    {
+      "file": "ribbon_spirit_happy.webp",
+      "piece": "mood: happy",
+      "generation": "mood-happy-3",
+      "seed": 410014,
+      "reference": "ribbon_spirit_idle.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true,
+      "note": "mild: idle plus sparkles"
+    },
+    {
+      "file": "cutout/ribbon_spirit_happy.webp",
+      "piece": "mood: happy cut-out",
+      "source": "ribbon_spirit_happy.webp",
+      "size": [656, 684],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
+    },
+    {
+      "file": "ribbon_spirit_sleepy.webp",
+      "piece": "mood: sleepy",
+      "generation": "mood-sleepy-2",
+      "seed": 410016,
+      "reference": "ribbon_spirit_idle.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true
+    },
+    {
+      "file": "cutout/ribbon_spirit_sleepy.webp",
+      "piece": "mood: sleepy cut-out",
+      "source": "ribbon_spirit_sleepy.webp",
+      "size": [686, 769],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
+    },
+    {
+      "file": "ribbon_spirit_excited.webp",
+      "piece": "mood: excited",
+      "generation": "mood-excited-3",
+      "seed": 410019,
+      "reference": "ribbon_spirit_idle.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true
+    },
+    {
+      "file": "cutout/ribbon_spirit_excited.webp",
+      "piece": "mood: excited cut-out",
+      "source": "ribbon_spirit_excited.webp",
+      "size": [702, 786],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces; sparkle glows retain small violet remnants"
+    },
+    {
+      "file": "ribbon_spirit_welcome.webp",
+      "piece": "welcome hero",
+      "generation": "welcome-hero",
+      "seed": 410020,
+      "reference": "ribbon_spirit_idle.webp",
+      "size": [768, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true
+    },
+    {
+      "file": "cutout/ribbon_spirit_welcome.webp",
+      "piece": "welcome hero cut-out",
+      "source": "ribbon_spirit_welcome.webp",
+      "size": [537, 597],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces; halo retains small violet remnants"
+    },
+    {
+      "file": "ribbon_spirit_empty_collection.webp",
+      "piece": "empty collection",
+      "generation": "empty-collection",
+      "seed": 410021,
+      "reference": "ribbon_spirit_idle.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true
+    },
+    {
+      "file": "cutout/ribbon_spirit_empty_collection.webp",
+      "piece": "empty collection cut-out",
+      "source": "ribbon_spirit_empty_collection.webp",
+      "size": [668, 707],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
+    },
+    {
+      "file": "ribbon_spirit_empty_review_queue.webp",
+      "piece": "empty review queue",
+      "generation": "empty-review-queue",
+      "seed": 410022,
+      "reference": "ribbon_spirit_sleepy.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true,
+      "note": "rounded tray reads more like a tub than an inbox"
+    },
+    {
+      "file": "cutout/ribbon_spirit_empty_review_queue.webp",
+      "piece": "empty review queue cut-out",
+      "source": "ribbon_spirit_empty_review_queue.webp",
+      "size": [648, 746],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
+    },
+    {
+      "file": "ribbon_spirit_search_no_results.webp",
+      "piece": "search with no results",
+      "generation": "search-no-results-3",
+      "seed": 410025,
+      "reference": "ribbon_spirit_idle.webp",
+      "size": [1024, 1024],
+      "background": "#0C0816-ish deep violet",
+      "usable": true,
+      "note": "magnifying-glass handle lightly touches the tail"
+    },
+    {
+      "file": "cutout/ribbon_spirit_search_no_results.webp",
+      "piece": "search with no results cut-out",
+      "source": "ribbon_spirit_search_no_results.webp",
+      "size": [671, 707],
+      "background": "transparent",
+      "usable": true,
+      "note": "best on dark surfaces"
+    }
+  ]
+}
