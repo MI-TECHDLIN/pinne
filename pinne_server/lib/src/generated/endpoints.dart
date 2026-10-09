@@ -913,6 +913,25 @@ class Endpoints extends _is.EndpointDispatch {
                 params['draft'],
               ),
         ),
+        'refreshPreview': _is.MethodConnector(
+          name: 'refreshPreview',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['item'] as _i97sinw1.ItemEndpoint).refreshPreview(
+                    session,
+                    params['id'],
+                  ),
+        ),
         'update': _is.MethodConnector(
           name: 'update',
           params: {

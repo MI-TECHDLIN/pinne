@@ -24,6 +24,7 @@ abstract final class AiOutputValidator {
     String source, {
     required Iterable<UuidValue> allowedCollectionIds,
     required String provider,
+    AiEvidenceCoverage expectedCoverage = AiEvidenceCoverage.metadataOnly,
   }) {
     final Object? decoded;
     try {
@@ -48,7 +49,7 @@ abstract final class AiOutputValidator {
         tags.any((value) => value is! String) ||
         (summary != null && summary is! String) ||
         rationale is! String ||
-        coverage != 'metadata_only' ||
+        coverage != _coverageName(expectedCoverage) ||
         uncertain is! bool) {
       throw const FormatException('AI response contains invalid field types.');
     }
@@ -67,7 +68,7 @@ abstract final class AiOutputValidator {
         tags: tags.cast<String>(),
         summary: summary as String?,
         rationale: rationale,
-        evidenceCoverage: AiEvidenceCoverage.metadataOnly,
+        evidenceCoverage: expectedCoverage,
         uncertain: uncertain,
         provider: provider,
       ),
@@ -80,10 +81,8 @@ abstract final class AiOutputValidator {
   static AiOrganizationResult sanitize(
     AiOrganizationResult result, {
     required Iterable<UuidValue> allowedCollectionIds,
+    AiEvidenceCoverage? evidenceCoverage,
   }) {
-    if (result.evidenceCoverage != AiEvidenceCoverage.metadataOnly) {
-      throw const FormatException('Unsupported evidence coverage.');
-    }
     final allowed = allowedCollectionIds.map((id) => id.toString()).toSet();
     final ids = <UuidValue>[];
     final seenIds = <String>{};
@@ -105,7 +104,7 @@ abstract final class AiOutputValidator {
       tags: tags,
       summary: summary,
       rationale: _cap(result.rationale.trim(), maxRationaleLength),
-      evidenceCoverage: AiEvidenceCoverage.metadataOnly,
+      evidenceCoverage: evidenceCoverage ?? result.evidenceCoverage,
       uncertain: result.uncertain,
       provider: _cap(result.provider.trim(), 40),
     );
@@ -133,4 +132,9 @@ abstract final class AiOutputValidator {
 
   static String _cap(String value, int length) =>
       value.length <= length ? value : value.substring(0, length).trimRight();
+
+  static String _coverageName(AiEvidenceCoverage coverage) =>
+      coverage == AiEvidenceCoverage.metadataPlusPreview
+      ? 'metadata_plus_preview'
+      : 'metadata_only';
 }

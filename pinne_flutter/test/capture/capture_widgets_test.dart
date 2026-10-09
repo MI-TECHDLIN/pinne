@@ -195,6 +195,90 @@ void main() {
   });
 
   group('saved list', () {
+    Item previewItem({
+      required EnrichmentState enrichment,
+      AccessState access = AccessState.unknown,
+      String? thumbnail,
+      String? author,
+      int? duration,
+    }) => Item(
+      id: const Uuid().v4obj(),
+      ownerId: const Uuid().v4obj(),
+      url: 'https://example.com/article',
+      title: 'The extracted title',
+      sourcePlatform: SourcePlatform.web,
+      enrichmentState: enrichment,
+      accessState: access,
+      thumbnailUrl: thumbnail,
+      previewAuthor: author,
+      durationSeconds: duration,
+    );
+
+    Future<void> showPreview(WidgetTester tester, Item item) async {
+      final capture = store.save(
+        parseCaptureInput('https://example.com/article'),
+        intention: 'Keep this note prominent',
+      );
+      await tester.pumpWidget(
+        _host(
+          _page(SavedCard(capture: capture, signedIn: true, item: item)),
+          store: store,
+        ),
+      );
+      await tester.pump();
+    }
+
+    testWidgets('pending preview shows a soft skeleton', (tester) async {
+      await showPreview(
+        tester,
+        previewItem(enrichment: EnrichmentState.pending),
+      );
+      expect(find.byKey(const ValueKey('preview-skeleton')), findsOneWidget);
+      expect(
+        find.text('Your note: “Keep this note prominent”'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('ready preview shows thumbnail, author and known duration', (
+      tester,
+    ) async {
+      await showPreview(
+        tester,
+        previewItem(
+          enrichment: EnrichmentState.ready,
+          access: AccessState.available,
+          thumbnail: 'https://images.example.com/preview.jpg',
+          author: 'A. Builder',
+          duration: 125,
+        ),
+      );
+      expect(find.byKey(const ValueKey('preview-thumbnail')), findsOneWidget);
+      expect(find.text('The extracted title'), findsOneWidget);
+      expect(find.text('A. Builder'), findsOneWidget);
+      expect(find.text('2:05'), findsOneWidget);
+    });
+
+    testWidgets('unavailable preview keeps an honest line and user note', (
+      tester,
+    ) async {
+      await showPreview(
+        tester,
+        previewItem(
+          enrichment: EnrichmentState.failed,
+          access: AccessState.unavailable,
+        ),
+      );
+      expect(
+        find.text('Preview not available. The link is saved.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Your note: “Keep this note prominent”'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('shows source, sync state and note as text', (tester) async {
       final synced = store.save(
         parseCaptureInput('https://x.com/a/status/1'),

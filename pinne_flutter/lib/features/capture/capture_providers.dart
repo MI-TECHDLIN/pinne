@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pinne_client/pinne_client.dart';
 
 import '../../core/server_client.dart';
 import 'capture_store.dart';
@@ -60,5 +61,27 @@ final capturesProvider = StreamProvider<List<LocalCapture>>((ref) async* {
   yield store.captures();
   await for (final _ in store.changes) {
     yield store.captures();
+  }
+});
+
+/// Server-side preview state overlaid on the durable local saves. Polling only
+/// continues while preview jobs are pending or processing.
+final savedItemsProvider = StreamProvider.autoDispose<List<Item>>((ref) async* {
+  final signedIn = ref.watch(signedInProvider);
+  ref.watch(capturesProvider);
+  if (!signedIn) {
+    yield const [];
+    return;
+  }
+  for (var poll = 0; poll < 8; poll++) {
+    final items = await ref.watch(clientProvider).item.list(limit: 100);
+    yield items;
+    final working = items.any(
+      (item) =>
+          item.enrichmentState == EnrichmentState.pending ||
+          item.enrichmentState == EnrichmentState.processing,
+    );
+    if (!working) return;
+    await Future<void>.delayed(const Duration(seconds: 1));
   }
 });

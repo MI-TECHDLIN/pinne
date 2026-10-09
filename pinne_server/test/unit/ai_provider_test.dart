@@ -94,6 +94,19 @@ void main() {
     expect(result.evidenceCoverage, AiEvidenceCoverage.metadataOnly);
   });
 
+  test('preview evidence coverage is derived from supplied evidence', () async {
+    final result = await const NoAiProvider().organize(
+      evidence: const AiItemEvidence(
+        title: 'Real title',
+        sourcePlatform: 'web',
+        description: 'Extracted public description',
+        previewAvailable: true,
+      ),
+      collections: const [],
+    );
+    expect(result.evidenceCoverage, AiEvidenceCoverage.metadataPlusPreview);
+  });
+
   test('Gemini uses structured Interactions JSON and retries 429', () async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => server.close(force: true));

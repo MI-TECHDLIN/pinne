@@ -66,6 +66,24 @@ void main() {
       );
     });
 
+    test('changing a title permanently protects it from enrichment', () async {
+      final item = await Item.db.insertRow(
+        alice.build(),
+        Item(
+          ownerId: UuidValue.fromString(
+            alice.build().authenticated!.userIdentifier,
+          ),
+          url: 'https://example.com/article',
+          title: 'example.com/article',
+        ),
+      );
+      final updated = await endpoints.item.update(
+        alice,
+        item.copyWith(title: 'My research note'),
+      );
+      expect(updated.titleManuallyLocked, isTrue);
+    });
+
     test('when the client sends a foreign owner then it is ignored', () async {
       final item = await endpoints.item.create(alice, ItemDraft(title: 'a'));
       final bobId = bob.build().authenticated!.userIdentifier;

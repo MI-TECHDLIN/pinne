@@ -15,9 +15,12 @@ import 'dart:async' as _ida;
 import 'package:clock/clock.dart' as _io0w16m8;
 import 'package:serverpod/serverpod.dart' as _is;
 import '../ai/ai_organize_future_call.dart' as _iawa1gig;
+import '../link_previews/link_preview_future_call.dart' as _i72k3ewu;
 import '../reminders/reminder_digest_future_call.dart' as _izsl17q0;
 import 'future_calls_generated_models/ai_organize_future_call_process_model.dart'
     as _is4ugn9t;
+import 'future_calls_generated_models/link_preview_future_call_process_model.dart'
+    as _ij9va9aa;
 
 /// Invokes a future call.
 typedef _InvokeFutureCall =
@@ -62,6 +65,7 @@ class FutureCalls extends _is.FutureCallDispatch<_FutureCallRef> {
   ) {
     var registeredFutureCalls = <String, _is.InvokableFutureCall>{
       'AiOrganizeProcessFutureCall': AiOrganizeProcessFutureCall(),
+      'LinkPreviewProcessFutureCall': LinkPreviewProcessFutureCall(),
       'ReminderDigestRecomputeFutureCall': ReminderDigestRecomputeFutureCall(),
     };
     _futureCallManager = futureCallManager;
@@ -185,6 +189,8 @@ class _FutureCallRef {
 
   late final aiOrganize = _AiOrganizeFutureCallDispatcher(_invokeFutureCall);
 
+  late final linkPreview = _LinkPreviewFutureCallDispatcher(_invokeFutureCall);
+
   late final reminderDigest = _ReminderDigestFutureCallDispatcher(
     _invokeFutureCall,
   );
@@ -205,6 +211,26 @@ class _AiOrganizeFutureCallDispatcher {
     );
     return _invokeFutureCall(
       'AiOrganizeProcessFutureCall',
+      object,
+    );
+  }
+}
+
+class _LinkPreviewFutureCallDispatcher {
+  _LinkPreviewFutureCallDispatcher(this._invokeFutureCall);
+
+  final _InvokeFutureCall _invokeFutureCall;
+
+  Future<void> process(
+    _is.UuidValue itemId,
+    _is.UuidValue ownerId,
+  ) {
+    var object = _ij9va9aa.LinkPreviewFutureCallProcessModel(
+      itemId: itemId,
+      ownerId: ownerId,
+    );
+    return _invokeFutureCall(
+      'LinkPreviewProcessFutureCall',
       object,
     );
   }
@@ -234,6 +260,25 @@ class AiOrganizeProcessFutureCall
   ) async {
     if (object != null) {
       await _iawa1gig.AiOrganizeFutureCall().process(
+        session,
+        object.itemId,
+        object.ownerId,
+      );
+    }
+  }
+}
+
+class LinkPreviewProcessFutureCall
+    extends _is.FutureCall<_ij9va9aa.LinkPreviewFutureCallProcessModel>
+    implements
+        _is.InvokableFutureCall<_ij9va9aa.LinkPreviewFutureCallProcessModel> {
+  @override
+  _ida.Future<void> invoke(
+    _is.Session session,
+    _ij9va9aa.LinkPreviewFutureCallProcessModel? object,
+  ) async {
+    if (object != null) {
+      await _i72k3ewu.LinkPreviewFutureCall().process(
         session,
         object.itemId,
         object.ownerId,

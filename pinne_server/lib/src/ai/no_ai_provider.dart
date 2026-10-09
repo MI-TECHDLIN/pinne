@@ -60,6 +60,9 @@ class NoAiProvider implements AiProvider {
       evidence.url,
       evidence.intention,
       evidence.notes,
+      evidence.description,
+      evidence.author,
+      evidence.siteName,
       ...tags,
     ].whereType<String>().join(' ').toLowerCase();
     final collectionIds = collections
@@ -82,7 +85,9 @@ class NoAiProvider implements AiProvider {
         rationale: collectionIds.isEmpty
             ? 'Matched source and URL metadata only.'
             : 'Matched collection names and metadata keywords exactly.',
-        evidenceCoverage: AiEvidenceCoverage.metadataOnly,
+        evidenceCoverage: evidence.previewAvailable
+            ? AiEvidenceCoverage.metadataPlusPreview
+            : AiEvidenceCoverage.metadataOnly,
         uncertain: collectionIds.isEmpty,
         provider: name,
       ),

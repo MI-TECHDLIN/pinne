@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "type": "video",
+  "provider_name": "YouTube",
+  "title": "Build a calm review habit",
+  "author_name": "Pinne Studio",
+  "thumbnail_url": "https://i.ytimg.com/vi/example/hqdefault.jpg",
+  "html": "<iframe src=\"https://www.youtube.com/embed/example\"></iframe>"
+}

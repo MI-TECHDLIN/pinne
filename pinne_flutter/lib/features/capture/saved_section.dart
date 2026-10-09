@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_capture/pinne_capture.dart';
+import 'package:pinne_client/pinne_client.dart';
 
 import '../../core/server_client.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../../ui/item_preview.dart';
 import 'capture_labels.dart';
 import 'capture_providers.dart';
 import 'capture_store.dart';
@@ -23,6 +25,11 @@ class SavedSection extends ConsumerWidget {
     if (ref.watch(captureStoreProvider) == null) return const SizedBox();
     final captures = ref.watch(capturesProvider).value ?? const [];
     final signedIn = ref.watch(signedInProvider);
+    final serverItems = ref.watch(savedItemsProvider).value ?? const [];
+    final byId = {
+      for (final item in serverItems)
+        if (item.id != null) item.id!.uuid: item,
+    };
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -63,6 +70,9 @@ class SavedSection extends ConsumerWidget {
                 key: ValueKey('saved-${capture.clientItemId}'),
                 capture: capture,
                 signedIn: signedIn,
+                item: capture.serverItemId == null
+                    ? null
+                    : byId[capture.serverItemId],
               ),
             ),
           ],
@@ -87,10 +97,16 @@ class SavedSection extends ConsumerWidget {
 }
 
 class SavedCard extends ConsumerWidget {
-  const SavedCard({super.key, required this.capture, required this.signedIn});
+  const SavedCard({
+    super.key,
+    required this.capture,
+    required this.signedIn,
+    this.item,
+  });
 
   final LocalCapture capture;
   final bool signedIn;
+  final Item? item;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -98,6 +114,7 @@ class SavedCard extends ConsumerWidget {
     final url = capture.url;
     final note = capture.noteText;
     final intention = capture.intention;
+    final preview = item;
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,12 +135,24 @@ class SavedCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: PinneSpacing.sm),
+          if (preview != null) ...[
+            PreviewThumbnail(item: preview),
+            const SizedBox(height: PinneSpacing.sm),
+          ],
           Text(
-            capture.title,
+            preview?.title ?? capture.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium,
           ),
+          if (preview != null) ...[
+            PreviewByline(item: preview),
+            if (preview.durationSeconds case final seconds?)
+              Padding(
+                padding: const EdgeInsets.only(top: PinneSpacing.xs),
+                child: DurationChip(seconds: seconds),
+              ),
+          ],
           if (url != null)
             Text(
               readableUrl(url),

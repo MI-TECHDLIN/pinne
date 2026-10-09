@@ -62,6 +62,8 @@ import 'common/record_not_found_exception.dart' as _ilf890y8;
 import 'common/validation_exception.dart' as _ifwcmx8g;
 import 'future_calls_generated_models/ai_organize_future_call_process_model.dart'
     as _is4ugn9t;
+import 'future_calls_generated_models/link_preview_future_call_process_model.dart'
+    as _ij9va9aa;
 import 'health/server_health.dart' as _iozgwprg;
 import 'items/access_state.dart' as _imhj9b3j;
 import 'items/capture_draft.dart' as _idav3wwe;
@@ -1364,6 +1366,13 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
+          name: 'titleManuallyLocked',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
           name: 'noteText',
           columnType: _isp.ColumnType.text,
           isNullable: true,
@@ -1435,6 +1444,67 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: false,
           dartType: 'protocol:AccessState',
           columnDefault: '\'unknown\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previewDescription',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previewAuthor',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previewSiteName',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previewProvider',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'thumbnailUrl',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'durationSeconds',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previewMetadataJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previewUpdatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previewStartedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'previewAttemptCount',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
         ),
         _isp.ColumnDefinition(
           name: 'revision',
@@ -3359,6 +3429,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is4ugn9t.AiOrganizeFutureCallProcessModel) {
       return _is4ugn9t.AiOrganizeFutureCallProcessModel.fromJson(data) as T;
     }
+    if (t == _ij9va9aa.LinkPreviewFutureCallProcessModel) {
+      return _ij9va9aa.LinkPreviewFutureCallProcessModel.fromJson(data) as T;
+    }
     if (t == _iozgwprg.ServerHealth) {
       return _iozgwprg.ServerHealth.fromJson(data) as T;
     }
@@ -3689,6 +3762,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_is4ugn9t.AiOrganizeFutureCallProcessModel?>()) {
       return (data != null
               ? _is4ugn9t.AiOrganizeFutureCallProcessModel.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_ij9va9aa.LinkPreviewFutureCallProcessModel?>()) {
+      return (data != null
+              ? _ij9va9aa.LinkPreviewFutureCallProcessModel.fromJson(data)
               : null)
           as T;
     }
@@ -4177,6 +4256,8 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ifwcmx8g.ValidationException => 'ValidationException',
       _is4ugn9t.AiOrganizeFutureCallProcessModel =>
         'AiOrganizeFutureCallProcessModel',
+      _ij9va9aa.LinkPreviewFutureCallProcessModel =>
+        'LinkPreviewFutureCallProcessModel',
       _iozgwprg.ServerHealth => 'ServerHealth',
       _imhj9b3j.AccessState => 'AccessState',
       _idav3wwe.CaptureDraft => 'CaptureDraft',
@@ -4317,6 +4398,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'ValidationException';
       case _is4ugn9t.AiOrganizeFutureCallProcessModel():
         return 'AiOrganizeFutureCallProcessModel';
+      case _ij9va9aa.LinkPreviewFutureCallProcessModel():
+        return 'LinkPreviewFutureCallProcessModel';
       case _iozgwprg.ServerHealth():
         return 'ServerHealth';
       case _imhj9b3j.AccessState():
@@ -4566,6 +4649,11 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'AiOrganizeFutureCallProcessModel') {
       return deserialize<_is4ugn9t.AiOrganizeFutureCallProcessModel>(
+        data['data'],
+      );
+    }
+    if (dataClassName == 'LinkPreviewFutureCallProcessModel') {
+      return deserialize<_ij9va9aa.LinkPreviewFutureCallProcessModel>(
         data['data'],
       );
     }

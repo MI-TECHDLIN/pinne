@@ -10,6 +10,10 @@ class AiItemEvidence {
     this.url,
     this.intention,
     this.notes,
+    this.description,
+    this.author,
+    this.siteName,
+    this.previewAvailable = false,
   });
 
   final String title;
@@ -17,6 +21,10 @@ class AiItemEvidence {
   final String sourcePlatform;
   final String? intention;
   final String? notes;
+  final String? description;
+  final String? author;
+  final String? siteName;
+  final bool previewAvailable;
 
   Map<String, Object?> toJson() => {
     'title': title,
@@ -24,6 +32,12 @@ class AiItemEvidence {
     'sourcePlatform': sourcePlatform,
     'intention': intention,
     'notes': notes,
+    'description': description,
+    'author': author,
+    'siteName': siteName,
+    'evidenceCoverage': previewAvailable
+        ? 'metadata_plus_preview'
+        : 'metadata_only',
   };
 }
 

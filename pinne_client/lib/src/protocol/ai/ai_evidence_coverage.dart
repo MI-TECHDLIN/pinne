@@ -15,12 +15,15 @@ import 'package:serverpod_client/serverpod_client.dart' as _isc;
 /// Evidence available to an organizer. This task deliberately does not fetch
 /// the saved URL or send page contents.
 enum AiEvidenceCoverage implements _isc.SerializableModel {
-  metadataOnly;
+  metadataOnly,
+  metadataPlusPreview;
 
   static AiEvidenceCoverage fromJson(String name) {
     switch (name) {
       case 'metadataOnly':
         return AiEvidenceCoverage.metadataOnly;
+      case 'metadataPlusPreview':
+        return AiEvidenceCoverage.metadataPlusPreview;
       default:
         throw ArgumentError(
           'Value "$name" cannot be converted to "AiEvidenceCoverage"',
