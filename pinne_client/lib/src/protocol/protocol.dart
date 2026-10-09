@@ -59,6 +59,7 @@ import 'collections/item_collection.dart' as _ingnmqw7;
 import 'common/assignment_origin.dart' as _izy6d885;
 import 'common/record_not_found_exception.dart' as _ilf890y8;
 import 'common/validation_exception.dart' as _ifwcmx8g;
+import 'examples/example_saves_status.dart' as _inzv38yi;
 import 'health/server_health.dart' as _iozgwprg;
 import 'items/access_state.dart' as _imhj9b3j;
 import 'items/capture_draft.dart' as _idav3wwe;
@@ -155,6 +156,7 @@ export 'collections/item_collection.dart';
 export 'common/assignment_origin.dart';
 export 'common/record_not_found_exception.dart';
 export 'common/validation_exception.dart';
+export 'examples/example_saves_status.dart';
 export 'health/server_health.dart';
 export 'items/access_state.dart';
 export 'items/capture_draft.dart';
@@ -340,6 +342,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _ifwcmx8g.ValidationException) {
       return _ifwcmx8g.ValidationException.fromJson(data) as T;
+    }
+    if (t == _inzv38yi.ExampleSavesStatus) {
+      return _inzv38yi.ExampleSavesStatus.fromJson(data) as T;
     }
     if (t == _iozgwprg.ServerHealth) {
       return _iozgwprg.ServerHealth.fromJson(data) as T;
@@ -663,6 +668,10 @@ class Protocol extends _isc.SerializationManager {
       return (data != null
               ? _ifwcmx8g.ValidationException.fromJson(data)
               : null)
+          as T;
+    }
+    if (t == _isc.getType<_inzv38yi.ExampleSavesStatus?>()) {
+      return (data != null ? _inzv38yi.ExampleSavesStatus.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_iozgwprg.ServerHealth?>()) {
@@ -1141,6 +1150,7 @@ class Protocol extends _isc.SerializationManager {
       _izy6d885.AssignmentOrigin => 'AssignmentOrigin',
       _ilf890y8.RecordNotFoundException => 'RecordNotFoundException',
       _ifwcmx8g.ValidationException => 'ValidationException',
+      _inzv38yi.ExampleSavesStatus => 'ExampleSavesStatus',
       _iozgwprg.ServerHealth => 'ServerHealth',
       _imhj9b3j.AccessState => 'AccessState',
       _idav3wwe.CaptureDraft => 'CaptureDraft',
@@ -1278,6 +1288,8 @@ class Protocol extends _isc.SerializationManager {
         return 'RecordNotFoundException';
       case _ifwcmx8g.ValidationException():
         return 'ValidationException';
+      case _inzv38yi.ExampleSavesStatus():
+        return 'ExampleSavesStatus';
       case _iozgwprg.ServerHealth():
         return 'ServerHealth';
       case _imhj9b3j.AccessState():
@@ -1518,6 +1530,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'ValidationException') {
       return deserialize<_ifwcmx8g.ValidationException>(data['data']);
+    }
+    if (dataClassName == 'ExampleSavesStatus') {
+      return deserialize<_inzv38yi.ExampleSavesStatus>(data['data']);
     }
     if (dataClassName == 'ServerHealth') {
       return deserialize<_iozgwprg.ServerHealth>(data['data']);

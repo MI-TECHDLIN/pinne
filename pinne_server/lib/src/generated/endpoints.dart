@@ -62,6 +62,7 @@ import '../auth/google_idp_endpoint.dart' as _i71axiz0;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
 import '../calendar/calendar_endpoint.dart' as _i7b5ov6a;
 import '../collections/collection_endpoint.dart' as _i5j0184s;
+import '../examples/example_saves_endpoint.dart' as _ibnoh31k;
 import '../health/health_endpoint.dart' as _id9paj9q;
 import '../items/item_endpoint.dart' as _i97sinw1;
 import '../planning/planner_endpoint.dart' as _icn41d99;
@@ -122,6 +123,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'collection',
+          null,
+        ),
+      'exampleSaves': _ibnoh31k.ExampleSavesEndpoint()
+        ..initialize(
+          server,
+          'exampleSaves',
           null,
         ),
       'health': _id9paj9q.HealthEndpoint()
@@ -802,6 +809,45 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         params['id'],
                       ),
+        ),
+      },
+    );
+    connectors['exampleSaves'] = _is.EndpointConnector(
+      name: 'exampleSaves',
+      endpoint: endpoints['exampleSaves']!,
+      methodConnectors: {
+        'status': _is.MethodConnector(
+          name: 'status',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['exampleSaves'] as _ibnoh31k.ExampleSavesEndpoint)
+                      .status(session),
+        ),
+        'seed': _is.MethodConnector(
+          name: 'seed',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['exampleSaves'] as _ibnoh31k.ExampleSavesEndpoint)
+                      .seed(session),
+        ),
+        'remove': _is.MethodConnector(
+          name: 'remove',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['exampleSaves'] as _ibnoh31k.ExampleSavesEndpoint)
+                      .remove(session),
         ),
       },
     );

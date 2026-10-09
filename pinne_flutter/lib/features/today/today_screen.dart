@@ -14,6 +14,7 @@ import '../../ui/motion.dart';
 import '../../ui/item_preview.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../capture/paste_capture_card.dart';
+import '../examples/example_saves.dart';
 import '../progress/celebration.dart';
 import '../settings/profile_provider.dart';
 import 'today_providers.dart';
@@ -33,6 +34,8 @@ class TodayScreen extends ConsumerWidget {
       headlineBold: top == null ? 'a few good saves' : 'worth revisiting',
       subtitle: 'A small queue of what is worth revisiting now.',
       children: [
+        const ExampleSavesCard(),
+        const SizedBox(height: PinneSpacing.md),
         _BudgetChoice(selected: budget),
         const SizedBox(height: PinneSpacing.md),
         if (top != null && (data?.digestText?.trim().isNotEmpty ?? false)) ...[
@@ -316,6 +319,10 @@ class TodaySpiritCard extends StatelessWidget {
                     height: 1.5,
                   ),
                 ),
+                if (item?.isExample ?? false) ...[
+                  const SizedBox(height: PinneSpacing.sm),
+                  ExampleChip(dark: due),
+                ],
                 if (item != null) ...[
                   const SizedBox(height: PinneSpacing.lg),
                   Wrap(

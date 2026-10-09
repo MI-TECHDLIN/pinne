@@ -27,6 +27,8 @@ import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
 import 'package:pinne_server/src/generated/collections/collection_draft.dart'
     as _imy5wtcu;
+import 'package:pinne_server/src/generated/examples/example_saves_status.dart'
+    as _iaif5h49;
 import 'package:pinne_server/src/generated/future_calls.dart' as _ifh9pad3;
 import 'package:pinne_server/src/generated/future_calls_generated_models/ai_organize_future_call_process_model.dart'
     as _iqip40ut;
@@ -251,6 +253,8 @@ class TestEndpoints {
 
   late final _CollectionEndpoint collection;
 
+  late final _ExampleSavesEndpoint exampleSaves;
+
   late final _HealthEndpoint health;
 
   late final _ItemEndpoint item;
@@ -304,6 +308,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     collection = _CollectionEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    exampleSaves = _ExampleSavesEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1411,6 +1419,107 @@ class _CollectionEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _ExampleSavesEndpoint {
+  _ExampleSavesEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_iaif5h49.ExampleSavesStatus> status(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'exampleSaves',
+            method: 'status',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'exampleSaves',
+          methodName: 'status',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iaif5h49.ExampleSavesStatus>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iaif5h49.ExampleSavesStatus> seed(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'exampleSaves',
+            method: 'seed',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'exampleSaves',
+          methodName: 'seed',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iaif5h49.ExampleSavesStatus>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iaif5h49.ExampleSavesStatus> remove(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'exampleSaves',
+            method: 'remove',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'exampleSaves',
+          methodName: 'remove',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iaif5h49.ExampleSavesStatus>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

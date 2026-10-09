@@ -49,6 +49,8 @@ fields:
   previewUpdatedAt: DateTime?
   previewStartedAt: DateTime?
   previewAttemptCount: int, default=0
+  ### True only for opt-in starter content created by ExampleSavesEndpoint.
+  isExample: bool, default=false
   ### Optimistic concurrency counter, bumped on every server-side update.
   revision: int, default=1
 indexes:

@@ -1,0 +1,6 @@
+### Summary used by the client to offer and manage optional example saves.
+class: ExampleSavesStatus
+fields:
+  totalItemCount: int
+  exampleItemCount: int
+  exampleCollectionCount: int

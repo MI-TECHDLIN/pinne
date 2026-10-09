@@ -60,6 +60,7 @@ import 'collections/item_collection.dart' as _ingnmqw7;
 import 'common/assignment_origin.dart' as _izy6d885;
 import 'common/record_not_found_exception.dart' as _ilf890y8;
 import 'common/validation_exception.dart' as _ifwcmx8g;
+import 'examples/example_saves_status.dart' as _inzv38yi;
 import 'future_calls_generated_models/ai_organize_future_call_process_model.dart'
     as _is4ugn9t;
 import 'future_calls_generated_models/link_preview_future_call_process_model.dart'
@@ -161,6 +162,7 @@ export 'collections/item_collection.dart';
 export 'common/assignment_origin.dart';
 export 'common/record_not_found_exception.dart';
 export 'common/validation_exception.dart';
+export 'examples/example_saves_status.dart';
 export 'health/server_health.dart';
 export 'items/access_state.dart';
 export 'items/capture_draft.dart';
@@ -1265,6 +1267,13 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'int',
           columnDefault: '0',
         ),
+        _isp.ColumnDefinition(
+          name: 'isExample',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
@@ -1505,6 +1514,13 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: false,
           dartType: 'int',
           columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'isExample',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
         ),
         _isp.ColumnDefinition(
           name: 'revision',
@@ -3426,6 +3442,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _ifwcmx8g.ValidationException) {
       return _ifwcmx8g.ValidationException.fromJson(data) as T;
     }
+    if (t == _inzv38yi.ExampleSavesStatus) {
+      return _inzv38yi.ExampleSavesStatus.fromJson(data) as T;
+    }
     if (t == _is4ugn9t.AiOrganizeFutureCallProcessModel) {
       return _is4ugn9t.AiOrganizeFutureCallProcessModel.fromJson(data) as T;
     }
@@ -3757,6 +3776,10 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null
               ? _ifwcmx8g.ValidationException.fromJson(data)
               : null)
+          as T;
+    }
+    if (t == _is.getType<_inzv38yi.ExampleSavesStatus?>()) {
+      return (data != null ? _inzv38yi.ExampleSavesStatus.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_is4ugn9t.AiOrganizeFutureCallProcessModel?>()) {
@@ -4254,6 +4277,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       _izy6d885.AssignmentOrigin => 'AssignmentOrigin',
       _ilf890y8.RecordNotFoundException => 'RecordNotFoundException',
       _ifwcmx8g.ValidationException => 'ValidationException',
+      _inzv38yi.ExampleSavesStatus => 'ExampleSavesStatus',
       _is4ugn9t.AiOrganizeFutureCallProcessModel =>
         'AiOrganizeFutureCallProcessModel',
       _ij9va9aa.LinkPreviewFutureCallProcessModel =>
@@ -4396,6 +4420,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'RecordNotFoundException';
       case _ifwcmx8g.ValidationException():
         return 'ValidationException';
+      case _inzv38yi.ExampleSavesStatus():
+        return 'ExampleSavesStatus';
       case _is4ugn9t.AiOrganizeFutureCallProcessModel():
         return 'AiOrganizeFutureCallProcessModel';
       case _ij9va9aa.LinkPreviewFutureCallProcessModel():
@@ -4646,6 +4672,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'ValidationException') {
       return deserialize<_ifwcmx8g.ValidationException>(data['data']);
+    }
+    if (dataClassName == 'ExampleSavesStatus') {
+      return deserialize<_inzv38yi.ExampleSavesStatus>(data['data']);
     }
     if (dataClassName == 'AiOrganizeFutureCallProcessModel') {
       return deserialize<_is4ugn9t.AiOrganizeFutureCallProcessModel>(

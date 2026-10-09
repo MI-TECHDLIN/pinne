@@ -26,6 +26,8 @@ import 'package:pinne_client/src/protocol/collections/collection.dart'
     as _i9zrdvr8;
 import 'package:pinne_client/src/protocol/collections/collection_draft.dart'
     as _iqvt7ot6;
+import 'package:pinne_client/src/protocol/examples/example_saves_status.dart'
+    as _ii2eqorx;
 import 'package:pinne_client/src/protocol/health/server_health.dart'
     as _ibqesezf;
 import 'package:pinne_client/src/protocol/items/capture_draft.dart'
@@ -578,6 +580,39 @@ class EndpointCollection extends _isc.EndpointRef {
       );
 }
 
+/// Opt-in starter data for a new account.
+///
+/// Every query is owner-scoped. Seeding is idempotent because an owner with
+/// any example row is returned unchanged; removal only touches flagged rows.
+/// {@category Endpoint}
+class EndpointExampleSaves extends _isc.EndpointRef {
+  EndpointExampleSaves(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'exampleSaves';
+
+  _ida.Future<_ii2eqorx.ExampleSavesStatus> status() =>
+      caller.callServerEndpoint<_ii2eqorx.ExampleSavesStatus>(
+        'exampleSaves',
+        'status',
+        {},
+      );
+
+  _ida.Future<_ii2eqorx.ExampleSavesStatus> seed() =>
+      caller.callServerEndpoint<_ii2eqorx.ExampleSavesStatus>(
+        'exampleSaves',
+        'seed',
+        {},
+      );
+
+  _ida.Future<_ii2eqorx.ExampleSavesStatus> remove() =>
+      caller.callServerEndpoint<_ii2eqorx.ExampleSavesStatus>(
+        'exampleSaves',
+        'remove',
+        {},
+      );
+}
+
 /// Public liveness check that the app can call before sign-in.
 /// {@category Endpoint}
 class EndpointHealth extends _isc.EndpointRef {
@@ -1010,6 +1045,7 @@ class Client extends _isc.ServerpodClientShared {
     jwtRefresh = EndpointJwtRefresh(this);
     calendar = EndpointCalendar(this);
     collection = EndpointCollection(this);
+    exampleSaves = EndpointExampleSaves(this);
     health = EndpointHealth(this);
     item = EndpointItem(this);
     planner = EndpointPlanner(this);
@@ -1036,6 +1072,8 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointCalendar calendar;
 
   late final EndpointCollection collection;
+
+  late final EndpointExampleSaves exampleSaves;
 
   late final EndpointHealth health;
 
@@ -1065,6 +1103,7 @@ class Client extends _isc.ServerpodClientShared {
     'jwtRefresh': jwtRefresh,
     'calendar': calendar,
     'collection': collection,
+    'exampleSaves': exampleSaves,
     'health': health,
     'item': item,
     'planner': planner,

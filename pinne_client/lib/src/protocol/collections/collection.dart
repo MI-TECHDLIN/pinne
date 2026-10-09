@@ -24,8 +24,10 @@ abstract class Collection
     this.parentId,
     int? coverSeed,
     int? paletteIndex,
+    bool? isExample,
   }) : coverSeed = coverSeed ?? 0,
-       paletteIndex = paletteIndex ?? 0;
+       paletteIndex = paletteIndex ?? 0,
+       isExample = isExample ?? false;
 
   factory Collection({
     _isc.UuidValue? id,
@@ -35,6 +37,7 @@ abstract class Collection
     _isc.UuidValue? parentId,
     int? coverSeed,
     int? paletteIndex,
+    bool? isExample,
   }) = _CollectionImpl;
 
   factory Collection.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -52,6 +55,9 @@ abstract class Collection
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['parentId']),
       coverSeed: jsonSerialization['coverSeed'] as int?,
       paletteIndex: jsonSerialization['paletteIndex'] as int?,
+      isExample: jsonSerialization['isExample'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isExample']),
     );
   }
 
@@ -72,6 +78,9 @@ abstract class Collection
 
   int paletteIndex;
 
+  /// True only for opt-in starter collections created by ExampleSavesEndpoint.
+  bool isExample;
+
   /// Returns a shallow copy of this [Collection]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -83,6 +92,7 @@ abstract class Collection
     _isc.UuidValue? parentId,
     int? coverSeed,
     int? paletteIndex,
+    bool? isExample,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -95,6 +105,7 @@ abstract class Collection
       if (parentId != null) 'parentId': parentId?.toJson(),
       'coverSeed': coverSeed,
       'paletteIndex': paletteIndex,
+      'isExample': isExample,
     };
   }
 
@@ -109,6 +120,7 @@ abstract class Collection
       if (parentId != null) 'parentId': parentId?.toJson(),
       'coverSeed': coverSeed,
       'paletteIndex': paletteIndex,
+      'isExample': isExample,
     };
   }
 
@@ -129,6 +141,7 @@ class _CollectionImpl extends Collection {
     _isc.UuidValue? parentId,
     int? coverSeed,
     int? paletteIndex,
+    bool? isExample,
   }) : super._(
          id: id,
          ownerId: ownerId,
@@ -137,6 +150,7 @@ class _CollectionImpl extends Collection {
          parentId: parentId,
          coverSeed: coverSeed,
          paletteIndex: paletteIndex,
+         isExample: isExample,
        );
 
   /// Returns a shallow copy of this [Collection]
@@ -151,6 +165,7 @@ class _CollectionImpl extends Collection {
     Object? parentId = _Undefined,
     int? coverSeed,
     int? paletteIndex,
+    bool? isExample,
   }) {
     return Collection(
       id: id is _isc.UuidValue? ? id : this.id,
@@ -160,6 +175,7 @@ class _CollectionImpl extends Collection {
       parentId: parentId is _isc.UuidValue? ? parentId : this.parentId,
       coverSeed: coverSeed ?? this.coverSeed,
       paletteIndex: paletteIndex ?? this.paletteIndex,
+      isExample: isExample ?? this.isExample,
     );
   }
 }

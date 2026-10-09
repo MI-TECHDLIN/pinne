@@ -10,6 +10,7 @@ import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../../ui/item_preview.dart';
 import '../settings/profile_provider.dart';
+import '../examples/example_saves.dart';
 import 'search_providers.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -311,6 +312,10 @@ class SearchResultCard extends StatelessWidget {
                     letterSpacing: 1.1,
                   ),
                 ),
+                if (item.isExample) ...[
+                  const SizedBox(height: PinneSpacing.sm),
+                  const ExampleChip(dark: true),
+                ],
                 const SizedBox(height: PinneSpacing.sm),
                 PreviewByline(
                   item: item,

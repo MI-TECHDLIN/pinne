@@ -7,6 +7,8 @@ import 'features/auth/sign_in_screen.dart';
 import 'features/collections/collections_screen.dart';
 import 'features/planner/calendar_connections_screen.dart';
 import 'features/planner/planner_screen.dart';
+import 'features/onboarding/onboarding_screen.dart';
+import 'features/onboarding/onboarding_store.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/search/search_screen.dart';
 import 'features/settings/settings_screen.dart';
@@ -23,13 +25,22 @@ abstract final class Routes {
   static const progress = '/progress';
   static const settings = '/settings';
   static const signIn = '/sign-in';
+  static const onboarding = '/onboarding';
   static const ribbonGallery = '/debug/ribbon-spirit';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
-    initialLocation: Routes.today,
+    initialLocation: Routes.onboarding,
+    redirect: (context, state) =>
+        onboardingRedirect(ref.read(onboardingStoreProvider), state),
     routes: [
+      GoRoute(
+        path: Routes.onboarding,
+        builder: (context, state) => OnboardingScreen(
+          replay: state.uri.queryParameters['replay'] == '1',
+        ),
+      ),
       if (kDebugMode)
         GoRoute(
           path: Routes.ribbonGallery,
@@ -70,6 +81,14 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(router.dispose);
   return router;
 });
+
+String? onboardingRedirect(OnboardingStore store, GoRouterState state) {
+  final isOnboarding = state.matchedLocation == Routes.onboarding;
+  final replay = state.uri.queryParameters['replay'] == '1';
+  if (!store.completed && !isOnboarding) return Routes.onboarding;
+  if (store.completed && isOnboarding && !replay) return Routes.today;
+  return null;
+}
 
 StatefulShellBranch _branch(
   String path,
