@@ -38,7 +38,7 @@ class PillNavBar extends StatelessWidget {
             ? constraints.maxWidth
             : maxWidth;
         final width = available.clamp(0.0, maxWidth);
-        final innerWidth = width - (_inset * 2);
+        final innerWidth = width - (_inset * 2) - 2;
         final slotWidth = innerWidth / destinations.length;
         final indicatorLeft =
             (slotWidth * selectedIndex) + ((slotWidth - _indicatorExtent) / 2);
