@@ -10,6 +10,8 @@ fields:
   parentId: UuidValue?, relation(parent=collection, onDelete=SetNull)
   coverSeed: int, default=0
   paletteIndex: int, default=0
+  ### True only for opt-in starter collections created by ExampleSavesEndpoint.
+  isExample: bool, default=false
 indexes:
   collection_owner_parent_idx:
     fields: ownerId, parentId

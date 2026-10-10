@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../../core/server_client.dart';
+import '../../router.dart';
 import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
 
@@ -22,7 +23,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     setState(() => _guestLoading = true);
     try {
       await ref.read(guestSignInActionProvider)();
-      if (mounted && context.canPop()) context.pop();
+      if (mounted) _closeAfterAuthentication();
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -112,7 +113,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   void _closeAfterAuthentication() {
-    if (context.canPop()) context.pop();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(Routes.today);
+    }
   }
 
   void _showSignInError(Object error) {

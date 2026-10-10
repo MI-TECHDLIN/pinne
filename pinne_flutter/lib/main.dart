@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'core/server_client.dart';
 import 'features/capture/capture_providers.dart';
 import 'features/capture/open_capture_store.dart';
 import 'features/capture/share_entry.dart';
+import 'features/onboarding/onboarding_store.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final serverUrl = await resolveServerUrl();
   final client = await createServerClient(serverUrl);
   final store = await openCaptureStore();
+  final preferences = await SharedPreferences.getInstance();
   store?.releaseStaleHolds();
   runApp(
     ProviderScope(
@@ -19,6 +22,9 @@ void main() async {
         serverUrlProvider.overrideWithValue(serverUrl),
         clientProvider.overrideWithValue(client),
         captureStoreProvider.overrideWithValue(store),
+        onboardingStoreProvider.overrideWithValue(
+          SharedPreferencesOnboardingStore(preferences),
+        ),
       ],
       child: const PinneApp(),
     ),

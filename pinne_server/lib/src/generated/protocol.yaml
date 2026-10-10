@@ -37,6 +37,10 @@ collection:
   - create:
   - update:
   - delete:
+exampleSaves:
+  - status:
+  - seed:
+  - remove:
 health:
   - emailDeliveryAvailable:
   - check:

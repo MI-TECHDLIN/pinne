@@ -30,6 +30,8 @@ class SettingsScreen extends StatelessWidget {
         const ServerHealthCard(),
         const SizedBox(height: PinneSpacing.md),
         const _AiOrganizingCard(),
+        const SizedBox(height: PinneSpacing.md),
+        const _OnboardingCard(),
         if (kDebugMode)
           TextButton(
             onPressed: () => context.push(Routes.ribbonGallery),
@@ -38,6 +40,40 @@ class SettingsScreen extends StatelessWidget {
       ],
     );
   }
+}
+
+class _OnboardingCard extends StatelessWidget {
+  const _OnboardingCard();
+
+  @override
+  Widget build(BuildContext context) => GlassCard(
+    child: Row(
+      children: [
+        const Icon(Icons.auto_stories_outlined, color: PinneColors.lilac),
+        const SizedBox(width: PinneSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome tour',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const Text(
+                'Replay the three-screen introduction.',
+                style: TextStyle(color: PinneColors.muted),
+              ),
+            ],
+          ),
+        ),
+        TextButton(
+          key: const ValueKey('replay-onboarding'),
+          onPressed: () => context.go('${Routes.onboarding}?replay=1'),
+          child: const Text('Replay'),
+        ),
+      ],
+    ),
+  );
 }
 
 class _AiOrganizingCard extends ConsumerWidget {

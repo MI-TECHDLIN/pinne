@@ -27,6 +27,7 @@ class CollectionTileData {
       description: collection.description ?? 'A place for good finds.',
       coverSeed: collection.coverSeed,
       paletteIndex: collection.paletteIndex,
+      isSample: collection.isExample,
     );
   }
 

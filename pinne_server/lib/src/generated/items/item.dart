@@ -53,6 +53,7 @@ abstract class Item
     this.previewUpdatedAt,
     this.previewStartedAt,
     int? previewAttemptCount,
+    bool? isExample,
     int? revision,
   }) : sourcePlatform = sourcePlatform ?? _ixm5zqtz.SourcePlatform.web,
        titleManuallyLocked = titleManuallyLocked ?? false,
@@ -64,6 +65,7 @@ abstract class Item
        enrichmentState = enrichmentState ?? _iib6h77f.EnrichmentState.pending,
        accessState = accessState ?? _idll96tf.AccessState.unknown,
        previewAttemptCount = previewAttemptCount ?? 0,
+       isExample = isExample ?? false,
        revision = revision ?? 1;
 
   factory Item({
@@ -97,6 +99,7 @@ abstract class Item
     DateTime? previewUpdatedAt,
     DateTime? previewStartedAt,
     int? previewAttemptCount,
+    bool? isExample,
     int? revision,
   }) = _ItemImpl;
 
@@ -182,6 +185,9 @@ abstract class Item
               jsonSerialization['previewStartedAt'],
             ),
       previewAttemptCount: jsonSerialization['previewAttemptCount'] as int?,
+      isExample: jsonSerialization['isExample'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['isExample']),
       revision: jsonSerialization['revision'] as int?,
     );
   }
@@ -267,6 +273,9 @@ abstract class Item
 
   int previewAttemptCount;
 
+  /// True only for opt-in starter content created by ExampleSavesEndpoint.
+  bool isExample;
+
   /// Optimistic concurrency counter, bumped on every server-side update.
   int revision;
 
@@ -307,6 +316,7 @@ abstract class Item
     DateTime? previewUpdatedAt,
     DateTime? previewStartedAt,
     int? previewAttemptCount,
+    bool? isExample,
     int? revision,
   });
   @override
@@ -346,6 +356,7 @@ abstract class Item
       if (previewStartedAt != null)
         'previewStartedAt': previewStartedAt?.toJson(),
       'previewAttemptCount': previewAttemptCount,
+      'isExample': isExample,
       'revision': revision,
     };
   }
@@ -387,6 +398,7 @@ abstract class Item
       if (previewStartedAt != null)
         'previewStartedAt': previewStartedAt?.toJson(),
       'previewAttemptCount': previewAttemptCount,
+      'isExample': isExample,
       'revision': revision,
     };
   }
@@ -453,6 +465,7 @@ class _ItemImpl extends Item {
     DateTime? previewUpdatedAt,
     DateTime? previewStartedAt,
     int? previewAttemptCount,
+    bool? isExample,
     int? revision,
   }) : super._(
          id: id,
@@ -485,6 +498,7 @@ class _ItemImpl extends Item {
          previewUpdatedAt: previewUpdatedAt,
          previewStartedAt: previewStartedAt,
          previewAttemptCount: previewAttemptCount,
+         isExample: isExample,
          revision: revision,
        );
 
@@ -523,6 +537,7 @@ class _ItemImpl extends Item {
     Object? previewUpdatedAt = _Undefined,
     Object? previewStartedAt = _Undefined,
     int? previewAttemptCount,
+    bool? isExample,
     int? revision,
   }) {
     return Item(
@@ -577,6 +592,7 @@ class _ItemImpl extends Item {
           ? previewStartedAt
           : this.previewStartedAt,
       previewAttemptCount: previewAttemptCount ?? this.previewAttemptCount,
+      isExample: isExample ?? this.isExample,
       revision: revision ?? this.revision,
     );
   }
@@ -755,6 +771,11 @@ class ItemUpdateTable extends _is.UpdateTable<ItemTable> {
     value,
   );
 
+  _is.ColumnValue<bool, bool> isExample(bool value) => _is.ColumnValue(
+    table.isExample,
+    value,
+  );
+
   _is.ColumnValue<int, int> revision(int value) => _is.ColumnValue(
     table.revision,
     value,
@@ -896,6 +917,11 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
       this,
       hasDefault: true,
     );
+    isExample = _is.ColumnBool(
+      'isExample',
+      this,
+      hasDefault: true,
+    );
     revision = _is.ColumnInt(
       'revision',
       this,
@@ -979,6 +1005,9 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnInt previewAttemptCount;
 
+  /// True only for opt-in starter content created by ExampleSavesEndpoint.
+  late final _is.ColumnBool isExample;
+
   /// Optimistic concurrency counter, bumped on every server-side update.
   late final _is.ColumnInt revision;
 
@@ -1014,6 +1043,7 @@ class ItemTable extends _is.Table<_is.UuidValue?> {
     previewUpdatedAt,
     previewStartedAt,
     previewAttemptCount,
+    isExample,
     revision,
   ];
 }
