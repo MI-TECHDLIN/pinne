@@ -58,13 +58,13 @@ void main() {
   ) async {
     await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
-    expect(find.textContaining('a few good saves'), findsOneWidget);
+    expect(find.textContaining('curiosity'), findsOneWidget);
 
     final tabs = {
       'collections': 'collections',
       'search': 'your way',
       'progress': 'progress',
-      'today': 'a few good saves',
+      'today': 'curiosity',
     };
     for (final MapEntry(key: tab, value: headline) in tabs.entries) {
       await tester.tap(find.byKey(ValueKey('nav-$tab')));

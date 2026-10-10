@@ -328,13 +328,19 @@ class SearchResultCard extends StatelessWidget {
                     children: [
                       PreviewSourceChip(
                         source: item.sourcePlatform,
-                        dark: true,
+                        surface: PreviewChipSurface.pastel,
                       ),
-                      DurationChip(seconds: seconds, dark: true),
+                      DurationChip(
+                        seconds: seconds,
+                        surface: PreviewChipSurface.pastel,
+                      ),
                     ],
                   ),
                 ] else ...[
-                  PreviewSourceChip(source: item.sourcePlatform, dark: true),
+                  PreviewSourceChip(
+                    source: item.sourcePlatform,
+                    surface: PreviewChipSurface.pastel,
+                  ),
                 ],
                 const SizedBox(height: PinneSpacing.sm),
                 Text(
