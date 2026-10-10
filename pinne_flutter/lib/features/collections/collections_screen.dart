@@ -286,6 +286,28 @@ class _CollectionTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PinneColors.ink.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(
+                              PinneRadii.chip,
+                            ),
+                          ),
+                          child: Text(
+                            item.isSample ? 'SAMPLE' : 'COLLECTION',
+                            style: const TextStyle(
+                              color: PinneColors.ink,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: PinneSpacing.xs),
                         Text(
                           item.name,
                           maxLines: 2,

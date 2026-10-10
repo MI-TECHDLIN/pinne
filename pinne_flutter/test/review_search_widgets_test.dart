@@ -69,10 +69,12 @@ void main() {
 
     expect(find.text('DUE NOW · 5 MIN EST.'), findsOneWidget);
     expect(find.textContaining('Try this navigation pattern'), findsOneWidget);
-    for (final label in ['Reviewed', 'Remind me later', 'Archive', 'Open']) {
+    for (final label in ['Reviewed', 'Remind me later', 'Archive']) {
       await tester.tap(find.text(label));
       await tester.pump();
     }
+    await tester.tap(find.byKey(const ValueKey('review-open')));
+    await tester.pump();
     expect(calls, ['reviewed', 'snoozed', 'archived', 'opened']);
   });
 

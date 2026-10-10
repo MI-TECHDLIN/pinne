@@ -4,27 +4,51 @@ import 'package:pinne_client/pinne_client.dart';
 import '../theme/pinne_tokens.dart';
 import 'motion.dart';
 
+enum PreviewChipSurface { dark, pastel, due }
+
+({Color background, Color foreground, Color border}) previewChipColors(
+  PreviewChipSurface surface,
+) => switch (surface) {
+  PreviewChipSurface.dark => (
+    background: PinneColors.cardRaised,
+    foreground: PinneColors.text,
+    border: PinneColors.line,
+  ),
+  PreviewChipSurface.pastel || PreviewChipSurface.due => (
+    background: PinneColors.ink,
+    foreground: PinneColors.text,
+    border: PinneColors.ink,
+  ),
+};
+
 class PreviewSourceChip extends StatelessWidget {
-  const PreviewSourceChip({super.key, required this.source, this.dark = false});
+  const PreviewSourceChip({
+    super.key,
+    required this.source,
+    this.surface = PreviewChipSurface.dark,
+  });
 
   final SourcePlatform source;
-  final bool dark;
+  final PreviewChipSurface surface;
 
   @override
-  Widget build(BuildContext context) => Chip(
-    key: const ValueKey('preview-source'),
-    visualDensity: VisualDensity.compact,
-    backgroundColor: dark ? const Color(0x1A14102A) : PinneColors.glass,
-    side: BorderSide(color: dark ? const Color(0x3314102A) : PinneColors.line),
-    label: Text(
-      _sourceName(source),
-      style: TextStyle(
-        color: dark ? PinneColors.ink : PinneColors.text,
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
+  Widget build(BuildContext context) {
+    final colors = previewChipColors(surface);
+    return Chip(
+      key: const ValueKey('preview-source'),
+      visualDensity: VisualDensity.compact,
+      backgroundColor: colors.background,
+      side: BorderSide(color: colors.border),
+      label: Text(
+        _sourceName(source),
+        style: TextStyle(
+          color: colors.foreground,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   static String _sourceName(SourcePlatform source) => switch (source) {
     SourcePlatform.youtube => 'YouTube',
@@ -128,26 +152,33 @@ class PreviewByline extends StatelessWidget {
 }
 
 class DurationChip extends StatelessWidget {
-  const DurationChip({super.key, required this.seconds, this.dark = false});
+  const DurationChip({
+    super.key,
+    required this.seconds,
+    this.surface = PreviewChipSurface.dark,
+  });
 
   final int seconds;
-  final bool dark;
+  final PreviewChipSurface surface;
 
   @override
-  Widget build(BuildContext context) => Chip(
-    key: const ValueKey('known-duration'),
-    visualDensity: VisualDensity.compact,
-    backgroundColor: dark ? const Color(0x1A14102A) : PinneColors.glass,
-    side: BorderSide(color: dark ? const Color(0x3314102A) : PinneColors.line),
-    label: Text(
-      _duration(seconds),
-      style: TextStyle(
-        color: dark ? PinneColors.ink : PinneColors.text,
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
+  Widget build(BuildContext context) {
+    final colors = previewChipColors(surface);
+    return Chip(
+      key: const ValueKey('known-duration'),
+      visualDensity: VisualDensity.compact,
+      backgroundColor: colors.background,
+      side: BorderSide(color: colors.border),
+      label: Text(
+        _duration(seconds),
+        style: TextStyle(
+          color: colors.foreground,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   static String _duration(int seconds) {
     final duration = Duration(seconds: seconds);
