@@ -12,7 +12,6 @@ import 'package:pinne_flutter/features/settings/profile_provider.dart';
 import 'package:pinne_flutter/features/today/today_providers.dart';
 import 'package:pinne_flutter/features/today/today_screen.dart';
 import 'package:pinne_flutter/shell/pill_nav_bar.dart';
-import 'package:pinne_flutter/theme/pinne_tokens.dart';
 import 'package:pinne_flutter/ui/motion.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:visibility_detector/visibility_detector.dart';
