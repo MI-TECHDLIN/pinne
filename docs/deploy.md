@@ -201,8 +201,10 @@ API:      https://<PROJECT_ID>.api.serverpod.space/
 Insights: https://<PROJECT_ID>.insights.serverpod.space/
 ```
 
-The web host serves the Flutter build produced by the pre-deploy hook. The API
-health method is a Serverpod POST endpoint, not a plain browser GET:
+The web host serves the Flutter build produced by the pre-deploy hook. On the
+default Cloud domain, the app derives the matching `.api.serverpod.space` host
+at runtime; a future custom domain should pass `SERVER_URL` to the web build.
+The API health method is a Serverpod POST endpoint, not a plain browser GET:
 
 ```powershell
 $Api = "https://<PROJECT_ID>.api.serverpod.space/"

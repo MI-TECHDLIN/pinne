@@ -6,11 +6,38 @@ import 'package:pinne_client/pinne_client.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
-/// Server URL resolution, in order: `--dart-define=SERVER_URL=...`, then
-/// `apiUrl` in `assets/config.json`, then `http://localhost:8080/`.
+/// Server URL resolution, in order: `--dart-define=SERVER_URL=...`, a
+/// Serverpod Cloud API URL derived from its default web host, then `apiUrl` in
+/// `assets/config.json`, then `http://localhost:8080/`.
 ///
 /// On a physical device use your computer's LAN address, not localhost.
-Future<String> resolveServerUrl() => getServerUrl();
+Future<String> resolveServerUrl() async {
+  const definedUrl = String.fromEnvironment('SERVER_URL');
+  if (definedUrl.isNotEmpty) return definedUrl;
+
+  if (kIsWeb) {
+    final cloudUrl = serverpodCloudApiUrl(Uri.base);
+    if (cloudUrl != null) return cloudUrl;
+  }
+
+  return getServerUrl();
+}
+
+/// Returns the matching API host for a default Serverpod Cloud web URL.
+///
+/// Custom domains should use `SERVER_URL` because their API hostname cannot be
+/// inferred from the page URL.
+@visibleForTesting
+String? serverpodCloudApiUrl(Uri pageUri) {
+  const cloudWebSuffix = '.serverpod.space';
+  final host = pageUri.host.toLowerCase();
+  if (!host.endsWith(cloudWebSuffix)) return null;
+
+  final projectId = host.substring(0, host.length - cloudWebSuffix.length);
+  if (projectId.isEmpty || projectId.contains('.')) return null;
+  final scheme = pageUri.scheme == 'http' ? 'http' : 'https';
+  return '$scheme://$projectId.api.serverpod.space/';
+}
 
 /// Google sign-in is only offered when the OAuth client ids are provided:
 /// `--dart-define=GOOGLE_CLIENT_ID=...` and
