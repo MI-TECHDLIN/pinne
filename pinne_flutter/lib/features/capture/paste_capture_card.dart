@@ -10,6 +10,91 @@ import '../../ui/glass_card.dart';
 import 'capture_labels.dart';
 import 'capture_providers.dart';
 
+/// Compact entry from Today into the existing local-first manual capture UI.
+class CaptureEntryTile extends StatelessWidget {
+  const CaptureEntryTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: PinneColors.sky,
+      borderRadius: BorderRadius.circular(PinneRadii.tile),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: const ValueKey('capture-entry'),
+        onTap: () => showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(context).bottom,
+            ),
+            child: const _ManualCaptureSheet(),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: PinneSpacing.lg,
+            vertical: PinneSpacing.md,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: const BoxDecoration(
+                  color: PinneColors.ink,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.add_rounded, color: PinneColors.text),
+              ),
+              const SizedBox(width: PinneSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Save a link',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: PinneColors.ink,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Text(
+                      'Paste a link or jot a note',
+                      style: TextStyle(color: PinneColors.ink, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_rounded, color: PinneColors.ink),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ManualCaptureSheet extends StatelessWidget {
+  const _ManualCaptureSheet();
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: PinneColors.midnightRaised,
+    borderRadius: const BorderRadius.vertical(
+      top: Radius.circular(PinneRadii.sheet),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(PinneSpacing.lg),
+      child: const PasteCaptureCard(),
+    ),
+  );
+}
+
 /// Manual capture on Today: paste a link or type a note, optionally say why,
 /// save. The same local-first path as sharing: stored on the phone first,
 /// then synced.

@@ -3,7 +3,40 @@ import 'package:pinne_client/pinne_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/server_client.dart';
+import '../planner/planner_providers.dart';
 import '../progress/progress_providers.dart';
+
+final todayClockProvider = Provider<DateTime>((ref) => DateTime.now());
+
+@immutable
+class TodayOverview {
+  const TodayOverview({this.progress, this.nextSession});
+
+  final ProgressReport? progress;
+  final SessionView? nextSession;
+}
+
+final todayOverviewProvider = FutureProvider.autoDispose<TodayOverview>((
+  ref,
+) async {
+  if (!ref.watch(signedInProvider)) return const TodayOverview();
+  final now = ref.watch(todayClockProvider);
+  final progressFuture = ref
+      .watch(progressApiProvider)
+      .report(progressQuery(ProgressPeriod.thisWeek, now: now));
+  final sessionsFuture = ref
+      .watch(plannerApiProvider)
+      .sessions(now.toUtc(), now.toUtc().add(const Duration(days: 62)));
+  final progress = await progressFuture;
+  final sessions = await sessionsFuture;
+  sessions.sort((a, b) => a.session.startAt.compareTo(b.session.startAt));
+  return TodayOverview(
+    progress: progress,
+    nextSession: sessions
+        .where((view) => view.session.status == SessionStatus.scheduled)
+        .firstOrNull,
+  );
+});
 
 final reviewQueueEndpointProvider = Provider<EndpointReviewQueue>(
   (ref) => ref.watch(clientProvider).reviewQueue,

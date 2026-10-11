@@ -24,17 +24,20 @@ class AppShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.only(bottom: 14),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          heightFactor: 1,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: PillNavBar(
-              destinations: shellDestinations,
-              selectedIndex: navigationShell.currentIndex,
-              onSelected: (index) => navigationShell.goBranch(
-                index,
-                initialLocation: index == navigationShell.currentIndex,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            heightFactor: 1,
+            child: SizedBox(
+              width: PillNavBar.maxWidth,
+              child: PillNavBar(
+                destinations: shellDestinations,
+                selectedIndex: navigationShell.currentIndex,
+                onSelected: (index) => navigationShell.goBranch(
+                  index,
+                  initialLocation: index == navigationShell.currentIndex,
+                ),
               ),
             ),
           ),
