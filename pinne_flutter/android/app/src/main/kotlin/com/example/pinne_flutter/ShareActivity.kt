@@ -1,4 +1,4 @@
-package com.example.pinne_flutter
+package com.mitechdlin.pinne
 
 import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
