@@ -20,6 +20,14 @@ insightsServer:
   publicPort: 8081
   publicScheme: http
 
+# Flutter web server. `serverpod run flutter_build` writes its files to
+# web/app; the server route is registered only when that directory exists.
+webServer:
+  port: 8082
+  publicHost: localhost
+  publicPort: 8082
+  publicScheme: http
+
 
 # This is the database setup for your server.
 database:

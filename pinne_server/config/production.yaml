@@ -1,8 +1,7 @@
 # This is the configuration file for your production environment.
-# Typically, you will want to route the traffic through a load balancer
-# which adds SSL security through https. If you use Serverpod's standard
-# Terraform scripts to deploy your server, all you need to change in
-# this file is the examplepod.com domain name.
+# Serverpod Cloud overrides public hosts, ports, database settings and logging
+# with its managed runtime environment. The example hosts below remain useful
+# defaults for a future self-hosted deployment and contain no secrets.
 
 # Configuration for the main API server.
 apiServer:
@@ -15,6 +14,12 @@ apiServer:
 insightsServer:
   port: 8081
   publicHost: insights.examplepod.com
+  publicPort: 443
+  publicScheme: https
+
+webServer:
+  port: 8082
+  publicHost: app.examplepod.com
   publicPort: 443
   publicScheme: https
 
@@ -40,11 +45,14 @@ sessionLogs:
 # persistentEnabled: true
 # consoleLogFormat: json # Defaults to "json", options are "text" or "json"
 
-#futureCall:
-#  enabled: true # Defaults to true, set to false to disable scheduling and running future calls
-#  executionEnabled: true # Defaults to true
-#  concurrencyLimit: 1 # Defaults to 1, a negative or null value removes the limit
-#  scanInterval: 5000 # Unit in milliseconds, defaults to 5000
+# Link previews, AI organizing and the resurfacing digest all use durable
+# future calls. Serverpod Cloud Growth (or higher) is required because the
+# Starter plan disables future calls at the platform level.
+futureCall:
+  enabled: true
+  executionEnabled: true
+  concurrencyLimit: 1
+  scanInterval: 5000
 
 # Recommended when serving web clients: keeps auth tokens in httpOnly
 # cookies. Without this, web tokens live in JavaScript-readable storage,

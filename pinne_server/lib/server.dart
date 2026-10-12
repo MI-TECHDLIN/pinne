@@ -77,10 +77,22 @@ Future<void> run(List<String> args, {bool seedDemo = false}) async {
     ),
   );
 
+  // Serve the release web build when the pre-deploy hook has produced one.
+  // Serverpod Cloud supplies the public web/API hosts at runtime; local runs
+  // keep using the ports in config/development.yaml.
+  final flutterAppDirectory = Directory('web/app');
+  if (flutterAppDirectory.existsSync()) {
+    pod.webServer.addRoute(
+      FlutterRoute(flutterAppDirectory, enableWasmHeaders: false),
+    );
+  }
+
   // Start the server.
   await pod.start();
 
-  if (seedDemo) {
+  final seedDemoOnStart =
+      Platform.environment['PINNE_SEED_DEMO_ON_START']?.toLowerCase() == 'true';
+  if (seedDemo || seedDemoOnStart) {
     final email = _configuredPassword(pod, 'demoAccountEmail');
     final password = _configuredPassword(pod, 'demoAccountPassword');
     if (email == null || password == null) {
@@ -101,8 +113,10 @@ Future<void> run(List<String> args, {bool seedDemo = false}) async {
           ? 'Created empty demo account for $email.'
           : 'Demo account for $email already exists; nothing changed.',
     );
-    await pod.shutdown();
-    return;
+    if (seedDemo) {
+      await pod.shutdown();
+      return;
+    }
   }
 
   // Keep exactly one durable hourly digest scan across development restarts.
