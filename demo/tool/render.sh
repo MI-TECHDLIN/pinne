@@ -4,6 +4,8 @@
 #   demo/tool/render.sh                 every scene, then the final MP4
 #   demo/tool/render.sh --preview       PNG stills every 0.5 s, no video
 #   demo/tool/render.sh 05_today        one scene (a test-name regex)
+#   demo/tool/render.sh --assemble [--voiceover FILE] [--bed]
+#                                       only re-join the rendered segments
 #
 # Output goes to $FILM_OUT (default demo/out, git-ignored).
 set -euo pipefail
@@ -13,10 +15,14 @@ repo="$(dirname "$demo")"
 out="${FILM_OUT:-$demo/out}"
 preview=false
 if [[ ${1:-} == --preview ]]; then preview=true; shift; fi
-scene="${1:-}"
 
 ffmpeg="${FFMPEG:-$(command -v ffmpeg || python3 -c 'import imageio_ffmpeg as f; print(f.get_ffmpeg_exe())')}"
 mkdir -p "$out"
+if [[ ${1:-} == --assemble ]]; then
+  shift
+  FFMPEG="$ffmpeg" exec python3 -I "$demo/tool/assemble.py" "$out" "$@"
+fi
+scene="${1:-}"
 python3 -I "$demo/tool/fetch_fonts.py"
 engine="$("$demo/tool/film_engine.sh")"
 
