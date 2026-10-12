@@ -7,11 +7,15 @@ class AiSuggestionChipData {
     required this.id,
     required this.label,
     this.uncertain = false,
+    this.maxLines = 1,
   });
 
   final String id;
   final String label;
   final bool uncertain;
+
+  /// Longer suggestions, such as a summary, may wrap before they ellipsize.
+  final int maxLines;
 }
 
 /// Review controls for AI output. It intentionally owns no animation; parent
@@ -54,6 +58,7 @@ class AiSuggestionChips extends StatelessWidget {
                   Flexible(
                     child: Text(
                       suggestion.label,
+                      maxLines: suggestion.maxLines,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

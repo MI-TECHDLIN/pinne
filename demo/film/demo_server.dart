@@ -383,11 +383,16 @@ class _DemoAi extends EndpointAiOrganizing {
 
   @override
   Future<AiSettings> getSettings() async =>
-      AiSettings(enabled: true, disclosure: _disclosure);
+      AiSettings(available: true, enabled: true, disclosure: _disclosure);
 
   @override
   Future<AiSettings> setEnabled(bool enabled) async =>
-      AiSettings(enabled: enabled, disclosure: _disclosure);
+      AiSettings(available: true, enabled: enabled, disclosure: _disclosure);
+
+  // The film shows suggestions in its own panel, not on the Saved cards.
+  @override
+  Future<List<AiSuggestion>> listSuggestions(UuidValue itemId) async =>
+      const [];
 
   // The server's AiOrganizingEndpoint.disclosure.
   static const _disclosure =
