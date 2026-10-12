@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show VoidCallback;
 
 import 'package:pinne_calendar/pinne_calendar.dart';
 import 'package:pinne_capture/pinne_capture.dart';
@@ -8,6 +7,7 @@ import 'package:pinne_flutter/features/capture/outbox_sync.dart';
 import 'package:pinne_flutter/features/planner/device_calendar_adapter.dart';
 import 'package:pinne_flutter/features/planner/planner_api.dart';
 import 'package:pinne_flutter/features/progress/progress_providers.dart';
+import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 /// Clearly sample data standing in for the Serverpod server while the real
 /// app is filmed. Every screen, provider and widget is the app's own code;
@@ -34,6 +34,19 @@ abstract final class Sample {
   static const sharedWhy = 'Ideas for our app’s first-run screens';
 
   static DateTime get now => DateTime.now().toUtc();
+
+  /// The phone's clock in the film: Thursday of the current week at 10:24,
+  /// the time the drawn status bar shows, so the progress week has a few
+  /// days behind it whatever day the film is rendered.
+  static final DateTime filmNow = () {
+    final real = DateTime.now();
+    final monday = DateTime(
+      real.year,
+      real.month,
+      real.day,
+    ).subtract(Duration(days: real.weekday - 1));
+    return DateTime(monday.year, monday.month, monday.day + 3, 10, 24);
+  }();
 
   /// Thumbnails are served from demo/assets/thumbs by file name.
   static String thumb(String name) => 'https://thumbs.pinne.example/$name.png';
@@ -194,12 +207,25 @@ class DemoClient extends Client {
   DemoClient({
     List<Item> Function()? items,
     ReviewQueueResult Function()? queue,
+    this.displayName = Sample.ownerName,
+    this.onReviewed,
+    this.onSnoozed,
   }) : itemsSource = items ?? Sample.items,
        queueSource = queue,
-       super('http://pinne.example/');
+       super('http://pinne.example/') {
+    // The sign-in screen's widgets read the client's auth session.
+    authSessionManager = FlutterAuthSessionManager();
+  }
 
   List<Item> Function() itemsSource;
   ReviewQueueResult Function()? queueSource;
+
+  /// The profile name; empty for a fresh guest, who is greeted as "Guest".
+  final String displayName;
+
+  /// Called when a review event is recorded or an item is snoozed.
+  final void Function(ReviewEventDraft draft)? onReviewed;
+  final void Function(UuidValue itemId)? onSnoozed;
 
   @override
   late final EndpointItem item = _DemoItems(this);
@@ -299,14 +325,26 @@ class _DemoQueue extends EndpointReviewQueue {
   Future<ReviewQueueResult> get({required int timeBudgetMinutes}) async =>
       client.queueSource?.call() ??
       ReviewQueueResult(entries: [], timeBudgetMinutes: timeBudgetMinutes);
+
+  @override
+  Future<ItemReviewControl> snooze(UuidValue itemId, DateTime until) async {
+    client.onSnoozed?.call(itemId);
+    return ItemReviewControl(
+      ownerId: Sample.owner,
+      itemId: itemId,
+      snoozedUntil: until,
+    );
+  }
 }
 
 class _DemoReview extends EndpointReview {
-  _DemoReview(super.caller);
+  _DemoReview(this.client) : super(client);
+  final DemoClient client;
 
   @override
-  Future<ReviewEventReceipt> record(ReviewEventDraft draft) async =>
-      ReviewEventReceipt(
+  Future<ReviewEventReceipt> record(ReviewEventDraft draft) async {
+    client.onReviewed?.call(draft);
+    return ReviewEventReceipt(
         event: ReviewEvent(
           id: const Uuid().v4obj(),
           ownerId: Sample.owner,
@@ -327,15 +365,17 @@ class _DemoReview extends EndpointReview {
           lastReviewedAt: draft.occurredAt,
         ),
       );
+  }
 }
 
 class _DemoProfile extends EndpointProfile {
-  _DemoProfile(super.caller);
+  _DemoProfile(this.client) : super(client);
+  final DemoClient client;
 
   @override
   Future<PinneProfile?> get() async => PinneProfile(
     ownerId: Sample.owner,
-    displayName: Sample.ownerName,
+    displayName: client.displayName,
     avatarSeed: Sample.avatarSeed,
     avatarPalette: Sample.avatarPalette,
   );
@@ -393,10 +433,28 @@ class DemoProgressApi implements ProgressApi {
   DemoProgressApi({this.milestones = const []});
 
   List<ProgressMilestone> milestones;
+  var _extraReviews = 0;
+
+  /// One more review counted on the server. The 25th reaches the
+  /// "25 saves revisited" milestone, not yet celebrated.
+  void reviewRecorded() {
+    _extraReviews++;
+    if (24 + _extraReviews == 25) {
+      milestones = [
+        ...milestones,
+        ProgressMilestone(
+          key: 'reviews-25',
+          kind: MilestoneKind.reviewCount,
+          value: 25,
+          celebrated: false,
+        ),
+      ];
+    }
+  }
 
   @override
   Future<ProgressReport> report(ProgressQuery query) async =>
-      demoWeek(milestones: milestones);
+      demoWeek(milestones: milestones, extraReviews: _extraReviews);
 
   @override
   Future<void> markCelebrated(List<String> keys) async {
@@ -423,9 +481,13 @@ String _key(DateTime day) =>
     '${day.year}-${day.month.toString().padLeft(2, '0')}-'
     '${day.day.toString().padLeft(2, '0')}';
 
-/// This week, Monday to Sunday, around the real current date.
-ProgressReport demoWeek({List<ProgressMilestone> milestones = const []}) {
-  final now = DateTime.now();
+/// This week, Monday to Sunday, around [Sample.filmNow]. 24 reviews so far,
+/// plus any recorded while filming.
+ProgressReport demoWeek({
+  List<ProgressMilestone> milestones = const [],
+  int extraReviews = 0,
+}) {
+  final now = Sample.filmNow;
   final today = DateTime(now.year, now.month, now.day);
   final monday = today.subtract(Duration(days: today.weekday - 1));
   const counts = [2, 3, 1, 2, 3, 2, 1];
@@ -437,7 +499,9 @@ ProgressReport demoWeek({List<ProgressMilestone> milestones = const []}) {
         final future = day.isAfter(today);
         return ProgressDay(
           date: _key(day),
-          reviewedCount: future ? 0 : counts[i],
+          reviewedCount: future
+              ? 0
+              : counts[i] + (day == today ? extraReviews : 0),
           cohortRate: future ? null : rates[i],
           isToday: day == today,
           isFuture: future,
@@ -452,13 +516,13 @@ ProgressReport demoWeek({List<ProgressMilestone> milestones = const []}) {
     endDate: _key(monday.add(const Duration(days: 7))),
     today: _key(today),
     savedCount: 14,
-    reviewedCount: 9,
-    firstReviewedTodayCount: 2,
-    remainingCount: 5,
+    reviewedCount: 9 + extraReviews,
+    firstReviewedTodayCount: 2 + extraReviews,
+    remainingCount: 5 - extraReviews,
     appliedCount: 3,
-    reviewRate: 9 / 14,
+    reviewRate: (9 + extraReviews) / 14,
     reviewedInPeriodCount: reviewed,
-    totalReviewedCount: 25,
+    totalReviewedCount: 24 + extraReviews,
     days: days,
     bestDayDate: _key(monday.add(const Duration(days: 1))),
     collections: [

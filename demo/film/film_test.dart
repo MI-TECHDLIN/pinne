@@ -20,9 +20,44 @@ void main() {
   captureScenes();
 
   shoot('01_hook', (film) async {
+    final app = FilmApp(
+      firstRun: true,
+      client: DemoClient(displayName: ''),
+    );
     await film.precache(spiritArt('welcome'));
-    await film.open(Stage(extra: [HookCard()]));
-    await film.until(9.5);
+    await film.open(
+      Stage(
+        extra: [HookCard()],
+        phone: PhoneRig(
+          poses: [
+            const Pose(0, at: Offset(1350, 1700)),
+            const Pose(4.7, at: Offset(1350, 1700)),
+            const Pose(5.9),
+            const Pose(8.3),
+            Pose(
+              9.0,
+              focus: onScreen(206, 470),
+              at: const Offset(1350, 560),
+              scale: 1.3,
+            ),
+            Pose(
+              10.2,
+              focus: onScreen(206, 470),
+              at: const Offset(1350, 560),
+              scale: 1.3,
+            ),
+            const Pose(10.9),
+          ],
+          screen: app.widget(),
+        ),
+      ),
+    );
+    await settle(film.tester);
+    await film.until(7.9);
+    await film.tap(find.byKey(const ValueKey('onboarding-skip')));
+    await film.until(9.4);
+    await film.tap(find.byKey(const ValueKey('guest-sign-in-button')));
+    await film.until(11.5);
   });
 
   shoot('03_organize', (film) async {

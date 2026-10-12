@@ -120,7 +120,8 @@ List<_Tile> _heap() {
   return tiles;
 }
 
-/// 0-9.5 s: saves pile up, then the Ribbon Spirit and the name.
+/// Saves pile up, then the Ribbon Spirit and the name. The phone with the
+/// real onboarding is the scene's own [PhoneRig].
 class HookCard extends StatelessWidget {
   HookCard({super.key});
 
@@ -140,7 +141,7 @@ class HookCard extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Opacity(
-            opacity: 1 - 0.8 * away,
+            opacity: 1 - away,
             child: ImageFiltered(
               imageFilter: ui.ImageFilter.blur(
                 sigmaX: 0.01 + away * 16,
@@ -218,17 +219,20 @@ class HookCard extends StatelessWidget {
     );
   }
 
+  /// The name and the Ribbon Spirit on the left, beside the phone that
+  /// slides in with the real onboarding.
   Widget _reveal(double t) {
+    const x = 510.0;
     final p = ramp(t, 4.7, 1.1, Curves.easeOutBack);
     final glow = ramp(t, 4.6, 1.4);
     final float = math.sin((t - 4.6) * 1.6) * 8;
     return Stack(
       children: [
         Positioned(
-          left: 960 - 520,
-          top: 330 - 520,
-          width: 1040,
-          height: 1040,
+          left: x - 480,
+          top: 330 - 480,
+          width: 960,
+          height: 960,
           child: Opacity(
             opacity: glow,
             child: const DecoratedBox(
@@ -241,10 +245,10 @@ class HookCard extends StatelessWidget {
           ),
         ),
         Positioned(
-          left: 960 - 190,
-          top: 90 + float,
-          width: 380,
-          height: 470,
+          left: x - 160,
+          top: 110 + float,
+          width: 320,
+          height: 400,
           child: Opacity(
             opacity: ramp(t, 4.7, 0.5),
             child: Transform.scale(
@@ -254,18 +258,18 @@ class HookCard extends StatelessWidget {
           ),
         ),
         Positioned(
-          left: 0,
-          right: 0,
-          top: 600,
+          left: x - 450,
+          width: 900,
+          top: 560,
           child: Column(
             children: [
               fadeRise(
                 t,
-                5.6,
+                5.4,
                 Text(
                   'Pinne',
                   style: GoogleFonts.outfit(
-                    fontSize: 150,
+                    fontSize: 140,
                     fontWeight: FontWeight.w600,
                     letterSpacing: -4,
                     height: 1,
@@ -273,13 +277,22 @@ class HookCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 26),
+              const SizedBox(height: 24),
               fadeRise(
                 t,
-                6.3,
+                6.0,
                 Text(
                   'Save it. Come back to it.',
-                  style: Words.light(56).copyWith(color: PinneColors.lilac),
+                  style: Words.light(54).copyWith(color: PinneColors.lilac),
+                ),
+              ),
+              const SizedBox(height: 40),
+              fadeRise(
+                t,
+                8.4,
+                Text(
+                  'Try it without an account.',
+                  style: Words.body(32),
                 ),
               ),
             ],
