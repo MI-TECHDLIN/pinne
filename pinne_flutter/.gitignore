@@ -44,3 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+
+# Golden diff output from failed flutter tests
+test/failures/

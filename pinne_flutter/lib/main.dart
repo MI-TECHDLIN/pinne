@@ -8,6 +8,7 @@ import 'features/capture/capture_providers.dart';
 import 'features/capture/open_capture_store.dart';
 import 'features/capture/share_entry.dart';
 import 'features/onboarding/onboarding_store.dart';
+import 'features/tour/tour_store.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,9 @@ void main() async {
         captureStoreProvider.overrideWithValue(store),
         onboardingStoreProvider.overrideWithValue(
           SharedPreferencesOnboardingStore(preferences),
+        ),
+        tourStoreProvider.overrideWithValue(
+          SharedPreferencesTourStore(preferences),
         ),
       ],
       child: const PinneApp(),

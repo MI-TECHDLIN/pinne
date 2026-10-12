@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +14,7 @@ import 'features/search/search_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/today/today_screen.dart';
 import 'shell/app_shell.dart';
+import 'ui/feedback/error_state.dart';
 import 'ui/ribbon_spirit/ribbon_gallery.dart';
 
 abstract final class Routes {
@@ -34,6 +35,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: Routes.onboarding,
     redirect: (context, state) =>
         onboardingRedirect(ref.read(onboardingStoreProvider), state),
+    errorBuilder: (context, state) => Scaffold(
+      body: SafeArea(
+        child: PinneErrorState(
+          error: state.error,
+          subject: 'this page',
+          secondaryLabel: 'Go to Today',
+          onSecondary: () => context.go(Routes.today),
+        ),
+      ),
+    ),
     routes: [
       GoRoute(
         path: Routes.onboarding,
