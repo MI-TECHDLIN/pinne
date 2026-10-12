@@ -211,4 +211,108 @@ void main() {
       matchesGoldenFile('../../docs/onboarding/03-make-time-progress.png'),
     );
   });
+
+  const phones = {
+    'small': Size(360, 640),
+    'medium': Size(390, 844),
+    'large': Size(430, 932),
+  };
+
+  for (final MapEntry(key: name, value: size) in phones.entries) {
+    for (final scale in const [1.0, 1.3]) {
+      testWidgets('$name phone at ${scale}x text keeps copy clear of the '
+          'footer on every page', (tester) async {
+        await tester.binding.setSurfaceSize(size);
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(() {
+          tester.binding.setSurfaceSize(null);
+          tester.platformDispatcher.clearTextScaleFactorTestValue();
+        });
+        await tester.pumpWidget(testApp(MemoryOnboardingStore()));
+        await tester.pumpAndSettle();
+
+        for (var page = 0; page < 3; page++) {
+          expect(tester.takeException(), isNull, reason: 'page $page');
+          final next = tester.getRect(
+            find.byKey(const ValueKey('onboarding-next')),
+          );
+          final copy = find.byKey(const ValueKey('onboarding-copy'));
+          final scrollable = find.descendant(
+            of: find.byKey(const ValueKey('onboarding-pages')),
+            matching: find.byType(Scrollable),
+          );
+          // Scroll the copy fully into view; it must then sit above the
+          // footer and inside the screen, never under it.
+          await tester.ensureVisible(copy);
+          await tester.pumpAndSettle();
+          final copyRect = tester.getRect(copy);
+          expect(copyRect.bottom, lessThanOrEqualTo(next.top), reason: '$page');
+          expect(copyRect.left, greaterThanOrEqualTo(0));
+          expect(copyRect.right, lessThanOrEqualTo(size.width));
+          expect(scrollable, findsWidgets);
+          if (page < 2) {
+            await tester.tap(find.byKey(const ValueKey('onboarding-next')));
+            await tester.pumpAndSettle();
+          }
+        }
+        expect(find.text('Get started'), findsOneWidget);
+      });
+    }
+  }
+
+  testWidgets('scene gets the room left by the copy on tall phones', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 932));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(testApp(MemoryOnboardingStore()));
+    await tester.pumpAndSettle();
+
+    final scene = tester.getRect(
+      find.byKey(const ValueKey('onboarding-static-scene')),
+    );
+    final copy = tester.getRect(find.byKey(const ValueKey('onboarding-copy')));
+    expect(scene.bottom, lessThanOrEqualTo(copy.top));
+    expect(scene.height, greaterThan(300));
+  });
+
+  testWidgets('landscape and tablets put the scene beside the copy', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(900, 420));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(testApp(MemoryOnboardingStore()));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    final scene = tester.getRect(
+      find.byKey(const ValueKey('onboarding-static-scene')),
+    );
+    final copy = tester.getRect(find.byKey(const ValueKey('onboarding-copy')));
+    expect(scene.right, lessThanOrEqualTo(copy.left));
+  });
+
+  testWidgets('small phone with large text renders for review', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 640));
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+    addTearDown(() {
+      tester.binding.setSurfaceSize(null);
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+    });
+    await tester.pumpWidget(testApp(MemoryOnboardingStore()));
+    await tester.pumpAndSettle();
+
+    for (var page = 1; page <= 3; page++) {
+      await expectLater(
+        find.byType(Scaffold),
+        matchesGoldenFile('../../docs/onboarding/small-large-text-0$page.png'),
+      );
+      if (page < 3) {
+        await tester.tap(find.byKey(const ValueKey('onboarding-next')));
+        await tester.pumpAndSettle();
+      }
+    }
+  });
 }

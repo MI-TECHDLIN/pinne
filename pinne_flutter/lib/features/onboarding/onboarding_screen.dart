@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import 'onboarding_store.dart';
@@ -72,9 +74,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     }
   }
 
+  static const _pageCount = 3;
+
   @override
   Widget build(BuildContext context) {
     final reduced = reduceMotionOf(context);
+    final last = _page == _pageCount - 1;
     return Scaffold(
       body: DecoratedBox(
         decoration: const BoxDecoration(
@@ -87,12 +92,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
         child: SafeArea(
           child: Column(
             children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  key: const ValueKey('onboarding-skip'),
-                  onPressed: _finishing ? null : _finish,
-                  child: const Text('Skip'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  PinneSpacing.xl,
+                  PinneSpacing.xs,
+                  PinneSpacing.sm,
+                  0,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${_page + 1} of $_pageCount',
+                        key: const ValueKey('onboarding-step'),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: PinneColors.muted,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      key: const ValueKey('onboarding-skip'),
+                      onPressed: _finishing ? null : _finish,
+                      child: Text(last ? 'Close' : 'Skip'),
+                    ),
+                  ],
                 ),
               ),
               Expanded(
@@ -140,40 +163,55 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   PinneSpacing.xl,
-                  PinneSpacing.sm,
+                  PinneSpacing.md,
                   PinneSpacing.xl,
-                  PinneSpacing.xl,
+                  PinneSpacing.lg,
                 ),
                 child: Row(
                   children: [
                     Expanded(
-                      child: Row(
-                        children: [
-                          for (var index = 0; index < 3; index++) ...[
-                            AnimatedContainer(
-                              key: ValueKey('onboarding-dot-$index'),
-                              duration: motionDurationOf(
-                                context,
-                                PinneMotionDurations.quick,
-                              ),
-                              width: index == _page ? 24 : 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                color: index == _page
-                                    ? PinneColors.lilac
-                                    : PinneColors.line,
-                                borderRadius: BorderRadius.circular(99),
-                              ),
+                      child: Semantics(
+                        label: 'Page ${_page + 1} of $_pageCount',
+                        child: ExcludeSemantics(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                for (
+                                  var index = 0;
+                                  index < _pageCount;
+                                  index++
+                                ) ...[
+                                  AnimatedContainer(
+                                    key: ValueKey('onboarding-dot-$index'),
+                                    duration: motionDurationOf(
+                                      context,
+                                      PinneMotionDurations.quick,
+                                    ),
+                                    width: index == _page ? 24 : 7,
+                                    height: 7,
+                                    decoration: BoxDecoration(
+                                      color: index == _page
+                                          ? PinneColors.lilac
+                                          : PinneColors.line,
+                                      borderRadius: BorderRadius.circular(99),
+                                    ),
+                                  ),
+                                  if (index != _pageCount - 1)
+                                    const SizedBox(width: PinneSpacing.sm),
+                                ],
+                              ],
                             ),
-                            if (index != 2)
-                              const SizedBox(width: PinneSpacing.sm),
-                          ],
-                        ],
+                          ),
+                        ),
                       ),
                     ),
+                    const SizedBox(width: PinneSpacing.md),
                     _ProgressButton(
-                      progress: (_page + 1) / 3,
-                      last: _page == 2,
+                      progress: (_page + 1) / _pageCount,
+                      last: last,
                       busy: _finishing,
                       onPressed: _advance,
                     ),
@@ -207,61 +245,284 @@ class _OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) => SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: PinneSpacing.xl),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: constraints.maxHeight),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: math.max(PinneSpacing.sm, constraints.maxHeight * .02),
-            ),
-            SizedBox(
-              height: math.max(342, constraints.maxHeight * .50),
-              child: scene,
-            ),
-            const SizedBox(height: PinneSpacing.lg),
-            Text(
-              eyebrow,
-              style: const TextStyle(
-                color: PinneColors.lilac,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.4,
-              ),
-            ),
-            const SizedBox(height: PinneSpacing.sm),
-            Text.rich(
-              TextSpan(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth;
+      final height = constraints.maxHeight;
+      // Phones in landscape and tablets put the scene beside the copy.
+      final sideBySide = width >= 600 && width > height * 1.15;
+      final contentWidth = sideBySide
+          ? math.min(width, 980.0)
+          : math.min(width, 560.0);
+      final gutter = width < 380 ? PinneSpacing.lg : PinneSpacing.xl;
+      final copy = _Copy(
+        eyebrow: eyebrow,
+        leading: leading,
+        bold: bold,
+        trailing: trailing,
+        body: body,
+        headlineSize: (math.min(contentWidth, 460) * .086).clamp(28.0, 40.0),
+      );
+      final glowingScene = _SceneGlow(child: scene);
+      if (sideBySide) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: gutter),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: contentWidth),
+              child: Row(
                 children: [
-                  TextSpan(text: leading),
-                  TextSpan(
-                    text: bold,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  Expanded(child: glowingScene),
+                  const SizedBox(width: PinneSpacing.xl),
+                  Expanded(
+                    child: Center(child: SingleChildScrollView(child: copy)),
                   ),
-                  TextSpan(text: trailing),
                 ],
               ),
-              key: ValueKey('onboarding-headline-$bold'),
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                fontSize: 36,
-                height: 1.02,
-              ),
             ),
-            const SizedBox(height: PinneSpacing.md),
-            Text(
-              body,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: PinneColors.muted,
-                height: 1.5,
-              ),
+          ),
+        );
+      }
+      return SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: gutter),
+        child: Center(
+          child: SizedBox(
+            width: contentWidth - gutter * 2,
+            child: _SceneAndCopy(
+              viewportHeight: height,
+              minScene: math.min(200, height * .4),
+              maxScene: 560,
+              gap: height < 560 ? PinneSpacing.lg : PinneSpacing.xl,
+              scene: glowingScene,
+              copy: copy,
             ),
-            const SizedBox(height: PinneSpacing.md),
-          ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _Copy extends StatelessWidget {
+  const _Copy({
+    required this.eyebrow,
+    required this.leading,
+    required this.bold,
+    required this.trailing,
+    required this.body,
+    required this.headlineSize,
+  });
+
+  final String eyebrow;
+  final String leading;
+  final String bold;
+  final String trailing;
+  final String body;
+  final double headlineSize;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    key: const ValueKey('onboarding-copy'),
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        eyebrow,
+        style: const TextStyle(
+          color: PinneColors.lilac,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.4,
         ),
       ),
+      const SizedBox(height: PinneSpacing.sm),
+      Semantics(
+        header: true,
+        child: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: leading),
+              TextSpan(
+                text: bold,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              TextSpan(text: trailing),
+            ],
+          ),
+          key: ValueKey('onboarding-headline-$bold'),
+          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+            fontSize: headlineSize,
+            height: 1.05,
+          ),
+        ),
+      ),
+      const SizedBox(height: PinneSpacing.md),
+      Text(
+        body,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: PinneColors.muted,
+          height: 1.5,
+        ),
+      ),
+    ],
+  );
+}
+
+/// A soft violet halo so each illustration sits on a stage, not on nothing.
+class _SceneGlow extends StatelessWidget {
+  const _SceneGlow({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      gradient: RadialGradient(
+        center: const Alignment(0, .3),
+        radius: .5,
+        colors: [
+          PinneColors.violet.withValues(alpha: .22),
+          PinneColors.violet.withValues(alpha: 0),
+        ],
+      ),
     ),
+    // Illustrations are pictures: their sample text keeps one size so the
+    // composition never breaks. The page copy still follows text scaling.
+    child: MediaQuery.withNoTextScaling(child: child),
+  );
+}
+
+/// Lays out the copy at its natural height, then gives the scene what is left
+/// between [minScene] and [maxScene]. The copy sits on the bottom edge, next
+/// to the footer, and the scene is centred above it. Only when even the
+/// smallest scene cannot fit does the page grow past [viewportHeight] and
+/// scroll, so text is never clipped.
+class _SceneAndCopy extends MultiChildRenderObjectWidget {
+  _SceneAndCopy({
+    required this.viewportHeight,
+    required this.minScene,
+    required this.maxScene,
+    required this.gap,
+    required Widget scene,
+    required Widget copy,
+  }) : super(children: [scene, copy]);
+
+  final double viewportHeight;
+  final double minScene;
+  final double maxScene;
+  final double gap;
+
+  @override
+  _RenderSceneAndCopy createRenderObject(BuildContext context) =>
+      _RenderSceneAndCopy(viewportHeight, minScene, maxScene, gap);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderSceneAndCopy renderObject,
+  ) {
+    renderObject
+      ..viewportHeight = viewportHeight
+      ..minScene = minScene
+      ..maxScene = maxScene
+      ..gap = gap;
+  }
+}
+
+class _SceneAndCopyParentData extends ContainerBoxParentData<RenderBox> {}
+
+class _RenderSceneAndCopy extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, _SceneAndCopyParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _SceneAndCopyParentData> {
+  _RenderSceneAndCopy(
+    this._viewportHeight,
+    this._minScene,
+    this._maxScene,
+    this._gap,
+  );
+
+  double _viewportHeight;
+  set viewportHeight(double value) {
+    if (value == _viewportHeight) return;
+    _viewportHeight = value;
+    markNeedsLayout();
+  }
+
+  double _minScene;
+  set minScene(double value) {
+    if (value == _minScene) return;
+    _minScene = value;
+    markNeedsLayout();
+  }
+
+  double _maxScene;
+  set maxScene(double value) {
+    if (value == _maxScene) return;
+    _maxScene = value;
+    markNeedsLayout();
+  }
+
+  double _gap;
+  set gap(double value) {
+    if (value == _gap) return;
+    _gap = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _SceneAndCopyParentData) {
+      child.parentData = _SceneAndCopyParentData();
+    }
+  }
+
+  @override
+  void performLayout() {
+    final width = constraints.maxWidth;
+    final scene = firstChild!;
+    final copy = childAfter(scene)!;
+    copy.layout(BoxConstraints.tightFor(width: width), parentUsesSize: true);
+    final copyHeight = copy.size.height;
+    final room = _viewportHeight - copyHeight - _gap;
+    final sceneHeight = room
+        .clamp(_minScene, math.max(_minScene, _maxScene))
+        .toDouble();
+    scene.layout(BoxConstraints.tightFor(width: width, height: sceneHeight));
+    final height = math.max(_viewportHeight, sceneHeight + _gap + copyHeight);
+    size = constraints.constrain(Size(width, height));
+    final sceneSpace = size.height - copyHeight - _gap;
+    (scene.parentData! as _SceneAndCopyParentData).offset = Offset(
+      0,
+      (sceneSpace - sceneHeight) / 2,
+    );
+    (copy.parentData! as _SceneAndCopyParentData).offset = Offset(
+      0,
+      size.height - copyHeight,
+    );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) =>
+      defaultPaint(context, offset);
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      defaultHitTestChildren(result, position: position);
+}
+
+/// Draws an illustration at its design size and scales the whole picture to
+/// fit, so every phone sees the same proportions.
+class _Stage extends StatelessWidget {
+  const _Stage({required this.size, required this.child});
+
+  final Size size;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => FittedBox(
+    // Leans toward the copy below so tall phones do not open a gap.
+    alignment: const Alignment(0, .7),
+    child: SizedBox.fromSize(size: size, child: child),
   );
 }
 
@@ -301,10 +562,14 @@ class _SaveScene extends StatelessWidget {
           ),
       ],
     );
-    if (reduced) return composition(1);
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (_, _) => composition(animation.value),
+    return _Stage(
+      size: const Size(340, 320),
+      child: reduced
+          ? composition(1)
+          : AnimatedBuilder(
+              animation: animation,
+              builder: (_, _) => composition(animation.value),
+            ),
     );
   }
 }
@@ -398,6 +663,7 @@ class _ReminderScene extends StatelessWidget {
                   const Expanded(
                     child: _MiniSaveCard(
                       key: ValueKey('reminder-article'),
+                      inset: EdgeInsets.only(right: 28),
                       title: 'A better way to keep notes',
                       label: 'ARTICLE · 4 MIN',
                     ),
@@ -406,6 +672,7 @@ class _ReminderScene extends StatelessWidget {
                   const Expanded(
                     child: _MiniSaveCard(
                       key: ValueKey('reminder-video'),
+                      inset: EdgeInsets.only(left: 28),
                       title: 'Motion with a purpose',
                       label: 'VIDEO · 6 MIN',
                     ),
@@ -432,10 +699,14 @@ class _ReminderScene extends StatelessWidget {
         );
       },
     );
-    if (reduced) return composition(1);
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (_, _) => composition(animation.value),
+    return _Stage(
+      size: const Size(340, 330),
+      child: reduced
+          ? composition(1)
+          : AnimatedBuilder(
+              animation: animation,
+              builder: (_, _) => composition(animation.value),
+            ),
     );
   }
 }
@@ -446,14 +717,17 @@ class _MiniSaveCard extends StatelessWidget {
     required this.title,
     required this.label,
     this.due = false,
+    this.inset = EdgeInsets.zero,
   });
   final String title;
   final String label;
   final bool due;
+  final EdgeInsets inset;
 
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
+    margin: inset,
     padding: const EdgeInsets.symmetric(
       horizontal: PinneSpacing.lg,
       vertical: PinneSpacing.sm,
@@ -472,7 +746,9 @@ class _MiniSaveCard extends StatelessWidget {
         ),
       ],
     ),
+    alignment: Alignment.centerLeft,
     child: Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -580,10 +856,14 @@ class _ProgressScene extends StatelessWidget {
         ),
       ],
     );
-    if (reduced) return composition(1);
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (_, _) => composition(animation.value),
+    return _Stage(
+      size: const Size(340, 300),
+      child: reduced
+          ? composition(1)
+          : AnimatedBuilder(
+              animation: animation,
+              builder: (_, _) => composition(animation.value),
+            ),
     );
   }
 }
@@ -601,34 +881,54 @@ class _ProgressButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: last ? 'Continue to sign in' : 'Next onboarding page',
-    child: CustomPaint(
-      painter: _RingPainter(progress: progress),
-      child: Padding(
-        padding: const EdgeInsets.all(7),
-        child: IconButton.filled(
-          key: const ValueKey('onboarding-next'),
-          style: IconButton.styleFrom(
-            backgroundColor: PinneColors.accentPrimaryAction,
-            foregroundColor: PinneColors.ink,
-            minimumSize: const Size.square(54),
-          ),
-          onPressed: busy ? null : onPressed,
-          icon: busy
-              ? const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: PinneColors.ink,
-                  ),
-                )
-              : Icon(last ? Icons.login_rounded : Icons.arrow_forward_rounded),
-        ),
-      ),
-    ),
-  );
+  Widget build(BuildContext context) {
+    const spinner = SizedBox.square(
+      dimension: 20,
+      child: CircularProgressIndicator(strokeWidth: 2, color: PinneColors.ink),
+    );
+    // The last page ends on a labelled pill: the one primary action.
+    final Widget button = last
+        ? FilledButton.icon(
+            key: const ValueKey('onboarding-next'),
+            style: pinnePrimaryActionStyle().copyWith(
+              textStyle: WidgetStatePropertyAll(
+                Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              minimumSize: const WidgetStatePropertyAll(Size(0, 56)),
+              padding: const WidgetStatePropertyAll(
+                EdgeInsets.symmetric(horizontal: PinneSpacing.xl),
+              ),
+            ),
+            onPressed: busy ? null : onPressed,
+            iconAlignment: IconAlignment.end,
+            icon: busy ? spinner : const Icon(Icons.arrow_forward_rounded),
+            label: const Text('Get started'),
+          )
+        : CustomPaint(
+            painter: _RingPainter(progress: progress),
+            child: Padding(
+              padding: const EdgeInsets.all(7),
+              child: IconButton.filled(
+                key: const ValueKey('onboarding-next'),
+                tooltip: 'Next page',
+                style: IconButton.styleFrom(
+                  backgroundColor: PinneColors.accentPrimaryAction,
+                  foregroundColor: PinneColors.ink,
+                  minimumSize: const Size.square(54),
+                ),
+                onPressed: busy ? null : onPressed,
+                icon: busy ? spinner : const Icon(Icons.arrow_forward_rounded),
+              ),
+            ),
+          );
+    return AnimatedSwitcher(
+      duration: motionDurationOf(context, PinneMotionDurations.quick),
+      child: KeyedSubtree(key: ValueKey(last), child: button),
+    );
+  }
 }
 
 class _RingPainter extends CustomPainter {
