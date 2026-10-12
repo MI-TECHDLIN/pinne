@@ -411,13 +411,30 @@ class _SuggestionPanelState extends State<_SuggestionPanel> {
               if (_log.isNotEmpty) const SizedBox(height: 12),
               for (final line in _log)
                 Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    line,
-                    style: const TextStyle(
-                      color: PinneColors.muted,
-                      fontSize: 14,
-                    ),
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        line.startsWith('Accepted')
+                            ? Icons.check_rounded
+                            : Icons.close_rounded,
+                        size: 18,
+                        color: line.startsWith('Accepted')
+                            ? PinneColors.violet
+                            : PinneColors.muted,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        line,
+                        style: TextStyle(
+                          color: line.startsWith('Accepted')
+                              ? PinneColors.text
+                              : PinneColors.muted,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
             ],
