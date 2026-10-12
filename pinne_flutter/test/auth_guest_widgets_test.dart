@@ -79,14 +79,6 @@ void main() {
             (ref) async => AccountKind.guest,
           ),
           motionPreferenceProvider.overrideWith(_AlwaysReduced.new),
-          serverHealthProvider.overrideWith(
-            (ref) async => ServerHealth(
-              ok: true,
-              databaseOk: true,
-              serverTime: DateTime.utc(2026, 10, 8),
-              version: '0.1.0',
-            ),
-          ),
         ],
         child: MaterialApp(
           theme: pinneDarkTheme(),

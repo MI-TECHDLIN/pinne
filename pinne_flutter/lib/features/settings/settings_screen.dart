@@ -8,9 +8,11 @@ import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../tour/tour_controller.dart';
 import 'account_kind_provider.dart';
 import 'ai_settings_provider.dart';
 import 'profile_card.dart';
+import '../../ui/feedback/toast.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -27,11 +29,9 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: PinneSpacing.md),
         const _MotionCard(),
         const SizedBox(height: PinneSpacing.md),
-        const ServerHealthCard(),
-        const SizedBox(height: PinneSpacing.md),
         const _AiOrganizingCard(),
         const SizedBox(height: PinneSpacing.md),
-        const _OnboardingCard(),
+        const _GuidesCard(),
         if (kDebugMode)
           TextButton(
             onPressed: () => context.push(Routes.ribbonGallery),
@@ -42,37 +42,90 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class _OnboardingCard extends StatelessWidget {
-  const _OnboardingCard();
+class _GuidesCard extends ConsumerWidget {
+  const _GuidesCard();
 
   @override
-  Widget build(BuildContext context) => GlassCard(
-    child: Row(
+  Widget build(BuildContext context, WidgetRef ref) => GlassCard(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.auto_stories_outlined, color: PinneColors.lilac),
-        const SizedBox(width: PinneSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome tour',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const Text(
-                'Replay the three-screen introduction.',
-                style: TextStyle(color: PinneColors.muted),
-              ),
-            ],
+        Text('Guides', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: PinneSpacing.sm),
+        _GuideRow(
+          icon: Icons.explore_outlined,
+          title: 'App tour',
+          body: 'Walk through Today, step by step.',
+          action: TextButton(
+            key: const ValueKey('show-app-tour'),
+            onPressed: () {
+              context.go(Routes.today);
+              ref.read(tourControllerProvider.notifier).start();
+            },
+            child: const Text('Show the app tour'),
           ),
         ),
-        TextButton(
-          key: const ValueKey('replay-onboarding'),
-          onPressed: () => context.go('${Routes.onboarding}?replay=1'),
-          child: const Text('Replay'),
+        const Divider(height: PinneSpacing.lg),
+        _GuideRow(
+          icon: Icons.auto_stories_outlined,
+          title: 'Welcome screens',
+          body: 'Replay the three-screen introduction.',
+          action: TextButton(
+            key: const ValueKey('replay-onboarding'),
+            onPressed: () => context.go('${Routes.onboarding}?replay=1'),
+            child: const Text('Replay'),
+          ),
         ),
       ],
     ),
+  );
+}
+
+class _GuideRow extends StatelessWidget {
+  const _GuideRow({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.action,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final Widget action;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: Icon(icon, color: PinneColors.lilac),
+      ),
+      const SizedBox(width: PinneSpacing.md),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
+            Text(body, style: const TextStyle(color: PinneColors.muted)),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButtonTheme(
+                data: TextButtonThemeData(
+                  style: TextButton.styleFrom(
+                    foregroundColor: PinneColors.lilac,
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+                child: action,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
   );
 }
 
@@ -128,14 +181,12 @@ class _AiOrganizingCard extends ConsumerWidget {
                           await ref
                               .read(aiSettingsProvider.notifier)
                               .setEnabled(enabled);
-                        } catch (_) {
+                        } catch (error) {
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Could not update AI organizing.',
-                                ),
-                              ),
+                            showErrorToast(
+                              context,
+                              error,
+                              'Could not update AI organizing',
                             );
                           }
                         }
@@ -264,61 +315,6 @@ class _MotionCard extends ConsumerWidget {
             onSelectionChanged: (selection) => ref
                 .read(motionPreferenceProvider.notifier)
                 .set(selection.single),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Shows whether the configured server answers its public health check.
-class ServerHealthCard extends ConsumerWidget {
-  const ServerHealthCard({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final health = ref.watch(serverHealthProvider);
-    final theme = Theme.of(context);
-    final (label, detail, colour) = switch (health) {
-      AsyncData(:final value) when value.ok && value.databaseOk => (
-        'Server online',
-        'API ${value.version}',
-        PinneColors.mint,
-      ),
-      AsyncData(:final value) => (
-        'Server degraded',
-        value.databaseOk ? 'API ${value.version}' : 'Database unreachable',
-        PinneColors.peach,
-      ),
-      AsyncError() => (
-        'Server unreachable',
-        'Is the server running?',
-        PinneColors.pink,
-      ),
-      _ => ('Checking server…', '', PinneColors.muted),
-    };
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.circle, size: 10, color: colour),
-              const SizedBox(width: PinneSpacing.sm),
-              Expanded(child: Text(label, style: theme.textTheme.titleMedium)),
-              TextButton(
-                onPressed: () => ref.invalidate(serverHealthProvider),
-                child: const Text('Recheck'),
-              ),
-            ],
-          ),
-          if (detail.isNotEmpty)
-            Text(detail, style: const TextStyle(color: PinneColors.muted)),
-          Text(
-            ref.watch(serverUrlProvider),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: PinneColors.muted,
-            ),
           ),
         ],
       ),

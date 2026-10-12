@@ -10,6 +10,7 @@ import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../capture/saved_section.dart';
 import 'collection_cover.dart';
+import '../../ui/feedback/error_state.dart';
 
 @immutable
 class CollectionTileData {
@@ -94,26 +95,10 @@ class CollectionsScreen extends ConsumerWidget {
       children: [
         collections.when(
           loading: () => const _LoadingGrid(),
-          error: (error, stackTrace) => GlassCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Collections could not load',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: PinneSpacing.xs),
-                const Text(
-                  'Try again when the server is reachable.',
-                  style: TextStyle(color: PinneColors.muted),
-                ),
-                const SizedBox(height: PinneSpacing.sm),
-                TextButton(
-                  onPressed: () => ref.invalidate(collectionsProvider),
-                  child: const Text('Try again'),
-                ),
-              ],
-            ),
+          error: (error, stackTrace) => PinneErrorCard(
+            error: error,
+            subject: 'your collections',
+            onRetry: () => ref.invalidate(collectionsProvider),
           ),
           data: (items) => _CollectionGrid(items: items),
         ),

@@ -8,6 +8,8 @@ import 'package:pinne_client/pinne_client.dart';
 
 import '../../router.dart';
 import '../../theme/pinne_tokens.dart';
+import '../../ui/feedback/error_state.dart';
+import '../../ui/feedback/toast.dart';
 import '../../ui/item_preview.dart';
 import '../../ui/motion.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
@@ -15,6 +17,7 @@ import '../capture/paste_capture_card.dart';
 import '../examples/example_saves.dart';
 import '../progress/celebration.dart';
 import '../settings/profile_provider.dart';
+import '../tour/tour_controller.dart';
 import 'today_providers.dart';
 
 class TodayScreen extends ConsumerWidget {
@@ -32,135 +35,166 @@ class TodayScreen extends ConsumerWidget {
     final top = data?.entries.firstOrNull;
     final displayName = profile?.displayName.trim();
 
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.6, -1.2),
-          radius: 1.2,
-          colors: [PinneColors.glowViolet, PinneColors.midnight],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            PinneSpacing.gutter,
-            PinneSpacing.lg,
-            PinneSpacing.gutter,
-            PinneSpacing.navClearance,
+    return TourAutoStart(
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(-0.6, -1.2),
+            radius: 1.2,
+            colors: [PinneColors.glowViolet, PinneColors.midnight],
           ),
-          children: [
-            _TodayHeader(
-              seed: avatar.seed,
-              palette: avatar.palette,
-              greeting: _greeting(now.hour),
-              name: displayName == null || displayName.isEmpty
-                  ? 'Guest'
-                  : displayName,
-              onSearch: () => context.go(Routes.search),
+        ),
+        child: SafeArea(
+          bottom: false,
+          // Not lazy: the tour must reach every part of Today on any screen.
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              PinneSpacing.gutter,
+              PinneSpacing.lg,
+              PinneSpacing.gutter,
+              PinneSpacing.navClearance,
             ),
-            const SizedBox(height: PinneSpacing.lg),
-            _QueueHeadline(count: data?.entries.length ?? 0),
-            const SizedBox(height: PinneSpacing.md),
-            _BudgetChoice(selected: budget),
-            const SizedBox(height: PinneSpacing.md),
-            if (queue.isLoading)
-              const _HeroLoading()
-            else if (queue.hasError)
-              _QueueError(onRetry: () => ref.invalidate(todayQueueProvider))
-            else
-              TodaySpiritCard(
-                due: top != null,
-                seed: avatar.seed,
-                palette: avatar.palette,
-                entry: top,
-                digestText: data?.digestText,
-                timeBudgetMinutes: budget,
-                onReviewed: top == null
-                    ? null
-                    : () => _review(context, ref, top.item),
-                onRemindLater: top == null
-                    ? null
-                    : () => _run(
-                        context,
-                        () => ref
-                            .read(todayActionGatewayProvider)
-                            .remindLater(top.item),
-                        'We’ll bring it back tomorrow.',
-                      ),
-                onArchive: top == null
-                    ? null
-                    : () => _run(
-                        context,
-                        () => ref
-                            .read(todayActionGatewayProvider)
-                            .archive(top.item),
-                        'Archived without counting it as reviewed.',
-                      ),
-                onOpen: top?.item.url == null
-                    ? null
-                    : () => _run(
-                        context,
-                        () => ref
-                            .read(todayActionGatewayProvider)
-                            .open(top!.item),
-                        'Opened. It still waits for your review.',
-                      ),
-              ),
-            const SizedBox(height: PinneSpacing.md),
-            _WeekStrip(
-              now: now,
-              reviewedDates: {
-                for (final day in overview?.progress?.days ?? <ProgressDay>[])
-                  if (day.reviewedCount > 0) day.date,
-              },
-            ),
-            const SizedBox(height: PinneSpacing.md),
-            Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: _PastelActionTile(
-                    color: PinneColors.peach,
-                    tag: 'NEXT UP',
-                    title: overview?.nextSession == null
-                        ? 'Plan a review session'
-                        : 'Review session',
-                    body: _sessionLabel(overview?.nextSession, now),
-                    icon: Icons.calendar_month_rounded,
-                    onTap: () => context.push(Routes.planner),
+                _TodayHeader(
+                  seed: avatar.seed,
+                  palette: avatar.palette,
+                  greeting: _greeting(now.hour),
+                  name: displayName == null || displayName.isEmpty
+                      ? 'Guest'
+                      : displayName,
+                  onSearch: () => context.go(Routes.search),
+                ),
+                const SizedBox(height: PinneSpacing.lg),
+                _QueueHeadline(count: data?.entries.length ?? 0),
+                const SizedBox(height: PinneSpacing.md),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TourAnchor(
+                    target: TourTarget.timeChips,
+                    child: _BudgetChoice(selected: budget),
                   ),
                 ),
-                const SizedBox(width: PinneSpacing.sm),
-                Expanded(
-                  child: _PastelActionTile(
-                    color: PinneColors.mint,
-                    tag: 'THIS WEEK',
-                    title:
-                        '${overview?.progress?.savedCount ?? 0} saved this week',
-                    body:
-                        '${overview?.progress?.reviewedInPeriodCount ?? 0} reviewed',
-                    icon: Icons.insights_rounded,
-                    onTap: () => context.go(Routes.progress),
+                const SizedBox(height: PinneSpacing.md),
+                TourAnchor(
+                  target: TourTarget.reviewCard,
+                  child: queue.isLoading
+                      ? const _HeroLoading()
+                      : queue.hasError
+                      ? PinneErrorCard(
+                          error: queue.error,
+                          subject: 'your queue',
+                          onRetry: () => ref.invalidate(todayQueueProvider),
+                        )
+                      : TodaySpiritCard(
+                          due: top != null,
+                          seed: avatar.seed,
+                          palette: avatar.palette,
+                          entry: top,
+                          digestText: data?.digestText,
+                          timeBudgetMinutes: budget,
+                          onReviewed: top == null
+                              ? null
+                              : () => _review(context, ref, top.item),
+                          onRemindLater: top == null
+                              ? null
+                              : () => _run(
+                                  context,
+                                  () => ref
+                                      .read(todayActionGatewayProvider)
+                                      .remindLater(top.item),
+                                  'We’ll bring it back tomorrow.',
+                                  'Could not snooze it',
+                                ),
+                          onArchive: top == null
+                              ? null
+                              : () => _run(
+                                  context,
+                                  () => ref
+                                      .read(todayActionGatewayProvider)
+                                      .archive(top.item),
+                                  'Archived without counting it as reviewed.',
+                                  'Could not archive it',
+                                ),
+                          onOpen: top?.item.url == null
+                              ? null
+                              : () => _run(
+                                  context,
+                                  () => ref
+                                      .read(todayActionGatewayProvider)
+                                      .open(top!.item),
+                                  'Opened. It still waits for your review.',
+                                  'Could not open it',
+                                ),
+                        ),
+                ),
+                const SizedBox(height: PinneSpacing.md),
+                TourAnchor(
+                  target: TourTarget.weekStrip,
+                  child: _WeekStrip(
+                    now: now,
+                    reviewedDates: {
+                      for (final day
+                          in overview?.progress?.days ?? <ProgressDay>[])
+                        if (day.reviewedCount > 0) day.date,
+                    },
                   ),
                 ),
+                const SizedBox(height: PinneSpacing.md),
+                TourAnchor(
+                  target: TourTarget.planTiles,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _PastelActionTile(
+                          color: PinneColors.peach,
+                          tag: 'NEXT UP',
+                          title: overview?.nextSession == null
+                              ? 'Plan a review session'
+                              : 'Review session',
+                          body: _sessionLabel(overview?.nextSession, now),
+                          icon: Icons.calendar_month_rounded,
+                          onTap: () => context.push(Routes.planner),
+                        ),
+                      ),
+                      const SizedBox(width: PinneSpacing.sm),
+                      Expanded(
+                        child: _PastelActionTile(
+                          color: PinneColors.mint,
+                          tag: 'THIS WEEK',
+                          title:
+                              '${overview?.progress?.savedCount ?? 0} saved this week',
+                          body:
+                              '${overview?.progress?.reviewedInPeriodCount ?? 0} reviewed',
+                          icon: Icons.insights_rounded,
+                          onTap: () => context.go(Routes.progress),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: PinneSpacing.sm),
+                const TourAnchor(
+                  target: TourTarget.saveLink,
+                  child: CaptureEntryTile(),
+                ),
+                const SizedBox(height: PinneSpacing.md),
+                const ExampleSavesCard(),
+                if ((data?.entries.length ?? 0) > 1) ...[
+                  const SizedBox(height: PinneSpacing.md),
+                  Text(
+                    '${data!.entries.length - 1} more fit this session. '
+                    'Durations are estimates.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: PinneColors.muted,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: PinneSpacing.sm),
-            const CaptureEntryTile(),
-            const SizedBox(height: PinneSpacing.md),
-            const ExampleSavesCard(),
-            if ((data?.entries.length ?? 0) > 1) ...[
-              const SizedBox(height: PinneSpacing.md),
-              Text(
-                '${data!.entries.length - 1} more fit this session. '
-                'Durations are estimates.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PinneColors.muted,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -170,24 +204,22 @@ class TodayScreen extends ConsumerWidget {
     try {
       final receipt = await ref.read(todayActionGatewayProvider).reviewed(item);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Counted as reviewed.'),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () => unawaited(
-              ref
-                  .read(todayActionGatewayProvider)
-                  .undo(item, receipt.event.id!),
-            ),
-          ),
+      showPinneToast(
+        context,
+        'Counted as reviewed.',
+        kind: ToastKind.success,
+        actionLabel: 'Undo',
+        onAction: () => unawaited(
+          ref.read(todayActionGatewayProvider).undo(item, receipt.event.id!),
         ),
       );
       await ref
           .read(celebrationControllerProvider.notifier)
           .checkAfterReview(context);
-    } on Object {
-      if (context.mounted) _message(context, 'Could not update your review.');
+    } on Object catch (error) {
+      if (context.mounted) {
+        showErrorToast(context, error, 'Could not count your review');
+      }
     }
   }
 
@@ -195,17 +227,16 @@ class TodayScreen extends ConsumerWidget {
     BuildContext context,
     Future<void> Function() action,
     String success,
+    String failure,
   ) async {
     try {
       await action();
-      if (context.mounted) _message(context, success);
-    } on Object {
-      if (context.mounted) _message(context, 'Could not update the queue.');
+      if (context.mounted) {
+        showPinneToast(context, success, kind: ToastKind.success);
+      }
+    } on Object catch (error) {
+      if (context.mounted) showErrorToast(context, error, failure);
     }
-  }
-
-  void _message(BuildContext context, String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   static String _greeting(int hour) {
@@ -732,33 +763,39 @@ class _PastelActionTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
-          height: 126,
+          // Grows with large text so the title and body never clip.
+          height: 126 * MediaQuery.textScalerOf(context).scale(1).clamp(1, 1.6),
           child: Padding(
             padding: const EdgeInsets.all(PinneSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: PinneColors.ink.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(PinneRadii.chip),
-                      ),
-                      child: Text(
-                        tag,
-                        style: const TextStyle(
-                          color: PinneColors.ink,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: PinneColors.ink.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(PinneRadii.chip),
+                        ),
+                        child: Text(
+                          tag,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: PinneColors.ink,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: PinneSpacing.xs),
                     Icon(icon, color: PinneColors.ink, size: 18),
                   ],
                 ),
@@ -805,35 +842,6 @@ class _HeroLoading extends StatelessWidget {
     ),
     child: const Center(
       child: CircularProgressIndicator(color: PinneColors.violet),
-    ),
-  );
-}
-
-class _QueueError extends StatelessWidget {
-  const _QueueError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(PinneSpacing.lg),
-    decoration: BoxDecoration(
-      color: PinneColors.card,
-      borderRadius: BorderRadius.circular(PinneRadii.card),
-      border: Border.all(color: PinneColors.line),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Your queue is taking a moment.',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: PinneSpacing.sm),
-        const Text('Your saves are safe. Try again when you’re ready.'),
-        const SizedBox(height: PinneSpacing.md),
-        FilledButton(onPressed: onRetry, child: const Text('Try again')),
-      ],
     ),
   );
 }

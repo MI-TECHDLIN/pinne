@@ -9,6 +9,7 @@ import '../collections/collections_screen.dart';
 import '../progress/progress_providers.dart';
 import '../search/search_providers.dart';
 import '../today/today_providers.dart';
+import '../../ui/feedback/toast.dart';
 
 final exampleSavesStatusProvider =
     FutureProvider.autoDispose<ExampleSavesStatus?>(
@@ -45,19 +46,15 @@ class _ExampleSavesCardState extends ConsumerState<ExampleSavesCard> {
         ..invalidate(searchPageProvider)
         ..invalidate(progressReportProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              remove ? 'Example saves removed.' : 'Six example saves added.',
-            ),
-          ),
+        showPinneToast(
+          context,
+          remove ? 'Example saves removed.' : 'Six example saves added.',
+          kind: ToastKind.success,
         );
       }
-    } on Object {
+    } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not update example saves.')),
-        );
+        showErrorToast(context, error, 'Could not update example saves');
       }
     } finally {
       if (mounted) setState(() => _busy = false);

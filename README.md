@@ -243,6 +243,14 @@ goal, per-collection rates and review days. New milestones get a one-time
 celebration with the Ribbon Spirit. Formulas, screenshots and how to
 re-render them: [`docs/progress/`](docs/progress/README.md).
 
+## First run, tour and errors
+
+Three onboarding screens adapt to every phone size and large text
+([`docs/onboarding/`](docs/onboarding/)). The first time Today opens, a
+seven-step tour spotlights its parts and the tabs; Settings > Guides replays
+it ([`docs/tour/`](docs/tour/README.md)). Failures show plain-language cards
+and toasts, never raw exceptions ([`docs/errors/`](docs/errors/README.md)).
+
 ## Checks
 
 ```bash

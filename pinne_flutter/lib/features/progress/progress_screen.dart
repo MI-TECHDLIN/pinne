@@ -10,6 +10,7 @@ import 'celebration.dart';
 import 'progress_card_stack.dart';
 import 'progress_providers.dart';
 import 'progress_widgets.dart';
+import '../../ui/feedback/error_state.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
@@ -43,7 +44,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final value = report.value;
     final Widget body;
     if (report.hasError && !report.isLoading) {
-      body = _ProgressError(
+      body = PinneErrorCard(
+        error: report.error,
+        subject: 'your progress',
         onRetry: () => ref.invalidate(progressReportProvider),
       );
     } else if (!report.hasValue) {
@@ -335,29 +338,6 @@ class ProgressEmptyState extends ConsumerWidget {
       ],
     );
   }
-}
-
-class _ProgressError extends StatelessWidget {
-  const _ProgressError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) => GlassCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Your progress is taking a moment.',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: PinneSpacing.sm),
-        const Text('Nothing is lost. Try again when you’re ready.'),
-        const SizedBox(height: PinneSpacing.md),
-        FilledButton(onPressed: onRetry, child: const Text('Try again')),
-      ],
-    ),
-  );
 }
 
 Future<void> showGoalSettings(BuildContext context) =>

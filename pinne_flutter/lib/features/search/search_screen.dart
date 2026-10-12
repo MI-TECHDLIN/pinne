@@ -12,6 +12,7 @@ import '../../ui/item_preview.dart';
 import '../settings/profile_provider.dart';
 import '../examples/example_saves.dart';
 import 'search_providers.dart';
+import '../../ui/feedback/error_state.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -97,10 +98,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const SizedBox(height: PinneSpacing.lg),
         page.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => _SearchMessage(
-            title: 'Search is taking a moment.',
-            body: 'Your saves are safe. Try again when you’re ready.',
-            action: () => ref.invalidate(searchPageProvider),
+          error: (error, _) => PinneErrorCard(
+            error: error,
+            subject: 'search results',
+            onRetry: () => ref.invalidate(searchPageProvider),
           ),
           data: (data) {
             if (query.isEmpty) {
@@ -415,32 +416,6 @@ class SearchEmptyState extends StatelessWidget {
             ],
           ),
         ),
-      ],
-    ),
-  );
-}
-
-class _SearchMessage extends StatelessWidget {
-  const _SearchMessage({
-    required this.title,
-    required this.body,
-    required this.action,
-  });
-
-  final String title;
-  final String body;
-  final VoidCallback action;
-
-  @override
-  Widget build(BuildContext context) => GlassCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: PinneSpacing.xs),
-        Text(body, style: const TextStyle(color: PinneColors.muted)),
-        const SizedBox(height: PinneSpacing.md),
-        FilledButton(onPressed: action, child: const Text('Try again')),
       ],
     ),
   );

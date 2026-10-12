@@ -6,6 +6,7 @@ import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import 'profile_provider.dart';
+import '../../ui/feedback/friendly_error.dart';
 
 class ProfileCard extends ConsumerWidget {
   const ProfileCard({super.key});
@@ -36,9 +37,16 @@ class ProfileCard extends ConsumerWidget {
                 ),
                 if (profile.isLoading) const LinearProgressIndicator(),
                 if (profile.hasError)
-                  TextButton(
+                  TextButton.icon(
+                    key: const ValueKey('profile-retry'),
                     onPressed: () => ref.invalidate(profileProvider),
-                    child: const Text('Could not load · Retry'),
+                    icon: Icon(
+                      FriendlyError.from(profile.error).icon,
+                      size: 16,
+                    ),
+                    label: Text(
+                      '${FriendlyError.from(profile.error).title} · Try again',
+                    ),
                   ),
                 if (userId != null)
                   TextButton(

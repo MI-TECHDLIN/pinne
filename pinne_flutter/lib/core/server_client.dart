@@ -66,11 +66,6 @@ final clientProvider = Provider<Client>(
   (ref) => throw UnimplementedError('clientProvider must be overridden'),
 );
 
-/// Public server health, used by Settings. Refresh with `ref.invalidate`.
-final serverHealthProvider = FutureProvider.autoDispose<ServerHealth>(
-  (ref) => ref.watch(clientProvider).health.check(),
-);
-
 /// Whether this deployment can deliver email verification and reset codes.
 final emailDeliveryAvailableProvider = FutureProvider.autoDispose<bool>(
   (ref) => ref.watch(clientProvider).health.emailDeliveryAvailable(),

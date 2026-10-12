@@ -82,6 +82,17 @@ ThemeData pinneDarkTheme() {
       ),
     ),
     dividerTheme: const DividerThemeData(color: PinneColors.line),
+    // Fallback for any plain SnackBar; prefer showPinneToast (ui/feedback).
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: PinneColors.cardRaised,
+      contentTextStyle: const TextStyle(color: PinneColors.text),
+      actionTextColor: PinneColors.lilac,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(PinneRadii.tile),
+        side: const BorderSide(color: PinneColors.line),
+      ),
+    ),
   );
 }
 

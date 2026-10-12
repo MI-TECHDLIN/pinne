@@ -46,6 +46,8 @@ dependencies:
     path: ../pinne_capture
   pinne_client:
     path: ../pinne_client
+  # Pinned with pinne_client; only for mapping sign-in exceptions to words.
+  serverpod_auth_idp_client: 4.0.3
   serverpod_auth_idp_flutter: 4.0.3
   serverpod_flutter: 4.0.3
   share_plus: ^13.3.1

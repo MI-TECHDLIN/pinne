@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../ui/feedback/friendly_error.dart';
 import 'capture_store.dart';
 
 /// The server side of capture sync, so tests can use a fake server.
@@ -177,9 +178,7 @@ class OutboxSync {
   }
 
   static String _describe(Exception error) => switch (error) {
-    ValidationException(:final message) => message,
     RecordNotFoundException() => 'A chosen collection no longer exists.',
-    ServerpodClientException(:final message) => message,
-    _ => error.toString(),
+    _ => FriendlyError.from(error).hint,
   };
 }
