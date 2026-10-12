@@ -217,7 +217,10 @@ class _OnboardingPage extends StatelessWidget {
             SizedBox(
               height: math.max(PinneSpacing.sm, constraints.maxHeight * .02),
             ),
-            SizedBox(height: constraints.maxHeight * .50, child: scene),
+            SizedBox(
+              height: math.max(342, constraints.maxHeight * .50),
+              child: scene,
+            ),
             const SizedBox(height: PinneSpacing.lg),
             Text(
               eyebrow,
@@ -367,55 +370,67 @@ class _ReminderScene extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget composition(double value) => Stack(
-      key: ValueKey(reduced ? 'onboarding-static-scene' : 'reminder-animation'),
-      children: [
-        Positioned(
-          right: 0,
-          top: 0,
-          child: Image.asset(
-            'assets/art/cutout/ribbon_spirit_excited.webp',
-            width: 132,
+    Widget composition(double value) => LayoutBuilder(
+      builder: (context, constraints) {
+        final spiritHeight = math.min(108.0, constraints.maxHeight * .31);
+        return Column(
+          key: ValueKey(
+            reduced ? 'onboarding-static-scene' : 'reminder-animation',
           ),
-        ),
-        Positioned(
-          left: 12,
-          right: 54,
-          top: 42,
-          child: Transform.rotate(
-            angle: -.08,
-            child: const _MiniSaveCard(
-              title: 'A better way to keep notes',
-              label: 'ARTICLE · 4 MIN',
+          children: [
+            SizedBox(
+              height: spiritHeight,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Image.asset(
+                  'assets/art/cutout/ribbon_spirit_excited.webp',
+                  key: const ValueKey('reminder-spirit'),
+                  width: spiritHeight,
+                  height: spiritHeight,
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
-          ),
-        ),
-        Positioned(
-          left: 46,
-          right: 14,
-          top: 120,
-          child: Transform.rotate(
-            angle: .055,
-            child: const _MiniSaveCard(
-              title: 'Motion with a purpose',
-              label: 'VIDEO · 6 MIN',
+            const SizedBox(height: PinneSpacing.md),
+            Expanded(
+              child: Column(
+                children: [
+                  const Expanded(
+                    child: _MiniSaveCard(
+                      key: ValueKey('reminder-article'),
+                      title: 'A better way to keep notes',
+                      label: 'ARTICLE · 4 MIN',
+                    ),
+                  ),
+                  const SizedBox(height: PinneSpacing.sm),
+                  const Expanded(
+                    child: _MiniSaveCard(
+                      key: ValueKey('reminder-video'),
+                      title: 'Motion with a purpose',
+                      label: 'VIDEO · 6 MIN',
+                    ),
+                  ),
+                  const SizedBox(height: PinneSpacing.sm),
+                  Expanded(
+                    child: Transform.translate(
+                      offset: Offset(
+                        0,
+                        reduced ? 0 : math.sin(value * math.pi * 2) * 2,
+                      ),
+                      child: const _MiniSaveCard(
+                        key: ValueKey('reminder-due'),
+                        title: 'Tiny habits that stick',
+                        label: 'DUE NOW · SAVED 24H AGO',
+                        due: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-        Positioned(
-          left: 22,
-          right: 36,
-          top: 198 + (reduced ? 0 : math.sin(value * math.pi * 2) * 4),
-          child: Transform.rotate(
-            angle: -.025,
-            child: const _MiniSaveCard(
-              title: 'Tiny habits that stick',
-              label: 'DUE NOW · SAVED 24H AGO',
-              due: true,
-            ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
     if (reduced) return composition(1);
     return AnimatedBuilder(
@@ -427,6 +442,7 @@ class _ReminderScene extends StatelessWidget {
 
 class _MiniSaveCard extends StatelessWidget {
   const _MiniSaveCard({
+    super.key,
     required this.title,
     required this.label,
     this.due = false,
@@ -437,7 +453,11 @@ class _MiniSaveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(PinneSpacing.lg),
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(
+      horizontal: PinneSpacing.lg,
+      vertical: PinneSpacing.sm,
+    ),
     decoration: BoxDecoration(
       color: due
           ? PinneColors.accentDue

@@ -159,6 +159,30 @@ void main() {
     expect(find.byKey(const ValueKey('onboarding-static-scene')), findsNothing);
   });
 
+  testWidgets('reminder cards clear the spirit on narrow phones', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(testApp(MemoryOnboardingStore()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('onboarding-next')));
+    await tester.pumpAndSettle();
+
+    final spirit = tester.getRect(
+      find.byKey(const ValueKey('reminder-spirit')),
+    );
+    final article = tester.getRect(
+      find.byKey(const ValueKey('reminder-article')),
+    );
+    final video = tester.getRect(find.byKey(const ValueKey('reminder-video')));
+    final due = tester.getRect(find.byKey(const ValueKey('reminder-due')));
+    expect(spirit.bottom, lessThan(article.top));
+    expect(article.bottom, lessThan(video.top));
+    expect(video.bottom, lessThan(due.top));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('three onboarding screens render for review', (tester) async {
     await tester.binding.setSurfaceSize(const Size(430, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
