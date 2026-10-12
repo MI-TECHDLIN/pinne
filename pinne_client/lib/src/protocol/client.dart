@@ -671,7 +671,8 @@ class EndpointItem extends _isc.EndpointRef {
   /// Saves a shared or pasted link or note. Safe to retry with the same
   /// operation id. A recognised duplicate returns the existing item with
   /// `duplicate` set; its notes, collections and first `savedAt` are kept.
-  /// The answer never waits for enrichment, which starts as `pending`.
+  /// The answer never waits for enrichment. On hosts without future calls,
+  /// previews are unavailable and notes need no enrichment.
   _ida.Future<_ibc30ndw.CaptureResult> capture(_ium6vjfl.CaptureDraft draft) =>
       caller.callServerEndpoint<_ibc30ndw.CaptureResult>(
         'item',

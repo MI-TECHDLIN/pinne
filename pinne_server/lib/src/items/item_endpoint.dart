@@ -45,11 +45,19 @@ class ItemEndpoint extends Endpoint {
   /// Saves a shared or pasted link or note. Safe to retry with the same
   /// operation id. A recognised duplicate returns the existing item with
   /// `duplicate` set; its notes, collections and first `savedAt` are kept.
-  /// The answer never waits for enrichment, which starts as `pending`.
+  /// The answer never waits for enrichment. On hosts without future calls,
+  /// previews are unavailable and notes need no enrichment.
   Future<CaptureResult> capture(Session session, CaptureDraft draft) async {
     final result = await ItemCapture(session, session.ownerId).capture(draft);
-    await _scheduleEnrichment(session, result.itemId, session.ownerId);
-    return result;
+    final item = await _scheduleEnrichment(
+      session,
+      result.itemId,
+      session.ownerId,
+    );
+    return result.copyWith(
+      enrichmentState: item.enrichmentState,
+      revision: item.revision,
+    );
   }
 
   Future<Item> create(Session session, ItemDraft draft) async {
@@ -67,11 +75,10 @@ class ItemEndpoint extends Endpoint {
         savedAt: draft.savedAt?.toUtc() ?? DateTime.now().toUtc(),
       ),
     );
-    await _scheduleEnrichment(session, item.id!, item.ownerId);
-    return item;
+    return _scheduleEnrichment(session, item.id!, item.ownerId);
   }
 
-  Future<void> _scheduleEnrichment(
+  Future<Item> _scheduleEnrichment(
     Session session,
     UuidValue itemId,
     UuidValue ownerId,
@@ -80,9 +87,25 @@ class ItemEndpoint extends Endpoint {
       session,
       where: (t) => t.id.equals(itemId) & t.ownerId.equals(ownerId),
     );
-    if (item?.url == null) {
+    if (item == null) throw RecordNotFoundException(resource: 'item');
+    if (!session.serverpod.config.futureCall.enabled) {
+      if (item.enrichmentState != EnrichmentState.pending &&
+          item.enrichmentState != EnrichmentState.processing) {
+        return item;
+      }
+      return Item.db.updateRow(
+        session,
+        item.copyWith(
+          enrichmentState: item.url == null
+              ? EnrichmentState.ready
+              : EnrichmentState.failed,
+          revision: item.revision + 1,
+        ),
+      );
+    }
+    if (item.url == null) {
       await _scheduleOrganizing(session, itemId, ownerId);
-      return;
+      return item;
     }
     // Existing metadata can still be organized immediately. A successful
     // preview requests a newer AI task version with the richer evidence.
@@ -95,6 +118,7 @@ class ItemEndpoint extends Endpoint {
           .linkPreview
           .process(itemId, ownerId);
     } catch (_) {}
+    return item;
   }
 
   /// Queues a fresh preview for one owned item. A foreign id is indistinguish-
@@ -107,6 +131,11 @@ class ItemEndpoint extends Endpoint {
     );
     if (item == null) throw RecordNotFoundException(resource: 'item');
     if (item.url == null) return item;
+    if (!session.serverpod.config.futureCall.enabled) {
+      throw ValidationException(
+        message: 'Link previews are unavailable on this hosting plan.',
+      );
+    }
     final queued = await Item.db.updateRow(
       session,
       item.copyWith(

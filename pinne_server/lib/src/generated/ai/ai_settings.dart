@@ -16,21 +16,26 @@ import 'package:serverpod/serverpod.dart' as _is;
 abstract class AiSettings
     implements _is.SerializableModel, _is.ProtocolSerialization {
   AiSettings._({
+    required this.available,
     required this.enabled,
     required this.disclosure,
   });
 
   factory AiSettings({
+    required bool available,
     required bool enabled,
     required String disclosure,
   }) = _AiSettingsImpl;
 
   factory AiSettings.fromJson(Map<String, dynamic> jsonSerialization) {
     return AiSettings(
+      available: _is.BoolJsonExtension.fromJson(jsonSerialization['available']),
       enabled: _is.BoolJsonExtension.fromJson(jsonSerialization['enabled']),
       disclosure: jsonSerialization['disclosure'] as String,
     );
   }
+
+  bool available;
 
   bool enabled;
 
@@ -40,6 +45,7 @@ abstract class AiSettings
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
   AiSettings copyWith({
+    bool? available,
     bool? enabled,
     String? disclosure,
   });
@@ -47,6 +53,7 @@ abstract class AiSettings
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'AiSettings',
+      'available': available,
       'enabled': enabled,
       'disclosure': disclosure,
     };
@@ -56,6 +63,7 @@ abstract class AiSettings
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'AiSettings',
+      'available': available,
       'enabled': enabled,
       'disclosure': disclosure,
     };
@@ -69,9 +77,11 @@ abstract class AiSettings
 
 class _AiSettingsImpl extends AiSettings {
   _AiSettingsImpl({
+    required bool available,
     required bool enabled,
     required String disclosure,
   }) : super._(
+         available: available,
          enabled: enabled,
          disclosure: disclosure,
        );
@@ -81,10 +91,12 @@ class _AiSettingsImpl extends AiSettings {
   @_is.useResult
   @override
   AiSettings copyWith({
+    bool? available,
     bool? enabled,
     String? disclosure,
   }) {
     return AiSettings(
+      available: available ?? this.available,
       enabled: enabled ?? this.enabled,
       disclosure: disclosure ?? this.disclosure,
     );

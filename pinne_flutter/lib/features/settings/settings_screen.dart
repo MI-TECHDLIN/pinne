@@ -107,7 +107,9 @@ class _AiOrganizingCard extends ConsumerWidget {
                   children: [
                     Text('AI organizing', style: theme.textTheme.titleMedium),
                     Text(
-                      signedIn
+                      value?.available == false
+                          ? 'Unavailable on this hosting plan.'
+                          : signedIn
                           ? 'Suggest collections, tags and a short summary.'
                           : 'Sign in to change this setting.',
                       style: const TextStyle(color: PinneColors.muted),
@@ -119,7 +121,8 @@ class _AiOrganizingCard extends ConsumerWidget {
                 key: const ValueKey('ai-organizing-toggle'),
                 value: value?.enabled ?? true,
                 activeTrackColor: PinneColors.violet,
-                onChanged: signedIn && value != null && !settings.isLoading
+                onChanged:
+                    signedIn && value?.available == true && !settings.isLoading
                     ? (enabled) async {
                         try {
                           await ref

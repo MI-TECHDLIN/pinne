@@ -122,13 +122,15 @@ Future<void> run(List<String> args, {bool seedDemo = false}) async {
   // Keep exactly one durable hourly digest scan across development restarts.
   // The scan only records a deduplicated in-app digest; delivery adapters are
   // deliberately outside this feature.
-  const digestScheduleId = 'pinne-review-digest-hourly';
-  await pod.futureCalls.cancel(digestScheduleId);
-  await pod.futureCalls
-      .callRecurring(identifier: digestScheduleId)
-      .every(const Duration(hours: 1))
-      .reminderDigest
-      .recompute();
+  if (pod.config.futureCall.enabled) {
+    const digestScheduleId = 'pinne-review-digest-hourly';
+    await pod.futureCalls.cancel(digestScheduleId);
+    await pod.futureCalls
+        .callRecurring(identifier: digestScheduleId)
+        .every(const Duration(hours: 1))
+        .reminderDigest
+        .recompute();
+  }
 }
 
 String? _configuredPassword(Serverpod pod, String key) {

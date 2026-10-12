@@ -18,18 +18,36 @@ class AiOrganizingEndpoint extends Endpoint {
       'Different data terms apply in the EEA, Switzerland and UK. Turn this '
       'off to keep organizing on this server with simple rules only.';
 
+  static const unavailableDisclosure =
+      'AI organizing is unavailable on this hosting plan.';
+
   Future<AiSettings> getSettings(Session session) async {
+    if (!session.serverpod.config.futureCall.enabled) {
+      return AiSettings(
+        available: false,
+        enabled: false,
+        disclosure: unavailableDisclosure,
+      );
+    }
     final preference = await AiPreference.db.findFirstRow(
       session,
       where: (t) => t.ownerId.equals(session.ownerId),
     );
     return AiSettings(
+      available: true,
       enabled: preference?.enabled ?? true,
       disclosure: disclosure,
     );
   }
 
   Future<AiSettings> setEnabled(Session session, bool enabled) async {
+    if (!session.serverpod.config.futureCall.enabled) {
+      return AiSettings(
+        available: false,
+        enabled: false,
+        disclosure: unavailableDisclosure,
+      );
+    }
     await AiPreference.db.upsertRow(
       session,
       AiPreference(ownerId: session.ownerId, enabled: enabled),
@@ -37,7 +55,11 @@ class AiOrganizingEndpoint extends Endpoint {
       updateColumns: (t) => [t.enabled],
       updateWhere: (t) => t.ownerId.equals(session.ownerId),
     );
-    return AiSettings(enabled: enabled, disclosure: disclosure);
+    return AiSettings(
+      available: true,
+      enabled: enabled,
+      disclosure: disclosure,
+    );
   }
 
   Future<List<AiSuggestion>> listSuggestions(
@@ -57,6 +79,11 @@ class AiOrganizingEndpoint extends Endpoint {
 
   Future<void> reprocess(Session session, UuidValue itemId) async {
     final item = await _ownedItem(session, itemId);
+    if (!session.serverpod.config.futureCall.enabled) {
+      throw ValidationException(
+        message: 'AI organizing is unavailable on this hosting plan.',
+      );
+    }
     await AiOrganizationService.instance.enqueue(
       session,
       ownerId: item.ownerId,
