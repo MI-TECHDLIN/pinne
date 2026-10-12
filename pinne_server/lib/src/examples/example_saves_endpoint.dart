@@ -30,6 +30,8 @@ class ExampleSavesEndpoint extends Endpoint {
         transaction: tx,
       );
       if (existing == 0) {
+        // The first three are older than the default 24-hour review delay so
+        // a new account can review right away; the rest come due later.
         final now = DateTime.now().toUtc();
         final collections = await Collection.db.insert(
           session,
@@ -78,7 +80,7 @@ class ExampleSavesEndpoint extends Endpoint {
               title: 'Tiny habits that actually stick',
               contentType: ContentType.article,
               intention: 'Try the two-minute version this week.',
-              savedAt: now.subtract(const Duration(hours: 20)),
+              savedAt: now.subtract(const Duration(hours: 27)),
               accessState: AccessState.available,
               enrichmentState: EnrichmentState.ready,
               isExample: true,
@@ -90,7 +92,7 @@ class ExampleSavesEndpoint extends Endpoint {
               title: 'Start with the smallest version',
               contentType: ContentType.note,
               intention: 'Use this on the next side project.',
-              savedAt: now.subtract(const Duration(hours: 12)),
+              savedAt: now.subtract(const Duration(hours: 25)),
               accessState: AccessState.available,
               enrichmentState: EnrichmentState.ready,
               isExample: true,

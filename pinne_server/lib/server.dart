@@ -39,6 +39,12 @@ Future<void> run(List<String> args, {bool seedDemo = false}) async {
   stdout.writeln(
     'AI organizing provider: ${AiProviderRegistry.activeProviderName}.',
   );
+  // Starter plans run without future calls: AI then runs inline on capture,
+  // and link previews and the review digest are off.
+  stdout.writeln(
+    'Future calls: '
+    '${pod.config.futureCall.enabled ? 'enabled' : 'disabled'}.',
+  );
 
   // Google sign-in needs real OAuth credentials. Until `googleClientSecret` is
   // set in config/passwords.yaml the provider stays off and email sign-in

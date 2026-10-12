@@ -337,6 +337,46 @@ void main() {
     expect(result.provider, 'rules');
   });
 
+  test('Groq auth failures are reported without the key', () async {
+    final client = _FakeGroqHttpClient((uri, headers, body, timeout) async {
+      return const GroqHttpResponse(
+        statusCode: HttpStatus.unauthorized,
+        body: '{"error":{"message":"Invalid API Key"}}',
+      );
+    });
+    final failures = <String>[];
+    final provider = FallbackAiProvider(
+      primary: GroqProvider(apiKey: 'gsk_secret-key', httpClient: client),
+      fallback: const NoAiProvider(),
+      onPrimaryFailure: (error) => failures.add(describeAiFailure(error)),
+    );
+
+    final result = await provider.organize(
+      evidence: evidence,
+      collections: const [],
+    );
+
+    expect(result.provider, 'rules');
+    expect(failures, ['Groq returned HTTP 401.']);
+    expect(failures.single, isNot(contains('gsk_')));
+  });
+
+  test('AI failure descriptions name the class, not the payload', () {
+    expect(describeAiFailure(TimeoutException('slow')), 'timeout');
+    expect(
+      describeAiFailure(GroqRateLimitException(retryAfter: '17')),
+      'Groq rate limit exceeded; retry after 17.',
+    );
+    expect(
+      describeAiFailure(const FormatException('{"secret": "body"}')),
+      'malformed response',
+    );
+    expect(
+      describeAiFailure(const SocketException('host unreachable')),
+      'network error (SocketException)',
+    );
+  });
+
   group('AI provider registry', () {
     tearDown(AiProviderRegistry.resetForTest);
 

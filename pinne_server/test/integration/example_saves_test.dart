@@ -36,6 +36,25 @@ void main() {
       expect(collections.every((collection) => collection.isExample), isTrue);
     });
 
+    test('three examples are due for review right away', () async {
+      await endpoints.exampleSaves.seed(alice);
+
+      final queue = await endpoints.reviewQueue.get(
+        alice,
+        timeBudgetMinutes: 20,
+      );
+
+      expect(queue.eligibleCount, 3);
+      expect(
+        queue.entries.map((entry) => entry.item.title),
+        unorderedEquals([
+          'Designing calm interfaces',
+          'Tiny habits that actually stick',
+          'Start with the smallest version',
+        ]),
+      );
+    });
+
     test('removal deletes only this owner examples', () async {
       await endpoints.exampleSaves.seed(alice);
       await endpoints.exampleSaves.seed(bob);
