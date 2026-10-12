@@ -29,6 +29,7 @@ fallback behavior are in `docs/ai.md`. Run steps and commands are in `README.md`
 ## Commands
 
 - Checks: `dart analyze` and `dart test` in `pinne_calendar/`, `pinne_capture/` and `pinne_server/`, `flutter analyze` and `flutter test` in `pinne_flutter/`, `dart format` on changed files.
+- Goldens (`docs/**/*.png` via `matchesGoldenFile`) must be rendered with `--update-goldens` on Linux with the Flutter version pinned in `.github/workflows/ci.yml`; macOS renders fail CI pixel checks.
 - Server tests use an embedded PostgreSQL and need no Docker. Dev runs use `docker compose up -d` in `pinne_server/`.
 - After a model change with a `table`: `serverpod generate`, then `serverpod create-migration`. A `migration.sql` may be hand-edited only to keep data safe, and the resulting schema must still equal `definition.sql`.
 - With `serverpod start` running, prefer the `serverpod` MCP tools (`create_migration`, `apply_migrations`, `tail_server_logs`, `hot_restart`). Serverpod and Flutter agent skills are installed by `serverpod create` under the git-ignored `.claude/skills/`.
