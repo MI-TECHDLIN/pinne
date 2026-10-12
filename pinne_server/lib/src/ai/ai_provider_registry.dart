@@ -1,5 +1,6 @@
 import 'ai_provider.dart';
 import 'gemini_provider.dart';
+import 'groq_provider.dart';
 import 'no_ai_provider.dart';
 
 /// Process-wide provider configuration, initialized once by server.dart.
@@ -10,12 +11,21 @@ abstract final class AiProviderRegistry {
 
   static bool get remoteAvailable => _globallyEnabled && _remote != null;
   static AiProvider? get remote => remoteAvailable ? _remote : null;
+  static String get activeProviderName => remote?.name ?? fallback.name;
 
-  static void configure({String? geminiApiKey, required bool enabled}) {
+  static void configure({
+    String? groqApiKey,
+    String? geminiApiKey,
+    required bool enabled,
+  }) {
     _globallyEnabled = enabled;
-    _remote = geminiApiKey == null || geminiApiKey.trim().isEmpty
-        ? null
-        : GeminiProvider(apiKey: geminiApiKey);
+    _remote = switch ((groqApiKey?.trim(), geminiApiKey?.trim())) {
+      (final groq?, _) when groq.isNotEmpty => GroqProvider(apiKey: groq),
+      (_, final gemini?) when gemini.isNotEmpty => GeminiProvider(
+        apiKey: gemini,
+      ),
+      _ => null,
+    };
   }
 
   static AiProvider provider({required bool userEnabled}) {

@@ -27,18 +27,18 @@ Future<void> run(List<String> args, {bool seedDemo = false}) async {
     (envName: 'PINNE_DEMO_ACCOUNT_PASSWORD', alias: 'demoAccountPassword'),
   ]);
 
-  final geminiApiKey = pod.getPassword('geminiApiKey');
+  final groqApiKey = _configuredPassword(pod, 'groqApiKey');
+  final geminiApiKey = _configuredPassword(pod, 'geminiApiKey');
   final aiEnabled =
       Platform.environment['PINNE_AI_ENABLED']?.toLowerCase() != 'false';
   AiProviderRegistry.configure(
+    groqApiKey: groqApiKey,
     geminiApiKey: geminiApiKey,
     enabled: aiEnabled,
   );
-  if (geminiApiKey == null || !aiEnabled) {
-    stdout.writeln(
-      'Gemini AI is disabled; deterministic organizing is active.',
-    );
-  }
+  stdout.writeln(
+    'AI organizing provider: ${AiProviderRegistry.activeProviderName}.',
+  );
 
   // Google sign-in needs real OAuth credentials. Until `googleClientSecret` is
   // set in config/passwords.yaml the provider stays off and email sign-in

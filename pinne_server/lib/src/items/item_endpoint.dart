@@ -45,8 +45,8 @@ class ItemEndpoint extends Endpoint {
   /// Saves a shared or pasted link or note. Safe to retry with the same
   /// operation id. A recognised duplicate returns the existing item with
   /// `duplicate` set; its notes, collections and first `savedAt` are kept.
-  /// The answer never waits for enrichment. On hosts without future calls,
-  /// previews are unavailable and notes need no enrichment.
+  /// Hosts with future calls schedule enrichment in the background. Starter
+  /// hosts process bounded organizing inline; link previews remain unavailable.
   Future<CaptureResult> capture(Session session, CaptureDraft draft) async {
     final result = await ItemCapture(session, session.ownerId).capture(draft);
     final item = await _scheduleEnrichment(
@@ -91,9 +91,10 @@ class ItemEndpoint extends Endpoint {
     if (!session.serverpod.config.futureCall.enabled) {
       if (item.enrichmentState != EnrichmentState.pending &&
           item.enrichmentState != EnrichmentState.processing) {
+        await _scheduleOrganizing(session, itemId, ownerId);
         return item;
       }
-      return Item.db.updateRow(
+      final updated = await Item.db.updateRow(
         session,
         item.copyWith(
           enrichmentState: item.url == null
@@ -102,6 +103,8 @@ class ItemEndpoint extends Endpoint {
           revision: item.revision + 1,
         ),
       );
+      await _scheduleOrganizing(session, itemId, ownerId);
+      return updated;
     }
     if (item.url == null) {
       await _scheduleOrganizing(session, itemId, ownerId);
@@ -171,10 +174,18 @@ class ItemEndpoint extends Endpoint {
         ownerId: ownerId,
         itemId: itemId,
       );
-      await session.serverpod.futureCalls
-          .callWithDelay(Duration.zero, identifier: 'ai-organize-$itemId')
-          .aiOrganize
-          .process(itemId, ownerId);
+      if (session.serverpod.config.futureCall.enabled) {
+        await session.serverpod.futureCalls
+            .callWithDelay(Duration.zero, identifier: 'ai-organize-$itemId')
+            .aiOrganize
+            .process(itemId, ownerId);
+      } else {
+        await AiOrganizationService.instance.process(
+          session,
+          itemId: itemId,
+          ownerId: ownerId,
+        );
+      }
     } catch (_) {
       // The explicit reprocess endpoint can enqueue it again later.
     }

@@ -1,3 +1,6 @@
+import 'package:pinne_server/src/ai/ai_organization_service.dart';
+import 'package:pinne_server/src/ai/ai_provider.dart';
+import 'package:pinne_server/src/ai/fake_ai_provider.dart';
 import 'package:pinne_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:test/test.dart';
@@ -34,6 +37,12 @@ void main() {
           final item = (await endpoints.item.get(owner, saved.itemId))!;
           expect(item.enrichmentState, EnrichmentState.failed);
           expect(item.revision, saved.revision);
+          final task = await AiOrganizeTask.db.findFirstRow(
+            owner.build(),
+            where: (t) => t.itemId.equals(item.id!),
+          );
+          expect(task?.state, AiProcessingState.completed);
+          expect(task?.provider, 'rules');
 
           final review = await endpoints.review.record(
             owner,
@@ -56,7 +65,7 @@ void main() {
       );
 
       test(
-        'notes are immediately ready and AI settings are unavailable',
+        'notes organize inline and AI settings remain available',
         () async {
           final saved = await endpoints.item.capture(
             owner,
@@ -65,20 +74,55 @@ void main() {
           expect(saved.enrichmentState, EnrichmentState.ready);
 
           final settings = await endpoints.aiOrganizing.getSettings(owner);
-          expect(settings.available, isFalse);
-          expect(settings.enabled, isFalse);
+          expect(settings.available, isTrue);
+          expect(settings.enabled, isTrue);
+          expect(settings.disclosure, contains('simple rules'));
           final attempted = await endpoints.aiOrganizing.setEnabled(
             owner,
-            true,
+            false,
           );
-          expect(attempted.available, isFalse);
+          expect(attempted.available, isTrue);
           expect(attempted.enabled, isFalse);
-          await expectLater(
-            endpoints.aiOrganizing.reprocess(owner, saved.itemId),
-            throwsA(isA<ValidationException>()),
+          await endpoints.aiOrganizing.reprocess(owner, saved.itemId);
+          final task = await AiOrganizeTask.db.findFirstRow(
+            owner.build(),
+            where: (t) => t.itemId.equals(saved.itemId),
           );
+          expect(task?.state, AiProcessingState.completed);
+          expect(task?.provider, 'rules');
         },
       );
+
+      test('configured remote provider runs inline', () async {
+        final previous = AiOrganizationService.instance;
+        final fake = FakeAiProvider(
+          result: const AiOrganizationResult(
+            collectionIds: [],
+            tags: ['remote-result'],
+            rationale: 'Remote metadata match.',
+            evidenceCoverage: AiEvidenceCoverage.metadataOnly,
+            uncertain: false,
+            provider: 'fake-remote',
+          ),
+        );
+        AiOrganizationService.instance = AiOrganizationService(
+          remoteProviderOverride: fake,
+        );
+        addTearDown(() => AiOrganizationService.instance = previous);
+
+        final saved = await endpoints.item.capture(
+          owner,
+          draft(text: 'A note organized on Starter'),
+        );
+
+        expect(fake.calls, 1);
+        final task = await AiOrganizeTask.db.findFirstRow(
+          owner.build(),
+          where: (t) => t.itemId.equals(saved.itemId),
+        );
+        expect(task?.state, AiProcessingState.completed);
+        expect(task?.provider, 'fake-remote');
+      });
     },
     configOverride: (config) => config.copyWith(
       futureCall: const FutureCallConfig(enabled: false),
