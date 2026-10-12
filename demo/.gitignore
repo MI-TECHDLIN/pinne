@@ -1,0 +1,6 @@
+# Rendered output, downloaded fonts and the symlinked engine stay local.
+.cache/
+out/
+*.mp4
+*.wav
+__pycache__/
