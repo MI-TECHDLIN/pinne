@@ -8,6 +8,7 @@ import '../../theme/pinne_tokens.dart';
 import 'device_calendar_adapter.dart';
 import 'planner_format.dart';
 import 'planner_providers.dart';
+import '../../ui/feedback/error_state.dart';
 
 /// Routes, permission state, freshness, and which calendars are checked for
 /// conflicts and which one takes sessions.
@@ -42,8 +43,12 @@ class CalendarConnectionsScreen extends ConsumerWidget {
               const SizedBox(height: PinneSpacing.md),
             ],
         ],
-        AsyncError() => [
-          const GlassCard(child: Text('Could not load your calendars.')),
+        AsyncError(:final error) => [
+          PinneErrorCard(
+            error: error,
+            subject: 'your calendars',
+            onRetry: () => ref.invalidate(plannerProvider),
+          ),
         ],
         _ => [const Center(child: CircularProgressIndicator())],
       },

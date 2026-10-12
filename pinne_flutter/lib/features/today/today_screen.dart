@@ -8,6 +8,8 @@ import 'package:pinne_client/pinne_client.dart';
 
 import '../../router.dart';
 import '../../theme/pinne_tokens.dart';
+import '../../ui/feedback/error_state.dart';
+import '../../ui/feedback/toast.dart';
 import '../../ui/item_preview.dart';
 import '../../ui/motion.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
@@ -67,7 +69,11 @@ class TodayScreen extends ConsumerWidget {
             if (queue.isLoading)
               const _HeroLoading()
             else if (queue.hasError)
-              _QueueError(onRetry: () => ref.invalidate(todayQueueProvider))
+              PinneErrorCard(
+                error: queue.error,
+                subject: 'your queue',
+                onRetry: () => ref.invalidate(todayQueueProvider),
+              )
             else
               TodaySpiritCard(
                 due: top != null,
@@ -87,6 +93,7 @@ class TodayScreen extends ConsumerWidget {
                             .read(todayActionGatewayProvider)
                             .remindLater(top.item),
                         'We’ll bring it back tomorrow.',
+                        'Could not snooze it',
                       ),
                 onArchive: top == null
                     ? null
@@ -96,6 +103,7 @@ class TodayScreen extends ConsumerWidget {
                             .read(todayActionGatewayProvider)
                             .archive(top.item),
                         'Archived without counting it as reviewed.',
+                        'Could not archive it',
                       ),
                 onOpen: top?.item.url == null
                     ? null
@@ -105,6 +113,7 @@ class TodayScreen extends ConsumerWidget {
                             .read(todayActionGatewayProvider)
                             .open(top!.item),
                         'Opened. It still waits for your review.',
+                        'Could not open it',
                       ),
               ),
             const SizedBox(height: PinneSpacing.md),
@@ -170,24 +179,22 @@ class TodayScreen extends ConsumerWidget {
     try {
       final receipt = await ref.read(todayActionGatewayProvider).reviewed(item);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Counted as reviewed.'),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () => unawaited(
-              ref
-                  .read(todayActionGatewayProvider)
-                  .undo(item, receipt.event.id!),
-            ),
-          ),
+      showPinneToast(
+        context,
+        'Counted as reviewed.',
+        kind: ToastKind.success,
+        actionLabel: 'Undo',
+        onAction: () => unawaited(
+          ref.read(todayActionGatewayProvider).undo(item, receipt.event.id!),
         ),
       );
       await ref
           .read(celebrationControllerProvider.notifier)
           .checkAfterReview(context);
-    } on Object {
-      if (context.mounted) _message(context, 'Could not update your review.');
+    } on Object catch (error) {
+      if (context.mounted) {
+        showErrorToast(context, error, 'Could not count your review');
+      }
     }
   }
 
@@ -195,17 +202,16 @@ class TodayScreen extends ConsumerWidget {
     BuildContext context,
     Future<void> Function() action,
     String success,
+    String failure,
   ) async {
     try {
       await action();
-      if (context.mounted) _message(context, success);
-    } on Object {
-      if (context.mounted) _message(context, 'Could not update the queue.');
+      if (context.mounted) {
+        showPinneToast(context, success, kind: ToastKind.success);
+      }
+    } on Object catch (error) {
+      if (context.mounted) showErrorToast(context, error, failure);
     }
-  }
-
-  void _message(BuildContext context, String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   static String _greeting(int hour) {
@@ -805,35 +811,6 @@ class _HeroLoading extends StatelessWidget {
     ),
     child: const Center(
       child: CircularProgressIndicator(color: PinneColors.violet),
-    ),
-  );
-}
-
-class _QueueError extends StatelessWidget {
-  const _QueueError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(PinneSpacing.lg),
-    decoration: BoxDecoration(
-      color: PinneColors.card,
-      borderRadius: BorderRadius.circular(PinneRadii.card),
-      border: Border.all(color: PinneColors.line),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Your queue is taking a moment.',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: PinneSpacing.sm),
-        const Text('Your saves are safe. Try again when you’re ready.'),
-        const SizedBox(height: PinneSpacing.md),
-        FilledButton(onPressed: onRetry, child: const Text('Try again')),
-      ],
     ),
   );
 }

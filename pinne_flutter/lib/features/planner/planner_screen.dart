@@ -14,6 +14,7 @@ import 'planner_format.dart';
 import 'planner_providers.dart';
 import 'planner_settings_sheet.dart';
 import 'session_card.dart';
+import '../../ui/feedback/error_state.dart';
 
 /// Plans short review sessions in free time and shows what was checked.
 class PlannerScreen extends ConsumerWidget {
@@ -56,18 +57,11 @@ class PlannerScreen extends ConsumerWidget {
       subtitle: 'Short sessions placed in your free time.',
       children: switch (planner) {
         AsyncData(:final value) => [_PlannerBody(state: value)],
-        AsyncError() => [
-          GlassCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Could not load your planner.'),
-                TextButton(
-                  onPressed: () => ref.invalidate(plannerProvider),
-                  child: const Text('Try again'),
-                ),
-              ],
-            ),
+        AsyncError(:final error) => [
+          PinneErrorCard(
+            error: error,
+            subject: 'your planner',
+            onRetry: () => ref.invalidate(plannerProvider),
           ),
         ],
         _ => [

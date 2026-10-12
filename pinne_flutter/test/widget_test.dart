@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/app.dart';
 import 'package:pinne_flutter/core/motion.dart';
 import 'package:pinne_flutter/core/server_client.dart';
@@ -37,14 +36,6 @@ Widget _app({List overrides = const []}) => ProviderScope(
     captureApiProvider.overrideWithValue(FakeCaptureServer()),
     signedInProvider.overrideWith(_SignedOut.new),
     motionPreferenceProvider.overrideWith(_AlwaysReduced.new),
-    serverHealthProvider.overrideWith(
-      (ref) async => ServerHealth(
-        ok: true,
-        databaseOk: true,
-        serverTime: DateTime.utc(2026, 10, 6),
-        version: '0.1.0',
-      ),
-    ),
     ...overrides,
   ],
   child: const PinneApp(),
@@ -73,16 +64,16 @@ void main() {
     }
   });
 
-  testWidgets('Settings shows server health from the health endpoint', (
+  testWidgets('Settings no longer shows a live server indicator', (
     tester,
   ) async {
     await tester.pumpWidget(_app());
     await tester.tap(find.byKey(const ValueKey('nav-settings')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Server online'), findsOneWidget);
-    expect(find.text('API 0.1.0'), findsOneWidget);
-    expect(find.text('http://localhost:8080/'), findsOneWidget);
+    expect(find.text('Settings'), findsWidgets);
+    expect(find.textContaining('Server online'), findsNothing);
+    expect(find.text('http://localhost:8080/'), findsNothing);
   });
 
   testWidgets('the selected tab is announced as selected', (tester) async {

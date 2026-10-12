@@ -7,6 +7,8 @@ import '../../core/server_client.dart';
 import '../../router.dart';
 import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
+import '../../ui/feedback/friendly_error.dart';
+import '../../ui/feedback/toast.dart';
 
 /// Guest-first sign-in, with email and optional Google for durable accounts.
 class SignInScreen extends ConsumerStatefulWidget {
@@ -25,11 +27,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       await ref.read(guestSignInActionProvider)();
       if (mounted) _closeAfterAuthentication();
     } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Guest sign-in failed: $error')),
-        );
-      }
+      if (mounted) _showSignInError(error);
     } finally {
       if (mounted) setState(() => _guestLoading = false);
     }
@@ -121,8 +119,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   void _showSignInError(Object error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Sign-in failed: $error')),
+    if (!mounted) return;
+    final friendly = FriendlyError.from(error);
+    showPinneToast(
+      context,
+      '${friendly.title}. ${friendly.hint}',
+      kind: ToastKind.error,
     );
   }
 }

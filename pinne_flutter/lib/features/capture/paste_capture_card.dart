@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_capture/pinne_capture.dart';
 
+import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/glass_card.dart';
 import 'capture_labels.dart';
@@ -141,13 +142,16 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
     final link = _input.link;
     try {
       final earlier = link == null ? null : store.findSaved(link);
-      final saved = store.save(_input, intention: _why.text);
+      store.save(_input, intention: _why.text);
       final sync = ref.read(outboxSyncProvider);
       if (sync != null) unawaited(sync.drain());
+      final syncLine = ref.read(signedInProvider)
+          ? 'Kept on this phone; it syncs when you are online.'
+          : 'Kept on this phone; sign in to sync it.';
       setState(() {
         _confirmation = earlier != null
             ? 'Already in Pinne. Your note joins that save.'
-            : 'Saved to Pinne: ${saved.title}';
+            : 'Saved to Pinne. $syncLine';
         _error = null;
         _input = CaptureInput.empty;
       });
@@ -239,7 +243,7 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
                   child: Text(
                     error ?? confirmation ?? '',
                     key: const ValueKey('paste-confirmation'),
-                    maxLines: 2,
+                    maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: error != null

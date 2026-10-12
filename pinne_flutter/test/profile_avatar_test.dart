@@ -64,14 +64,6 @@ void main() {
           profileEndpointProvider.overrideWithValue(endpoint),
           signedInProvider.overrideWith(_SignedIn.new),
           serverUrlProvider.overrideWithValue('http://localhost:8080/'),
-          serverHealthProvider.overrideWith(
-            (ref) async => ServerHealth(
-              ok: true,
-              databaseOk: true,
-              serverTime: DateTime.utc(2026, 10, 6),
-              version: '0.1.0',
-            ),
-          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

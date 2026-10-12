@@ -11,6 +11,7 @@ import '../../ui/motion.dart';
 import 'account_kind_provider.dart';
 import 'ai_settings_provider.dart';
 import 'profile_card.dart';
+import '../../ui/feedback/toast.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -26,8 +27,6 @@ class SettingsScreen extends StatelessWidget {
         const _AccountCard(),
         const SizedBox(height: PinneSpacing.md),
         const _MotionCard(),
-        const SizedBox(height: PinneSpacing.md),
-        const ServerHealthCard(),
         const SizedBox(height: PinneSpacing.md),
         const _AiOrganizingCard(),
         const SizedBox(height: PinneSpacing.md),
@@ -128,14 +127,12 @@ class _AiOrganizingCard extends ConsumerWidget {
                           await ref
                               .read(aiSettingsProvider.notifier)
                               .setEnabled(enabled);
-                        } catch (_) {
+                        } catch (error) {
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Could not update AI organizing.',
-                                ),
-                              ),
+                            showErrorToast(
+                              context,
+                              error,
+                              'Could not update AI organizing',
                             );
                           }
                         }
@@ -264,61 +261,6 @@ class _MotionCard extends ConsumerWidget {
             onSelectionChanged: (selection) => ref
                 .read(motionPreferenceProvider.notifier)
                 .set(selection.single),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Shows whether the configured server answers its public health check.
-class ServerHealthCard extends ConsumerWidget {
-  const ServerHealthCard({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final health = ref.watch(serverHealthProvider);
-    final theme = Theme.of(context);
-    final (label, detail, colour) = switch (health) {
-      AsyncData(:final value) when value.ok && value.databaseOk => (
-        'Server online',
-        'API ${value.version}',
-        PinneColors.mint,
-      ),
-      AsyncData(:final value) => (
-        'Server degraded',
-        value.databaseOk ? 'API ${value.version}' : 'Database unreachable',
-        PinneColors.peach,
-      ),
-      AsyncError() => (
-        'Server unreachable',
-        'Is the server running?',
-        PinneColors.pink,
-      ),
-      _ => ('Checking server…', '', PinneColors.muted),
-    };
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.circle, size: 10, color: colour),
-              const SizedBox(width: PinneSpacing.sm),
-              Expanded(child: Text(label, style: theme.textTheme.titleMedium)),
-              TextButton(
-                onPressed: () => ref.invalidate(serverHealthProvider),
-                child: const Text('Recheck'),
-              ),
-            ],
-          ),
-          if (detail.isNotEmpty)
-            Text(detail, style: const TextStyle(color: PinneColors.muted)),
-          Text(
-            ref.watch(serverUrlProvider),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: PinneColors.muted,
-            ),
           ),
         ],
       ),
