@@ -6,6 +6,7 @@ import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ai_suggestion_chips.dart';
 import '../../ui/feedback/toast.dart';
+import '../../ui/pinne_loading.dart';
 import '../collections/collections_screen.dart';
 import 'capture_providers.dart';
 
@@ -131,8 +132,8 @@ class AiSuggestionsNotifier extends AsyncNotifier<List<AiSuggestionChipData>> {
   }
 }
 
-/// AI suggestions on a Saved card. Shows nothing at all while loading, on
-/// error or when the AI had nothing to suggest.
+/// AI suggestions on a Saved card. Uses an inline skeleton while loading and
+/// shows nothing on error or when the AI had nothing to suggest.
 class SavedItemAiSuggestions extends ConsumerWidget {
   const SavedItemAiSuggestions({super.key, required this.itemId});
 
@@ -140,8 +141,14 @@ class SavedItemAiSuggestions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final suggestions =
-        ref.watch(aiSuggestionsProvider(itemId)).asData?.value ?? const [];
+    final state = ref.watch(aiSuggestionsProvider(itemId));
+    if (state.isLoading && !state.hasValue) {
+      return const Padding(
+        padding: EdgeInsets.only(top: PinneSpacing.sm),
+        child: PinneSuggestionSkeleton(),
+      );
+    }
+    final suggestions = state.asData?.value ?? const [];
     if (suggestions.isEmpty) return const SizedBox.shrink();
     final notifier = ref.read(aiSuggestionsProvider(itemId).notifier);
     final theme = Theme.of(context);

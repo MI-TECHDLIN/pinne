@@ -9,6 +9,7 @@ import '../../router.dart';
 import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../../ui/pinne_loading.dart';
 import 'onboarding_store.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -882,9 +883,9 @@ class _ProgressButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const spinner = SizedBox.square(
-      dimension: 20,
-      child: CircularProgressIndicator(strokeWidth: 2, color: PinneColors.ink),
+    const loader = PinneBrandedLoader(
+      size: 20,
+      label: 'Finishing setup',
     );
     // The last page ends on a labelled pill: the one primary action.
     final Widget button = last
@@ -904,7 +905,7 @@ class _ProgressButton extends StatelessWidget {
             ),
             onPressed: busy ? null : onPressed,
             iconAlignment: IconAlignment.end,
-            icon: busy ? spinner : const Icon(Icons.arrow_forward_rounded),
+            icon: busy ? loader : const Icon(Icons.arrow_forward_rounded),
             label: const Text('Get started'),
           )
         : CustomPaint(
@@ -920,7 +921,7 @@ class _ProgressButton extends StatelessWidget {
                   minimumSize: const Size.square(54),
                 ),
                 onPressed: busy ? null : onPressed,
-                icon: busy ? spinner : const Icon(Icons.arrow_forward_rounded),
+                icon: busy ? loader : const Icon(Icons.arrow_forward_rounded),
               ),
             ),
           );

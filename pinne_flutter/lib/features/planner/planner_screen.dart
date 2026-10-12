@@ -15,6 +15,7 @@ import 'planner_providers.dart';
 import 'planner_settings_sheet.dart';
 import 'session_card.dart';
 import '../../ui/feedback/error_state.dart';
+import '../../ui/pinne_loading.dart';
 
 /// Plans short review sessions in free time and shows what was checked.
 class PlannerScreen extends ConsumerWidget {
@@ -64,17 +65,26 @@ class PlannerScreen extends ConsumerWidget {
             onRetry: () => ref.invalidate(plannerProvider),
           ),
         ],
-        _ => [
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(PinneSpacing.xl),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-        ],
+        _ => [const _PlannerLoadingSkeleton()],
       },
     );
   }
+}
+
+class _PlannerLoadingSkeleton extends StatelessWidget {
+  const _PlannerLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+    key: ValueKey('planner-slots-skeleton'),
+    children: [
+      PinneCardSkeleton(height: 230, label: 'Loading planner calendar'),
+      SizedBox(height: PinneSpacing.md),
+      PinneCardSkeleton(height: 112, label: 'Loading planned session'),
+      SizedBox(height: PinneSpacing.md),
+      PinneCardSkeleton(height: 112, label: 'Loading planned session'),
+    ],
+  );
 }
 
 class _PlannerBody extends ConsumerStatefulWidget {
@@ -336,7 +346,12 @@ class _PlanPanel extends StatelessWidget {
         FilledButton(
           style: pinnePrimaryActionStyle(),
           onPressed: working ? null : onPlan,
-          child: Text(month ? 'Plan my month' : 'Plan my week'),
+          child: working
+              ? const PinneBrandedLoader(
+                  size: 22,
+                  label: 'Finding open review times',
+                )
+              : Text(month ? 'Plan my month' : 'Plan my week'),
         ),
         if (onExportAll != null)
           TextButton.icon(
@@ -407,12 +422,22 @@ class _ProposalPanel extends StatelessWidget {
             FilledButton(
               style: pinnePrimaryActionStyle(),
               onPressed: working ? null : onAccept,
-              child: const Text('Accept plan'),
+              child: working
+                  ? const PinneBrandedLoader(
+                      size: 22,
+                      label: 'Saving your plan',
+                    )
+                  : const Text('Accept plan'),
             )
           else if (count > 0 && !suggestOnly)
             OutlinedButton(
               onPressed: working ? null : onKeepUnverified,
-              child: const Text('Keep in Pinne without checking'),
+              child: working
+                  ? const PinneBrandedLoader(
+                      size: 22,
+                      label: 'Saving your plan',
+                    )
+                  : const Text('Keep in Pinne without checking'),
             ),
           const SizedBox(height: PinneSpacing.xs),
           Wrap(

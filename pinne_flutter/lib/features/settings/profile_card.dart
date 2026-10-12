@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
+import '../../ui/pinne_loading.dart';
 import 'profile_provider.dart';
 import '../../ui/feedback/friendly_error.dart';
 
@@ -22,51 +24,65 @@ class ProfileCard extends ConsumerWidget {
           RibbonSpirit(seed: avatar.seed, palette: avatar.palette, size: 88),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  profile.asData?.value?.displayName ?? 'Your little companion',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  userId == null
-                      ? 'Sign in to keep your spirit.'
-                      : 'A ribbon, all your own.',
-                  style: const TextStyle(color: PinneColors.muted),
-                ),
-                if (profile.isLoading) const LinearProgressIndicator(),
-                if (profile.hasError)
-                  TextButton.icon(
-                    key: const ValueKey('profile-retry'),
-                    onPressed: () => ref.invalidate(profileProvider),
-                    icon: Icon(
-                      FriendlyError.from(profile.error).icon,
-                      size: 16,
+            child: profile.isLoading
+                ? const PinneSkeleton(
+                    label: 'Loading profile settings',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Bone.text(width: 178, fontSize: 18),
+                        SizedBox(height: PinneSpacing.sm),
+                        Bone.text(width: 146, fontSize: 14),
+                        SizedBox(height: PinneSpacing.md),
+                        Bone.button(width: 142, height: 34),
+                      ],
                     ),
-                    label: Text(
-                      '${FriendlyError.from(profile.error).title} · Try again',
-                    ),
-                  ),
-                if (userId != null)
-                  TextButton(
-                    onPressed: profile.isLoading || profile.hasError
-                        ? null
-                        : () => showModalBottomSheet<void>(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: PinneColors.midnightRaised,
-                            builder: (_) => _AvatarPicker(
-                              userId: userId,
-                              profile: profile.asData?.value,
-                              seed: avatar.seed,
-                              palette: avatar.palette,
-                            ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        profile.asData?.value?.displayName ??
+                            'Your little companion',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text(
+                        userId == null
+                            ? 'Sign in to keep your spirit.'
+                            : 'A ribbon, all your own.',
+                        style: const TextStyle(color: PinneColors.muted),
+                      ),
+                      if (profile.hasError)
+                        TextButton.icon(
+                          key: const ValueKey('profile-retry'),
+                          onPressed: () => ref.invalidate(profileProvider),
+                          icon: Icon(
+                            FriendlyError.from(profile.error).icon,
+                            size: 16,
                           ),
-                    child: const Text('Choose your spirit'),
+                          label: Text(
+                            '${FriendlyError.from(profile.error).title} · Try again',
+                          ),
+                        ),
+                      if (userId != null)
+                        TextButton(
+                          onPressed: profile.hasError
+                              ? null
+                              : () => showModalBottomSheet<void>(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: PinneColors.midnightRaised,
+                                  builder: (_) => _AvatarPicker(
+                                    userId: userId,
+                                    profile: profile.asData?.value,
+                                    seed: avatar.seed,
+                                    palette: avatar.palette,
+                                  ),
+                                ),
+                          child: const Text('Choose your spirit'),
+                        ),
+                    ],
                   ),
-              ],
-            ),
           ),
         ],
       ),
@@ -276,7 +292,19 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
             width: double.infinity,
             child: FilledButton(
               onPressed: _saving ? null : _save,
-              child: Text(_saving ? 'Saving…' : 'Keep this spirit'),
+              child: _saving
+                  ? const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PinneBrandedLoader(
+                          size: 20,
+                          label: 'Saving your spirit',
+                        ),
+                        SizedBox(width: PinneSpacing.sm),
+                        Text('Saving…'),
+                      ],
+                    )
+                  : const Text('Keep this spirit'),
             ),
           ),
         ],

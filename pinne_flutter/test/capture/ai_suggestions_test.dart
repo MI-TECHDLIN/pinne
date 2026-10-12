@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +13,7 @@ import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
 import 'package:pinne_flutter/features/capture/saved_section.dart';
 import 'package:pinne_flutter/theme/pinne_theme.dart';
+import 'package:pinne_flutter/ui/pinne_loading.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'fake_capture_server.dart';
@@ -27,13 +30,17 @@ class _FakeAiSuggestions implements AiSuggestionsApi {
   final accepted = <UuidValue>[];
   final rejected = <UuidValue>[];
   final work = const Uuid().v4obj();
+  Completer<void>? pendingGate;
   bool fail = false;
 
   @override
-  Future<List<AiSuggestion>> pending(UuidValue itemId) async => [
-    for (final s in suggestions)
-      if (s.itemId == itemId && s.status == AiSuggestionStatus.pending) s,
-  ];
+  Future<List<AiSuggestion>> pending(UuidValue itemId) async {
+    await pendingGate?.future;
+    return [
+      for (final s in suggestions)
+        if (s.itemId == itemId && s.status == AiSuggestionStatus.pending) s,
+    ];
+  }
 
   @override
   Future<Map<UuidValue, String>> collectionNames() async => {work: 'Work'};
@@ -91,6 +98,7 @@ void main() {
     WidgetTester tester,
     _FakeAiSuggestions api, {
     Item? serverItem,
+    bool settle = true,
   }) async {
     final capture = store.save(
       parseCaptureInput('https://example.com/article'),
@@ -124,8 +132,27 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+    }
   }
+
+  testWidgets('pending suggestions use an inline skeleton, not a spinner', (
+    tester,
+  ) async {
+    final api = _FakeAiSuggestions([])..pendingGate = Completer<void>();
+
+    await show(tester, api, settle: false);
+
+    expect(
+      find.byKey(const ValueKey('ai-suggestions-skeleton')),
+      findsOneWidget,
+    );
+    expect(find.byType(PinneSuggestionSkeleton), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
 
   testWidgets('accepted and dismissed suggestions leave the card', (
     tester,

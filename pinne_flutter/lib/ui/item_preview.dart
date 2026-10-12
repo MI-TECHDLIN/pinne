@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pinne_client/pinne_client.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../theme/pinne_tokens.dart';
-import 'motion.dart';
+import 'pinne_loading.dart';
 
 enum PreviewChipSurface { dark, pastel, due }
 
@@ -110,17 +111,13 @@ class _PreviewPlaceholder extends StatelessWidget {
     key: ValueKey(pending ? 'preview-skeleton' : 'preview-placeholder'),
     color: PinneColors.cardRaised,
     alignment: Alignment.center,
-    child: pending && !reduceMotionOf(context)
-        ? const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: PinneColors.lilac,
-            ),
+    child: pending
+        ? const PinneSkeleton(
+            label: 'Loading preview image',
+            child: Bone(width: double.infinity, height: double.infinity),
           )
-        : Icon(
-            pending ? Icons.hourglass_empty_rounded : Icons.link_rounded,
+        : const Icon(
+            Icons.link_rounded,
             color: PinneColors.muted,
             size: 30,
           ),

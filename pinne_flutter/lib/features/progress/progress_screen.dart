@@ -5,6 +5,7 @@ import 'package:pinne_client/pinne_client.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
+import '../../ui/pinne_loading.dart';
 import '../settings/profile_provider.dart';
 import 'celebration.dart';
 import 'progress_card_stack.dart';
@@ -50,12 +51,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         onRetry: () => ref.invalidate(progressReportProvider),
       );
     } else if (!report.hasValue) {
-      body = const GlassCard(
-        child: SizedBox(
-          height: 160,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      );
+      body = const _ProgressLoadingSkeleton();
     } else if (value == null) {
       body = const ProgressEmptyState(signedOut: true);
     } else if (value.savedCount == 0 && value.reviewedInPeriodCount == 0) {
@@ -85,13 +81,34 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         SizedBox(
           height: PinneSpacing.lg,
           child: report.isLoading && report.hasValue
-              ? const Center(child: LinearProgressIndicator(minHeight: 2))
+              ? const Center(
+                  child: PinneBrandedLoader(
+                    size: 16,
+                    label: 'Refreshing progress',
+                  ),
+                )
               : null,
         ),
         body,
       ],
     );
   }
+}
+
+class _ProgressLoadingSkeleton extends StatelessWidget {
+  const _ProgressLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+    key: ValueKey('progress-deck-skeleton'),
+    children: [
+      PinneCardSkeleton(height: 210, label: 'Loading progress deck'),
+      SizedBox(height: PinneSpacing.md),
+      PinneCardSkeleton(height: 116, label: 'Loading progress summary'),
+      SizedBox(height: PinneSpacing.md),
+      PinneCardSkeleton(height: 132, label: 'Loading weekly goal'),
+    ],
+  );
 }
 
 class PeriodPicker extends StatelessWidget {
@@ -401,14 +418,20 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
     final settings = ref.watch(progressSettingsProvider);
     final current = settings.value;
     if (current == null) {
-      return SizedBox(
-        height: 180,
-        child: Center(
-          child: settings.hasError || !settings.isLoading
-              ? const Text('Sign in to set a weekly goal.')
-              : const CircularProgressIndicator(),
-        ),
-      );
+      return settings.hasError || !settings.isLoading
+          ? const SizedBox(
+              height: 180,
+              child: Center(child: Text('Sign in to set a weekly goal.')),
+            )
+          : const SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: PinneCardSkeleton(
+                  height: 148,
+                  label: 'Loading goal settings',
+                ),
+              ),
+            );
     }
     final goal = _goal ?? current.weeklyGoalDays;
     final streak = _streak ?? current.streakEnabled;
@@ -477,7 +500,12 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
               child: FilledButton(
                 key: const ValueKey('goal-save'),
                 onPressed: _saving ? null : () => _save(current),
-                child: Text(_saving ? 'Saving…' : 'Save'),
+                child: _saving
+                    ? const PinneBrandedLoader(
+                        size: 20,
+                        label: 'Saving goal',
+                      )
+                    : const Text('Save'),
               ),
             ),
           ],

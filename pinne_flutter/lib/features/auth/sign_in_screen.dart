@@ -9,6 +9,7 @@ import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/feedback/friendly_error.dart';
 import '../../ui/feedback/toast.dart';
+import '../../ui/pinne_loading.dart';
 
 /// Guest-first sign-in, with email and optional Google for durable accounts.
 class SignInScreen extends ConsumerStatefulWidget {
@@ -66,9 +67,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     key: const ValueKey('guest-sign-in-button'),
                     style: pinnePrimaryActionStyle(),
                     onPressed: _guestLoading ? null : _signInAsGuest,
-                    child: Text(
-                      _guestLoading ? 'Starting…' : 'Try without an account',
-                    ),
+                    child: _guestLoading
+                        ? const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              PinneBrandedLoader(
+                                size: 20,
+                                label: 'Starting guest session',
+                              ),
+                              SizedBox(width: PinneSpacing.sm),
+                              Text('Starting…'),
+                            ],
+                          )
+                        : const Text('Try without an account'),
                   ),
                   if (!emailAvailable) ...[
                     const SizedBox(height: PinneSpacing.md),
