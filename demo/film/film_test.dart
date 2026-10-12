@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/router.dart';
 import 'package:pinne_flutter/theme/pinne_theme.dart';
 import 'package:pinne_flutter/theme/pinne_tokens.dart';
@@ -20,10 +21,7 @@ void main() {
   captureScenes();
 
   shoot('01_hook', (film) async {
-    final app = FilmApp(
-      firstRun: true,
-      client: DemoClient(displayName: ''),
-    );
+    final app = FilmApp(firstRun: true, client: DemoClient(displayName: ''));
     await film.precache(spiritArt('welcome'));
     await film.open(
       Stage(
@@ -36,14 +34,14 @@ void main() {
             const Pose(8.3),
             Pose(
               9.0,
-              focus: onScreen(206, 470),
-              at: const Offset(1350, 560),
+              focus: onScreen(206, 330),
+              at: const Offset(1350, 540),
               scale: 1.3,
             ),
             Pose(
               10.2,
-              focus: onScreen(206, 470),
-              at: const Offset(1350, 560),
+              focus: onScreen(206, 330),
+              at: const Offset(1350, 540),
               scale: 1.3,
             ),
             const Pose(10.9),
@@ -71,7 +69,7 @@ void main() {
         cues: const [
           Cue(
             0.2,
-            10.5,
+            12.5,
             kicker: 'Organize',
             title: 'Gemini suggests.\nYou decide.',
             body:
@@ -124,15 +122,15 @@ void main() {
       alignment: 0.15,
     );
     await settle(film.tester, 0.3);
-    await film.until(3.6);
+    await film.until(4.0);
     await film.tap(find.byKey(const ValueKey('accept-collection')));
-    await film.until(5.0);
+    await film.until(5.6);
     await film.tap(find.byKey(const ValueKey('accept-tag-onboarding')));
-    await film.until(6.3);
+    await film.until(7.2);
     await film.tap(find.byKey(const ValueKey('dismiss-tag-ux')));
-    await film.until(7.6);
+    await film.until(8.8);
     await film.tap(find.byKey(const ValueKey('accept-summary')));
-    await film.until(10.5);
+    await film.until(12.5);
   });
 
   shoot('06_planner', (film) async {
@@ -143,7 +141,7 @@ void main() {
         cues: const [
           Cue(
             0.2,
-            12.5,
+            12,
             kicker: 'Make time',
             title: 'It finds time\nfor you.',
             body:
@@ -203,23 +201,44 @@ void main() {
     );
     await film.until(10.4);
     await film.tap(find.text('Accept plan'));
-    await film.until(12.5);
+    await film.until(12);
   });
 
   shoot('07_progress', (film) async {
-    final app = FilmApp(progress: DemoProgressApi());
+    final progress = DemoProgressApi();
+    final due = DueQueue([Sample.items()[3]]);
+    final app = FilmApp(
+      progress: progress,
+      client: DemoClient(
+        queue: due.result,
+        onReviewed: (draft) {
+          if (draft.eventType != ReviewEventType.reviewed) return;
+          due.remove(draft.itemId);
+          progress.reviewRecorded();
+        },
+      ),
+    );
     app.router.go(Routes.progress);
     await film.open(
       Stage(
         cues: const [
           Cue(
             0.2,
-            10.5,
+            7.6,
             kicker: 'Progress',
             title: 'Honest progress.',
             body:
                 'Numbers come only from real reviews. Opening a link or '
                 'undoing never counts, and an empty week shows a dash, not 0%.',
+          ),
+          Cue(
+            7.9,
+            14.5,
+            kicker: 'Progress',
+            title: 'Milestones get\na celebration.',
+            body:
+                'Review your 25th save and your Ribbon Spirit celebrates '
+                'with you. Once, never nagging.',
           ),
         ],
         phone: PhoneRig(
@@ -233,12 +252,31 @@ void main() {
               scale: 1.3,
             ),
             Pose(
-              7.0,
+              5.6,
               focus: onScreen(206, 420),
               at: const Offset(1350, 520),
               scale: 1.3,
             ),
-            const Pose(8.0),
+            const Pose(6.5),
+            const Pose(7.6),
+            Pose(
+              8.4,
+              focus: onScreen(206, 330),
+              at: const Offset(1350, 540),
+              scale: 1.3,
+            ),
+            Pose(
+              9.2,
+              focus: onScreen(206, 330),
+              at: const Offset(1350, 540),
+              scale: 1.3,
+            ),
+            Pose(
+              10.2,
+              focus: onScreen(206, 446),
+              at: const Offset(1350, 540),
+              scale: 1.15,
+            ),
           ],
           screen: app.widget(),
         ),
@@ -249,45 +287,43 @@ void main() {
     final deck =
         film.tester.getCenter(find.text('Reviewed this week').first) +
         const Offset(70, 110);
-    await film.until(2.6);
+    await film.until(2.4);
     await film.drag(
       deck,
       const Offset(-330, 30),
       seconds: 0.32,
       curve: Curves.easeIn,
     );
-    await film.until(4.2);
+    await film.until(3.8);
     await film.drag(
       deck,
       const Offset(-330, 30),
       seconds: 0.32,
       curve: Curves.easeIn,
     );
-    await film.until(5.8);
+    await film.until(5.2);
     await film.drag(
       deck,
       const Offset(-330, 30),
       seconds: 0.32,
       curve: Curves.easeIn,
     );
-    await film.until(8.2);
-    await film.drag(
-      const Offset(1350, 820),
-      const Offset(0, -380),
-      seconds: 1.0,
-    );
-    await film.until(10.5);
+    await film.until(7.4);
+    await film.tap(find.byKey(const ValueKey('nav-today')));
+    await film.until(8.8);
+    await film.tap(find.byKey(const ValueKey('review-reviewed')));
+    await film.until(14.5);
   });
 
   shoot('08_serverpod', (film) async {
     await film.open(const Stage(extra: [ServerpodCard()]));
-    await film.until(13);
+    await film.until(12);
   });
 
   shoot('09_close', (film) async {
     await film.precache(spiritArt('happy'));
     await film.open(const Stage(extra: [CloseCard()]));
-    await film.until(8);
+    await film.until(7);
   });
 }
 

@@ -290,10 +290,7 @@ class HookCard extends StatelessWidget {
               fadeRise(
                 t,
                 8.4,
-                Text(
-                  'Try it without an account.',
-                  style: Words.body(32),
-                ),
+                Text('Try it without an account.', style: Words.body(32)),
               ),
             ],
           ),
@@ -410,6 +407,20 @@ class ServerpodCard extends StatelessWidget {
                 'Migrations checked in',
               ],
               color: PinneColors.mint,
+            ),
+          ),
+        ),
+        Positioned(
+          left: 130,
+          top: 880,
+          right: 130,
+          child: fadeRise(
+            t,
+            5.0,
+            Text(
+              'Set up for Serverpod Cloud: managed Postgres, automatic '
+              'migrations and durable future calls.',
+              style: Words.body(26).copyWith(color: PinneColors.lilac),
             ),
           ),
         ),

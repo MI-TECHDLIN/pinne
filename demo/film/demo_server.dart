@@ -345,26 +345,23 @@ class _DemoReview extends EndpointReview {
   Future<ReviewEventReceipt> record(ReviewEventDraft draft) async {
     client.onReviewed?.call(draft);
     return ReviewEventReceipt(
-        event: ReviewEvent(
-          id: const Uuid().v4obj(),
-          ownerId: Sample.owner,
-          itemId: draft.itemId,
-          clientEventId: draft.clientEventId,
-          eventType: draft.eventType,
-          occurredAt: draft.occurredAt,
-          timezone: draft.timezone,
-          effectiveLocalDate: draft.occurredAt.toIso8601String().substring(
-            0,
-            10,
-          ),
-        ),
-        progress: ItemProgress(
-          ownerId: Sample.owner,
-          itemId: draft.itemId,
-          firstReviewedAt: draft.occurredAt,
-          lastReviewedAt: draft.occurredAt,
-        ),
-      );
+      event: ReviewEvent(
+        id: const Uuid().v4obj(),
+        ownerId: Sample.owner,
+        itemId: draft.itemId,
+        clientEventId: draft.clientEventId,
+        eventType: draft.eventType,
+        occurredAt: draft.occurredAt,
+        timezone: draft.timezone,
+        effectiveLocalDate: draft.occurredAt.toIso8601String().substring(0, 10),
+      ),
+      progress: ItemProgress(
+        ownerId: Sample.owner,
+        itemId: draft.itemId,
+        firstReviewedAt: draft.occurredAt,
+        lastReviewedAt: draft.occurredAt,
+      ),
+    );
   }
 }
 

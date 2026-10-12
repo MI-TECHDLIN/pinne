@@ -78,7 +78,7 @@ void captureScenes() {
           ),
           Cue(
             7.9,
-            17,
+            15.5,
             kicker: 'Capture',
             title: 'Synced, then\nfilled in.',
             body:
@@ -206,7 +206,7 @@ void captureScenes() {
       const Offset(0, -420),
       seconds: 0.8,
     );
-    await film.until(17);
+    await film.until(15.5);
   });
 
   shoot('04_search', (film) async {
@@ -220,7 +220,7 @@ void captureScenes() {
         cues: const [
           Cue(
             0.2,
-            11.5,
+            12,
             kicker: 'Find',
             title: 'Find it by what\nyou remember.',
             body:
@@ -260,41 +260,13 @@ void captureScenes() {
     final field = find.byKey(const ValueKey('search-field'));
     await film.tap(field);
     await film.type(field, 'sunday dinner video', charsPerSecond: 13);
-    await film.until(11.5);
+    await film.until(12);
   });
 
   shoot('05_today', (film) async {
-    var reviewed = false;
-    ReviewQueueResult queue() {
-      final items = Sample.items();
-      final item = reviewed ? items[3] : items[0];
-      return ReviewQueueResult(
-        entries: [
-          ReviewQueueEntry(
-            item: item,
-            dueAt: item.savedAt.add(const Duration(hours: 24)),
-            overdueMinutes: 120,
-            estimatedMinutes: 5,
-            selectionReason: 'Due for review · about 5 min (estimate)',
-          ),
-        ],
-        timeBudgetMinutes: 10,
-        eligibleCount: reviewed ? 1 : 2,
-      );
-    }
-
+    final due = DueQueue([Sample.items()[0], Sample.items()[3]]);
     final app = FilmApp(
-      client: DemoClient(queue: queue),
-      progress: DemoProgressApi(
-        milestones: [
-          ProgressMilestone(
-            key: 'reviews-25',
-            kind: MilestoneKind.reviewCount,
-            value: 25,
-            celebrated: false,
-          ),
-        ],
-      ),
+      client: DemoClient(queue: due.result, onSnoozed: due.remove),
     );
     for (final name in ['onboarding', 'navbar']) {
       await film.precache(NetworkImage(Sample.thumb(name)));
@@ -304,7 +276,7 @@ void captureScenes() {
         cues: const [
           Cue(
             0.2,
-            6.6,
+            7.2,
             kicker: 'Come back',
             title: 'A day later,\nit comes back.',
             body:
@@ -312,13 +284,13 @@ void captureScenes() {
                 'back with your note on why. Lime means due now.',
           ),
           Cue(
-            6.9,
-            15,
+            7.5,
+            14,
             kicker: 'Come back',
-            title: 'Reviewed. Or later.',
+            title: 'Review it, snooze it,\nor let it go.',
             body:
-                'One tap counts it, or remind me later. Milestones get a '
-                'small celebration from your Ribbon Spirit.',
+                'A small queue sized to the time you have. Remind me later '
+                'brings it back tomorrow.',
           ),
         ],
         phone: PhoneRig(
@@ -327,26 +299,50 @@ void captureScenes() {
             const Pose(0.8),
             Pose(
               1.9,
-              focus: onScreen(206, 470),
+              focus: onScreen(206, 400),
               at: const Offset(1350, 540),
-              scale: 1.28,
+              scale: 1.3,
             ),
             Pose(
-              5.4,
-              focus: onScreen(206, 470),
+              11.6,
+              focus: onScreen(206, 400),
               at: const Offset(1350, 540),
-              scale: 1.28,
+              scale: 1.3,
             ),
-            const Pose(6.3),
+            const Pose(12.6),
           ],
           screen: app.widget(),
         ),
       ),
     );
     await settle(film.tester);
-    await film.until(6.6);
-    reviewed = true;
-    await film.tap(find.byKey(const ValueKey('review-reviewed')));
-    await film.until(15);
+    await film.until(6.9);
+    await film.tap(find.byKey(const ValueKey('review-remind')));
+    await film.until(14);
   });
+}
+
+/// The server's review queue for the film: due items in order, each about
+/// five minutes, minus whatever was snoozed.
+class DueQueue {
+  DueQueue(this.items);
+
+  final List<Item> items;
+
+  void remove(UuidValue id) => items.removeWhere((item) => item.id == id);
+
+  ReviewQueueResult result() => ReviewQueueResult(
+    entries: [
+      for (final item in items)
+        ReviewQueueEntry(
+          item: item,
+          dueAt: item.savedAt.add(const Duration(hours: 24)),
+          overdueMinutes: 120,
+          estimatedMinutes: 5,
+          selectionReason: 'Due for review · about 5 min (estimate)',
+        ),
+    ],
+    timeBudgetMinutes: 10,
+    eligibleCount: items.length,
+  );
 }
