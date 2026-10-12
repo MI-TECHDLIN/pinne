@@ -225,9 +225,13 @@ keeps serving traffic.
 
 ## 6. Build and install the Android judge APK
 
-The app already resolves the server in this order: `SERVER_URL` build define,
-`assets/config.json`, then local development. Build with the Cloud API URL and
-its trailing slash:
+The app resolves the server in this order: the `SERVER_URL` build define, then,
+in release builds for phones, the hosted API
+`https://pinneapp.api.serverpod.space/`, then `assets/config.json`, which points
+at local development (`http://localhost:8080`). A release APK built without
+the define therefore talks to the `pinneapp` project; pass `SERVER_URL`
+explicitly anyway, with its trailing slash, so the build never depends on the
+project id baked into the app:
 
 ```powershell
 cd <PINNE_REPOSITORY>\pinne_flutter
@@ -263,16 +267,22 @@ guest credentials are device-bound.
 Use the exact APK that will be submitted and a normal mobile internet
 connection, not the laptop's local network.
 
-- Open Pinne and confirm Settings reports the server as healthy.
+- Run the health request from section 5 and confirm `ok: true`. The app has no
+  server indicator; a mis-built APK shows a friendly network error at sign-in.
 - Tap **Try without an account** and reach a private empty workspace.
+- On Today, tap **Load examples**. Confirm three example saves are in the
+  review queue right away, open one, and mark it **Reviewed**.
 - Save a public web link and confirm it appears in Collections → Saved. On
   Growth, confirm preview metadata appears after processing; on Starter,
-  confirm the saved link remains usable without a preview.
-- With `groqApiKey` set, confirm an AI suggestion appears and can be accepted
-  or dismissed. A deterministic suggestion alone does not prove Groq ran; use
-  the startup log and stored task provider in Insights to confirm the path.
-- Confirm the saved item enters the Today review queue and can be opened and
-  reviewed.
+  expect "Preview not available. The link is saved."
+- Confirm AI suggestions (collection, tags, a summary) appear on the saved card
+  and can be accepted or dismissed. Rules alone can also suggest a collection
+  and tags, so this does not prove Groq ran: the server log prints
+  `AI organizing provider: groq` and `Future calls: enabled|disabled` at
+  startup and a warning with the failure class or HTTP status whenever a Groq
+  call falls back to rules; Insights also shows the stored task provider.
+- The new save enters the Today review queue about 24 hours later; it is not
+  due during the same session.
 - Open Planner, provide device-calendar permission only if desired, create a
   plan, and verify unknown/stale availability is never shown as free.
 - Open Progress and confirm the newly completed review affects the report.
@@ -291,9 +301,12 @@ Replace the two placeholders and paste this into the private testing field:
 > `https://<PROJECT_ID>.api.serverpod.space/`; no local server is needed. Open
 > Pinne while online and tap **Try without an account**. No email, code, or
 > external account is required, and the guest receives a private empty
-> workspace. Save a link or note on Today, confirm it appears in Collections →
-> Saved, and open it from the review queue to complete the save-and-review
-> flow. You can also try Planner and Progress. Alternatively, choose email
+> workspace. On Today, tap **Load examples**: three of the six example saves are
+> due for review right away, so open one from the review queue and tap
+> **Reviewed** to complete the save-and-review flow. Then save a link or note of
+> your own on Today and find it in Collections → Saved, where you can accept or
+> dismiss its AI suggestions. New saves come back for review in about 24 hours.
+> You can also try Planner and Progress. Alternatively, choose email
 > sign-in and use the demo email and password supplied separately in this
 > private submission. Guest access is device-bound: do not sign out, clear app
 > data, or uninstall until testing is complete.

@@ -14,10 +14,15 @@ The server selects the first configured provider in this order:
 3. Deterministic local rules when neither key is set.
 
 `PINNE_AI_ENABLED=false` forces local rules globally. A user can also turn
-remote organizing off. The server logs only the selected provider name at
-startup, never a key. Missing configuration, the per-user quota, an HTTP error,
-a rate limit, timeout, or invalid model output all fall back to local rules and
-never make a save fail.
+remote organizing off. At startup the server logs the selected provider name
+and whether future calls are enabled, never a key. Missing configuration, the
+per-user quota, an HTTP error, a rate limit, timeout, or invalid model output
+all fall back to local rules and never make a save fail. A remote failure is
+logged as a warning with its class or HTTP status only (`describeAiFailure` in
+`pinne_server/lib/src/ai/ai_provider.dart`), never the key, prompt or response.
+
+The app lists an item's pending suggestions on its Saved card, where each can
+be accepted (it updates the item's collections, tags or summary) or dismissed.
 
 The same organizing service runs through durable future calls when the hosting
 plan supports them and inline on Serverpod Cloud Starter. Starter still cannot

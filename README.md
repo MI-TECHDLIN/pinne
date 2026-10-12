@@ -5,9 +5,11 @@ web, keep a note on why you saved each one, find them again by what you
 remember, get a gentle reminder about a day later, plan review sessions and see
 honest progress.
 
-It is built fully on [Serverpod](https://serverpod.dev) 4 with a Flutter app.
-This repository holds the foundation: models, owner-scoped endpoints, auth
-and the app shell. Product features land on top of it.
+It is built fully on [Serverpod](https://serverpod.dev) 4 with a Flutter
+Android app. The live backend runs on Serverpod Cloud; deploying it and
+building the judge APK are covered in [docs/deploy.md](docs/deploy.md). AI
+organizing (Groq, with deterministic rules as the fallback) and its data terms
+are described in [docs/ai.md](docs/ai.md).
 
 ## Layout
 
@@ -73,8 +75,9 @@ All commands start from the repo root.
 
    The server URL comes from `--dart-define=SERVER_URL=...`, else `apiUrl` in
    `pinne_flutter/assets/config.json`, else `http://localhost:8080/`. On a
-   physical phone use your computer's LAN address. Settings shows whether
-   the server answers.
+   physical phone use your computer's LAN address. Release builds for phones
+   without `SERVER_URL` use the hosted API,
+   `https://pinneapp.api.serverpod.space/`, instead of `config.json`.
 
 ## Sign-in
 
@@ -136,12 +139,15 @@ the Google button. Never commit real credentials.
 1. Install the supplied Pinne APK and open it while connected to the internet.
 2. Tap **Try without an account**. No email, code or external account is
    required; the guest gets a private, empty Pinne workspace immediately.
-3. Save a link or note on Today, then confirm it appears in Collections →
-   Saved. Open it from the review queue to complete the core save-and-review
-   flow.
-4. Alternatively, choose email sign-in and use the demo email and password
+3. On Today, tap **Load examples**. Three of the six example saves are due
+   right away: open one from the review queue and tap **Reviewed** to complete
+   the save-and-review flow. Progress counts each review.
+4. Save a link or note on Today and confirm it appears in Collections → Saved,
+   with any AI suggestions (collection, tags, summary) to accept or dismiss.
+   New saves come back for review in about 24 hours.
+5. Alternatively, choose email sign-in and use the demo email and password
    included in the private submission form. That account also starts empty.
-5. Guest access is device-bound. Do not sign out, clear app data or uninstall
+6. Guest access is device-bound. Do not sign out, clear app data or uninstall
    until testing is complete, because Serverpod 4.0.3 cannot yet link that
    guest to email in place.
 
@@ -282,3 +288,8 @@ FLUX.2 [klein] 4B (Apache-2.0). Prompts, seeds, the licence record and the
 AI-use disclosure for the submission are in
 [`docs/ai-art/README.md`](docs/ai-art/README.md). The animated spirit in the
 app is drawn in code (`docs/ribbon-spirit/`).
+
+## License
+
+Pinne is released under the [MIT License](LICENSE). The licence record for
+the AI-generated art is in [docs/ai-art/README.md](docs/ai-art/README.md).

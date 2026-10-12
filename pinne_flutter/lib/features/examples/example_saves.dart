@@ -113,7 +113,7 @@ class _ExampleSavesCardState extends ConsumerState<ExampleSavesCard> {
           Text(
             loaded
                 ? '${value.exampleItemCount} clearly labelled examples are in your account.'
-                : 'Add six labelled examples across two collections. Nothing is added unless you choose it.',
+                : 'Add six labelled examples across two collections, three of them ready to review now. Nothing is added unless you choose it.',
             style: const TextStyle(color: PinneColors.muted, height: 1.4),
           ),
           const SizedBox(height: PinneSpacing.md),
