@@ -3,32 +3,45 @@ import '../generated/protocol.dart';
 import '../generated/serverpod.dart';
 import 'ai_organization_service.dart';
 import 'ai_output_validator.dart';
+import 'ai_provider_registry.dart';
 
 class AiOrganizingEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  static const disclosure =
+  static const groqDisclosure =
       "When AI organizing is on, Pinne sends the saved item's title, URL, "
       'source platform, your intention and notes, plus the names and IDs of '
-      "your collections, to Google's Gemini API. It does not fetch the page. "
-      "On Gemini's unpaid tier, Google may use prompts and responses to "
-      'improve its products, and human reviewers may process them. Google '
-      'says not to send sensitive, confidential or personal information. '
-      'Different data terms apply in the EEA, Switzerland and UK. Turn this '
-      'off to keep organizing on this server with simple rules only.';
+      'your collections and any stored preview description, author and site '
+      "name, to GroqCloud. It does not fetch the page. Groq says it does not "
+      'train models on inputs or outputs unless the customer explicitly '
+      'permits it. Requests are not retained by default, but Groq may '
+      'temporarily log inputs and outputs for up to 30 days for reliability '
+      'or suspected abuse. '
+      'Turn this off to organize on this server with simple rules only.';
 
-  static const unavailableDisclosure =
-      'AI organizing is unavailable on this hosting plan.';
+  static const geminiDisclosure =
+      "When AI organizing is on, Pinne sends the saved item's title, URL, "
+      'source platform, your intention and notes, plus the names and IDs of '
+      'your collections and any stored preview description, author and site '
+      "name, to Google's Gemini API. It does not fetch the page. On Gemini's "
+      'unpaid tier, Google may use prompts and responses to improve its '
+      'products, and human reviewers may process them. Google says not to '
+      'send sensitive, confidential or personal information. Different data '
+      'terms apply in the EEA, Switzerland and UK. Turn this off to organize '
+      'on this server with simple rules only.';
+
+  static const deterministicDisclosure =
+      'AI organizing uses simple rules on this server and sends no saved-item '
+      'metadata to an external AI provider.';
+
+  static String get disclosure => switch (AiProviderRegistry.remote?.name) {
+    'groq' => groqDisclosure,
+    'gemini' => geminiDisclosure,
+    _ => deterministicDisclosure,
+  };
 
   Future<AiSettings> getSettings(Session session) async {
-    if (!session.serverpod.config.futureCall.enabled) {
-      return AiSettings(
-        available: false,
-        enabled: false,
-        disclosure: unavailableDisclosure,
-      );
-    }
     final preference = await AiPreference.db.findFirstRow(
       session,
       where: (t) => t.ownerId.equals(session.ownerId),
@@ -41,13 +54,6 @@ class AiOrganizingEndpoint extends Endpoint {
   }
 
   Future<AiSettings> setEnabled(Session session, bool enabled) async {
-    if (!session.serverpod.config.futureCall.enabled) {
-      return AiSettings(
-        available: false,
-        enabled: false,
-        disclosure: unavailableDisclosure,
-      );
-    }
     await AiPreference.db.upsertRow(
       session,
       AiPreference(ownerId: session.ownerId, enabled: enabled),
@@ -79,20 +85,23 @@ class AiOrganizingEndpoint extends Endpoint {
 
   Future<void> reprocess(Session session, UuidValue itemId) async {
     final item = await _ownedItem(session, itemId);
-    if (!session.serverpod.config.futureCall.enabled) {
-      throw ValidationException(
-        message: 'AI organizing is unavailable on this hosting plan.',
-      );
-    }
     await AiOrganizationService.instance.enqueue(
       session,
       ownerId: item.ownerId,
       itemId: itemId,
     );
-    await session.serverpod.futureCalls
-        .callWithDelay(Duration.zero, identifier: 'ai-organize-$itemId')
-        .aiOrganize
-        .process(itemId, item.ownerId);
+    if (session.serverpod.config.futureCall.enabled) {
+      await session.serverpod.futureCalls
+          .callWithDelay(Duration.zero, identifier: 'ai-organize-$itemId')
+          .aiOrganize
+          .process(itemId, item.ownerId);
+    } else {
+      await AiOrganizationService.instance.process(
+        session,
+        itemId: itemId,
+        ownerId: item.ownerId,
+      );
+    }
   }
 
   Future<AiSuggestion> accept(

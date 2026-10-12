@@ -1,81 +1,105 @@
 # AI organizing
 
 Pinne organizes only metadata already saved with an item. It does not fetch the
-saved URL in this phase.
+saved URL in this phase. The provider receives the title, URL, source platform,
+the user's intention and note, collection names and IDs, and any stored preview
+description, author, and site name.
 
-## Verified Gemini choice (2026-10-07)
+## Provider selection
 
-Pinne uses the stable model id `gemini-3.5-flash-lite`. Google's model page
-describes it as a low-latency, cost-effective model for high-throughput, simple
-data extraction and confirms that it supports structured outputs:
-<https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite>.
-That is a better fit for short classification JSON than a larger reasoning
-model. The pricing page lists standard input and output as free of charge on
-the free tier: <https://ai.google.dev/gemini-api/docs/pricing>.
+The server selects the first configured provider in this order:
 
-Google measures limits as requests per minute (RPM), input tokens per minute
-(TPM), and requests per day (RPD). Limits are per project, daily quotas reset at
-midnight Pacific time, and a limit breach returns HTTP 429. As of the
-verification date, Google does not publish one guaranteed numeric free-tier
-limit: the effective limits depend on the project and model, are shown in AI
-Studio, may change with account status, and are explicitly not guaranteed.
-Check the project's live RPM, TPM, and RPD values before a demo:
-<https://ai.google.dev/gemini-api/docs/rate-limits>. Pinne additionally caps
-remote organizing at 20 items per owner per UTC day; over-cap work uses the
-local deterministic fallback.
+1. Groq when `groqApiKey` is set.
+2. Gemini when `geminiApiKey` is set and no Groq key is set.
+3. Deterministic local rules when neither key is set.
 
-The REST request sends an `x-goog-api-key` header in a `POST` request to
-`/v1beta/interactions`. Its documented structured-output shape is:
+`PINNE_AI_ENABLED=false` forces local rules globally. A user can also turn
+remote organizing off. The server logs only the selected provider name at
+startup, never a key. Missing configuration, the per-user quota, an HTTP error,
+a rate limit, timeout, or invalid model output all fall back to local rules and
+never make a save fail.
+
+The same organizing service runs through durable future calls when the hosting
+plan supports them and inline on Serverpod Cloud Starter. Starter still cannot
+run link previews, so its link organizing uses saved metadata only.
+
+## Verified Groq choice (2026-10-12)
+
+The primary model is the production model ID `openai/gpt-oss-20b`. Groq lists
+it as a hosted model and supports strict structured outputs for it:
+
+- <https://console.groq.com/docs/models>
+- <https://console.groq.com/docs/structured-outputs>
+
+Groq's Services Agreement permits API integration into customer applications
+for end users and includes EEA/Swiss regional terms. Its free service has no
+published EEA, Switzerland, or UK exclusion like Gemini's unpaid tier:
+<https://console.groq.com/docs/legal/services-agreement>.
+
+Pinne posts directly to
+`https://api.groq.com/openai/v1/chat/completions` with a bearer token. The
+request uses low reasoning effort and the documented strict JSON Schema shape:
 
 ```json
 {
-  "model": "gemini-3.5-flash-lite",
-  "input": "...",
+  "model": "openai/gpt-oss-20b",
+  "messages": [
+    {"role": "system", "content": "..."},
+    {"role": "user", "content": "..."}
+  ],
   "response_format": {
-    "type": "text",
-    "mime_type": "application/json",
-    "schema": {"type": "object", "properties": {}}
+    "type": "json_schema",
+    "json_schema": {
+      "name": "pinne_organization",
+      "strict": true,
+      "schema": {"type": "object", "additionalProperties": false}
+    }
   },
-  "store": false
+  "reasoning_effort": "low"
 }
 ```
 
-This is the current official REST shape:
-<https://ai.google.dev/gemini-api/docs/structured-output>.
-The response is still parsed and validated as untrusted input.
+Strict mode constrains generation to the schema, but Pinne still treats the
+response as untrusted. Groq and Gemini share one prompt and schema, and the
+same local validator checks fields, collection ownership, lengths, tag count,
+summary sentence count, and evidence coverage before anything is stored.
+
+Groq publishes Free-plan limits for GPT-OSS 20B of 30 requests/minute, 1,000
+requests/day, 8,000 tokens/minute, and 200,000 tokens/day. Account-specific
+limits remain authoritative: <https://console.groq.com/docs/rate-limits>.
+Pinne separately caps remote organizing at 20 items per owner per UTC day.
 
 ## Data use and disclosure
 
-Google's Gemini API Additional Terms say that for unpaid services Google may
-use submitted content and generated responses to provide, improve, and develop
-its products and machine-learning technologies. Human reviewers may read,
-annotate, and process input and output; Google says it disconnects reviewed
-data from the Google Account, API key, and Cloud project first, and warns not
-to submit sensitive, confidential, or personal information. The terms provide
-different treatment in the EEA, Switzerland, and UK. Source:
-<https://ai.google.dev/gemini-api/terms>.
+Groq's Services Agreement says it may not train or fine-tune models on inputs
+or outputs unless the customer explicitly gives permission or instructions.
+Groq's data documentation says inference requests are not retained by default.
+It may temporarily log inputs and outputs for platform reliability or suspected
+abuse, for up to 30 days; Groq also offers a Zero Data Retention control.
 
-The same terms also say an API client made available to users in the EEA,
-Switzerland, or the UK may use only Paid Services. Confirm the deployment
-region and audience before exposing Gemini-backed organizing publicly there;
-the deterministic provider remains available everywhere.
+- <https://console.groq.com/docs/legal/services-agreement>
+- <https://console.groq.com/docs/your-data>
 
-The Settings disclosure therefore says:
+The Settings disclosure for Groq therefore says:
 
 > When AI organizing is on, Pinne sends the saved item's title, URL, source
 > platform, your intention and notes, plus the names and IDs of your
-> collections, to Google's Gemini API. It does not fetch the page. On Gemini's
-> unpaid tier, Google may use prompts and responses to improve its products,
-> and human reviewers may process them. Google says not to send sensitive,
-> confidential or personal information. Different data terms apply in the
-> EEA, Switzerland and UK. Turn this off to keep organizing on this server
-> with simple rules only.
+> collections and any stored preview description, author and site name, to
+> GroqCloud. It does not fetch the page. Groq says it does not train models on
+> inputs or outputs unless the customer explicitly permits it. Requests are
+> not retained by default, but Groq may temporarily log inputs and outputs for
+> up to 30 days for reliability or suspected abuse. Turn this off to organize
+> on this server with simple rules only.
+
+If only `geminiApiKey` is configured, Settings instead names Gemini and shows
+the Gemini-specific disclosure. Gemini remains secondary because its unpaid
+service may not power an API client exposed to users in the EEA, Switzerland,
+or the UK. See <https://ai.google.dev/gemini-api/terms>.
 
 ## Configuration
 
-`geminiApiKey` belongs only in the git-ignored
-`pinne_server/config/passwords.yaml` or the matching
-`SERVERPOD_PASSWORD_geminiApiKey` environment variable. The remote provider is
-selected when the key exists. Set `PINNE_AI_ENABLED=false` to force the
-deterministic provider globally. A missing key, user opt-out, quota cap, HTTP
-error, timeout, or malformed response also falls back without failing a save.
+Create a Groq key at <https://console.groq.com/keys>. Store `groqApiKey` only
+in the git-ignored `pinne_server/config/passwords.yaml` or the matching
+`SERVERPOD_PASSWORD_groqApiKey` environment variable. `geminiApiKey` may remain
+configured as a secondary provider, but it is selected only when the Groq key
+is absent. Never commit either key.

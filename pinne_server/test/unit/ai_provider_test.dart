@@ -1,10 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:pinne_server/src/ai/ai_output_validator.dart';
+import 'package:pinne_server/src/ai/ai_organizing_endpoint.dart';
 import 'package:pinne_server/src/ai/ai_provider.dart';
+import 'package:pinne_server/src/ai/ai_provider_registry.dart';
 import 'package:pinne_server/src/ai/fake_ai_provider.dart';
 import 'package:pinne_server/src/ai/gemini_provider.dart';
+import 'package:pinne_server/src/ai/groq_provider.dart';
 import 'package:pinne_server/src/ai/no_ai_provider.dart';
 import 'package:pinne_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
@@ -194,4 +198,211 @@ void main() {
       {'id': owned.toString(), 'name': 'Flutter'},
     );
   });
+
+  test(
+    'Groq uses strict JSON Schema and validates successful output',
+    () async {
+      late Uri sentUri;
+      late Map<String, String> sentHeaders;
+      late Map<String, dynamic> sentBody;
+      final client = _FakeGroqHttpClient((uri, headers, body, timeout) async {
+        sentUri = uri;
+        sentHeaders = headers;
+        sentBody = jsonDecode(body) as Map<String, dynamic>;
+        return GroqHttpResponse(
+          statusCode: HttpStatus.ok,
+          body: jsonEncode({
+            'choices': [
+              {
+                'message': {
+                  'content': jsonEncode({
+                    'collectionIds': [owned.toString()],
+                    'tags': [' Flutter '],
+                    'summary': 'A layout reference.',
+                    'rationale': 'Title and URL match.',
+                    'evidenceCoverage': 'metadata_only',
+                    'uncertain': false,
+                  }),
+                },
+              },
+            ],
+          }),
+        );
+      });
+      final provider = GroqProvider(apiKey: 'test-key', httpClient: client);
+
+      final result = await provider.organize(
+        evidence: evidence,
+        collections: [AiCollectionOption(id: owned, name: 'Flutter')],
+      );
+
+      expect(
+        sentUri.toString(),
+        'https://api.groq.com/openai/v1/chat/completions',
+      );
+      expect(sentHeaders[HttpHeaders.authorizationHeader], 'Bearer test-key');
+      expect(sentBody['model'], GroqProvider.modelId);
+      expect(sentBody['reasoning_effort'], 'low');
+      expect(sentBody['include_reasoning'], isFalse);
+      final responseFormat =
+          sentBody['response_format'] as Map<String, dynamic>;
+      expect(responseFormat['type'], 'json_schema');
+      final jsonSchema = responseFormat['json_schema'] as Map<String, dynamic>;
+      expect(jsonSchema['strict'], isTrue);
+      final schema = jsonSchema['schema'] as Map<String, dynamic>;
+      expect(schema['additionalProperties'], isFalse);
+      final messages = sentBody['messages'] as List;
+      final userMessage = messages.last as Map<String, dynamic>;
+      final input = jsonDecode(userMessage['content'] as String);
+      expect(input['input']['evidence']['title'], 'Flutter layout');
+      expect(result.provider, 'groq');
+      expect(result.collectionIds, [owned]);
+      expect(result.tags, ['flutter']);
+    },
+  );
+
+  test('Groq rejects schema-violating model output', () async {
+    final client = _FakeGroqHttpClient((uri, headers, body, timeout) async {
+      return GroqHttpResponse(
+        statusCode: HttpStatus.ok,
+        body: jsonEncode({
+          'choices': [
+            {
+              'message': {
+                'content': jsonEncode({
+                  'collectionIds': <String>[],
+                  'tags': <String>[],
+                  'summary': null,
+                  'rationale': 'No match.',
+                  'evidenceCoverage': 'metadata_only',
+                  'uncertain': true,
+                  'unexpected': true,
+                }),
+              },
+            },
+          ],
+        }),
+      );
+    });
+
+    await expectLater(
+      GroqProvider(apiKey: 'test-key', httpClient: client).organize(
+        evidence: evidence,
+        collections: const [],
+      ),
+      throwsFormatException,
+    );
+  });
+
+  test('Groq 429 with Retry-After falls back immediately', () async {
+    var calls = 0;
+    final client = _FakeGroqHttpClient((uri, headers, body, timeout) async {
+      calls++;
+      return const GroqHttpResponse(
+        statusCode: HttpStatus.tooManyRequests,
+        body: '{}',
+        retryAfter: '17',
+      );
+    });
+    final provider = FallbackAiProvider(
+      primary: GroqProvider(apiKey: 'test-key', httpClient: client),
+      fallback: const NoAiProvider(),
+    );
+
+    final result = await provider.organize(
+      evidence: evidence,
+      collections: [AiCollectionOption(id: owned, name: 'Flutter')],
+    );
+
+    expect(calls, 1);
+    expect(result.provider, 'rules');
+  });
+
+  test('Groq timeout falls back to deterministic rules', () async {
+    final client = _FakeGroqHttpClient((uri, headers, body, timeout) {
+      return Future<GroqHttpResponse>.error(
+        TimeoutException('fake request timeout', timeout),
+      );
+    });
+    final provider = FallbackAiProvider(
+      primary: GroqProvider(apiKey: 'test-key', httpClient: client),
+      fallback: const NoAiProvider(),
+    );
+
+    final result = await provider.organize(
+      evidence: evidence,
+      collections: [AiCollectionOption(id: owned, name: 'Flutter')],
+    );
+
+    expect(result.provider, 'rules');
+  });
+
+  group('AI provider registry', () {
+    tearDown(AiProviderRegistry.resetForTest);
+
+    test('selects Groq before Gemini', () {
+      AiProviderRegistry.configure(
+        groqApiKey: 'groq-key',
+        geminiApiKey: 'gemini-key',
+        enabled: true,
+      );
+
+      expect(AiProviderRegistry.remote, isA<GroqProvider>());
+      expect(AiProviderRegistry.activeProviderName, 'groq');
+      expect(AiOrganizingEndpoint.disclosure, contains('GroqCloud'));
+      expect(AiOrganizingEndpoint.disclosure, isNot(contains('Gemini')));
+    });
+
+    test('selects Gemini only when Groq key is missing', () {
+      AiProviderRegistry.configure(
+        geminiApiKey: 'gemini-key',
+        enabled: true,
+      );
+
+      expect(AiProviderRegistry.remote, isA<GeminiProvider>());
+      expect(AiProviderRegistry.activeProviderName, 'gemini');
+    });
+
+    test('missing keys do not select a remote provider', () {
+      AiProviderRegistry.configure(
+        groqApiKey: '  ',
+        geminiApiKey: null,
+        enabled: true,
+      );
+
+      expect(AiProviderRegistry.remote, isNull);
+      expect(AiProviderRegistry.activeProviderName, 'rules');
+    });
+
+    test('global off switch forces deterministic organizing', () {
+      AiProviderRegistry.configure(groqApiKey: 'groq-key', enabled: false);
+
+      expect(AiProviderRegistry.remote, isNull);
+      expect(AiProviderRegistry.activeProviderName, 'rules');
+      expect(
+        AiProviderRegistry.provider(userEnabled: true),
+        isA<NoAiProvider>(),
+      );
+    });
+  });
+}
+
+class _FakeGroqHttpClient implements GroqHttpClient {
+  _FakeGroqHttpClient(this.handler);
+
+  final Future<GroqHttpResponse> Function(
+    Uri uri,
+    Map<String, String> headers,
+    String body,
+    Duration timeout,
+  )
+  handler;
+
+  @override
+  Future<GroqHttpResponse> post(
+    Uri uri, {
+    required Map<String, String> headers,
+    required String body,
+    required Duration timeout,
+  }) => handler(uri, headers, body, timeout);
 }

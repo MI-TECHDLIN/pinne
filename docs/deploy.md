@@ -19,16 +19,12 @@ passwords, and provides `private` and `public` file storages. Pinne connects to
 those storages through `ServerpodCloudProvider`; outside Cloud it retains the
 existing `DatabaseCloudStorage` fallback.
 
-Pinne's link previews, AI organizing, and hourly scan for roughly 24-hour
-resurfacing digests all use durable future calls. The production config
-explicitly enables scheduling and execution. The current **Starter** plan is
-$5/month and includes one small podlet, one small database, and two storage
-buckets, but it disables future calls. **Growth** is therefore the functional
-choice for Pinne; it is currently $20/month plus metered usage and enables
-future calls. The first Cloud project currently includes a one-month free
-trial without a credit card. Confirm the price and trial shown in the Console
-before choosing: these commercial details can change. No Cloud project or plan
-has been created from this repository.
+Link previews and the hourly scan for roughly 24-hour resurfacing digests use
+durable future calls. AI organizing uses future calls when available and runs
+inline on **Starter**. Starter keeps capture, review, and organizing usable but
+does not provide link previews or the digest scheduler. **Growth** enables the
+full background feature set. Confirm current plans and prices in the Console;
+commercial details can change.
 
 Official references:
 
@@ -86,9 +82,9 @@ In the browser/terminal flow:
    Save it as `<PROJECT_ID>` for the commands below.
 2. Leave the managed database enabled. Pinne persists auth, saves, reviews,
    plans, progress, future calls, and local-storage fallback records.
-3. Choose a plan. Growth is needed for Pinne's future-call features; Starter
-   can host basic synchronous endpoints but cannot run previews, AI organizing,
-   or the digest scheduler as implemented.
+3. Choose a plan. Starter supports the core synchronous flow and inline AI
+   organizing. Growth is needed for link previews, background AI organizing,
+   and the digest scheduler.
 4. Accept the proposed pre-deploy hooks: `serverpod generate` and
    `serverpod run flutter_build`. A failing pre-deploy hook stops the upload.
 5. Do not copy placeholder production values from `config/passwords.yaml`.
@@ -122,10 +118,10 @@ values that must not remain in shell history, put the value alone in a file
 outside the repository and use `--from-file C:\secure\value.txt` in place of
 the quoted value; securely delete that file afterward.
 
-Required for the judged Gemini path and the private demo login:
+Required for the judged Groq path and the private demo login:
 
 ```powershell
-serverpod cloud password set geminiApiKey "<GEMINI_API_KEY>"
+serverpod cloud password set groqApiKey "<GROQ_API_KEY>"
 serverpod cloud password set demoAccountEmail "<JUDGE_DEMO_EMAIL>"
 serverpod cloud password set demoAccountPassword "<STRONG_JUDGE_DEMO_PASSWORD>"
 ```
@@ -154,9 +150,10 @@ serverpod cloud password list
 serverpod cloud deploy --redeploy
 ```
 
-Gemini is optional for server availability. If its key is absent or a request
-fails, Pinne uses its deterministic organizing provider. Link previews do not
-need a key and fetch public HTTP(S) metadata from the server with SSRF, size,
+Groq is optional for server availability. If its key is absent, Pinne tries a
+configured `geminiApiKey`, then uses deterministic organizing. Any provider
+failure also falls back to deterministic rules. Link previews do not need an
+AI key and fetch public HTTP(S) metadata from the server with SSRF, size,
 redirect, and timeout restrictions.
 
 ## 4. Seed the empty judge account
@@ -268,11 +265,12 @@ connection, not the laptop's local network.
 
 - Open Pinne and confirm Settings reports the server as healthy.
 - Tap **Try without an account** and reach a private empty workspace.
-- Save a public web link. Confirm it appears in Collections → Saved and its
-  preview metadata appears after processing.
-- With `geminiApiKey` set, confirm an AI suggestion appears and can be accepted
-  or dismissed. A deterministic suggestion alone does not prove Gemini ran;
-  use Insights/logs to confirm the provider path if needed.
+- Save a public web link and confirm it appears in Collections → Saved. On
+  Growth, confirm preview metadata appears after processing; on Starter,
+  confirm the saved link remains usable without a preview.
+- With `groqApiKey` set, confirm an AI suggestion appears and can be accepted
+  or dismissed. A deterministic suggestion alone does not prove Groq ran; use
+  the startup log and stored task provider in Insights to confirm the path.
 - Confirm the saved item enters the Today review queue and can be opened and
   reviewed.
 - Open Planner, provide device-calendar permission only if desired, create a
