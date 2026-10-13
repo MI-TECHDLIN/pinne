@@ -7,16 +7,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'paths.dart';
+import 'tour.dart';
 
-/// One touch shown on screen so viewers can follow taps and drags.
-class Touch {
-  Touch(this.position, this.downAt);
-  Offset position;
-  final double downAt;
-  double? upAt;
-}
-
-/// Scene time and touches, readable anywhere in the stage. The real app
+/// Scene time and the guided tour, readable anywhere in the stage. The real app
 /// inside the phone never depends on it, so it is not rebuilt by it.
 class FilmScope extends InheritedWidget {
   const FilmScope({super.key, required this.film, required super.child});
@@ -66,13 +59,22 @@ class Film {
   final WidgetTester tester;
   final String name;
   final clock = ValueNotifier<double>(0);
-  final touches = <Touch>[];
+
+  /// The camera, cursor and callouts over an app screen; null for cards.
+  Guide? guide;
   final _boundary = GlobalKey();
   Process? _encoder;
   int frame = 0;
+
+  /// Scene time when the scene's last essential moment ended, before the
+  /// spare footage.
+  double? core;
   Duration _pumped = Duration.zero;
 
   double get t => frame / fps;
+
+  /// Starts the guided tour, with the screen first framed by [home].
+  Guide guided([Shot? home]) => guide = Guide(this, home);
 
   Future<void> open(Widget stage) async {
     tester.view.physicalSize = size;
@@ -124,6 +126,7 @@ class Film {
     final target = Duration(microseconds: (frame + 1) * 1000000 ~/ fps);
     await tester.pump(target - _pumped);
     _pumped = target;
+    guide?.afterFrame();
     await _capture();
     frame++;
   }
@@ -161,6 +164,7 @@ class Film {
   Future<void> hold(double seconds) => until(t + seconds);
 
   Future<void> finish() async {
+    guide?.write();
     // Unmount the app and let its timers (outbox backoff, polling) run out.
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(minutes: 30));
@@ -173,45 +177,6 @@ class Film {
       });
     }
     debugDisableShadows = true;
-  }
-
-  /// A visible tap: the finger rests briefly so the ripple and the touch
-  /// marker both read on video.
-  Future<void> tap(Finder finder, {Offset offset = Offset.zero}) async {
-    final at = tester.getCenter(finder.first) + offset;
-    final touch = Touch(at, t);
-    touches.add(touch);
-    final gesture = await tester.startGesture(at);
-    await hold(0.2);
-    await gesture.up();
-    touch.upAt = t;
-  }
-
-  /// Drags with eased motion over [seconds]; slow enough not to fling unless
-  /// the curve ends fast.
-  Future<void> drag(
-    Offset from,
-    Offset by, {
-    double seconds = 0.6,
-    Curve curve = Curves.easeInOutCubic,
-    double rest = 0.12,
-  }) async {
-    final touch = Touch(from, t);
-    touches.add(touch);
-    final gesture = await tester.startGesture(from);
-    await hold(rest);
-    final start = t;
-    var moved = Offset.zero;
-    while (t < start + seconds - 1e-6) {
-      final p = curve.transform(((t - start + 1 / fps) / seconds).clamp(0, 1));
-      final next = by * p;
-      await gesture.moveBy(next - moved);
-      moved = next;
-      touch.position = from + moved;
-      await step();
-    }
-    await gesture.up();
-    touch.upAt = t;
   }
 
   /// Types into a text field at a human pace.

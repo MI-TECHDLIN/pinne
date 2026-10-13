@@ -119,8 +119,8 @@ List<_Tile> _heap() {
   return tiles;
 }
 
-/// Saves pile up, then the Ribbon Spirit and the name. The phone with the
-/// real onboarding is the scene's own [PhoneRig].
+/// Saves pile up, then the Ribbon Spirit and the name. The app screen with
+/// the real onboarding is the scene's own [Stage.screen].
 class HookCard extends StatelessWidget {
   HookCard({super.key});
 
@@ -129,7 +129,7 @@ class HookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AtTime(
     builder: (context, t, _) {
-      final away = ramp(t, 5.0, 1.0, Curves.easeInOutCubic);
+      final away = ramp(t, 8.9, 0.9, Curves.easeInOutCubic);
       final heap = Stack(
         children: [
           for (final tile in _tiles)
@@ -157,7 +157,7 @@ class HookCard extends StatelessWidget {
             right: 0,
             top: 150,
             child: Opacity(
-              opacity: 1 - ramp(t, 4.9, 0.5),
+              opacity: 1 - ramp(t, 9.0, 0.5),
               child: Column(
                 children: [
                   fadeRise(
@@ -168,7 +168,7 @@ class HookCard extends StatelessWidget {
                   const SizedBox(height: 14),
                   fadeRise(
                     t,
-                    2.6,
+                    6.9,
                     Text(
                       'And never come back to it.',
                       style: Words.light(88).copyWith(color: PinneColors.lilac),
@@ -178,7 +178,8 @@ class HookCard extends StatelessWidget {
               ),
             ),
           ),
-          if (t > 5.3) _reveal(t),
+          if (t > 9.4 && t < 15.2) _compare(t),
+          if (t > 15.0) _reveal(t),
         ],
       );
     },
@@ -218,13 +219,143 @@ class HookCard extends StatelessWidget {
     );
   }
 
-  /// The name and the Ribbon Spirit on the left, beside the phone that
-  /// slides in with the real onboarding.
-  Widget _reveal(double t) {
+  /// "Why not just use bookmarks?": the save button in each app against
+  /// Pinne, read in silence between the hook's lines. Sources in
+  /// demo/README.md.
+  Widget _compare(double t) {
+    final out = 1 - ramp(t, 14.7, 0.5, Curves.easeInCubic);
+    Widget row(
+      double at,
+      IconData icon,
+      Color color,
+      String text,
+      bool pinne,
+    ) => fadeRise(
+      t,
+      at,
+      Padding(
+        padding: const EdgeInsets.only(top: 22),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 38),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Text(
+                text,
+                style: Words.body(34).copyWith(
+                  color: pinne ? PinneColors.text : PinneColors.muted,
+                  height: 1.25,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      dy: 16,
+      span: 0.45,
+    );
+    Widget column(double at, String title, List<String> lines, bool pinne) =>
+        fadeRise(
+          t,
+          at,
+          GlassPanel(
+            tint: pinne ? const Color(0x337C5CFF) : PinneColors.glass,
+            padding: const EdgeInsets.fromLTRB(40, 34, 40, 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Words.title(52).copyWith(
+                    color: pinne ? PinneColors.text : PinneColors.muted,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                for (final (i, line) in lines.indexed)
+                  row(
+                    at + 0.35 + i * 0.28,
+                    pinne
+                        ? Icons.check_circle_rounded
+                        : Icons.remove_circle_outline,
+                    pinne ? PinneColors.mint : PinneColors.muted,
+                    line,
+                    pinne,
+                  ),
+              ],
+            ),
+          ),
+        );
+    return Opacity(
+      opacity: out,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 96,
+            child: Center(
+              child: fadeRise(
+                t,
+                9.6,
+                Text('Why not just use bookmarks?', style: Words.title(80)),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 120,
+            top: 250,
+            width: 800,
+            child: column(9.9, 'Saved in each app', const [
+              'Scattered across apps',
+              'No note on why you saved it',
+              'Never brought back to you',
+              'Saving feels like progress, but isn’t',
+            ], false),
+          ),
+          Positioned(
+            left: 1000,
+            top: 250,
+            width: 800,
+            child: column(11.0, 'Pinne', const [
+              'One home for saves from every app',
+              'Your why, saved with it',
+              'Comes back at the right time',
+              'Honest progress: only reviews count',
+              'AI organizing that you control',
+            ], true),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 960,
+            child: Center(
+              child: fadeRise(
+                t,
+                12.8,
+                Text(
+                  'A browser study found people add bookmarks far faster '
+                  'than they delete them. Cockburn et al., 2003',
+                  style: Words.body(26).copyWith(color: PinneColors.lilac),
+                ),
+                dy: 10,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// The name and the Ribbon Spirit on the left, beside the app screen
+  /// that rises in with the real onboarding. They make way for the tour.
+  Widget _reveal(double t) =>
+      Opacity(opacity: 1 - ramp(t, 18.2, 0.5), child: _brand(t));
+
+  Widget _brand(double t) {
     const x = 510.0;
-    final p = ramp(t, 5.4, 1.1, Curves.easeOutBack);
-    final glow = ramp(t, 5.3, 1.4);
-    final float = math.sin((t - 5.3) * 1.6) * 8;
+    final p = ramp(t, 15.2, 1.1, Curves.easeOutBack);
+    final glow = ramp(t, 15.1, 1.4);
+    final float = math.sin((t - 15.1) * 1.6) * 8;
     return Stack(
       children: [
         Positioned(
@@ -249,7 +380,7 @@ class HookCard extends StatelessWidget {
           width: 320,
           height: 400,
           child: Opacity(
-            opacity: ramp(t, 5.4, 0.5),
+            opacity: ramp(t, 15.2, 0.5),
             child: Transform.scale(
               scale: 0.6 + 0.4 * p,
               child: Image(image: spiritArt('welcome'), fit: BoxFit.contain),
@@ -264,7 +395,7 @@ class HookCard extends StatelessWidget {
             children: [
               fadeRise(
                 t,
-                6.1,
+                15.7,
                 Text(
                   'Pinne',
                   style: TextStyle(
@@ -280,39 +411,10 @@ class HookCard extends StatelessWidget {
               const SizedBox(height: 24),
               fadeRise(
                 t,
-                6.7,
+                16.5,
                 Text(
                   'Save it. Come back to it.',
                   style: Words.light(54).copyWith(color: PinneColors.lilac),
-                ),
-              ),
-              const SizedBox(height: 40),
-              // Sign-in, then the first-visit tour.
-              SizedBox(
-                height: 46,
-                child: Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    Opacity(
-                      opacity: 1 - ramp(t, 12.6, 0.3),
-                      child: fadeRise(
-                        t,
-                        9.4,
-                        Text(
-                          'Try it without an account.',
-                          style: Words.body(32),
-                        ),
-                      ),
-                    ),
-                    fadeRise(
-                      t,
-                      12.9,
-                      Text(
-                        'A short tour shows you around.',
-                        style: Words.body(32),
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ],
@@ -363,7 +465,7 @@ const _serverRows = [
 ];
 
 /// When each server row appears, in step with the narration.
-const _rowTimes = [3.0, 4.6, 6.2, 8.2, 10.4];
+const _rowTimes = [3.5, 5.1, 8.0, 11.0, 12.6];
 
 class ServerpodCard extends StatelessWidget {
   const ServerpodCard({super.key});
@@ -426,7 +528,7 @@ class ServerpodCard extends StatelessWidget {
           width: 330,
           child: fadeRise(
             t,
-            4.4,
+            5.1,
             _SideBox(
               icon: Icons.dns_rounded,
               title: 'PostgreSQL',
@@ -444,7 +546,7 @@ class ServerpodCard extends StatelessWidget {
           right: 130,
           child: fadeRise(
             t,
-            12.0,
+            13.7,
             Row(
               children: [
                 const Icon(
@@ -474,7 +576,7 @@ class ServerpodCard extends StatelessWidget {
           width: 330,
           child: fadeRise(
             t,
-            8.0,
+            11.0,
             _SideBox(
               icon: Icons.auto_awesome_rounded,
               title: 'Groq (gpt-oss-20b)',
@@ -524,14 +626,14 @@ class _Wires extends CustomPainter {
     wire(
       const Offset(1360, 450),
       const Offset(1460, 450),
-      4.8,
+      5.5,
       PinneColors.mint,
       null,
     );
     wire(
       const Offset(1360, 760),
       const Offset(1460, 760),
-      8.4,
+      11.4,
       PinneColors.pink,
       null,
     );

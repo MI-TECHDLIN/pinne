@@ -8,6 +8,7 @@ import 'package:pinne_flutter/features/capture/capture_store.dart';
 import 'package:pinne_flutter/features/onboarding/onboarding_store.dart';
 import 'package:pinne_flutter/features/planner/planner_providers.dart';
 import 'package:pinne_flutter/features/progress/progress_providers.dart';
+import 'package:pinne_flutter/features/search/search_history.dart';
 import 'package:pinne_flutter/features/settings/profile_provider.dart';
 import 'package:pinne_flutter/features/today/today_greeting.dart';
 import 'package:pinne_flutter/features/today/today_providers.dart';
@@ -46,6 +47,8 @@ class FilmApp {
     DemoProgressApi? progress,
     CaptureStore? store,
     bool firstRun = false,
+    bool freshGuest = false,
+    List<String> recentSearches = const [],
   }) : client = client ?? DemoClient(),
        capture = capture ?? DemoCaptureApi(),
        progress = progress ?? DemoProgressApi(),
@@ -64,7 +67,9 @@ class FilmApp {
           await Future<void>.delayed(const Duration(milliseconds: 500));
           (container.read(signedInProvider.notifier) as _SignedIn).signIn();
         }),
-        tourStoreProvider.overrideWithValue(MemoryTourStore(seen: !firstRun)),
+        tourStoreProvider.overrideWithValue(
+          MemoryTourStore(seen: !firstRun && !freshGuest),
+        ),
         todayClockProvider.overrideWithValue(Sample.filmNow),
         greetingClockProvider.overrideWithValue(() => Sample.filmNow),
         // "Start small. Stay curious.", the same line in every scene.
@@ -77,6 +82,9 @@ class FilmApp {
         deviceTimezoneProvider.overrideWith((ref) async => 'UTC'),
         icsSharerProvider.overrideWithValue((ics) async {}),
         openExternalUrlProvider.overrideWithValue((uri) async => true),
+        searchHistoryStoreProvider.overrideWithValue(
+          MemorySearchHistoryStore(recentSearches),
+        ),
       ],
     );
   }

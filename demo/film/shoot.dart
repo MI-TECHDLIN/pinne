@@ -13,6 +13,7 @@ void shoot(String name, Future<void> Function(Film film) body) {
     final film = Film(tester, name);
     try {
       await body(film);
+      film.core = film.t;
       // Spare footage, so the edit can hold a scene for the narration.
       await film.hold(Film.tail);
     } finally {
@@ -38,3 +39,9 @@ Future<void> settle(WidgetTester tester, [double seconds = 1.5]) async {
 
 Finder text(String value) => find.text(value);
 Finder key(String value) => find.byKey(ValueKey(value));
+
+/// The whole button labelled [label], so a callout keeps clear of all of it.
+Finder button(String label) => find.ancestor(
+  of: find.text(label),
+  matching: find.bySubtype<ButtonStyleButton>(),
+);
