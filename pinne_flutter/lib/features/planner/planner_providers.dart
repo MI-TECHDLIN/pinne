@@ -158,6 +158,8 @@ class PlannerController extends AsyncNotifier<PlannerState> {
 
   @override
   Future<PlannerState> build() async {
+    final accountId = ref.watch(accountIdProvider);
+    if (accountId == null) throw StateError('Sign in before opening Planner.');
     final deviceId = await ref.watch(deviceIdProvider.future);
     var prefs = await _api.preferences();
     if (prefs.id == null) {

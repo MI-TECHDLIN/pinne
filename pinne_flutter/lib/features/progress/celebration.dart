@@ -6,6 +6,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
@@ -82,7 +83,12 @@ class CelebrationController extends Notifier<Set<String>> {
   bool _showing = false;
 
   @override
-  Set<String> build() => {};
+  Set<String> build() {
+    ref.watch(accountIdProvider);
+    _unsaved.clear();
+    _showing = false;
+    return {};
+  }
 
   /// Celebrates whatever in [milestones] has not been celebrated yet.
   Future<void> celebrate(

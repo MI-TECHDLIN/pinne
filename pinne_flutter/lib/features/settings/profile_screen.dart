@@ -11,6 +11,7 @@ import '../../theme/pinne_tokens.dart';
 import '../../ui/feedback/friendly_error.dart';
 import '../../ui/pinne_loading.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
+import '../auth/sign_out.dart';
 import 'profile_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -370,29 +371,8 @@ class _SignedInAccountCard extends ConsumerWidget {
   );
 
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text(
-          'Your saves stay with this account. Sign in again to see them.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            key: const ValueKey('confirm-sign-out'),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Sign out'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    await ref.read(signedInProvider.notifier).signOut();
-    if (context.mounted) context.go(Routes.signIn);
+    final signedOut = await confirmSignOut(context, ref);
+    if (signedOut && context.mounted) context.go(Routes.signIn);
   }
 }
 

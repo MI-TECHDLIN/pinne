@@ -14,6 +14,7 @@ import 'package:pinne_flutter/theme/pinne_tokens.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../support/golden_theme.dart';
+import '../support/test_account.dart';
 import 'fake_progress_api.dart';
 
 class _SignedIn extends SignedInNotifier {
@@ -33,6 +34,7 @@ void main() {
   }) => ProviderScope(
     overrides: [
       signedInProvider.overrideWith(_SignedIn.new),
+      accountIdProvider.overrideWith(TestAccountId.new),
       avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 0)),
       if (api != null) progressApiProvider.overrideWithValue(api),
     ],

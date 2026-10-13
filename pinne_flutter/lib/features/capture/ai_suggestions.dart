@@ -64,7 +64,7 @@ class AiSuggestionsNotifier extends AsyncNotifier<List<AiSuggestionChipData>> {
 
   @override
   Future<List<AiSuggestionChipData>> build() async {
-    if (!ref.watch(signedInProvider)) return const [];
+    if (ref.watch(accountIdProvider) == null) return const [];
     final api = ref.watch(aiSuggestionsApiProvider);
     final suggestions = await api.pending(itemId);
     final names = suggestions.any((s) => s.kind == AiSuggestionKind.collection)

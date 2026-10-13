@@ -62,7 +62,10 @@ Future<Client> createServerClient(String serverUrl) async {
   final client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()
     ..authSessionManager = FlutterAuthSessionManager();
-  unawaited(client.auth.initialize());
+  // Local data is keyed by the authenticated user. Do not expose the app (or
+  // the share extension) to capture storage until the persisted identity is
+  // known.
+  await client.auth.initialize();
   if (googleSignInConfigured && !kIsWeb) {
     unawaited(client.auth.initializeGoogleSignIn());
   }
@@ -99,6 +102,15 @@ final signedInProvider = NotifierProvider<SignedInNotifier, bool>(
   SignedInNotifier.new,
 );
 
+/// The stable account key for every user-scoped local cache and provider.
+///
+/// Watching a boolean is insufficient when one authenticated account is
+/// replaced by another. The auth id changes for guest, email and demo users,
+/// so dependents are disposed and rebuilt with the new account's data.
+final accountIdProvider = NotifierProvider<AccountIdNotifier, String?>(
+  AccountIdNotifier.new,
+);
+
 /// Device-only account data that must not survive an explicit sign-out.
 final signOutCleanupProvider = Provider<Future<void> Function()>(
   (ref) => () async {},
@@ -117,5 +129,17 @@ class SignedInNotifier extends Notifier<bool> {
   Future<void> signOut() async {
     await ref.read(clientProvider).auth.signOutDevice();
     await ref.read(signOutCleanupProvider)();
+  }
+}
+
+class AccountIdNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    if (!ref.watch(signedInProvider)) return null;
+    final auth = ref.watch(clientProvider).auth;
+    void sync() => state = auth.authInfo?.authUserId.toString();
+    auth.authInfoListenable.addListener(sync);
+    ref.onDispose(() => auth.authInfoListenable.removeListener(sync));
+    return auth.authInfo?.authUserId.toString();
   }
 }

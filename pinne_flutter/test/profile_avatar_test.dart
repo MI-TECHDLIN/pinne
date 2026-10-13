@@ -16,7 +16,7 @@ class _SignedIn extends SignedInNotifier {
   bool build() => true;
 }
 
-class _Alice extends ProfileUserId {
+class _Alice extends AccountIdNotifier {
   @override
   String? build() => '00000000-0000-4000-8000-000000000001';
 }
@@ -60,7 +60,7 @@ void main() {
       final endpoint = _ProfileEndpoint();
       Widget app() => ProviderScope(
         overrides: [
-          profileUserIdProvider.overrideWith(_Alice.new),
+          accountIdProvider.overrideWith(_Alice.new),
           profileEndpointProvider.overrideWithValue(endpoint),
           signedInProvider.overrideWith(_SignedIn.new),
           serverUrlProvider.overrideWithValue('http://localhost:8080/'),

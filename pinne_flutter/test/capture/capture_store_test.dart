@@ -150,6 +150,38 @@ void main() {
         older.clientItemId,
       ]);
     });
+
+    test('are visible and deduplicated only inside their account', () {
+      const accountA = 'account-a';
+      const accountB = 'account-b';
+      final input = parseCaptureInput('https://example.com/private');
+      final savedA = store.save(input, accountId: accountA);
+
+      expect(store.captures(accountId: accountB), isEmpty);
+      expect(
+        store.findSaved(input.link!, accountId: accountB),
+        isNull,
+        reason: "B must not see A's local duplicate marker",
+      );
+
+      final savedB = store.save(input, accountId: accountB);
+      expect(
+        store.captures(accountId: accountA).single.clientItemId,
+        savedA.clientItemId,
+      );
+      expect(
+        store.captures(accountId: accountB).single.clientItemId,
+        savedB.clientItemId,
+      );
+      expect(
+        store.dueOperations(DateTime.now(), accountId: accountA),
+        hasLength(1),
+      );
+      expect(
+        store.dueOperations(DateTime.now(), accountId: accountB),
+        hasLength(1),
+      );
+    });
   });
 
   group('held captures', () {

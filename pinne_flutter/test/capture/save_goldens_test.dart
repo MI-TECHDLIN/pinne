@@ -22,6 +22,11 @@ class _SignedOut extends SignedInNotifier {
   bool build() => false;
 }
 
+class _AccountId extends AccountIdNotifier {
+  @override
+  String? build() => CaptureStore.testAccountId;
+}
+
 /// Renders the Save-a-link sheet over the pill nav and the save celebration
 /// for docs/capture/.
 void main() {
@@ -39,6 +44,7 @@ void main() {
           captureStoreProvider.overrideWithValue(store),
           captureApiProvider.overrideWithValue(FakeCaptureServer()),
           signedInProvider.overrideWith(_SignedOut.new),
+          accountIdProvider.overrideWith(_AccountId.new),
           avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 0)),
         ],
         child: MaterialApp(

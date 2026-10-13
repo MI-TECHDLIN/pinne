@@ -30,6 +30,11 @@ class _SignedIn extends SignedInNotifier {
   bool build() => value;
 }
 
+class _AccountId extends AccountIdNotifier {
+  @override
+  String? build() => CaptureStore.testAccountId;
+}
+
 Widget _host(
   Widget child, {
   required CaptureStore store,
@@ -42,6 +47,7 @@ Widget _host(
       captureStoreProvider.overrideWithValue(store),
       captureApiProvider.overrideWithValue(server ?? FakeCaptureServer()),
       signedInProvider.overrideWith(() => _SignedIn(signedIn)),
+      accountIdProvider.overrideWith(_AccountId.new),
       avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 0)),
     ],
     child: MaterialApp(

@@ -25,8 +25,14 @@ class SavedSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(captureStoreProvider) == null) return const SizedBox();
+    final accountId = ref.watch(accountIdProvider);
     final capturesState = ref.watch(capturesProvider);
-    final captures = capturesState.value ?? const [];
+    final captures = capturesState.isLoading
+        ? const <LocalCapture>[]
+        : [
+            for (final capture in capturesState.value ?? const <LocalCapture>[])
+              if (capture.accountId == accountId) capture,
+          ];
     final signedIn = ref.watch(signedInProvider);
     final serverItems = ref.watch(savedItemsProvider).value ?? const [];
     final byId = {
@@ -56,7 +62,7 @@ class SavedSection extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: PinneSpacing.md),
-        if (capturesState.isLoading && !capturesState.hasValue)
+        if (capturesState.isLoading)
           const _SavedListSkeleton()
         else if (captures.isEmpty)
           const ComingSoonCard(
@@ -229,10 +235,13 @@ class SavedCard extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: () {
+                    final accountId = ref.read(accountIdProvider);
+                    if (accountId == null) return;
                     ref
                         .read(captureStoreProvider)
                         ?.retry(
                           capture.clientItemId,
+                          accountId: accountId,
                         );
                     final sync = ref.read(outboxSyncProvider);
                     if (sync != null) unawaited(sync.drain());

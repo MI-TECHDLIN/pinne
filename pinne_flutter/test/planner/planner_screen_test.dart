@@ -13,6 +13,7 @@ import 'package:pinne_flutter/ui/motion.dart';
 
 import 'fake_device_calendar.dart';
 import 'fake_planner_api.dart';
+import '../support/test_account.dart';
 
 class _SignedIn extends SignedInNotifier {
   @override
@@ -43,6 +44,7 @@ void main() {
       ProviderScope(
         overrides: [
           signedInProvider.overrideWith(_SignedIn.new),
+          accountIdProvider.overrideWith(TestAccountId.new),
           motionPreferenceProvider.overrideWith(_Reduced.new),
           plannerApiProvider.overrideWithValue(server),
           deviceCalendarApiProvider.overrideWithValue(phone),

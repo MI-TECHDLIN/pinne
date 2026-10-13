@@ -15,7 +15,7 @@ import '../../ui/feedback/toast.dart';
 final exampleSavesStatusProvider =
     FutureProvider.autoDispose<ExampleSavesStatus?>(
       (ref) async {
-        if (!ref.watch(signedInProvider)) return null;
+        if (ref.watch(accountIdProvider) == null) return null;
         return ref.watch(clientProvider).exampleSaves.status();
       },
     );

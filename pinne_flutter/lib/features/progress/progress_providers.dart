@@ -53,7 +53,10 @@ final progressPeriodProvider =
 
 class ProgressPeriodNotifier extends Notifier<ProgressPeriod> {
   @override
-  ProgressPeriod build() => ProgressPeriod.thisWeek;
+  ProgressPeriod build() {
+    ref.watch(accountIdProvider);
+    return ProgressPeriod.thisWeek;
+  }
 
   void select(ProgressPeriod period) => state = period;
 }
@@ -62,7 +65,7 @@ class ProgressPeriodNotifier extends Notifier<ProgressPeriod> {
 final progressReportProvider = FutureProvider.autoDispose<ProgressReport?>((
   ref,
 ) {
-  if (!ref.watch(signedInProvider)) return null;
+  if (ref.watch(accountIdProvider) == null) return null;
   final period = ref.watch(progressPeriodProvider);
   return ref.watch(progressApiProvider).report(progressQuery(period));
 });
@@ -70,7 +73,7 @@ final progressReportProvider = FutureProvider.autoDispose<ProgressReport?>((
 final progressSettingsProvider = FutureProvider.autoDispose<ProgressSettings?>((
   ref,
 ) {
-  if (!ref.watch(signedInProvider)) return null;
+  if (ref.watch(accountIdProvider) == null) return null;
   return ref.watch(progressApiProvider).settings();
 });
 

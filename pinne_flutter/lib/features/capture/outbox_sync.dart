@@ -90,6 +90,7 @@ class OutboxSync {
   OutboxSync({
     required this.store,
     required this.api,
+    required this.accountId,
     required this.canSync,
     this.backoff = const BackoffPolicy(),
     DateTime Function()? clock,
@@ -99,6 +100,7 @@ class OutboxSync {
 
   final CaptureStore store;
   final CaptureApi api;
+  final String accountId;
 
   /// Whether a user is signed in. Captures wait locally while it is false.
   final bool Function() canSync;
@@ -129,17 +131,24 @@ class OutboxSync {
     do {
       _again = false;
       if (!canSync()) break;
-      store.releaseStaleHolds(now: _clock());
-      for (final operation in store.dueOperations(_clock())) {
+      store.releaseStaleHolds(accountId: accountId, now: _clock());
+      for (final operation in store.dueOperations(
+        _clock(),
+        accountId: accountId,
+      )) {
         if (_disposed) return confirmed;
         try {
           final result = await api.capture(operation.draft);
-          store.confirm(operation.operationId, result);
+          store.confirm(operation.operationId, result, accountId: accountId);
           confirmed++;
         } on Exception catch (error) {
           switch (classifySyncError(error)) {
             case SyncFailure.rejected:
-              store.markFailed(operation.operationId, _describe(error));
+              store.markFailed(
+                operation.operationId,
+                _describe(error),
+                accountId: accountId,
+              );
               continue;
             case SyncFailure.signedOut:
               // Wait for the next sign-in to call drain again.
@@ -150,6 +159,7 @@ class OutboxSync {
               final attempts = operation.attempts + 1;
               store.scheduleRetry(
                 operation.operationId,
+                accountId: accountId,
                 attempts: attempts,
                 nextAttemptAt: _clock().add(backoff.delay(attempts, _jitter())),
                 error: _describe(error),
@@ -166,7 +176,7 @@ class OutboxSync {
   void _scheduleNext() {
     _timer?.cancel();
     _timer = null;
-    final next = store.nextDueAt();
+    final next = store.nextDueAt(accountId: accountId);
     if (_disposed || next == null || !canSync()) return;
     final wait = next.difference(_clock());
     _timer = Timer(wait.isNegative ? Duration.zero : wait, drain);
