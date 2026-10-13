@@ -18,8 +18,20 @@ remote organizing off. At startup the server logs the selected provider name
 and whether future calls are enabled, never a key. Missing configuration, the
 per-user quota, an HTTP error, a rate limit, timeout, or invalid model output
 all fall back to local rules and never make a save fail. A remote failure is
-logged as a warning with its class or HTTP status only (`describeAiFailure` in
-`pinne_server/lib/src/ai/ai_provider.dart`), never the key, prompt or response.
+logged with its class, HTTP status and Groq error code only
+(`describeAiFailure` in `pinne_server/lib/src/ai/ai_provider.dart`), never the
+key, prompt or response. Production keeps session logs off the console, so
+`AiProviderStatus` (`pinne_server/lib/src/ai/ai_provider_status.dart`) also
+writes `AI organizing: <provider> failed, organized with rules instead:
+<reason>` to stderr, where `serverpod cloud log` shows it. The public
+`health/aiProviderStatus` call returns the configured provider and its last
+outcome in that server process.
+
+The local rules always tag a link with its site (`docs.flutter.dev` is
+`flutter`), add known keywords from the title, URL, intention, note and
+preview, suggest collections whose names appear in that text, and quote the
+stored preview description (or a note's own text, at most two sentences) as
+the summary. They never invent a summary when no such text is stored.
 
 The app lists an item's pending suggestions on its Saved card, where each can
 be accepted (it updates the item's collections, tags or summary) or dismissed.
@@ -63,6 +75,10 @@ request uses low reasoning effort and the documented strict JSON Schema shape:
   "reasoning_effort": "low"
 }
 ```
+
+The schema uses only keywords Groq documents for strict mode (no `maxItems`
+or `minItems`); tag and id counts are enforced locally. A response cut off at
+`max_completion_tokens` is reported as such instead of as malformed JSON.
 
 Strict mode constrains generation to the schema, but Pinne still treats the
 response as untrusted. Groq and Gemini share one prompt and schema, and the
