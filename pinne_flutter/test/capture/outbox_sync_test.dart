@@ -136,6 +136,27 @@ void main() {
     expect(store.outboxLength(), 0);
   });
 
+  test('an unsynced capture is not sent after the account changes', () async {
+    // Account A saves while offline, then signs out. The current unscoped
+    // outbox cannot distinguish this operation from account B's work.
+    signedIn = false;
+    save('A private save');
+
+    signedIn = true; // Account B signs in on the same phone.
+    await sync.drain();
+
+    expect(
+      server.calls,
+      isEmpty,
+      reason: "account A's outbox must never be uploaded as account B",
+    );
+    expect(
+      store.outboxLength(),
+      1,
+      reason: 'A can sync it after signing back in',
+    );
+  });
+
   test(
     'an expired session stops the pass without counting an attempt',
     () async {
