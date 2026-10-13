@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/pinne_tokens.dart';
+import '../ribbon_spirit/ribbon_cutout.dart';
 import 'friendly_error.dart';
 
 /// A designed failure state: the Ribbon Spirit, what happened in plain words,
@@ -283,7 +284,10 @@ class _SpiritBadge extends StatelessWidget {
           Positioned.fill(
             child: Padding(
               padding: EdgeInsets.all(size * .08),
-              child: Image.asset(friendly.art, fit: BoxFit.contain),
+              child: RibbonSpiritCutout(
+                asset: friendly.art,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           Positioned(
