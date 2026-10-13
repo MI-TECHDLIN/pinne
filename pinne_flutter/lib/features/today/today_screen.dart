@@ -42,11 +42,11 @@ class TodayScreen extends ConsumerWidget {
 
     return TourAutoStart(
       child: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment(-0.6, -1.2),
             radius: 1.2,
-            colors: [PinneColors.glowViolet, PinneColors.midnight],
+            colors: [context.pinne.glowViolet, context.pinne.midnight],
           ),
         ),
         child: SafeArea(
@@ -162,7 +162,7 @@ class TodayScreen extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: _PastelActionTile(
-                                color: PinneColors.peach,
+                                color: context.pinne.peach,
                                 tag: 'NEXT UP',
                                 title: overview?.nextSession == null
                                     ? 'Plan a review session'
@@ -175,7 +175,7 @@ class TodayScreen extends ConsumerWidget {
                             const SizedBox(width: PinneSpacing.sm),
                             Expanded(
                               child: _PastelActionTile(
-                                color: PinneColors.mint,
+                                color: context.pinne.mint,
                                 tag: 'THIS WEEK',
                                 title:
                                     '${overview?.progress?.savedCount ?? 0} saved this week',
@@ -200,9 +200,9 @@ class TodayScreen extends ConsumerWidget {
                   Text(
                     '${data!.entries.length - 1} more fit this session. '
                     'Durations are estimates.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: PinneColors.muted,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: context.pinne.muted),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -301,8 +301,8 @@ class _TodayHeader extends StatelessWidget {
             child: Container(
               width: 48,
               height: 48,
-              decoration: const BoxDecoration(
-                color: PinneColors.glass,
+              decoration: BoxDecoration(
+                color: context.pinne.glass,
                 shape: BoxShape.circle,
               ),
               child: ClipOval(
@@ -325,9 +325,9 @@ class _TodayHeader extends StatelessWidget {
                 greeting,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PinneColors.muted,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: context.pinne.muted),
               ),
               Text(
                 name,
@@ -342,9 +342,9 @@ class _TodayHeader extends StatelessWidget {
           key: const ValueKey('today-search'),
           tooltip: 'Search saved items',
           style: IconButton.styleFrom(
-            backgroundColor: PinneColors.glass,
-            foregroundColor: PinneColors.text,
-            side: const BorderSide(color: PinneColors.line),
+            backgroundColor: context.pinne.glass,
+            foregroundColor: context.pinne.text,
+            side: BorderSide(color: context.pinne.line),
           ),
           onPressed: onSearch,
           icon: const Icon(Icons.search_rounded),
@@ -355,11 +355,7 @@ class _TodayHeader extends StatelessWidget {
 }
 
 class TodayHeadline extends StatelessWidget {
-  const TodayHeadline({
-    super.key,
-    required this.count,
-    required this.calmLine,
-  });
+  const TodayHeadline({super.key, required this.count, required this.calmLine});
 
   final int count;
   final String calmLine;
@@ -481,7 +477,7 @@ class TodaySpiritCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(PinneSpacing.lg),
       decoration: BoxDecoration(
-        color: PinneColors.accentDue,
+        color: context.pinne.accentDue,
         borderRadius: BorderRadius.circular(PinneRadii.card),
       ),
       child: Column(
@@ -492,8 +488,8 @@ class TodaySpiritCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'DUE NOW · $estimate MIN EST.',
-                  style: const TextStyle(
-                    color: PinneColors.ink,
+                  style: TextStyle(
+                    color: context.pinne.ink,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
@@ -504,8 +500,8 @@ class TodaySpiritCard extends StatelessWidget {
                 key: const ValueKey('review-open'),
                 tooltip: 'Open saved item',
                 style: IconButton.styleFrom(
-                  backgroundColor: PinneColors.ink,
-                  foregroundColor: PinneColors.accentDue,
+                  backgroundColor: context.pinne.ink,
+                  foregroundColor: context.pinne.accentDue,
                 ),
                 onPressed: onOpen,
                 icon: const Icon(Icons.north_east_rounded),
@@ -521,10 +517,7 @@ class TodaySpiritCard extends StatelessWidget {
                 surface: PreviewChipSurface.due,
               ),
               if (item.durationSeconds case final seconds?)
-                DurationChip(
-                  seconds: seconds,
-                  surface: PreviewChipSurface.due,
-                ),
+                DurationChip(seconds: seconds, surface: PreviewChipSurface.due),
             ],
           ),
           if (item.isExample) ...[
@@ -537,7 +530,7 @@ class TodaySpiritCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: PinneColors.ink,
+              color: context.pinne.ink,
               fontWeight: FontWeight.w600,
               height: 1.08,
             ),
@@ -548,7 +541,7 @@ class TodaySpiritCard extends StatelessWidget {
               note!.trim(),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: PinneColors.ink, height: 1.35),
+              style: TextStyle(color: context.pinne.ink, height: 1.35),
             ),
           ],
           const SizedBox(height: PinneSpacing.md),
@@ -558,8 +551,8 @@ class TodaySpiritCard extends StatelessWidget {
               key: const ValueKey('today-budget-progress'),
               value: progress,
               minHeight: 6,
-              color: PinneColors.ink,
-              backgroundColor: PinneColors.ink.withValues(alpha: 0.16),
+              color: context.pinne.ink,
+              backgroundColor: context.pinne.ink.withValues(alpha: 0.16),
             ),
           ),
           const SizedBox(height: PinneSpacing.md),
@@ -570,8 +563,8 @@ class TodaySpiritCard extends StatelessWidget {
               FilledButton.icon(
                 key: const ValueKey('review-reviewed'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: PinneColors.ink,
-                  foregroundColor: PinneColors.text,
+                  backgroundColor: context.pinne.ink,
+                  foregroundColor: context.pinne.text,
                   visualDensity: VisualDensity.compact,
                 ),
                 onPressed: onReviewed,
@@ -581,8 +574,8 @@ class TodaySpiritCard extends StatelessWidget {
               OutlinedButton(
                 key: const ValueKey('review-remind'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: PinneColors.ink,
-                  side: const BorderSide(color: PinneColors.ink),
+                  foregroundColor: context.pinne.ink,
+                  side: BorderSide(color: context.pinne.ink),
                   visualDensity: VisualDensity.compact,
                 ),
                 onPressed: onRemindLater,
@@ -591,7 +584,7 @@ class TodaySpiritCard extends StatelessWidget {
               TextButton(
                 key: const ValueKey('review-archive'),
                 style: TextButton.styleFrom(
-                  foregroundColor: PinneColors.ink,
+                  foregroundColor: context.pinne.ink,
                   visualDensity: VisualDensity.compact,
                 ),
                 onPressed: onArchive,
@@ -635,7 +628,7 @@ class _EmptyQueueCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 18, 112, 20),
       constraints: const BoxConstraints(minHeight: 154),
       decoration: BoxDecoration(
-        color: PinneColors.lilac,
+        color: context.pinne.lilac,
         borderRadius: BorderRadius.circular(PinneRadii.card),
       ),
       child: Stack(
@@ -644,10 +637,10 @@ class _EmptyQueueCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'ALL QUIET',
                 style: TextStyle(
-                  color: PinneColors.ink,
+                  color: context.pinne.ink,
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.4,
@@ -657,7 +650,7 @@ class _EmptyQueueCard extends StatelessWidget {
               Text(
                 'Room for a new thought',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: PinneColors.ink,
+                  color: context.pinne.ink,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -667,7 +660,7 @@ class _EmptyQueueCard extends StatelessWidget {
                     ? digestText!
                     : 'Nothing is due. Your spirit is resting.',
                 style: TextStyle(
-                  color: PinneColors.ink.withValues(alpha: 0.76),
+                  color: context.pinne.ink.withValues(alpha: 0.76),
                   height: 1.35,
                 ),
               ),
@@ -735,13 +728,13 @@ class _DayChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final foreground = today ? PinneColors.ink : PinneColors.text;
+    final foreground = today ? context.pinne.ink : context.pinne.text;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: today ? Colors.white : PinneColors.glass,
+        color: today ? Colors.white : context.pinne.glass,
         borderRadius: BorderRadius.circular(PinneRadii.chip),
-        border: Border.all(color: PinneColors.line),
+        border: Border.all(color: context.pinne.line),
       ),
       child: Column(
         children: [
@@ -821,15 +814,15 @@ class _PastelActionTile extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: PinneColors.ink.withValues(alpha: 0.12),
+                          color: context.pinne.ink.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(PinneRadii.chip),
                         ),
                         child: Text(
                           tag,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: PinneColors.ink,
+                          style: TextStyle(
+                            color: context.pinne.ink,
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
                           ),
@@ -837,7 +830,7 @@ class _PastelActionTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: PinneSpacing.xs),
-                    Icon(icon, color: PinneColors.ink, size: 18),
+                    Icon(icon, color: context.pinne.ink, size: 18),
                   ],
                 ),
                 const Spacer(),
@@ -846,7 +839,7 @@ class _PastelActionTile extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: PinneColors.ink,
+                    color: context.pinne.ink,
                     fontWeight: FontWeight.w700,
                     height: 1.12,
                   ),
@@ -856,8 +849,8 @@ class _PastelActionTile extends StatelessWidget {
                   body,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: PinneColors.ink,
+                  style: TextStyle(
+                    color: context.pinne.ink,
                     fontSize: 11,
                   ),
                 ),
@@ -874,10 +867,8 @@ class _HeroLoading extends StatelessWidget {
   const _HeroLoading();
 
   @override
-  Widget build(BuildContext context) => const PinneCardSkeleton(
-    height: 148,
-    label: 'Loading your next review',
-  );
+  Widget build(BuildContext context) =>
+      const PinneCardSkeleton(height: 148, label: 'Loading your next review');
 }
 
 const _weekdayNames = [

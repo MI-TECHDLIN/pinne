@@ -61,7 +61,7 @@ class PillNavBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xD90A0716),
                   borderRadius: BorderRadius.circular(PinneRadii.chip),
-                  border: Border.all(color: PinneColors.line),
+                  border: Border.all(color: context.pinne.line),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0xAA000000),
@@ -138,17 +138,14 @@ class _PillNavItem extends StatelessWidget {
           customBorder: const CircleBorder(),
           child: ExcludeSemantics(
             child: AnimatedSwitcher(
-              duration: motionDurationOf(
-                context,
-                PinneMotionDurations.quick,
-              ),
+              duration: motionDurationOf(context, PinneMotionDurations.quick),
               child: Icon(
                 destination.icon,
                 key: ValueKey(
                   'pill-nav-icon-${destination.label.toLowerCase()}',
                 ),
                 size: 21,
-                color: selected ? PinneColors.ink : PinneColors.muted,
+                color: selected ? context.pinne.ink : context.pinne.muted,
               ),
             ),
           ),

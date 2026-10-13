@@ -172,14 +172,14 @@ class _SampleNotice extends StatelessWidget {
           vertical: PinneSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: PinneColors.glass,
+          color: context.pinne.glass,
           borderRadius: BorderRadius.circular(PinneRadii.chip),
-          border: Border.all(color: PinneColors.line),
+          border: Border.all(color: context.pinne.line),
         ),
-        child: const Text(
+        child: Text(
           'SAMPLE COLLECTIONS',
           style: TextStyle(
-            color: PinneColors.lilac,
+            color: context.pinne.lilac,
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.7,
@@ -207,8 +207,12 @@ class _CollectionTransition extends StatelessWidget {
             pageBuilder: (context, animation, secondaryAnimation) =>
                 CollectionDetailScreen(item: item),
             transitionsBuilder:
-                (context, animation, secondaryAnimation, child) =>
-                    FadeTransition(opacity: animation, child: child),
+                (
+                  context,
+                  animation,
+                  secondaryAnimation,
+                  child,
+                ) => FadeTransition(opacity: animation, child: child),
           ),
         ),
       );
@@ -218,8 +222,8 @@ class _CollectionTransition extends StatelessWidget {
       transitionDuration: PinneMotionDurations.slow,
       transitionType: ContainerTransitionType.fadeThrough,
       closedColor: Colors.transparent,
-      openColor: PinneColors.midnight,
-      middleColor: PinneColors.midnightRaised,
+      openColor: context.pinne.midnight,
+      middleColor: context.pinne.midnightRaised,
       closedElevation: 0,
       openElevation: 0,
       closedShape: RoundedRectangleBorder(
@@ -246,7 +250,7 @@ class _CollectionTile extends StatelessWidget {
       button: true,
       label: '${item.name}. ${item.description}',
       child: Material(
-        color: PinneColors.tilePalette[item.paletteIndex],
+        color: context.pinne.tilePalette[item.paletteIndex],
         borderRadius: BorderRadius.circular(PinneRadii.tile),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -278,15 +282,15 @@ class _CollectionTile extends StatelessWidget {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: PinneColors.ink.withValues(alpha: 0.12),
+                            color: context.pinne.ink.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(
                               PinneRadii.chip,
                             ),
                           ),
                           child: Text(
                             item.isSample ? 'SAMPLE' : 'COLLECTION',
-                            style: const TextStyle(
-                              color: PinneColors.ink,
+                            style: TextStyle(
+                              color: context.pinne.ink,
                               fontSize: 9,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
@@ -300,7 +304,7 @@ class _CollectionTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                color: PinneColors.ink,
+                                color: context.pinne.ink,
                                 height: 1.05,
                               ),
                         ),
@@ -311,7 +315,9 @@ class _CollectionTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: PinneColors.ink.withValues(alpha: 0.68),
+                                color: context.pinne.ink.withValues(
+                                  alpha: 0.68,
+                                ),
                               ),
                         ),
                       ],
@@ -335,7 +341,7 @@ class CollectionDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: PinneColors.midnight,
+      backgroundColor: context.pinne.midnight,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(PinneSpacing.gutter),
@@ -345,7 +351,7 @@ class CollectionDetailScreen extends StatelessWidget {
               child: IconButton.filled(
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: PinneColors.ink,
+                  foregroundColor: context.pinne.ink,
                 ),
                 onPressed: () => Navigator.of(context).pop(),
                 tooltip: 'Back',
@@ -372,15 +378,15 @@ class CollectionDetailScreen extends StatelessWidget {
             const SizedBox(height: PinneSpacing.sm),
             Text(
               item.description,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: PinneColors.muted,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: context.pinne.muted),
             ),
             const SizedBox(height: PinneSpacing.xl),
-            const GlassCard(
+            GlassCard(
               child: Text(
                 'Saved items will appear here.',
-                style: TextStyle(color: PinneColors.muted),
+                style: TextStyle(color: context.pinne.muted),
               ),
             ),
           ],

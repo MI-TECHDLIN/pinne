@@ -48,8 +48,8 @@ class AiSuggestionChips extends StatelessWidget {
               key: ValueKey('ai-suggestion-${suggestion.id}'),
               padding: const EdgeInsets.only(left: PinneSpacing.md),
               decoration: BoxDecoration(
-                color: PinneColors.glass,
-                border: Border.all(color: PinneColors.line),
+                color: context.pinne.glass,
+                border: Border.all(color: context.pinne.line),
                 borderRadius: BorderRadius.circular(PinneRadii.chip),
               ),
               child: Row(
@@ -63,17 +63,17 @@ class AiSuggestionChips extends StatelessWidget {
                     ),
                   ),
                   if (suggestion.uncertain)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(left: PinneSpacing.xs),
                       child: Text(
                         'Maybe',
-                        style: TextStyle(color: PinneColors.muted),
+                        style: TextStyle(color: context.pinne.muted),
                       ),
                     ),
                   IconButton(
                     key: ValueKey('accept-${suggestion.id}'),
                     tooltip: 'Accept ${suggestion.label}',
-                    color: PinneColors.violet,
+                    color: context.pinne.violet,
                     visualDensity: VisualDensity.compact,
                     onPressed: () => onAccept(suggestion.id),
                     icon: const Icon(Icons.check_rounded),
@@ -81,7 +81,7 @@ class AiSuggestionChips extends StatelessWidget {
                   IconButton(
                     key: ValueKey('dismiss-${suggestion.id}'),
                     tooltip: 'Dismiss ${suggestion.label}',
-                    color: PinneColors.muted,
+                    color: context.pinne.muted,
                     visualDensity: VisualDensity.compact,
                     onPressed: () => onDismiss(suggestion.id),
                     icon: const Icon(Icons.close_rounded),

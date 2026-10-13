@@ -53,7 +53,7 @@ class ProfileCard extends ConsumerWidget {
                     userId == null
                         ? 'Sign in to keep your spirit.'
                         : 'A ribbon, all your own.',
-                    style: const TextStyle(color: PinneColors.muted),
+                    style: TextStyle(color: context.pinne.muted),
                   ),
                   if (profile.hasError)
                     TextButton.icon(
@@ -74,7 +74,7 @@ class ProfileCard extends ConsumerWidget {
                           : () => showModalBottomSheet<void>(
                               context: context,
                               isScrollControlled: true,
-                              backgroundColor: PinneColors.midnightRaised,
+                              backgroundColor: context.pinne.midnightRaised,
                               builder: (_) => _AvatarPicker(
                                 userId: userId,
                                 profile: profile.asData?.value,
@@ -191,9 +191,9 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
             'Find your spirit',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          const Text(
+          Text(
             'Same little soul. A different twist.',
-            style: TextStyle(color: PinneColors.muted),
+            style: TextStyle(color: context.pinne.muted),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -224,13 +224,13 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
                         width: (constraints.maxWidth - 24) / 4,
                         decoration: BoxDecoration(
                           color: _seed == _seeds[index]
-                              ? PinneColors.cardRaised
-                              : PinneColors.card,
+                              ? context.pinne.cardRaised
+                              : context.pinne.card,
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(
                             color: _seed == _seeds[index]
-                                ? PinneColors.violet
-                                : PinneColors.line,
+                                ? context.pinne.violet
+                                : context.pinne.line,
                             width: 2,
                           ),
                         ),
@@ -243,13 +243,13 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
                               size: (constraints.maxWidth - 24) / 4,
                             ),
                             if (_seed == _seeds[index])
-                              const Positioned(
+                              Positioned(
                                 right: 4,
                                 bottom: 4,
                                 child: Icon(
                                   Icons.check_circle,
                                   size: 16,
-                                  color: PinneColors.lilac,
+                                  color: context.pinne.lilac,
                                 ),
                               ),
                           ],
@@ -271,11 +271,11 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
                 index++
               )
                 ChoiceChip(
-                  selectedColor: PinneColors.violet,
-                  backgroundColor: PinneColors.card,
-                  checkmarkColor: PinneColors.text,
-                  labelStyle: const TextStyle(color: PinneColors.text),
-                  side: const BorderSide(color: PinneColors.line),
+                  selectedColor: context.pinne.violet,
+                  backgroundColor: context.pinne.card,
+                  checkmarkColor: context.pinne.text,
+                  labelStyle: TextStyle(color: context.pinne.text),
+                  side: BorderSide(color: context.pinne.line),
                   label: Text(PinneSpiritPalettes.values[index].name),
                   avatar: CircleAvatar(
                     backgroundColor: PinneSpiritPalettes.values[index].body,
@@ -293,7 +293,7 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
               padding: const EdgeInsets.only(top: 12),
               child: Text(
                 _error!,
-                style: const TextStyle(color: PinneColors.pink),
+                style: TextStyle(color: context.pinne.pink),
               ),
             ),
           const SizedBox(height: 20),

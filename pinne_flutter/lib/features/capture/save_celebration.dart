@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
-import '../progress/celebration.dart' show RibbonConfetti;
 
 const saveCelebrationDuration = Duration(milliseconds: 1400);
 
@@ -140,7 +139,17 @@ class _SaveCelebrationState extends State<_SaveCelebration>
                           child: RepaintBoundary(
                             child: CustomPaint(
                               key: const ValueKey('save-sparkles'),
-                              painter: _SaveSparklesPainter(_controller),
+                              painter: _SaveSparklesPainter(
+                                _controller,
+                                [
+                                  context.pinne.peach,
+                                  context.pinne.mint,
+                                  context.pinne.pink,
+                                  context.pinne.sky,
+                                  context.pinne.lilac,
+                                  context.pinne.violet,
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -148,18 +157,23 @@ class _SaveCelebrationState extends State<_SaveCelebration>
                         key: const ValueKey('save-celebration-card'),
                         padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [PinneColors.cardRaised, PinneColors.card],
+                            colors: [
+                              context.pinne.cardRaised,
+                              context.pinne.card,
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(PinneRadii.card),
                           border: Border.all(
-                            color: PinneColors.lilac.withValues(alpha: 0.4),
+                            color: context.pinne.lilac.withValues(alpha: 0.4),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: PinneColors.violet.withValues(alpha: 0.3),
+                              color: context.pinne.violet.withValues(
+                                alpha: 0.3,
+                              ),
                               blurRadius: 34,
                               spreadRadius: 2,
                             ),
@@ -181,10 +195,10 @@ class _SaveCelebrationState extends State<_SaveCelebration>
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.check_circle_rounded,
                                   size: 21,
-                                  color: PinneColors.mint,
+                                  color: context.pinne.mint,
                                 ),
                                 const SizedBox(width: PinneSpacing.sm),
                                 Text(
@@ -219,9 +233,10 @@ class _SaveCelebrationState extends State<_SaveCelebration>
 }
 
 class _SaveSparklesPainter extends CustomPainter {
-  _SaveSparklesPainter(this.progress) : super(repaint: progress);
+  _SaveSparklesPainter(this.progress, this.colours) : super(repaint: progress);
 
   final Animation<double> progress;
+  final List<Color> colours;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -235,7 +250,6 @@ class _SaveSparklesPainter extends CustomPainter {
       final angle = (math.pi * 2 * i / 22) + ((i % 3) * 0.12);
       final distance = (84 + (i % 4) * 16) * t;
       final position = centre + Offset.fromDirection(angle, distance);
-      final colours = RibbonConfetti.colours;
       final paint = Paint()
         ..color = colours[i % colours.length].withValues(alpha: fade * 0.9)
         ..strokeWidth = 4
@@ -253,5 +267,6 @@ class _SaveSparklesPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SaveSparklesPainter oldDelegate) => false;
+  bool shouldRepaint(_SaveSparklesPainter oldDelegate) =>
+      oldDelegate.colours != colours;
 }

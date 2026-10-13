@@ -48,6 +48,7 @@ ThemeData pinneDarkTheme() {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: scheme,
+    extensions: const [PinnePalette.dark],
     scaffoldBackgroundColor: PinneColors.midnight,
     textTheme: textTheme,
     cardTheme: const CardThemeData(

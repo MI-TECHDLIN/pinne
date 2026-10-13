@@ -11,7 +11,7 @@ Future<void> showPlannerSettings(
 ) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
-  backgroundColor: PinneColors.card,
+  backgroundColor: context.pinne.card,
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(PinneRadii.sheet)),
   ),
@@ -77,7 +77,7 @@ class _PlannerSettingsSheetState extends ConsumerState<PlannerSettingsSheet> {
         Expanded(child: Text(label)),
         DropdownButton<T>(
           value: value,
-          dropdownColor: PinneColors.cardRaised,
+          dropdownColor: context.pinne.cardRaised,
           underline: const SizedBox.shrink(),
           items: [
             for (final (v, text) in options)
@@ -227,7 +227,10 @@ class _PlannerSettingsSheetState extends ConsumerState<PlannerSettingsSheet> {
               ),
               Text(
                 'Times are in ${_p.timezone}.',
-                style: const TextStyle(color: PinneColors.muted, fontSize: 13),
+                style: TextStyle(
+                  color: context.pinne.muted,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: PinneSpacing.md),
               FilledButton(

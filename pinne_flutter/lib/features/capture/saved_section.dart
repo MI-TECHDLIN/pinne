@@ -55,7 +55,7 @@ class SavedSection extends ConsumerWidget {
                 Text(
                   '${captures.length}',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: PinneColors.muted,
+                    color: context.pinne.muted,
                   ),
                 ),
             ],
@@ -153,10 +153,7 @@ class SavedCard extends ConsumerWidget {
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: SyncStatusLabel(
-                    capture: capture,
-                    signedIn: signedIn,
-                  ),
+                  child: SyncStatusLabel(capture: capture, signedIn: signedIn),
                 ),
               ),
             ],
@@ -186,7 +183,7 @@ class SavedCard extends ConsumerWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: PinneColors.muted,
+                color: context.pinne.muted,
               ),
             )
           else if (note != null && note.trim() != capture.title)
@@ -195,7 +192,7 @@ class SavedCard extends ConsumerWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: PinneColors.muted,
+                color: context.pinne.muted,
               ),
             ),
           if (preview?.summary case final summary?) ...[
@@ -215,7 +212,7 @@ class SavedCard extends ConsumerWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: PinneColors.lilac,
+                color: context.pinne.lilac,
               ),
             ),
           ],
@@ -229,7 +226,7 @@ class SavedCard extends ConsumerWidget {
                   child: Text(
                     capture.lastError ?? 'The server did not accept it.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: PinneColors.muted,
+                      color: context.pinne.muted,
                     ),
                   ),
                 ),

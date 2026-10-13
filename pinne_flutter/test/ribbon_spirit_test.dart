@@ -21,6 +21,7 @@ Future<List<int>> pixels(
     recipe: RibbonRecipe(seed),
     palette: PinneSpiritPalettes.values[0],
     mood: mood,
+    faceColor: PinneColors.text,
     phase: phase,
     reducedMotion: reduced,
   ).paint(Canvas(recorder), const Size(160, 160));

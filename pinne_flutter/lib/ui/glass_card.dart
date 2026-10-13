@@ -23,9 +23,9 @@ class GlassCard extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(PinneSpacing.lg),
       decoration: BoxDecoration(
-        color: PinneColors.glass,
+        color: context.pinne.glass,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: PinneColors.line, width: 1),
+        border: Border.all(color: context.pinne.line, width: 1),
       ),
       child: child,
     );
