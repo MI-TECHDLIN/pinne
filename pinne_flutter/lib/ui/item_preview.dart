@@ -18,7 +18,7 @@ enum PreviewChipSurface { dark, pastel, due }
   ),
   PreviewChipSurface.pastel || PreviewChipSurface.due => (
     background: palette.ink,
-    foreground: palette.text,
+    foreground: palette.onViolet,
     border: palette.ink,
   ),
 };

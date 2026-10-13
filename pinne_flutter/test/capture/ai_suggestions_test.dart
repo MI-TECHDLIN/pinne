@@ -15,6 +15,7 @@ import 'package:pinne_flutter/theme/pinne_theme.dart';
 import 'package:pinne_flutter/ui/pinne_loading.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import '../support/golden_theme.dart';
 import 'fake_capture_server.dart';
 
 class _SignedIn extends SignedInNotifier {
@@ -63,6 +64,7 @@ class _FakeAiSuggestions implements AiSuggestionsApi {
 }
 
 void main() {
+  setUpAll(loadGoldenFonts);
   late CaptureStore store;
   setUp(() => store = CaptureStore(sqlite3.openInMemory()));
   tearDown(() => store.close());
@@ -101,6 +103,7 @@ void main() {
     _FakeAiSuggestions api, {
     Item? serverItem,
     bool settle = true,
+    bool light = false,
   }) async {
     final capture = store.save(
       parseCaptureInput('https://example.com/article'),
@@ -115,7 +118,7 @@ void main() {
           aiSuggestionsApiProvider.overrideWithValue(api),
         ],
         child: MaterialApp(
-          theme: pinneDarkTheme(),
+          theme: light ? pinneLightTheme() : pinneDarkTheme(),
           builder: (context, app) => MotionPreferenceScope(
             preference: MotionPreference.reduced,
             child: app!,
@@ -198,6 +201,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(api.accepted, [collection.id, summary.id]);
     expect(find.text('AI suggestions'), findsNothing);
+  });
+
+  testWidgets('Saved card with AI suggestions renders in Lavender Mist', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(412, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final api = _FakeAiSuggestions([]);
+    api.suggestions.addAll([
+      suggestion(AiSuggestionKind.collection, collectionId: api.work),
+      suggestion(AiSuggestionKind.tag, value: 'design', uncertain: true),
+      suggestion(
+        AiSuggestionKind.summary,
+        value: 'How quiet layouts reduce stress.',
+      ),
+    ]);
+
+    await show(tester, api, light: true);
+
+    await expectLater(
+      find.byType(Scaffold),
+      matchesGoldenFile('../../../docs/light-theme/saved-ai-suggestions.png'),
+    );
   });
 
   testWidgets('no suggestions means no AI chrome', (tester) async {

@@ -30,4 +30,5 @@ Future<void> loadGoldenFonts() async {
   await icons.load();
 }
 
-ThemeData goldenTheme() => pinneDarkTheme();
+ThemeData goldenTheme({Brightness brightness = Brightness.dark}) =>
+    brightness == Brightness.light ? pinneLightTheme() : pinneDarkTheme();

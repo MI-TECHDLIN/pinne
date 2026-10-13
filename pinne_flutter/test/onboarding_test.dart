@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import 'package:pinne_flutter/features/onboarding/onboarding_screen.dart';
 import 'package:pinne_flutter/features/onboarding/onboarding_store.dart';
 import 'package:pinne_flutter/router.dart';
 import 'package:pinne_flutter/ui/motion.dart';
+import 'package:pinne_flutter/ui/ribbon_spirit/ribbon_cutout.dart';
 
 import 'support/golden_theme.dart';
 
@@ -16,6 +18,7 @@ void main() {
     MemoryOnboardingStore store, {
     String initialLocation = Routes.onboarding,
     MotionPreference motion = MotionPreference.reduced,
+    bool light = false,
   }) {
     final router = GoRouter(
       initialLocation: initialLocation,
@@ -51,7 +54,9 @@ void main() {
       overrides: [onboardingStoreProvider.overrideWithValue(store)],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        theme: goldenTheme(),
+        theme: goldenTheme(
+          brightness: light ? Brightness.light : Brightness.dark,
+        ),
         routerConfig: router,
         builder: (context, child) => MotionPreferenceScope(
           preference: motion,
@@ -209,6 +214,40 @@ void main() {
     await expectLater(
       find.byType(Scaffold),
       matchesGoldenFile('../../docs/onboarding/03-make-time-progress.png'),
+    );
+  });
+
+  testWidgets('first onboarding page renders in Lavender Mist', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      testApp(
+        MemoryOnboardingStore(),
+        motion: MotionPreference.reduced,
+        light: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final cutout = find.byType(RibbonSpiritCutout);
+    await tester.runAsync(
+      () => precacheImage(
+        const AssetImage(
+          'assets/art/cutout/ribbon_spirit_empty_collection.webp',
+        ),
+        tester.element(cutout),
+      ),
+    );
+    await tester.pump();
+    final image = find.descendant(of: cutout, matching: find.byType(RawImage));
+    expect(cutout, findsOneWidget);
+    expect(tester.renderObject<RenderImage>(image).image, isNotNull);
+
+    await expectLater(
+      find.byType(Scaffold),
+      matchesGoldenFile('../../docs/light-theme/onboarding.png'),
     );
   });
 

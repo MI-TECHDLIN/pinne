@@ -8,9 +8,11 @@ import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
 import 'package:pinne_flutter/features/collections/collection_cover.dart';
 import 'package:pinne_flutter/features/today/today_greeting.dart';
+import 'package:pinne_flutter/theme/theme_mode.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'capture/fake_capture_server.dart';
+import 'support/golden_theme.dart';
 
 class _SignedOut extends SignedInNotifier {
   @override
@@ -25,6 +27,11 @@ class _PlatformReducesMotion extends PlatformReduceMotionNotifier {
 class _AlwaysReduced extends MotionPreferenceNotifier {
   @override
   MotionPreference build() => MotionPreference.reduced;
+}
+
+class _AlwaysLightTheme extends ThemePreferenceNotifier {
+  @override
+  PinneThemePreference build() => PinneThemePreference.light;
 }
 
 Widget _app({List overrides = const []}) => ProviderScope(
@@ -43,6 +50,8 @@ Widget _app({List overrides = const []}) => ProviderScope(
 );
 
 void main() {
+  setUpAll(loadGoldenFonts);
+
   testWidgets('starts on Today and the pill nav switches tabs', (
     tester,
   ) async {
@@ -84,6 +93,25 @@ void main() {
     expect(find.text('Settings'), findsWidgets);
     expect(find.textContaining('Server online'), findsNothing);
     expect(find.text('http://localhost:8080/'), findsNothing);
+  });
+
+  testWidgets('Settings renders in Lavender Mist', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(412, 915));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      _app(
+        overrides: [
+          themePreferenceProvider.overrideWith(_AlwaysLightTheme.new),
+        ],
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('nav-settings')));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(Scaffold).first,
+      matchesGoldenFile('../../docs/light-theme/settings.png'),
+    );
   });
 
   testWidgets('the selected tab is announced as selected', (tester) async {

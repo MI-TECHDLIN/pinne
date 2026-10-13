@@ -380,7 +380,7 @@ class _MenuFilter<T> extends StatelessWidget {
     ],
     child: Chip(
       labelStyle: TextStyle(
-        color: selected == null ? context.pinne.text : context.pinne.onViolet,
+        color: selected == null ? context.pinne.muted : context.pinne.onViolet,
       ),
       side: BorderSide(
         color: selected == null ? context.pinne.line : context.pinne.violet,
@@ -396,9 +396,7 @@ class _MenuFilter<T> extends StatelessWidget {
           Icon(
             Icons.expand_more_rounded,
             size: 16,
-            color: selected == null
-                ? context.pinne.text
-                : context.pinne.onViolet,
+            color: selected == null ? null : context.pinne.onViolet,
           ),
         ],
       ),

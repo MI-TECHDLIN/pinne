@@ -71,6 +71,7 @@ void main() {
     Widget child, {
     bool withTodayData = false,
     bool withSearchData = false,
+    Brightness brightness = Brightness.dark,
   }) => ProviderScope(
     overrides: [
       signedInProvider.overrideWith(_SignedOut.new),
@@ -131,7 +132,7 @@ void main() {
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: goldenTheme(),
+      theme: goldenTheme(brightness: brightness),
       home: MotionPreferenceScope(
         preference: MotionPreference.reduced,
         child: Scaffold(body: child),
@@ -145,6 +146,8 @@ void main() {
     String name, {
     bool withTodayData = false,
     bool withSearchData = false,
+    Brightness brightness = Brightness.dark,
+    String? goldenPath,
   }) async {
     await tester.binding.setSurfaceSize(const Size(412, 915));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -153,6 +156,7 @@ void main() {
         child,
         withTodayData: withTodayData,
         withSearchData: withSearchData,
+        brightness: brightness,
       ),
     );
     for (var i = 0; i < 20; i++) {
@@ -160,7 +164,9 @@ void main() {
     }
     await expectLater(
       find.byType(Scaffold).first,
-      matchesGoldenFile('../../docs/ui-fidelity/after-$name.png'),
+      matchesGoldenFile(
+        goldenPath ?? '../../docs/ui-fidelity/after-$name.png',
+      ),
     );
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
@@ -173,6 +179,18 @@ void main() {
       const TodayScreen(),
       'today',
       withTodayData: true,
+    ),
+  );
+
+  testWidgets(
+    'Today in Lavender Mist',
+    (tester) => capture(
+      tester,
+      const TodayScreen(),
+      'today-light',
+      withTodayData: true,
+      brightness: Brightness.light,
+      goldenPath: '../../docs/light-theme/today.png',
     ),
   );
 
