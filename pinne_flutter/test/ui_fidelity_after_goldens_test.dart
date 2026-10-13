@@ -10,6 +10,7 @@ import 'package:pinne_flutter/features/search/search_providers.dart';
 import 'package:pinne_flutter/features/search/search_screen.dart';
 import 'package:pinne_flutter/features/settings/profile_provider.dart';
 import 'package:pinne_flutter/features/today/today_providers.dart';
+import 'package:pinne_flutter/features/today/today_greeting.dart';
 import 'package:pinne_flutter/features/today/today_screen.dart';
 import 'package:pinne_flutter/shell/pill_nav_bar.dart';
 import 'package:pinne_flutter/ui/motion.dart';
@@ -73,6 +74,7 @@ void main() {
   }) => ProviderScope(
     overrides: [
       signedInProvider.overrideWith(_SignedOut.new),
+      greetingIndexPickerProvider.overrideWithValue((_) => 0),
       captureStoreProvider.overrideWithValue(
         CaptureStore(sqlite3.openInMemory()),
       ),

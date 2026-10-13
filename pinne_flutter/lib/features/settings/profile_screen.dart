@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinne_client/pinne_client.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../core/server_client.dart';
 import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/feedback/friendly_error.dart';
+import '../../ui/pinne_loading.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import 'profile_provider.dart';
 
@@ -385,31 +387,41 @@ class _ProfileSkeleton extends StatelessWidget {
   const _ProfileSkeleton();
 
   @override
-  Widget build(BuildContext context) => Column(
-    key: const ValueKey('profile-skeleton'),
-    children: [
-      for (final height in [144.0, 188.0, 150.0]) ...[
-        Container(
-          height: height,
-          decoration: BoxDecoration(
-            color: PinneColors.glass,
-            borderRadius: BorderRadius.circular(PinneRadii.card),
-            border: Border.all(color: PinneColors.line),
-          ),
-          padding: const EdgeInsets.all(PinneSpacing.lg),
-          alignment: Alignment.topLeft,
-          child: Container(
-            width: height,
-            height: 16,
-            decoration: BoxDecoration(
-              color: PinneColors.cardRaised,
-              borderRadius: BorderRadius.circular(PinneRadii.chip),
+  Widget build(BuildContext context) => const PinneSkeleton(
+    label: 'Loading your profile',
+    child: Column(
+      key: ValueKey('profile-skeleton'),
+      children: [
+        GlassCard(
+          child: SizedBox(
+            height: 112,
+            child: Row(
+              children: [
+                Bone.circle(size: 96),
+                SizedBox(width: PinneSpacing.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Bone.text(width: 142, fontSize: 24),
+                      SizedBox(height: PinneSpacing.sm),
+                      Bone.button(width: 68, height: 24),
+                      SizedBox(height: PinneSpacing.sm),
+                      Bone.text(width: 172, fontSize: 13),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(height: PinneSpacing.md),
+        SizedBox(height: PinneSpacing.md),
+        PinneCardSkeleton(height: 118, label: 'Loading profile progress'),
+        SizedBox(height: PinneSpacing.md),
+        PinneCardSkeleton(height: 88, label: 'Loading account details'),
       ],
-    ],
+    ),
   );
 }
 

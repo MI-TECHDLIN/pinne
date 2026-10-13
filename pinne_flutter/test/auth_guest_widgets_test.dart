@@ -94,4 +94,35 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 1));
   });
+
+  testWidgets('guest account switch never offers a second guest account', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(500, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          clientProvider.overrideWithValue(_client()),
+          signedInProvider.overrideWith(_SignedIn.new),
+          emailDeliveryAvailableProvider.overrideWith((ref) async => true),
+        ],
+        child: MaterialApp(
+          theme: pinneDarkTheme(),
+          home: const SignInScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('guest-account-switch-notice')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('guest-sign-in-button')),
+      findsNothing,
+    );
+  });
 }

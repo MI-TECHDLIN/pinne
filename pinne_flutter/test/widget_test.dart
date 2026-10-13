@@ -7,6 +7,7 @@ import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
 import 'package:pinne_flutter/features/collections/collection_cover.dart';
+import 'package:pinne_flutter/features/today/today_greeting.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'capture/fake_capture_server.dart';
@@ -35,6 +36,7 @@ Widget _app({List overrides = const []}) => ProviderScope(
     captureApiProvider.overrideWithValue(FakeCaptureServer()),
     signedInProvider.overrideWith(_SignedOut.new),
     motionPreferenceProvider.overrideWith(_AlwaysReduced.new),
+    greetingIndexPickerProvider.overrideWithValue((_) => 0),
     ...overrides,
   ],
   child: const PinneApp(),
@@ -46,18 +48,29 @@ void main() {
   ) async {
     await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
-    expect(find.textContaining('curiosity'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('today-calm-headline')),
+      findsOneWidget,
+    );
 
     final tabs = {
       'collections': 'collections',
       'search': 'your way',
       'progress': 'progress',
-      'today': 'curiosity',
+      'today': null,
     };
     for (final MapEntry(key: tab, value: headline) in tabs.entries) {
       await tester.tap(find.byKey(ValueKey('nav-$tab')));
       await tester.pumpAndSettle();
-      expect(find.textContaining(headline), findsWidgets, reason: tab);
+      if (headline == null) {
+        expect(
+          find.byKey(const ValueKey('today-calm-headline')),
+          findsOneWidget,
+          reason: tab,
+        );
+      } else {
+        expect(find.textContaining(headline), findsWidgets, reason: tab);
+      }
     }
   });
 

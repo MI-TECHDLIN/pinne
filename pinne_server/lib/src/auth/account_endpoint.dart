@@ -41,7 +41,9 @@ class AccountEndpoint extends Endpoint {
       session,
       where: (table) => table.authUserId.equals(ownerId),
     );
-    final email = emailAccount?.email;
+    final userProfile = await AuthServices.instance.userProfiles
+        .maybeFindUserProfileByUserId(session, ownerId);
+    final email = emailAccount?.email ?? userProfile?.email;
     final configuredDemoEmail = session.serverpod
         .getPassword('demoAccountEmail')
         ?.trim()
