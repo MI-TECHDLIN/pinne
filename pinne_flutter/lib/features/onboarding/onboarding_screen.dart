@@ -10,6 +10,7 @@ import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/pinne_loading.dart';
+import '../../ui/ribbon_spirit/ribbon_cutout.dart';
 import 'onboarding_store.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -549,8 +550,8 @@ class _SaveScene extends StatelessWidget {
       children: [
         Align(
           alignment: const Alignment(0, .35),
-          child: Image.asset(
-            'assets/art/cutout/ribbon_spirit_empty_collection.webp',
+          child: RibbonSpiritCutout(
+            asset: 'assets/art/cutout/ribbon_spirit_empty_collection.webp',
             width: 245,
             semanticLabel: 'Ribbon Spirit beside an open save box',
           ),
@@ -648,8 +649,8 @@ class _ReminderScene extends StatelessWidget {
               height: spiritHeight,
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Image.asset(
-                  'assets/art/cutout/ribbon_spirit_excited.webp',
+                child: RibbonSpiritCutout(
+                  asset: 'assets/art/cutout/ribbon_spirit_excited.webp',
                   key: const ValueKey('reminder-spirit'),
                   width: spiritHeight,
                   height: spiritHeight,
@@ -794,8 +795,8 @@ class _ProgressScene extends StatelessWidget {
         Positioned(
           left: 0,
           bottom: 0,
-          child: Image.asset(
-            'assets/art/cutout/ribbon_spirit_welcome.webp',
+          child: RibbonSpiritCutout(
+            asset: 'assets/art/cutout/ribbon_spirit_welcome.webp',
             width: 175,
           ),
         ),

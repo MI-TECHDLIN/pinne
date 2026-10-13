@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shell/pill_nav_bar.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../../ui/ribbon_spirit/ribbon_cutout.dart';
 import 'tour_controller.dart';
 
 /// Dims the app, cuts a window around the current [TourStep] target, and
@@ -371,8 +372,8 @@ class _Callout extends StatelessWidget {
             children: [
               if (welcome) ...[
                 Center(
-                  child: Image.asset(
-                    'assets/art/cutout/ribbon_spirit_welcome.webp',
+                  child: RibbonSpiritCutout(
+                    asset: 'assets/art/cutout/ribbon_spirit_welcome.webp',
                     height: 96,
                     excludeFromSemantics: true,
                   ),
