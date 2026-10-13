@@ -278,55 +278,68 @@ class _StatTile extends StatelessWidget {
   );
 }
 
-class _GuestAccountCard extends StatelessWidget {
+class _GuestAccountCard extends ConsumerWidget {
   const _GuestAccountCard();
 
   @override
-  Widget build(BuildContext context) => GlassCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.shield_outlined, color: PinneColors.lilac),
-            const SizedBox(width: PinneSpacing.sm),
-            Expanded(
-              child: Text(
-                'Keep your account available',
-                style: Theme.of(context).textTheme.titleMedium,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final emailAvailable =
+        ref.watch(emailDeliveryAvailableProvider).asData?.value ?? false;
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.shield_outlined, color: PinneColors.lilac),
+              const SizedBox(width: PinneSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Keep your account available',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: PinneSpacing.sm),
+          const Text(
+            'You are using Pinne as a guest. This version of Serverpod cannot '
+            'link a guest to email, so signing in or creating an account starts '
+            'a separate account. Your current guest saves stay with this guest '
+            'account and do not transfer.',
+            key: ValueKey('profile-guest-separate-account-notice'),
+            style: TextStyle(color: PinneColors.muted, height: 1.4),
+          ),
+          const SizedBox(height: PinneSpacing.md),
+          Wrap(
+            spacing: PinneSpacing.sm,
+            runSpacing: PinneSpacing.sm,
+            children: [
+              FilledButton(
+                key: const ValueKey('profile-sign-in'),
+                onPressed: () => context.push('${Routes.signIn}?mode=login'),
+                child: const Text('Sign in'),
+              ),
+              if (emailAvailable)
+                OutlinedButton(
+                  key: const ValueKey('profile-create-account'),
+                  onPressed: () => context.push('${Routes.signIn}?mode=create'),
+                  child: const Text('Create account'),
+                ),
+            ],
+          ),
+          if (!emailAvailable) ...[
+            const SizedBox(height: PinneSpacing.sm),
+            const Text(
+              'Email sign-up opens soon - try Pinne as a guest.',
+              key: ValueKey('profile-email-delivery-unavailable'),
+              style: TextStyle(color: PinneColors.muted),
             ),
           ],
-        ),
-        const SizedBox(height: PinneSpacing.sm),
-        const Text(
-          'You are using Pinne as a guest. This version of Serverpod cannot '
-          'link a guest to email, so signing in or creating an account starts '
-          'a separate account. Your current guest saves stay with this guest '
-          'account and do not transfer.',
-          key: ValueKey('profile-guest-separate-account-notice'),
-          style: TextStyle(color: PinneColors.muted, height: 1.4),
-        ),
-        const SizedBox(height: PinneSpacing.md),
-        Wrap(
-          spacing: PinneSpacing.sm,
-          runSpacing: PinneSpacing.sm,
-          children: [
-            FilledButton(
-              key: const ValueKey('profile-sign-in'),
-              onPressed: () => context.push('${Routes.signIn}?mode=login'),
-              child: const Text('Sign in'),
-            ),
-            OutlinedButton(
-              key: const ValueKey('profile-create-account'),
-              onPressed: () => context.push('${Routes.signIn}?mode=create'),
-              child: const Text('Create account'),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 class _SignedInAccountCard extends ConsumerWidget {

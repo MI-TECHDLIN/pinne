@@ -172,14 +172,10 @@ class SmtpEmailSender {
     required UuidValue accountRequestId,
     required String verificationCode,
     required Transaction? transaction,
-  }) => _send(
-    recipient: email,
-    subject: 'Your Pinne verification code',
-    body:
-        'Your Pinne verification code is $verificationCode. '
-        'It expires in 15 minutes. If you did not request this, ignore this '
-        'message.',
-  );
+  }) {
+    final content = PinneAuthEmail.registration(verificationCode);
+    return _send(recipient: email, content: content);
+  }
 
   Future<void> sendPasswordResetCode(
     Session session, {
@@ -187,29 +183,147 @@ class SmtpEmailSender {
     required UuidValue passwordResetRequestId,
     required String verificationCode,
     required Transaction? transaction,
-  }) => _send(
-    recipient: email,
-    subject: 'Reset your Pinne password',
-    body:
-        'Your Pinne password reset code is $verificationCode. '
-        'It expires in 15 minutes. If you did not request this, ignore this '
-        'message.',
-  );
+  }) {
+    final content = PinneAuthEmail.passwordReset(verificationCode);
+    return _send(recipient: email, content: content);
+  }
 
   Future<void> _send({
     required String recipient,
-    required String subject,
-    required String body,
+    required PinneAuthEmail content,
   }) async {
     final message = mailer.Message()
       ..from = mailer.Address(settings.fromEmail, settings.fromName)
       ..recipients.add(recipient)
-      ..subject = subject
-      ..text = body;
-    await mailer.send(
-      message,
-      server,
-      timeout: const Duration(seconds: 20),
+      ..subject = content.subject
+      ..text = content.text
+      ..html = content.html;
+    await mailer.send(message, server, timeout: const Duration(seconds: 20));
+  }
+}
+
+/// Rendered content for an authentication email.
+class PinneAuthEmail {
+  const PinneAuthEmail({
+    required this.subject,
+    required this.text,
+    required this.html,
+  });
+
+  static const _spiritUrl =
+      'https://pinneapp.serverpod.space/assets/assets/branding/pinne_icon.png';
+
+  final String subject;
+  final String text;
+  final String html;
+
+  factory PinneAuthEmail.registration(String verificationCode) => _build(
+    verificationCode: verificationCode,
+    subject: 'Your Pinne code: ${_subjectSafe(verificationCode)}',
+    heading: 'Welcome to Pinne',
+    introduction:
+        'Thanks for making a little space for what matters. '
+        'Use this code to finish creating your account:',
+  );
+
+  factory PinneAuthEmail.passwordReset(String verificationCode) => _build(
+    verificationCode: verificationCode,
+    subject: 'Reset your Pinne password',
+    heading: 'Let’s get you back in',
+    introduction:
+        'Use this code to choose a new password for your Pinne '
+        'account:',
+  );
+
+  static PinneAuthEmail _build({
+    required String verificationCode,
+    required String subject,
+    required String heading,
+    required String introduction,
+  }) {
+    const expiry = 'This code is valid for 15 minutes.';
+    const ignore = 'Didn’t ask for this? You can safely ignore this email.';
+    final code = _escapeHtml(verificationCode);
+    final spacedCode = verificationCode
+        .split('')
+        .map(_escapeHtml)
+        .join('&#8202;');
+    return PinneAuthEmail(
+      subject: subject,
+      text:
+          '$heading\n\n$introduction\n\n$verificationCode\n\n'
+          '$expiry\n\n$ignore\n\nPinne - Save it. Come back to it.',
+      html:
+          '''
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .page { background: #171126 !important; }
+      .card { background: #241a38 !important; }
+      .copy { color: #f5efff !important; }
+      .muted { color: #c9bddc !important; }
+      .code { background: #34264d !important; color: #f5efff !important; }
+    }
+  </style>
+</head>
+<body class="page" style="margin:0;padding:0;background:#f5f0fa;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+      border="0" style="width:100%;background:#f5f0fa;">
+    <tr><td align="center" style="padding:28px 12px;">
+      <table class="card" role="presentation" width="100%" cellspacing="0"
+          cellpadding="0" border="0"
+          style="width:100%;max-width:560px;background:#ffffff;border-radius:20px;overflow:hidden;">
+        <tr>
+          <td align="center" bgcolor="#25143d"
+              style="padding:24px;background:#25143d;">
+            <img src="$_spiritUrl" width="64" height="64" alt="Pinne Ribbon Spirit"
+                style="display:block;width:64px;height:64px;border:0;border-radius:16px;">
+            <div style="margin-top:8px;color:#ffffff;font-family:Arial,sans-serif;font-size:28px;font-weight:700;line-height:34px;">Pinne</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="copy" style="padding:34px 36px 12px;color:#261d32;font-family:Arial,sans-serif;">
+            <h1 style="margin:0 0 14px;font-size:25px;line-height:32px;">${_escapeHtml(heading)}</h1>
+            <p style="margin:0;font-size:16px;line-height:25px;">${_escapeHtml(introduction)}</p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:18px 36px;">
+            <div class="code" aria-label="$code"
+                style="padding:18px 12px;background:#eee7f7;border-radius:14px;color:#25143d;font-family:'Courier New',monospace;font-size:30px;font-weight:700;letter-spacing:3px;line-height:38px;">$spacedCode</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="muted" style="padding:4px 36px 34px;color:#665b72;font-family:Arial,sans-serif;font-size:14px;line-height:22px;">
+            <p style="margin:0 0 12px;">$expiry</p>
+            <p style="margin:0;">$ignore</p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#25143d"
+              style="padding:18px;background:#25143d;color:#ddd0ef;font-family:Arial,sans-serif;font-size:13px;line-height:20px;">
+            Pinne - Save it. Come back to it.
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>''',
     );
   }
+
+  static String _subjectSafe(String value) =>
+      value.replaceAll(RegExp(r'[\r\n]+'), ' ').trim();
+
+  static String _escapeHtml(String value) => value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
 }
