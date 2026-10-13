@@ -1,18 +1,134 @@
-# pinne
+<p align="center">
+  <img src="docs/readme/banner.png" alt="Pinne: Save it. Come back to it. The Ribbon Spirit beside three app screens." width="100%">
+</p>
 
-Pinne is a saved-content review app. You share links from X, YouTube and the
-web, keep a note on why you saved each one, find them again by what you
-remember, get a gentle reminder about a day later, plan review sessions and see
-honest progress.
+<p align="center">
+  <a href="https://github.com/MI-TECHDLIN/pinne/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/MI-TECHDLIN/pinne/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="Licence: MIT" src="https://img.shields.io/badge/licence-MIT-7c5cff"></a>
+  <a href="https://serverpod.dev"><img alt="Built with Serverpod 4" src="https://img.shields.io/badge/built%20with-Serverpod%204-7c5cff"></a>
+  <a href="https://flutter.dev"><img alt="Flutter" src="https://img.shields.io/badge/app-Flutter-02569B?logo=flutter&logoColor=white"></a>
+</p>
 
-It is built fully on [Serverpod](https://serverpod.dev) 4 with a Flutter
-Android app. The live backend runs on Serverpod Cloud; deploying it and
-building the judge APK are covered in [docs/deploy.md](docs/deploy.md). AI
-organizing (Groq, with deterministic rules as the fallback) and its data terms
-are described in [docs/ai.md](docs/ai.md).
+# Pinne
 
-**Project status:** Pinne started as a hackathon entry and is being built
-toward a polished public release.
+**Save the things worth coming back to, then actually come back to them.**
+
+We save everything: the thread, the video, the article we will "read later".
+Then we never look at it again. Every app has its own pile, and none of them
+remember *why* we saved something or bring it back when it would help.
+
+Pinne is for anyone whose saved posts have become a graveyard. Share a link
+from X, YouTube or the web into one place, jot a line on why it mattered, and
+Pinne brings it back about a day later, one calm review at a time. A small
+character, the Ribbon Spirit, keeps you company and keeps the progress honest.
+
+<p align="center">
+  <img src="docs/onboarding/01-everything-one-home.png" alt="Save it once, find it later: links, posts and notes in one home" width="23%">
+  <img src="docs/onboarding/02-we-bring-it-back.png" alt="Good ideas, right on time: saves come back about a day later" width="23%">
+  <img src="docs/ui-fidelity/after-collections.png" alt="Collections group saves by what you want to do with them" width="23%">
+  <img src="docs/onboarding/03-make-time-progress.png" alt="Turn saved into done: plan a review window and watch progress add up" width="23%">
+</p>
+
+**Quick links:**
+[Try it](#testing-instructions-for-judges) ·
+[Run locally](#run-it-locally) ·
+[Deploy](docs/deploy.md) ·
+[Roadmap](#whats-next) ·
+[AI and data terms](docs/ai.md)
+
+> **Project status:** Pinne started as a hackathon entry (deadline
+> 2026-10-14) and is being built toward a polished public release.
+
+## How Pinne works
+
+Pinne is a Flutter app on top of a [Serverpod](https://serverpod.dev) 4
+backend with PostgreSQL. The phone is the source of truth for a fresh save;
+the server organizes, schedules and keeps everything owner-scoped.
+
+```mermaid
+flowchart LR
+  subgraph Phone["Flutter app (Android)"]
+    UI["Today · Collections · Search · Progress"]
+    Outbox[("SQLite capture store<br/>and outbox")]
+    Cal["Phone calendar"]
+    UI --> Outbox
+    UI --- Cal
+  end
+
+  subgraph Cloud["Serverpod 4 on Serverpod Cloud"]
+    API["Endpoints<br/>owner-scoped, authenticated"]
+    FC["Future calls<br/>link previews, AI organizing,<br/>review digest"]
+    DB[("PostgreSQL")]
+    API --> DB
+    API --> FC
+    FC --> DB
+  end
+
+  Outbox <-->|"idempotent sync"| API
+  FC -->|"oEmbed / Open Graph<br/>SSRF-guarded fetcher"| Web["YouTube · X · TikTok · web pages"]
+  FC -->|"organizing suggestions"| Groq["Groq gpt-oss-20b"]
+  Groq -.->|"unavailable or off"| Rules["Deterministic rules"]
+  API -->|"verification codes"| Mail["Gmail SMTP"]
+```
+
+Link previews and the digest scheduler need durable future calls, which the
+Starter hosting plan does not provide; details in
+[docs/deploy.md](docs/deploy.md). AI providers and fallbacks are in
+[docs/ai.md](docs/ai.md), the fetcher's safety rules in
+[docs/link-previews.md](docs/link-previews.md).
+
+### The life of a save
+
+```mermaid
+flowchart LR
+  A["Share or paste<br/>from any app"] --> B["Saved on your phone<br/>works offline"]
+  B --> C["Synced<br/>retries are safe"]
+  C --> D["Organized<br/>suggestions you accept<br/>or dismiss"]
+  D --> E["Comes back<br/>about 24 hours later"]
+  E --> F["Reviewed<br/>or snoozed"]
+  F --> G["Honest progress"]
+```
+
+Nothing says "Saved" until the save is on the phone's disk, and nothing counts
+as progress until you really reviewed it. Opening a link or undoing a review
+never moves the numbers.
+
+## Features
+
+- **One home for everything you save.** Share from any app, or paste a link or
+  jot a note. It lands in one list, even offline.
+- **Your reason, saved with it.** "Why did you save this?" stays attached.
+- **It comes back at the right time.** About a day later, in a queue sized to
+  5, 10 or 20 minutes, with *Remind me later* when now is not the moment.
+- **Find it by what you remember.** Search by the way you would describe it to
+  a friend, filter by source, type or collection.
+- **AI you control.** Collections, tags and summaries are suggestions that
+  wait for your accept or dismiss, and never overwrite your choices. Without
+  AI, plain rules take over.
+- **Plan time for it.** The Planner finds free time in your phone calendar and
+  schedules sessions only when you accept.
+- **Honest progress.** Review rate, weekly goal and milestones come only from
+  real reviews.
+- **Private by design.** Every row belongs to one owner, and previews are
+  fetched through a guarded, plain-text-only path.
+
+### Why not just use bookmarks?
+
+| | Saved in each app | Pinne |
+| --- | --- | --- |
+| Where it lives | One pile per app: Instagram Saved, X Bookmarks, YouTube Watch later, Reddit Saved | One home across apps |
+| Why you saved it | The built-in features do not mention a note | Your reason is saved with it |
+| Coming back | A list you must remember to open | Comes back about a day later, sized to your time |
+| Progress | Saving feels like progress | Only real reviews count |
+| AI | None, or it decides for you | Suggestions you accept or dismiss |
+
+The left column describes what each app's official help pages document
+(Instagram, X, YouTube, TikTok and Reddit); it is a comparison of documented
+features, not a claim that no app ever sends a reminder. Research on
+bookmarking is consistent with the pile-up: a study of browser users found
+that bookmarks were [added far faster than they were deleted](https://www.csse.canterbury.ac.nz/andrew.cockburn/papers/itsRevisitation.pdf)
+(Cockburn et al., 2003, an early-web study, so read it as "piles grow", not
+as a number about today's apps).
 
 ## Layout
 
@@ -293,39 +409,32 @@ app is drawn in code (`docs/ribbon-spirit/`).
 
 ## What's Next
 
-The hackathon is Pinne's first stage, not the intended finish line. The current
-priority is a stable, polished app for judging, focused on the features that
-work today. After that, the plan is to keep improving Pinne for real users and
-develop it toward a sustainable startup, without presenting roadmap items as
-features that already exist.
+The hackathon is Pinne's first stage, not the finish line. The plan is to keep
+improving Pinne for real users and grow it toward a sustainable startup,
+without presenting roadmap items as features that already exist. These are
+directions, not dated promises.
 
-Planned work includes:
-
-- **Google Calendar and Apple Calendar integrations.** Today the app exposes
-  only calendars available on the phone, while `.ics` export remains available
-  from the Planner. Direct Google and Apple connections will return when they
-  can be authenticated, synchronized, tested and described honestly end to
-  end.
-- **A stronger everyday experience.** Future improvements include broader
-  capture and review workflows, more useful organization and retrieval,
-  accessibility and reliability work, and continued refinement based on real
-  user feedback.
-- **Production hosting.** Link previews and the digest are disabled on the
-  current Serverpod Cloud Starter deployment because they need a hosting plan
-  with background jobs. A production deployment will restore those jobs with
-  appropriate monitoring, retry behavior and operational safeguards.
-- **Public mobile distribution.** A production-ready release is intended for
-  the Google Play Store and Apple App Store after store compliance, privacy,
-  security, observability and release processes are in place. There is no Mac
-  available for iOS development yet, so iOS builds will use a cloud macOS build
-  service or a Mac when that stage begins.
-- **Engineering for growth.** Scalability, maintainability, performance and
-  production readiness will guide the backend, mobile clients, data model and
-  operations as usage grows.
-
-These are directions rather than dated promises. The immediate goal remains a
-dependable hackathon build; public launch work follows only when each part is
-ready for real users.
+- **Reminders that find you.** Today the review queue lives in the app.
+  Step 1 is on-device reminders with `flutter_local_notifications`: no server
+  involved, so a save can nudge you about a day later even if you never open
+  Pinne. Step 2 is push notifications through Firebase Cloud Messaging, with
+  Serverpod future calls deciding when to send (about 24 hours after a save,
+  quiet hours, a daily cap). Android comes first; iOS needs an APNs key from a
+  paid Apple Developer account.
+- **A light theme, Lavender Mist,** alongside the dark violet one.
+- **Google Calendar and Apple Calendar.** Today the app uses calendars on the
+  phone, and `.ics` export stays available. Direct connections return when
+  they can be authenticated, synchronized, tested and described honestly.
+- **Production hosting.** Link previews and the digest are off on the current
+  Serverpod Cloud Starter deployment because they need a plan with durable
+  future calls. A production deployment restores them with monitoring, retries
+  and operational safeguards. Push notifications need the same.
+- **Store releases.** Google Play and the Apple App Store, after compliance,
+  privacy, security and release processes are in place. There is no Mac for
+  iOS yet, so iOS builds will use a cloud macOS build service or a Mac.
+- **A stronger everyday experience.** Broader capture and review flows, better
+  organization and retrieval, accessibility and reliability work, guided by
+  real feedback.
 
 ## License
 
