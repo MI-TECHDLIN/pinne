@@ -13,6 +13,7 @@ void shoot(String name, Future<void> Function(Film film) body) {
     final film = Film(tester, name);
     try {
       await body(film);
+      film.core = film.t;
       // Spare footage, so the edit can hold a scene for the narration.
       await film.hold(Film.tail);
     } finally {

@@ -191,8 +191,9 @@ class DemoCaptureApi implements CaptureApi {
 class DemoClient extends Client {
   DemoClient({
     List<Item> Function()? items,
-    ReviewQueueResult Function()? queue,
+    ReviewQueueResult Function(int budgetMinutes)? queue,
     this.displayName = Sample.ownerName,
+    this.guest = false,
     this.onReviewed,
     this.onSnoozed,
   }) : itemsSource = items ?? Sample.items,
@@ -203,7 +204,10 @@ class DemoClient extends Client {
   }
 
   List<Item> Function() itemsSource;
-  ReviewQueueResult Function()? queueSource;
+  ReviewQueueResult Function(int budgetMinutes)? queueSource;
+
+  /// Signed in as a guest (anonymous) account rather than with email.
+  final bool guest;
 
   /// The AI organizing rows the server made while saving, per item.
   final ai = DemoAiSuggestions();
@@ -330,7 +334,7 @@ class _DemoQueue extends EndpointReviewQueue {
   @override
   Future<ReviewQueueResult> get({required int timeBudgetMinutes}) async {
     await serverLatency();
-    return client.queueSource?.call() ??
+    return client.queueSource?.call(timeBudgetMinutes) ??
         ReviewQueueResult(entries: [], timeBudgetMinutes: timeBudgetMinutes);
   }
 
@@ -498,17 +502,18 @@ class _DemoAi extends EndpointAiOrganizing {
 }
 
 class _DemoAccount extends EndpointAccount {
-  _DemoAccount(super.caller);
+  _DemoAccount(this.client) : super(client);
+  final DemoClient client;
 
   @override
-  Future<bool> isGuest() async => false;
+  Future<bool> isGuest() async => client.guest;
 
   @override
   Future<AccountSummary> summary() async {
     await serverLatency();
     return AccountSummary(
-      type: ProfileAccountType.email,
-      email: 'ada@pinne.example',
+      type: client.guest ? ProfileAccountType.guest : ProfileAccountType.email,
+      email: client.guest ? null : 'ada@pinne.example',
       memberSince: Sample.filmNow.subtract(const Duration(days: 41)),
     );
   }
