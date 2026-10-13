@@ -304,7 +304,7 @@ class _VerificationFormState extends State<_VerificationForm> {
           maxLength: _VerificationForm.codeLength,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1-9]'))],
           style: const TextStyle(letterSpacing: 6, fontSize: 20),
-          decoration: const InputDecoration(labelText: 'Code'),
+          decoration: _fieldDecoration('Code'),
           onChanged: (code) {
             if (code.length == _VerificationForm.codeLength) _submit();
           },
@@ -441,13 +441,26 @@ class _FormLayout extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        Text(title, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: PinneSpacing.lg),
         ...children,
       ],
     ),
   );
 }
+
+/// The outlined field the package's forms used, so the screens look the same.
+InputDecoration _fieldDecoration(
+  String label, {
+  String? errorText,
+  Widget? suffixIcon,
+}) => InputDecoration(
+  labelText: label,
+  errorText: errorText,
+  suffixIcon: suffixIcon,
+  contentPadding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+);
 
 class _EmailField extends StatelessWidget {
   const _EmailField({required this.controller});
@@ -467,8 +480,8 @@ class _EmailField extends StatelessWidget {
         (_, value) => value.copyWith(text: value.text.toLowerCase()),
       ),
     ],
-    decoration: InputDecoration(
-      labelText: context.emailSignInTexts.emailLabel,
+    decoration: _fieldDecoration(
+      context.emailSignInTexts.emailLabel,
       errorText: controller.error is InvalidEmailException
           ? controller.errorMessage
           : null,
@@ -508,8 +521,8 @@ class _PasswordFieldState extends State<_PasswordField> {
     onSubmitted: widget.onSubmitted == null
         ? null
         : (_) => widget.onSubmitted!(),
-    decoration: InputDecoration(
-      labelText: widget.label,
+    decoration: _fieldDecoration(
+      widget.label,
       suffixIcon: IconButton(
         tooltip: _hidden ? 'Show password' : 'Hide password',
         color: context.pinne.muted,
