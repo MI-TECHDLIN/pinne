@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 
 import '../../theme/pinne_theme.dart';
+import '../../theme/theme_mode.dart';
 import '../../ui/motion.dart';
 import 'share_sheet.dart';
 
@@ -36,19 +38,22 @@ class ShareChannel {
 
 /// The whole app the share engine runs: just the sheet, over a transparent
 /// window so the source app stays visible behind the dim.
-class ShareApp extends StatelessWidget {
+class ShareApp extends ConsumerWidget {
   const ShareApp({super.key, required this.payload, required this.onDone});
 
   final SharedPayload payload;
   final VoidCallback onDone;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themePreference = ref.watch(themePreferenceProvider);
     return MaterialApp(
       title: 'Save to Pinne',
       debugShowCheckedModeBanner: false,
       color: Colors.transparent,
-      theme: pinneDarkTheme(),
+      theme: pinneLightTheme(),
+      darkTheme: pinneDarkTheme(),
+      themeMode: themePreference.themeMode,
       // The in-app motion setting is not stored yet, so the share sheet
       // follows the system reduce-motion flag.
       builder: (context, child) => MotionPreferenceScope(

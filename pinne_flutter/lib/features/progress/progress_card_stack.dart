@@ -432,7 +432,7 @@ class _Dots extends StatelessWidget {
             width: i == active ? 18 : 6,
             height: 6,
             decoration: BoxDecoration(
-              color: i == active ? PinneColors.violet : PinneColors.line,
+              color: i == active ? context.pinne.violet : context.pinne.line,
               borderRadius: BorderRadius.circular(PinneRadii.chip),
             ),
           ),
@@ -463,10 +463,12 @@ class ProgressCardFace extends StatelessWidget {
       decoration: BoxDecoration(
         color: card.background,
         borderRadius: BorderRadius.circular(28),
-        border: dark ? Border.all(color: PinneColors.line) : null,
-        boxShadow: const [
+        border: dark ? Border.all(color: context.pinne.line) : null,
+        boxShadow: [
           BoxShadow(
-            color: Color(0x66000000),
+            color: Theme.of(context).brightness == Brightness.light
+                ? context.pinne.shadow
+                : const Color(0x66000000),
             blurRadius: 26,
             offset: Offset(0, 14),
           ),
@@ -601,17 +603,17 @@ class _MiniDayBars extends StatelessWidget {
                 height: 22,
                 decoration: BoxDecoration(
                   color: switch (bars[i]) {
-                    true => PinneColors.mint,
+                    true => context.pinne.mint,
                     false => foreground.withValues(alpha: 0.14),
                     null => foreground.withValues(alpha: 0.05),
                   },
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: bars[i] == true
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_rounded,
                         size: 14,
-                        color: PinneColors.ink,
+                        color: context.pinne.ink,
                       )
                     : null,
               ),

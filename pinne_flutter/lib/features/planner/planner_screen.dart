@@ -172,7 +172,7 @@ class _PlannerBodyState extends ConsumerState<_PlannerBody> {
           Text(
             'Nothing planned this day.',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: PinneColors.muted,
+              color: context.pinne.muted,
             ),
           ),
         for (final (index, view) in onDay.indexed) ...[
@@ -282,13 +282,13 @@ class _CoverageLine extends StatelessWidget {
           Icon(
             ok ? Icons.verified_outlined : Icons.help_outline,
             size: 16,
-            color: PinneColors.muted,
+            color: context.pinne.muted,
           ),
           const SizedBox(width: PinneSpacing.xs),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: PinneColors.muted, fontSize: 13),
+              style: TextStyle(color: context.pinne.muted, fontSize: 13),
             ),
           ),
         ],
@@ -309,7 +309,7 @@ class _Notice extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
       child: Row(
         children: [
-          const Icon(Icons.info_outline, size: 18, color: PinneColors.lilac),
+          Icon(Icons.info_outline, size: 18, color: context.pinne.lilac),
           const SizedBox(width: PinneSpacing.sm),
           Expanded(child: Semantics(liveRegion: true, child: Text(text))),
           IconButton(
@@ -414,7 +414,7 @@ class _ProposalPanel extends StatelessWidget {
                 ?proposal.commitBlockedReason,
             ].join(' '),
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: PinneColors.muted,
+              color: context.pinne.muted,
             ),
           ),
           const SizedBox(height: PinneSpacing.md),

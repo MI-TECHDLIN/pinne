@@ -1,5 +1,5 @@
 flutter_native_splash:
-  color: "#150F26"
+  color: "#F3F0FA"
   color_dark: "#150F26"
   image: assets/branding/pinne_splash.png
   image_dark: assets/branding/pinne_splash.png
@@ -7,9 +7,9 @@ flutter_native_splash:
   ios: true
   web: true
   android_12:
-    color: "#150F26"
+    color: "#F3F0FA"
     color_dark: "#150F26"
     image: assets/branding/pinne_splash.png
     image_dark: assets/branding/pinne_splash.png
-    icon_background_color: "#150F26"
+    icon_background_color: "#F3F0FA"
     icon_background_color_dark: "#150F26"

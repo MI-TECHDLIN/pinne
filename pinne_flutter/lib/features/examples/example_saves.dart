@@ -83,12 +83,13 @@ class _ExampleSavesCardState extends ConsumerState<ExampleSavesCard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
-                  color: PinneColors.violet,
+                  color: context.pinne.violet,
                   borderRadius: BorderRadius.circular(PinneRadii.chip),
                 ),
-                child: const Text(
+                child: Text(
                   'EXAMPLE',
                   style: TextStyle(
+                    color: context.pinne.onViolet,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: .8,
@@ -115,7 +116,7 @@ class _ExampleSavesCardState extends ConsumerState<ExampleSavesCard> {
             loaded
                 ? '${value.exampleItemCount} clearly labelled examples are in your account.'
                 : 'Add six labelled examples across two collections, three of them ready to review now. Nothing is added unless you choose it.',
-            style: const TextStyle(color: PinneColors.muted, height: 1.4),
+            style: TextStyle(color: context.pinne.muted, height: 1.4),
           ),
           const SizedBox(height: PinneSpacing.md),
           if (loaded)
@@ -152,16 +153,18 @@ class ExampleChip extends StatelessWidget {
     key: const ValueKey('example-chip'),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(
-      color: dark ? PinneColors.ink.withValues(alpha: .12) : PinneColors.violet,
+      color: dark
+          ? context.pinne.ink.withValues(alpha: .12)
+          : context.pinne.violet,
       borderRadius: BorderRadius.circular(PinneRadii.chip),
       border: dark
-          ? Border.all(color: PinneColors.ink.withValues(alpha: .24))
+          ? Border.all(color: context.pinne.ink.withValues(alpha: .24))
           : null,
     ),
     child: Text(
       'EXAMPLE',
       style: TextStyle(
-        color: dark ? PinneColors.ink : PinneColors.text,
+        color: dark ? context.pinne.ink : context.pinne.onViolet,
         fontSize: 9,
         fontWeight: FontWeight.w900,
         letterSpacing: .8,

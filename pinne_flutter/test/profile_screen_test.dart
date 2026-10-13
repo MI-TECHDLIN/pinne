@@ -9,13 +9,17 @@ import 'package:pinne_flutter/features/settings/profile_screen.dart';
 import 'package:pinne_flutter/theme/pinne_theme.dart';
 
 import 'progress/fake_progress_api.dart';
+import 'support/golden_theme.dart';
 import 'support/test_account.dart';
 
 void main() {
+  setUpAll(loadGoldenFonts);
+
   Widget app({
     required AccountSummary account,
     required bool emailAvailable,
     PinneProfile? profile,
+    bool light = false,
   }) => ProviderScope(
     overrides: [
       accountIdProvider.overrideWith(TestAccountId.new),
@@ -28,7 +32,7 @@ void main() {
       avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 1)),
     ],
     child: MaterialApp(
-      theme: pinneDarkTheme(),
+      theme: light ? pinneLightTheme() : pinneDarkTheme(),
       builder: (context, child) => MotionPreferenceScope(
         preference: MotionPreference.reduced,
         child: child!,
@@ -128,5 +132,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Sign out?'), findsOneWidget);
     expect(find.byKey(const ValueKey('confirm-sign-out')), findsOneWidget);
+  });
+
+  testWidgets('Profile renders in Lavender Mist', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(412, 915));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      app(
+        emailAvailable: true,
+        light: true,
+        account: AccountSummary(
+          type: ProfileAccountType.email,
+          email: 'river@example.com',
+          memberSince: DateTime.utc(2026, 1, 12),
+        ),
+        profile: PinneProfile(
+          ownerId: UuidValue.fromString(
+            '00000000-0000-4000-8000-000000000001',
+          ),
+          displayName: 'River',
+          avatarSeed: 2026,
+          avatarPalette: 1,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(Scaffold),
+      matchesGoldenFile('../../docs/light-theme/profile.png'),
+    );
   });
 }

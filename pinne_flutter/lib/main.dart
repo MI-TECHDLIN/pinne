@@ -11,6 +11,7 @@ import 'features/onboarding/onboarding_store.dart';
 import 'features/search/search_history.dart';
 import 'features/tour/tour_store.dart';
 import 'features/today/today_greeting.dart';
+import 'theme/theme_mode.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +36,9 @@ void main() async {
           SharedPreferencesGreetingStore(preferences),
         ),
         searchHistoryStoreProvider.overrideWithValue(searchHistoryStore),
+        themePreferenceStoreProvider.overrideWithValue(
+          SharedPreferencesThemePreferenceStore(preferences),
+        ),
         signOutCleanupProvider.overrideWith(
           (ref) =>
               () => ref.read(searchHistoryProvider.notifier).clear(),
@@ -59,12 +63,16 @@ void shareMain() async {
   final store = await openCaptureStore();
   final serverUrl = await resolveServerUrl();
   final client = await createServerClient(serverUrl);
+  final preferences = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(
       overrides: [
         serverUrlProvider.overrideWithValue(serverUrl),
         clientProvider.overrideWithValue(client),
         captureStoreProvider.overrideWithValue(store),
+        themePreferenceStoreProvider.overrideWithValue(
+          SharedPreferencesThemePreferenceStore(preferences),
+        ),
       ],
       child: ShareApp(payload: payload, onDone: channel.finish),
     ),

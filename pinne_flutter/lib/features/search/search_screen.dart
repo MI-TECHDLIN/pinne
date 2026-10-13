@@ -96,14 +96,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     icon: const Icon(Icons.close_rounded),
                   ),
             filled: true,
-            fillColor: PinneColors.glass,
-            border: const OutlineInputBorder(
+            fillColor: context.pinne.glass,
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(PinneRadii.chip)),
-              borderSide: BorderSide(color: PinneColors.line),
+              borderSide: BorderSide(color: context.pinne.line),
             ),
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(PinneRadii.chip)),
-              borderSide: BorderSide(color: PinneColors.line),
+              borderSide: BorderSide(color: context.pinne.line),
             ),
           ),
         ),
@@ -150,8 +150,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   SearchResultCard(
                     key: ValueKey('search-result-${data.results[i].item.id}'),
                     result: data.results[i],
-                    color: PinneColors
-                        .tilePalette[i % PinneColors.tilePalette.length],
+                    color: context
+                        .pinne
+                        .tilePalette[i % context.pinne.tilePalette.length],
                     onOpen: () => _open(data.results[i].item),
                   ),
                   if (i != data.results.length - 1)
@@ -240,9 +241,9 @@ class _RecentSearches extends StatelessWidget {
             ),
           ],
         ),
-        const Text(
+        Text(
           'Stored only on this device.',
-          style: TextStyle(color: PinneColors.muted, fontSize: 12),
+          style: TextStyle(color: context.pinne.muted, fontSize: 12),
         ),
         const SizedBox(height: PinneSpacing.xs),
         for (final search in searches)
@@ -379,18 +380,25 @@ class _MenuFilter<T> extends StatelessWidget {
         PopupMenuItem<T?>(value: value, child: Text(display(value))),
     ],
     child: Chip(
+      labelStyle: TextStyle(
+        color: selected == null ? context.pinne.muted : context.pinne.onViolet,
+      ),
       side: BorderSide(
-        color: selected == null ? PinneColors.line : PinneColors.violet,
+        color: selected == null ? context.pinne.line : context.pinne.violet,
       ),
       backgroundColor: selected == null
-          ? PinneColors.glass
-          : PinneColors.violet,
+          ? context.pinne.glass
+          : context.pinne.violet,
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(label),
           const SizedBox(width: PinneSpacing.xs),
-          const Icon(Icons.expand_more_rounded, size: 16),
+          Icon(
+            Icons.expand_more_rounded,
+            size: 16,
+            color: selected == null ? null : context.pinne.onViolet,
+          ),
         ],
       ),
     ),
@@ -434,8 +442,8 @@ class SearchResultCard extends StatelessWidget {
                 ],
                 Text(
                   '${_source(item.sourcePlatform)} · ${_words(item.contentType.name)}',
-                  style: const TextStyle(
-                    color: PinneColors.ink,
+                  style: TextStyle(
+                    color: context.pinne.ink,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.1,
@@ -448,7 +456,7 @@ class SearchResultCard extends StatelessWidget {
                 const SizedBox(height: PinneSpacing.sm),
                 PreviewByline(
                   item: item,
-                  color: PinneColors.ink.withValues(alpha: 0.72),
+                  color: context.pinne.ink.withValues(alpha: 0.72),
                 ),
                 if (item.durationSeconds case final seconds?) ...[
                   const SizedBox(height: PinneSpacing.xs),
@@ -476,21 +484,21 @@ class SearchResultCard extends StatelessWidget {
                   item.title,
                   style: Theme.of(
                     context,
-                  ).textTheme.titleLarge?.copyWith(color: PinneColors.ink),
+                  ).textTheme.titleLarge?.copyWith(color: context.pinne.ink),
                 ),
                 const SizedBox(height: PinneSpacing.sm),
                 Text(
                   note?.trim().isNotEmpty == true
                       ? 'Your note: “${note!.trim()}”'
                       : 'No saved note',
-                  style: const TextStyle(color: PinneColors.ink, height: 1.4),
+                  style: TextStyle(color: context.pinne.ink, height: 1.4),
                 ),
                 if (evidence != null) ...[
                   const SizedBox(height: PinneSpacing.md),
                   Text(
                     'Matched ${evidence.field}: ${evidence.snippet}',
                     style: TextStyle(
-                      color: PinneColors.ink.withValues(alpha: 0.72),
+                      color: context.pinne.ink.withValues(alpha: 0.72),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -539,7 +547,7 @@ class SearchEmptyState extends StatelessWidget {
               const SizedBox(height: PinneSpacing.xs),
               Text(
                 body,
-                style: const TextStyle(color: PinneColors.muted, height: 1.4),
+                style: TextStyle(color: context.pinne.muted, height: 1.4),
               ),
             ],
           ),

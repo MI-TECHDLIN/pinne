@@ -7,6 +7,7 @@ import '../../core/server_client.dart';
 import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
+import '../../theme/theme_mode.dart';
 import '../../ui/motion.dart';
 import '../auth/sign_out.dart';
 import '../tour/tour_controller.dart';
@@ -28,6 +29,8 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: PinneSpacing.md),
         const _AccountCard(),
         const SizedBox(height: PinneSpacing.md),
+        const _AppearanceCard(),
+        const SizedBox(height: PinneSpacing.md),
         const _MotionCard(),
         const SizedBox(height: PinneSpacing.md),
         const _AiOrganizingCard(),
@@ -39,6 +42,59 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('Ribbon studio'),
           ),
       ],
+    );
+  }
+}
+
+class _AppearanceCard extends ConsumerWidget {
+  const _AppearanceCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final preference = ref.watch(themePreferenceProvider);
+    final theme = Theme.of(context);
+    final description = switch (preference) {
+      PinneThemePreference.system => 'Following your device appearance.',
+      PinneThemePreference.dark => 'Midnight mode is on.',
+      PinneThemePreference.light => 'Lavender Mist is on.',
+    };
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Appearance', style: theme.textTheme.titleMedium),
+          Text(description, style: TextStyle(color: context.pinne.muted)),
+          const SizedBox(height: PinneSpacing.md),
+          SegmentedButton<PinneThemePreference>(
+            key: const ValueKey('appearance-control'),
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: context.pinne.violet,
+              selectedForegroundColor: context.pinne.onViolet,
+              foregroundColor: context.pinne.muted,
+              side: BorderSide(color: context.pinne.line),
+            ),
+            segments: const [
+              ButtonSegment(
+                value: PinneThemePreference.system,
+                label: Text('System'),
+              ),
+              ButtonSegment(
+                value: PinneThemePreference.dark,
+                label: Text('Dark'),
+              ),
+              ButtonSegment(
+                value: PinneThemePreference.light,
+                label: Text('Light'),
+              ),
+            ],
+            selected: {preference},
+            onSelectionChanged: (selection) => ref
+                .read(themePreferenceProvider.notifier)
+                .set(selection.single),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -101,7 +157,7 @@ class _GuideRow extends StatelessWidget {
     children: [
       Padding(
         padding: const EdgeInsets.only(top: 2),
-        child: Icon(icon, color: PinneColors.lilac),
+        child: Icon(icon, color: context.pinne.lilac),
       ),
       const SizedBox(width: PinneSpacing.md),
       Expanded(
@@ -109,13 +165,13 @@ class _GuideRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title, style: Theme.of(context).textTheme.titleSmall),
-            Text(body, style: const TextStyle(color: PinneColors.muted)),
+            Text(body, style: TextStyle(color: context.pinne.muted)),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButtonTheme(
                 data: TextButtonThemeData(
                   style: TextButton.styleFrom(
-                    foregroundColor: PinneColors.lilac,
+                    foregroundColor: context.pinne.lilac,
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                   ),
@@ -166,7 +222,7 @@ class _AiOrganizingCard extends ConsumerWidget {
                           : signedIn
                           ? 'Suggest collections, tags and a short summary.'
                           : 'Sign in to change this setting.',
-                      style: const TextStyle(color: PinneColors.muted),
+                      style: TextStyle(color: context.pinne.muted),
                     ),
                   ],
                 ),
@@ -174,7 +230,7 @@ class _AiOrganizingCard extends ConsumerWidget {
               Switch(
                 key: const ValueKey('ai-organizing-toggle'),
                 value: value?.enabled ?? true,
-                activeTrackColor: PinneColors.violet,
+                activeTrackColor: context.pinne.violet,
                 onChanged:
                     signedIn && value?.available == true && !settings.isLoading
                     ? (enabled) async {
@@ -200,7 +256,7 @@ class _AiOrganizingCard extends ConsumerWidget {
           Text(
             value?.disclosure ?? fallbackDisclosure,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: PinneColors.muted,
+              color: context.pinne.muted,
             ),
           ),
         ],
@@ -235,7 +291,7 @@ class _AccountCard extends ConsumerWidget {
                           : signedIn
                           ? 'Signed in'
                           : 'Not signed in',
-                      style: const TextStyle(color: PinneColors.muted),
+                      style: TextStyle(color: context.pinne.muted),
                     ),
                   ],
                 ),
@@ -258,19 +314,19 @@ class _AccountCard extends ConsumerWidget {
           ),
           if (isGuest) ...[
             const SizedBox(height: PinneSpacing.md),
-            const Text(
+            Text(
               'Guest data belongs to this device\'s account. Signing out, '
               'clearing app data or uninstalling can make your saves '
               'unavailable.',
               key: ValueKey('guest-data-notice'),
-              style: TextStyle(color: PinneColors.muted),
+              style: TextStyle(color: context.pinne.muted),
             ),
             const SizedBox(height: PinneSpacing.sm),
-            const Text(
+            Text(
               'Serverpod does not yet support linking a guest directly to '
               'email, so Pinne cannot safely offer an in-place upgrade yet.',
               key: ValueKey('guest-linking-unavailable'),
-              style: TextStyle(color: PinneColors.muted),
+              style: TextStyle(color: context.pinne.muted),
             ),
           ],
         ],
@@ -294,16 +350,16 @@ class _MotionCard extends ConsumerWidget {
           Text('Motion', style: theme.textTheme.titleMedium),
           Text(
             reduced ? 'Animations are reduced.' : 'Animations are on.',
-            style: const TextStyle(color: PinneColors.muted),
+            style: TextStyle(color: context.pinne.muted),
           ),
           const SizedBox(height: PinneSpacing.md),
           SegmentedButton<MotionPreference>(
             showSelectedIcon: false,
             style: SegmentedButton.styleFrom(
-              selectedBackgroundColor: PinneColors.violet,
-              selectedForegroundColor: PinneColors.text,
-              foregroundColor: PinneColors.muted,
-              side: const BorderSide(color: PinneColors.line),
+              selectedBackgroundColor: context.pinne.violet,
+              selectedForegroundColor: context.pinne.onViolet,
+              foregroundColor: context.pinne.muted,
+              side: BorderSide(color: context.pinne.line),
             ),
             segments: const [
               ButtonSegment(

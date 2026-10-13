@@ -10,6 +10,7 @@ import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/pinne_loading.dart';
+import '../../ui/ribbon_spirit/ribbon_cutout.dart';
 import 'onboarding_store.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -83,11 +84,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     final last = _page == _pageCount - 1;
     return Scaffold(
       body: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment(0, -0.55),
             radius: 1.05,
-            colors: [PinneColors.glowViolet, PinneColors.midnight],
+            colors: [context.pinne.glowViolet, context.pinne.midnight],
           ),
         ),
         child: SafeArea(
@@ -107,7 +108,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                         '${_page + 1} of $_pageCount',
                         key: const ValueKey('onboarding-step'),
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: PinneColors.muted,
+                          color: context.pinne.muted,
                         ),
                       ),
                     ),
@@ -195,8 +196,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                                     height: 7,
                                     decoration: BoxDecoration(
                                       color: index == _page
-                                          ? PinneColors.lilac
-                                          : PinneColors.line,
+                                          ? context.pinne.lilac
+                                          : context.pinne.line,
                                       borderRadius: BorderRadius.circular(99),
                                     ),
                                   ),
@@ -328,8 +329,8 @@ class _Copy extends StatelessWidget {
     children: [
       Text(
         eyebrow,
-        style: const TextStyle(
-          color: PinneColors.lilac,
+        style: TextStyle(
+          color: context.pinne.lilac,
           fontSize: 11,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.4,
@@ -360,7 +361,7 @@ class _Copy extends StatelessWidget {
       Text(
         body,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: PinneColors.muted,
+          color: context.pinne.muted,
           height: 1.5,
         ),
       ),
@@ -381,8 +382,8 @@ class _SceneGlow extends StatelessWidget {
         center: const Alignment(0, .3),
         radius: .5,
         colors: [
-          PinneColors.violet.withValues(alpha: .22),
-          PinneColors.violet.withValues(alpha: 0),
+          context.pinne.violet.withValues(alpha: .22),
+          context.pinne.violet.withValues(alpha: 0),
         ],
       ),
     ),
@@ -549,8 +550,8 @@ class _SaveScene extends StatelessWidget {
       children: [
         Align(
           alignment: const Alignment(0, .35),
-          child: Image.asset(
-            'assets/art/cutout/ribbon_spirit_empty_collection.webp',
+          child: RibbonSpiritCutout(
+            asset: 'assets/art/cutout/ribbon_spirit_empty_collection.webp',
             width: 245,
             semanticLabel: 'Ribbon Spirit beside an open save box',
           ),
@@ -614,14 +615,14 @@ class _FlyingContentIcon extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: PinneColors.cardRaised,
+              color: context.pinne.cardRaised,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: PinneColors.line),
-              boxShadow: const [
-                BoxShadow(color: PinneColors.glowPlum, blurRadius: 16),
+              border: Border.all(color: context.pinne.line),
+              boxShadow: [
+                BoxShadow(color: context.pinne.glowPlum, blurRadius: 16),
               ],
             ),
-            child: Icon(icon, size: 21, color: PinneColors.lilac),
+            child: Icon(icon, size: 21, color: context.pinne.lilac),
           ),
         ),
       ),
@@ -648,8 +649,8 @@ class _ReminderScene extends StatelessWidget {
               height: spiritHeight,
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Image.asset(
-                  'assets/art/cutout/ribbon_spirit_excited.webp',
+                child: RibbonSpiritCutout(
+                  asset: 'assets/art/cutout/ribbon_spirit_excited.webp',
                   key: const ValueKey('reminder-spirit'),
                   width: spiritHeight,
                   height: spiritHeight,
@@ -735,13 +736,19 @@ class _MiniSaveCard extends StatelessWidget {
     ),
     decoration: BoxDecoration(
       color: due
-          ? PinneColors.accentDue
-          : PinneColors.card.withValues(alpha: .94),
+          ? context.pinne.accentDue
+          : context.pinne.card.withValues(alpha: .94),
       borderRadius: BorderRadius.circular(PinneRadii.card),
-      border: due ? null : Border.all(color: PinneColors.line),
-      boxShadow: const [
+      border: due
+          ? Theme.of(context).brightness == Brightness.light
+                ? Border.all(color: context.pinne.dueEdge, width: 1.5)
+                : null
+          : Border.all(color: context.pinne.line),
+      boxShadow: [
         BoxShadow(
-          color: Color(0x55000000),
+          color: Theme.of(context).brightness == Brightness.light
+              ? context.pinne.shadow
+              : const Color(0x55000000),
           blurRadius: 20,
           offset: Offset(0, 10),
         ),
@@ -755,7 +762,7 @@ class _MiniSaveCard extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: due ? PinneColors.ink : PinneColors.lilac,
+            color: due ? context.pinne.ink : context.pinne.lilac,
             fontSize: 10,
             fontWeight: FontWeight.w800,
             letterSpacing: .8,
@@ -767,7 +774,7 @@ class _MiniSaveCard extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: due ? PinneColors.ink : PinneColors.text,
+            color: due ? context.pinne.ink : context.pinne.text,
           ),
         ),
       ],
@@ -788,8 +795,8 @@ class _ProgressScene extends StatelessWidget {
         Positioned(
           left: 0,
           bottom: 0,
-          child: Image.asset(
-            'assets/art/cutout/ribbon_spirit_welcome.webp',
+          child: RibbonSpiritCutout(
+            asset: 'assets/art/cutout/ribbon_spirit_welcome.webp',
             width: 175,
           ),
         ),
@@ -800,17 +807,17 @@ class _ProgressScene extends StatelessWidget {
             width: 174,
             padding: const EdgeInsets.all(PinneSpacing.lg),
             decoration: BoxDecoration(
-              color: PinneColors.card,
+              color: context.pinne.card,
               borderRadius: BorderRadius.circular(PinneRadii.card),
-              border: Border.all(color: PinneColors.line),
+              border: Border.all(color: context.pinne.line),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'TODAY · 10:30',
                   style: TextStyle(
-                    color: PinneColors.lilac,
+                    color: context.pinne.lilac,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1,
@@ -825,14 +832,14 @@ class _ProgressScene extends StatelessWidget {
                 Container(
                   height: 6,
                   decoration: BoxDecoration(
-                    color: PinneColors.violet,
+                    color: context.pinne.violet,
                     borderRadius: BorderRadius.circular(99),
                   ),
                 ),
                 const SizedBox(height: PinneSpacing.xs),
-                const Text(
+                Text(
                   '10 minute focus slot',
-                  style: TextStyle(color: PinneColors.muted, fontSize: 11),
+                  style: TextStyle(color: context.pinne.muted, fontSize: 11),
                 ),
               ],
             ),
@@ -842,7 +849,11 @@ class _ProgressScene extends StatelessWidget {
           right: 26,
           bottom: 4,
           child: CustomPaint(
-            painter: _RingPainter(progress: reduced ? .72 : .25 + value * .55),
+            painter: _RingPainter(
+              progress: reduced ? .72 : .25 + value * .55,
+              lineColor: context.pinne.line,
+              progressColor: context.pinne.lilac,
+            ),
             child: const SizedBox(
               width: 112,
               height: 112,
@@ -883,10 +894,7 @@ class _ProgressButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const loader = PinneBrandedLoader(
-      size: 20,
-      label: 'Finishing setup',
-    );
+    const loader = PinneBrandedLoader(size: 20, label: 'Finishing setup');
     // The last page ends on a labelled pill: the one primary action.
     final Widget button = last
         ? FilledButton.icon(
@@ -909,15 +917,19 @@ class _ProgressButton extends StatelessWidget {
             label: const Text('Get started'),
           )
         : CustomPaint(
-            painter: _RingPainter(progress: progress),
+            painter: _RingPainter(
+              progress: progress,
+              lineColor: context.pinne.line,
+              progressColor: context.pinne.lilac,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(7),
               child: IconButton.filled(
                 key: const ValueKey('onboarding-next'),
                 tooltip: 'Next page',
                 style: IconButton.styleFrom(
-                  backgroundColor: PinneColors.accentPrimaryAction,
-                  foregroundColor: PinneColors.ink,
+                  backgroundColor: context.pinne.accentPrimaryAction,
+                  foregroundColor: context.pinne.ink,
                   minimumSize: const Size.square(54),
                 ),
                 onPressed: busy ? null : onPressed,
@@ -933,8 +945,14 @@ class _ProgressButton extends StatelessWidget {
 }
 
 class _RingPainter extends CustomPainter {
-  const _RingPainter({required this.progress});
+  const _RingPainter({
+    required this.progress,
+    required this.lineColor,
+    required this.progressColor,
+  });
   final double progress;
+  final Color lineColor;
+  final Color progressColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -944,7 +962,7 @@ class _RingPainter extends CustomPainter {
       center,
       radius,
       Paint()
-        ..color = PinneColors.line
+        ..color = lineColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
@@ -954,7 +972,7 @@ class _RingPainter extends CustomPainter {
       math.pi * 2 * progress.clamp(0, 1),
       false,
       Paint()
-        ..color = PinneColors.lilac
+        ..color = progressColor
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeWidth = 3,
@@ -963,5 +981,7 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.progress != progress ||
+      oldDelegate.lineColor != lineColor ||
+      oldDelegate.progressColor != progressColor;
 }

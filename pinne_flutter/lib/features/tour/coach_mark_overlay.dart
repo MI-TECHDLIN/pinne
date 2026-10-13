@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shell/pill_nav_bar.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../../ui/ribbon_spirit/ribbon_cutout.dart';
 import 'tour_controller.dart';
 
 /// Dims the app, cuts a window around the current [TourStep] target, and
@@ -150,7 +151,12 @@ class _CoachMarkOverlayState extends ConsumerState<CoachMarkOverlay>
                 onTap: () {},
                 child: CustomPaint(
                   key: const ValueKey('tour-scrim'),
-                  painter: _ScrimPainter(hole: hole, radius: _step.radius + 6),
+                  painter: _ScrimPainter(
+                    hole: hole,
+                    radius: _step.radius + 6,
+                    highlightColor: context.pinne.violet,
+                    edgeColor: context.pinne.lilac,
+                  ),
                 ),
               ),
               CustomSingleChildLayout(
@@ -200,10 +206,17 @@ class _CoachMarkOverlayState extends ConsumerState<CoachMarkOverlay>
 }
 
 class _ScrimPainter extends CustomPainter {
-  const _ScrimPainter({required this.hole, required this.radius});
+  const _ScrimPainter({
+    required this.hole,
+    required this.radius,
+    required this.highlightColor,
+    required this.edgeColor,
+  });
 
   final Rect? hole;
   final double radius;
+  final Color highlightColor;
+  final Color edgeColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -230,7 +243,7 @@ class _ScrimPainter extends CustomPainter {
       ..drawRRect(
         window.inflate(3),
         Paint()
-          ..color = PinneColors.violet.withValues(alpha: .35)
+          ..color = highlightColor.withValues(alpha: .35)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 6
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
@@ -238,7 +251,7 @@ class _ScrimPainter extends CustomPainter {
       ..drawRRect(
         window,
         Paint()
-          ..color = PinneColors.lilac
+          ..color = edgeColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2,
       );
@@ -246,7 +259,10 @@ class _ScrimPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ScrimPainter oldDelegate) =>
-      oldDelegate.hole != hole || oldDelegate.radius != radius;
+      oldDelegate.hole != hole ||
+      oldDelegate.radius != radius ||
+      oldDelegate.highlightColor != highlightColor ||
+      oldDelegate.edgeColor != edgeColor;
 }
 
 /// Where the callout goes, in order: below the window, above it, to its
@@ -330,12 +346,14 @@ class _Callout extends StatelessWidget {
       child: Container(
         key: const ValueKey('tour-callout'),
         decoration: BoxDecoration(
-          color: PinneColors.cardRaised,
+          color: context.pinne.cardRaised,
           borderRadius: BorderRadius.circular(PinneRadii.card),
-          border: Border.all(color: PinneColors.lilac.withValues(alpha: .35)),
-          boxShadow: const [
+          border: Border.all(color: context.pinne.lilac.withValues(alpha: .35)),
+          boxShadow: [
             BoxShadow(
-              color: Color(0xAA000000),
+              color: Theme.of(context).brightness == Brightness.light
+                  ? context.pinne.shadow
+                  : const Color(0xAA000000),
               blurRadius: 30,
               offset: Offset(0, 14),
             ),
@@ -354,8 +372,8 @@ class _Callout extends StatelessWidget {
             children: [
               if (welcome) ...[
                 Center(
-                  child: Image.asset(
-                    'assets/art/cutout/ribbon_spirit_welcome.webp',
+                  child: RibbonSpiritCutout(
+                    asset: 'assets/art/cutout/ribbon_spirit_welcome.webp',
                     height: 96,
                     excludeFromSemantics: true,
                   ),
@@ -374,8 +392,8 @@ class _Callout extends StatelessWidget {
                       children: [
                         Text(
                           'STEP ${step + 1} OF ${tourSteps.length}',
-                          style: const TextStyle(
-                            color: PinneColors.lilac,
+                          style: TextStyle(
+                            color: context.pinne.lilac,
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 1.2,
@@ -398,7 +416,7 @@ class _Callout extends StatelessWidget {
                       key: const ValueKey('tour-skip'),
                       onPressed: onSkip,
                       style: TextButton.styleFrom(
-                        foregroundColor: PinneColors.muted,
+                        foregroundColor: context.pinne.muted,
                         visualDensity: VisualDensity.compact,
                       ),
                       child: const Text('Skip tour'),
@@ -411,7 +429,7 @@ class _Callout extends StatelessWidget {
                 child: Text(
                   data.body,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: PinneColors.muted,
+                    color: context.pinne.muted,
                     height: 1.4,
                   ),
                 ),
@@ -477,15 +495,15 @@ class _StepBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     width: 42,
     height: 42,
-    decoration: const BoxDecoration(
+    decoration: BoxDecoration(
       shape: BoxShape.circle,
       gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [PinneColors.lilac, PinneColors.violet],
+        colors: [context.pinne.lilac, context.pinne.violet],
       ),
     ),
-    child: Icon(icon, size: 21, color: PinneColors.text),
+    child: Icon(icon, size: 21, color: context.pinne.onViolet),
   );
 }
 
@@ -508,7 +526,7 @@ class _StepDots extends StatelessWidget {
               width: i == step ? 18 : 6,
               height: 6,
               decoration: BoxDecoration(
-                color: i == step ? PinneColors.lilac : PinneColors.line,
+                color: i == step ? context.pinne.lilac : context.pinne.line,
                 borderRadius: BorderRadius.circular(PinneRadii.chip),
               ),
             ),
@@ -528,18 +546,18 @@ class _TabChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
     decoration: BoxDecoration(
-      color: PinneColors.glass,
+      color: context.pinne.glass,
       borderRadius: BorderRadius.circular(PinneRadii.chip),
-      border: Border.all(color: PinneColors.line),
+      border: Border.all(color: context.pinne.line),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(destination.icon, size: 14, color: PinneColors.lilac),
+        Icon(destination.icon, size: 14, color: context.pinne.lilac),
         const SizedBox(width: 5),
         Text(
           destination.label,
-          style: const TextStyle(color: PinneColors.text, fontSize: 12),
+          style: TextStyle(color: context.pinne.text, fontSize: 12),
         ),
       ],
     ),

@@ -20,12 +20,22 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final light = Theme.of(context).brightness == Brightness.light;
     return Container(
       padding: padding ?? const EdgeInsets.all(PinneSpacing.lg),
       decoration: BoxDecoration(
-        color: PinneColors.glass,
+        color: context.pinne.glass,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: PinneColors.line, width: 1),
+        border: Border.all(color: context.pinne.line, width: 1),
+        boxShadow: light
+            ? [
+                BoxShadow(
+                  color: context.pinne.shadow,
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : null,
       ),
       child: child,
     );

@@ -30,10 +30,10 @@ class PinneSkeleton extends StatelessWidget {
       child: ExcludeSemantics(
         child: Skeletonizer.zone(
           effect: reduced
-              ? const SolidColorEffect(color: PinneColors.cardRaised)
-              : const ShimmerEffect(
-                  baseColor: PinneColors.cardRaised,
-                  highlightColor: Color(0xFF4A3D6B),
+              ? SolidColorEffect(color: context.pinne.cardRaised)
+              : ShimmerEffect(
+                  baseColor: context.pinne.cardRaised,
+                  highlightColor: context.pinne.shimmerHighlight,
                   duration: Duration(milliseconds: 1400),
                 ),
           child: child,
@@ -102,8 +102,8 @@ class PinneTileSkeleton extends StatelessWidget {
     child: SizedBox(
       height: height,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: PinneColors.card,
+        decoration: BoxDecoration(
+          color: context.pinne.card,
           borderRadius: BorderRadius.all(Radius.circular(PinneRadii.tile)),
         ),
         child: const Padding(
@@ -168,11 +168,7 @@ class PinneSuggestionSkeleton extends StatelessWidget {
 
 /// Branded indeterminate wait for compact actions that are not loading cards.
 class PinneBrandedLoader extends StatelessWidget {
-  const PinneBrandedLoader({
-    super.key,
-    this.size = 24,
-    this.label = 'Working',
-  });
+  const PinneBrandedLoader({super.key, this.size = 24, this.label = 'Working'});
 
   final double size;
   final String label;
@@ -190,13 +186,13 @@ class PinneBrandedLoader extends StatelessWidget {
                 child: Icon(
                   Icons.auto_awesome_rounded,
                   size: size * 0.72,
-                  color: PinneColors.lilac,
+                  color: context.pinne.lilac,
                 ),
               ),
             )
           : LoadingAnimationWidget.twistingDots(
-              leftDotColor: PinneColors.violet,
-              rightDotColor: PinneColors.pink,
+              leftDotColor: context.pinne.violet,
+              rightDotColor: context.pinne.pink,
               size: size,
             ),
     ),

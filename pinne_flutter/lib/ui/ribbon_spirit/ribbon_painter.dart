@@ -15,6 +15,7 @@ class RibbonPainter extends CustomPainter {
     required this.recipe,
     required this.palette,
     required this.mood,
+    required this.faceColor,
     this.phase = 0,
     this.reducedMotion = false,
     this.transitionFrom,
@@ -24,6 +25,7 @@ class RibbonPainter extends CustomPainter {
   final RibbonRecipe recipe;
   final SpiritPalette palette;
   final RibbonMood mood;
+  final Color faceColor;
   final double phase;
   final bool reducedMotion;
   final double? transitionFrom;
@@ -183,7 +185,7 @@ class RibbonPainter extends CustomPainter {
 
   void _eyes(Canvas canvas) {
     final paint = Paint()
-      ..color = PinneColors.text
+      ..color = faceColor
       ..strokeCap = StrokeCap.round;
     final blinking =
         !reducedMotion &&

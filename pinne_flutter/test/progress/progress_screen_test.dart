@@ -359,7 +359,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
       expect(find.byType(RibbonConfetti), findsOneWidget);
-      expect(RibbonConfetti.colours, isNot(contains(PinneColors.accentDue)));
+      expect(
+        RibbonConfetti.colours(PinnePalette.dark),
+        isNot(contains(PinneColors.accentDue)),
+      );
       await tester.tap(find.byKey(const ValueKey('celebration-continue')));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));

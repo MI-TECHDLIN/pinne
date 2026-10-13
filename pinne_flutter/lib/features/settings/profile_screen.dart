@@ -51,10 +51,7 @@ class ProfileScreen extends ConsumerWidget {
               },
             )
           else ...[
-            _ProfileHero(
-              profile: profile.value,
-              account: account.value,
-            ),
+            _ProfileHero(profile: profile.value, account: account.value),
             const SizedBox(height: PinneSpacing.md),
             if (progress.value case final report?) _StatsCard(report: report),
             if (progress.value != null) const SizedBox(height: PinneSpacing.md),
@@ -92,8 +89,8 @@ class _ProfileHero extends ConsumerWidget {
           Container(
             width: 96,
             height: 96,
-            decoration: const BoxDecoration(
-              color: PinneColors.cardRaised,
+            decoration: BoxDecoration(
+              color: context.pinne.cardRaised,
               shape: BoxShape.circle,
             ),
             child: ClipOval(
@@ -123,16 +120,16 @@ class _ProfileHero extends ConsumerWidget {
                     email,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: PinneColors.muted),
+                    style: TextStyle(color: context.pinne.muted),
                   ),
                 ],
                 if (account case final details?) ...[
                   const SizedBox(height: PinneSpacing.xs),
                   Text(
                     'Member since ${_dateLabel(details.memberSince.toLocal())}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: PinneColors.muted,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: context.pinne.muted),
                   ),
                 ],
               ],
@@ -158,7 +155,7 @@ class _AccountBadge extends StatelessWidget {
     };
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: PinneColors.violet,
+        color: context.pinne.violet,
         borderRadius: BorderRadius.circular(PinneRadii.chip),
       ),
       child: Padding(
@@ -166,7 +163,7 @@ class _AccountBadge extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: PinneColors.text,
+            color: context.pinne.onViolet,
             fontWeight: FontWeight.w800,
             letterSpacing: 1,
           ),
@@ -187,24 +184,24 @@ class _StatsCard extends StatelessWidget {
       (
         label: 'Saved this week',
         value: '${report.savedCount}',
-        color: PinneColors.peach,
+        color: context.pinne.peach,
       ),
       (
         label: 'Reviewed',
         value: '${report.totalReviewedCount}',
-        color: PinneColors.mint,
+        color: context.pinne.mint,
       ),
       (
         label: 'Weekly goal',
         value:
             '${report.weeklyGoal.reviewDayCount}/${report.weeklyGoal.goalDays} days',
-        color: PinneColors.sky,
+        color: context.pinne.sky,
       ),
       if (report.streakEnabled)
         (
           label: 'Current streak',
           value: '${report.currentStreakDays ?? 0} days',
-          color: PinneColors.pink,
+          color: context.pinne.pink,
         ),
     ];
     return GlassCard(
@@ -265,14 +262,14 @@ class _StatTile extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: PinneColors.ink,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(color: context.pinne.ink),
         ),
         Text(
           label,
           maxLines: 2,
-          style: const TextStyle(color: PinneColors.ink),
+          style: TextStyle(color: context.pinne.ink),
         ),
       ],
     ),
@@ -292,7 +289,7 @@ class _GuestAccountCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.shield_outlined, color: PinneColors.lilac),
+              Icon(Icons.shield_outlined, color: context.pinne.lilac),
               const SizedBox(width: PinneSpacing.sm),
               Expanded(
                 child: Text(
@@ -303,13 +300,13 @@ class _GuestAccountCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: PinneSpacing.sm),
-          const Text(
+          Text(
             'You are using Pinne as a guest. This version of Serverpod cannot '
             'link a guest to email, so signing in or creating an account starts '
             'a separate account. Your current guest saves stay with this guest '
             'account and do not transfer.',
             key: ValueKey('profile-guest-separate-account-notice'),
-            style: TextStyle(color: PinneColors.muted, height: 1.4),
+            style: TextStyle(color: context.pinne.muted, height: 1.4),
           ),
           const SizedBox(height: PinneSpacing.md),
           Wrap(
@@ -331,10 +328,10 @@ class _GuestAccountCard extends ConsumerWidget {
           ),
           if (!emailAvailable) ...[
             const SizedBox(height: PinneSpacing.sm),
-            const Text(
+            Text(
               'Email sign-up opens soon - try Pinne as a guest.',
               key: ValueKey('profile-email-delivery-unavailable'),
-              style: TextStyle(color: PinneColors.muted),
+              style: TextStyle(color: context.pinne.muted),
             ),
           ],
         ],
@@ -355,9 +352,9 @@ class _SignedInAccountCard extends ConsumerWidget {
       children: [
         Text('Account', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: PinneSpacing.xs),
-        const Text(
+        Text(
           'Your saves are attached to this account.',
-          style: TextStyle(color: PinneColors.muted),
+          style: TextStyle(color: context.pinne.muted),
         ),
         const SizedBox(height: PinneSpacing.md),
         OutlinedButton.icon(
@@ -430,14 +427,14 @@ class _ProfileError extends StatelessWidget {
     return GlassCard(
       child: Column(
         children: [
-          Icon(friendly.icon, color: PinneColors.lilac, size: 36),
+          Icon(friendly.icon, color: context.pinne.lilac, size: 36),
           const SizedBox(height: PinneSpacing.sm),
           Text(friendly.title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: PinneSpacing.xs),
           Text(
             friendly.hint,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: PinneColors.muted),
+            style: TextStyle(color: context.pinne.muted),
           ),
           TextButton(onPressed: onRetry, child: const Text('Try again')),
         ],

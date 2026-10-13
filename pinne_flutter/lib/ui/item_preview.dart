@@ -9,16 +9,17 @@ enum PreviewChipSurface { dark, pastel, due }
 
 ({Color background, Color foreground, Color border}) previewChipColors(
   PreviewChipSurface surface,
+  PinnePalette palette,
 ) => switch (surface) {
   PreviewChipSurface.dark => (
-    background: PinneColors.cardRaised,
-    foreground: PinneColors.text,
-    border: PinneColors.line,
+    background: palette.cardRaised,
+    foreground: palette.text,
+    border: palette.line,
   ),
   PreviewChipSurface.pastel || PreviewChipSurface.due => (
-    background: PinneColors.ink,
-    foreground: PinneColors.text,
-    border: PinneColors.ink,
+    background: palette.ink,
+    foreground: palette.onViolet,
+    border: palette.ink,
   ),
 };
 
@@ -34,7 +35,7 @@ class PreviewSourceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = previewChipColors(surface);
+    final colors = previewChipColors(surface, context.pinne);
     return Chip(
       key: const ValueKey('preview-source'),
       visualDensity: VisualDensity.compact,
@@ -109,18 +110,14 @@ class _PreviewPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     key: ValueKey(pending ? 'preview-skeleton' : 'preview-placeholder'),
-    color: PinneColors.cardRaised,
+    color: context.pinne.cardRaised,
     alignment: Alignment.center,
     child: pending
         ? const PinneSkeleton(
             label: 'Loading preview image',
             child: Bone(width: double.infinity, height: double.infinity),
           )
-        : const Icon(
-            Icons.link_rounded,
-            color: PinneColors.muted,
-            size: 30,
-          ),
+        : Icon(Icons.link_rounded, color: context.pinne.muted, size: 30),
   );
 }
 
@@ -141,7 +138,7 @@ class PreviewByline extends StatelessWidget {
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: color ?? PinneColors.muted,
+        color: color ?? context.pinne.muted,
         height: 1.35,
       ),
     );
@@ -160,7 +157,7 @@ class DurationChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = previewChipColors(surface);
+    final colors = previewChipColors(surface, context.pinne);
     return Chip(
       key: const ValueKey('known-duration'),
       visualDensity: VisualDensity.compact,

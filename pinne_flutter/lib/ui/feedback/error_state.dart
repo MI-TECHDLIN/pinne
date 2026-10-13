@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/pinne_tokens.dart';
+import '../ribbon_spirit/ribbon_cutout.dart';
 import 'friendly_error.dart';
 
 /// A designed failure state: the Ribbon Spirit, what happened in plain words,
@@ -42,13 +43,13 @@ class PinneErrorCard extends StatelessWidget {
           key: ValueKey('error-card-${friendly.cause.name}'),
           padding: const EdgeInsets.all(PinneSpacing.lg),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [PinneColors.cardRaised, PinneColors.card],
+              colors: [context.pinne.cardRaised, context.pinne.card],
             ),
             borderRadius: BorderRadius.circular(PinneRadii.card),
-            border: Border.all(color: PinneColors.line),
+            border: Border.all(color: context.pinne.line),
           ),
           child: narrow
               ? Column(
@@ -121,7 +122,7 @@ class PinneErrorState extends StatelessWidget {
                     friendly.message,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: PinneColors.muted,
+                      color: context.pinne.muted,
                       height: 1.45,
                     ),
                   ),
@@ -164,7 +165,7 @@ class _ErrorCopy extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(friendly.icon, size: 16, color: PinneColors.pink),
+            Icon(friendly.icon, size: 16, color: context.pinne.error),
             const SizedBox(width: PinneSpacing.xs),
             Flexible(
               child: Text(
@@ -178,8 +179,8 @@ class _ErrorCopy extends StatelessWidget {
                   ErrorCause.tooManyAttempts => 'PAUSED',
                   ErrorCause.unknown => 'HICCUP',
                 },
-                style: const TextStyle(
-                  color: PinneColors.pink,
+                style: TextStyle(
+                  color: context.pinne.error,
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
@@ -197,7 +198,7 @@ class _ErrorCopy extends StatelessWidget {
         Text(
           friendly.message,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: PinneColors.muted,
+            color: context.pinne.muted,
             height: 1.45,
           ),
         ),
@@ -273,8 +274,8 @@ class _SpiritBadge extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    PinneColors.violet.withValues(alpha: .35),
-                    PinneColors.violet.withValues(alpha: 0),
+                    context.pinne.violet.withValues(alpha: .35),
+                    context.pinne.violet.withValues(alpha: 0),
                   ],
                 ),
               ),
@@ -283,7 +284,10 @@ class _SpiritBadge extends StatelessWidget {
           Positioned.fill(
             child: Padding(
               padding: EdgeInsets.all(size * .08),
-              child: Image.asset(friendly.art, fit: BoxFit.contain),
+              child: RibbonSpiritCutout(
+                asset: friendly.art,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           Positioned(
@@ -293,14 +297,14 @@ class _SpiritBadge extends StatelessWidget {
               width: size * .34,
               height: size * .34,
               decoration: BoxDecoration(
-                color: PinneColors.pink,
+                color: context.pinne.error,
                 shape: BoxShape.circle,
-                border: Border.all(color: PinneColors.card, width: 2),
+                border: Border.all(color: context.pinne.card, width: 2),
               ),
               child: Icon(
                 friendly.icon,
                 size: size * .19,
-                color: PinneColors.ink,
+                color: context.pinne.ink,
               ),
             ),
           ),

@@ -61,7 +61,7 @@ class _MonthCalendarState extends State<MonthCalendar> {
                   label,
                   style: Theme.of(
                     context,
-                  ).textTheme.titleMedium?.copyWith(color: PinneColors.lilac),
+                  ).textTheme.titleMedium?.copyWith(color: context.pinne.lilac),
                 ),
               ),
             ),
@@ -85,8 +85,8 @@ class _MonthCalendarState extends State<MonthCalendar> {
                   child: Center(
                     child: Text(
                       letter,
-                      style: const TextStyle(
-                        color: PinneColors.muted,
+                      style: TextStyle(
+                        color: context.pinne.muted,
                         fontSize: 12,
                       ),
                     ),
@@ -160,7 +160,7 @@ class _DayCell extends StatelessWidget {
       if (proposed > 0)
         proposed == 1 ? '1 session proposed' : '$proposed sessions proposed',
     ];
-    final text = isSelected ? PinneColors.ink : PinneColors.text;
+    final text = isSelected ? context.pinne.selectionText : context.pinne.text;
     return Semantics(
       button: true,
       selected: isSelected,
@@ -175,16 +175,18 @@ class _DayCell extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CustomPaint(
-                painter: proposed > 0 && !isSelected ? _DashedRing() : null,
+                painter: proposed > 0 && !isSelected
+                    ? _DashedRing(color: context.pinne.lilac)
+                    : null,
                 child: Container(
                   width: 30,
                   height: 30,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected ? PinneColors.lilac : null,
+                    color: isSelected ? context.pinne.selectionFill : null,
                     border: isToday && !isSelected
-                        ? Border.all(color: PinneColors.muted)
+                        ? Border.all(color: context.pinne.muted)
                         : null,
                   ),
                   child: Text(
@@ -203,7 +205,7 @@ class _DayCell extends StatelessWidget {
                 height: 5,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: scheduled > 0 ? PinneColors.lilac : null,
+                  color: scheduled > 0 ? context.pinne.lilac : null,
                 ),
               ),
             ],
@@ -215,10 +217,14 @@ class _DayCell extends StatelessWidget {
 }
 
 class _DashedRing extends CustomPainter {
+  const _DashedRing({required this.color});
+
+  final Color color;
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = PinneColors.lilac
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
     final rect = Offset.zero & size;
@@ -230,7 +236,7 @@ class _DashedRing extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DashedRing oldDelegate) => false;
+  bool shouldRepaint(_DashedRing oldDelegate) => oldDelegate.color != color;
 }
 
 class _Legend extends StatelessWidget {
@@ -238,7 +244,7 @@ class _Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(color: PinneColors.muted, fontSize: 12);
+    final style = TextStyle(color: context.pinne.muted, fontSize: 12);
     return ExcludeSemantics(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -246,21 +252,23 @@ class _Legend extends StatelessWidget {
           Container(
             width: 6,
             height: 6,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: PinneColors.lilac,
+              color: context.pinne.lilac,
             ),
           ),
           const SizedBox(width: 4),
-          const Text('Planned', style: style),
+          Text('Planned', style: style),
           const SizedBox(width: PinneSpacing.md),
           SizedBox(
             width: 10,
             height: 10,
-            child: CustomPaint(painter: _DashedRing()),
+            child: CustomPaint(
+              painter: _DashedRing(color: context.pinne.lilac),
+            ),
           ),
           const SizedBox(width: 4),
-          const Text('Proposed', style: style),
+          Text('Proposed', style: style),
         ],
       ),
     );

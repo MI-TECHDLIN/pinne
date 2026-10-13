@@ -95,11 +95,15 @@ class PinneToastBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, tint, label) = switch (kind) {
-      ToastKind.success => (Icons.check_rounded, PinneColors.mint, 'Done'),
-      ToastKind.info => (Icons.info_outline_rounded, PinneColors.lilac, 'Note'),
+      ToastKind.success => (Icons.check_rounded, context.pinne.success, 'Done'),
+      ToastKind.info => (
+        Icons.info_outline_rounded,
+        context.pinne.lilac,
+        'Note',
+      ),
       ToastKind.error => (
         Icons.priority_high_rounded,
-        PinneColors.pink,
+        context.pinne.error,
         'Problem',
       ),
     };
@@ -116,12 +120,14 @@ class PinneToastBody extends StatelessWidget {
           PinneSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: PinneColors.cardRaised,
+          color: context.pinne.cardRaised,
           borderRadius: BorderRadius.circular(PinneRadii.tile),
           border: Border.all(color: tint.withValues(alpha: .35)),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x99000000),
+              color: Theme.of(context).brightness == Brightness.light
+                  ? context.pinne.shadow
+                  : const Color(0x99000000),
               blurRadius: 24,
               offset: Offset(0, 10),
             ),
@@ -133,14 +139,14 @@ class PinneToastBody extends StatelessWidget {
               width: 30,
               height: 30,
               decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
-              child: Icon(icon, size: 18, color: PinneColors.ink),
+              child: Icon(icon, size: 18, color: context.pinne.ink),
             ),
             const SizedBox(width: PinneSpacing.md),
             Expanded(
               child: Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PinneColors.text,
+                  color: context.pinne.text,
                   height: 1.3,
                 ),
               ),
@@ -149,9 +155,9 @@ class PinneToastBody extends StatelessWidget {
               TextButton(
                 key: const ValueKey('pinne-toast-action'),
                 onPressed: () {
-                  ScaffoldMessenger.maybeOf(context)?.hideCurrentSnackBar(
-                    reason: SnackBarClosedReason.action,
-                  );
+                  ScaffoldMessenger.maybeOf(
+                    context,
+                  )?.hideCurrentSnackBar(reason: SnackBarClosedReason.action);
                   onAction?.call();
                 },
                 child: Text(action),
