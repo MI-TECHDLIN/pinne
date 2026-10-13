@@ -159,7 +159,7 @@ Future<void> showCelebration(
     context: context,
     barrierDismissible: false,
     barrierLabel: 'Celebration',
-    barrierColor: PinneColors.midnight.withValues(alpha: 0.86),
+    barrierColor: context.pinne.midnight.withValues(alpha: 0.86),
     transitionDuration: reduced
         ? PinneMotionDurations.reducedFade
         : const Duration(milliseconds: 460),
@@ -229,16 +229,16 @@ class _CelebrationViewState extends State<CelebrationView> {
       margin: const EdgeInsets.symmetric(horizontal: PinneSpacing.xl),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [PinneColors.cardRaised, PinneColors.card],
+          colors: [context.pinne.cardRaised, context.pinne.card],
         ),
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: PinneColors.lilac.withValues(alpha: 0.35)),
+        border: Border.all(color: context.pinne.lilac.withValues(alpha: 0.35)),
         boxShadow: [
           BoxShadow(
-            color: PinneColors.violet.withValues(alpha: 0.35),
+            color: context.pinne.violet.withValues(alpha: 0.35),
             blurRadius: 60,
             spreadRadius: 4,
           ),
@@ -272,7 +272,7 @@ class _CelebrationViewState extends State<CelebrationView> {
                 height: 1,
                 fontWeight: FontWeight.w500,
                 letterSpacing: -3,
-                color: PinneColors.lilac,
+                color: context.pinne.lilac,
               ),
             ),
           ),
@@ -282,7 +282,7 @@ class _CelebrationViewState extends State<CelebrationView> {
             child: Text(
               copy.unit,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: PinneColors.muted,
+                color: context.pinne.muted,
               ),
             ),
           ),
@@ -301,14 +301,14 @@ class _CelebrationViewState extends State<CelebrationView> {
               children: [
                 for (final milestone in widget.also)
                   Chip(
-                    avatar: const Icon(
+                    avatar: Icon(
                       Icons.auto_awesome_rounded,
                       size: 16,
-                      color: PinneColors.lilac,
+                      color: context.pinne.lilac,
                     ),
                     label: Text('Also: ${CelebrationCopy.of(milestone).title}'),
-                    side: const BorderSide(color: PinneColors.line),
-                    backgroundColor: PinneColors.glass,
+                    side: BorderSide(color: context.pinne.line),
+                    backgroundColor: context.pinne.glass,
                   ),
               ],
             ),
@@ -353,13 +353,9 @@ class RibbonConfetti extends StatefulWidget {
 
   final int seed;
 
-  static const colours = [
-    PinneColors.peach,
-    PinneColors.mint,
-    PinneColors.pink,
-    PinneColors.sky,
-    PinneColors.lilac,
-    PinneColors.violet,
+  static List<Color> colours(PinnePalette palette) => [
+    ...palette.tilePalette,
+    palette.violet,
   ];
 
   @override
@@ -383,7 +379,11 @@ class _RibbonConfettiState extends State<RibbonConfetti>
   @override
   Widget build(BuildContext context) => RepaintBoundary(
     child: CustomPaint(
-      painter: _ConfettiPainter(_pieces, _controller),
+      painter: _ConfettiPainter(
+        _pieces,
+        _controller,
+        RibbonConfetti.colours(context.pinne),
+      ),
       size: Size.infinite,
     ),
   );
@@ -396,8 +396,7 @@ class _Piece {
       fall = 0.75 + random.nextDouble() * 0.6,
       sway = 12 + random.nextDouble() * 26,
       spin = (random.nextDouble() - 0.5) * 9,
-      colour =
-          RibbonConfetti.colours[random.nextInt(RibbonConfetti.colours.length)],
+      colourIndex = random.nextInt(6),
       ribbon = random.nextDouble() < 0.45,
       length = 26 + random.nextDouble() * 30;
 
@@ -411,16 +410,18 @@ class _Piece {
   final double fall;
   final double sway;
   final double spin;
-  final Color colour;
+  final int colourIndex;
   final bool ribbon;
   final double length;
 }
 
 class _ConfettiPainter extends CustomPainter {
-  _ConfettiPainter(this.pieces, this.progress) : super(repaint: progress);
+  _ConfettiPainter(this.pieces, this.progress, this.colours)
+    : super(repaint: progress);
 
   final List<_Piece> pieces;
   final Animation<double> progress;
+  final List<Color> colours;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -434,7 +435,7 @@ class _ConfettiPainter extends CustomPainter {
           math.sin(local * math.pi * 3 + piece.x * 9) * piece.sway;
       final fade = local > 0.8 ? (1 - local) / 0.2 : 1.0;
       final paint = Paint()
-        ..color = piece.colour.withValues(alpha: 0.9 * fade)
+        ..color = colours[piece.colourIndex].withValues(alpha: 0.9 * fade)
         ..style = piece.ribbon ? PaintingStyle.stroke : PaintingStyle.fill
         ..strokeWidth = 4
         ..strokeCap = StrokeCap.round;
@@ -445,10 +446,7 @@ class _ConfettiPainter extends CustomPainter {
         final path = Path()..moveTo(0, 0);
         for (var s = 1; s <= 12; s++) {
           final along = piece.length * s / 12;
-          path.lineTo(
-            math.sin(s / 12 * math.pi * 2 + local * 10) * 6,
-            along,
-          );
+          path.lineTo(math.sin(s / 12 * math.pi * 2 + local * 10) * 6, along);
         }
         canvas.drawPath(path, paint);
       } else {
@@ -466,5 +464,5 @@ class _ConfettiPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ConfettiPainter oldDelegate) =>
-      oldDelegate.pieces != pieces;
+      oldDelegate.pieces != pieces || oldDelegate.colours != colours;
 }

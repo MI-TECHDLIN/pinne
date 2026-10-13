@@ -30,11 +30,11 @@ class PinnePage extends StatelessWidget {
     final theme = Theme.of(context);
     final display = theme.textTheme.displaySmall;
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: RadialGradient(
           center: Alignment(-0.6, -1.2),
           radius: 1.2,
-          colors: [PinneColors.glowViolet, PinneColors.midnight],
+          colors: [context.pinne.glowViolet, context.pinne.midnight],
         ),
       ),
       child: SafeArea(
@@ -72,7 +72,7 @@ class PinnePage extends StatelessWidget {
               Text(
                 subtitle!,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: PinneColors.muted,
+                  color: context.pinne.muted,
                 ),
               ),
             ],
@@ -104,7 +104,7 @@ class ComingSoonCard extends StatelessWidget {
           Text(
             body,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: PinneColors.muted,
+              color: context.pinne.muted,
             ),
           ),
         ],

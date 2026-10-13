@@ -160,7 +160,7 @@ class SavedItemAiSuggestions extends ConsumerWidget {
           Text(
             'AI suggestions',
             style: theme.textTheme.labelMedium?.copyWith(
-              color: PinneColors.muted,
+              color: context.pinne.muted,
             ),
           ),
           const SizedBox(height: PinneSpacing.xs),

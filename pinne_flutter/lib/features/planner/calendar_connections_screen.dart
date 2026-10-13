@@ -96,7 +96,7 @@ class _PhoneCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.phone_android, color: PinneColors.lilac),
+              Icon(Icons.phone_android, color: context.pinne.lilac),
               const SizedBox(width: PinneSpacing.sm),
               Expanded(
                 child: Text(
@@ -113,7 +113,7 @@ class _PhoneCard extends ConsumerWidget {
                 ? 'Busy times have not been read yet.'
                 : 'Calendars last read ${checkedAgo(checked, DateTime.now())}. '
                       'Busy times are only as fresh as the last read.',
-            style: const TextStyle(color: PinneColors.muted, fontSize: 13),
+            style: TextStyle(color: context.pinne.muted, fontSize: 13),
           ),
           if (state.deviceSupported &&
               access != DeviceCalendarAccess.granted) ...[
@@ -150,7 +150,7 @@ class _PhoneCard extends ConsumerWidget {
                   ? 'No calendar takes sessions yet. Accepted sessions stay '
                         'in Pinne until you choose one.'
                   : 'Sessions are added to ${state.writeCalendar!.name}.',
-              style: const TextStyle(color: PinneColors.muted, fontSize: 13),
+              style: TextStyle(color: context.pinne.muted, fontSize: 13),
             ),
           ],
         ],
@@ -183,7 +183,10 @@ class _CalendarRow extends StatelessWidget {
             if (account != null && account != selection.name)
               Text(
                 account,
-                style: const TextStyle(color: PinneColors.muted, fontSize: 12),
+                style: TextStyle(
+                  color: context.pinne.muted,
+                  fontSize: 12,
+                ),
               ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
@@ -193,9 +196,9 @@ class _CalendarRow extends StatelessWidget {
               onChanged: (on) => onChanged(on, selection.useForWrites),
             ),
             if (selection.readOnly)
-              const Text(
+              Text(
                 'Read-only: sessions cannot be added here.',
-                style: TextStyle(color: PinneColors.muted, fontSize: 12),
+                style: TextStyle(color: context.pinne.muted, fontSize: 12),
               )
             else
               SwitchListTile(

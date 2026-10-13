@@ -90,7 +90,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         ? const ValueKey('guest-account-switch-notice')
                         : null,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: PinneColors.muted),
+                    style: TextStyle(color: context.pinne.muted),
                   ),
                   const SizedBox(height: PinneSpacing.xl),
                   if (!alreadySignedIn)
@@ -114,11 +114,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     ),
                   if (!emailAvailable) ...[
                     const SizedBox(height: PinneSpacing.md),
-                    const Text(
+                    Text(
                       'Email sign-up opens soon - try Pinne as a guest.',
                       key: ValueKey('email-delivery-unavailable'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: PinneColors.muted),
+                      style: TextStyle(color: context.pinne.muted),
                     ),
                   ],
                   const SizedBox(height: PinneSpacing.xl),

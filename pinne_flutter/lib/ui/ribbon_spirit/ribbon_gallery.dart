@@ -64,9 +64,9 @@ class _RibbonGalleryState extends State<RibbonGallery> {
           ],
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           '12 identities × 4 moods · tap a row to animate above',
-          style: TextStyle(color: PinneColors.muted),
+          style: TextStyle(color: context.pinne.muted),
         ),
         const SizedBox(height: 12),
         RibbonContactSheet(
@@ -110,7 +110,7 @@ class RibbonContactSheet extends StatelessWidget {
               child: Center(
                 child: Text(
                   mood.name,
-                  style: const TextStyle(color: PinneColors.lilac),
+                  style: TextStyle(color: context.pinne.lilac),
                 ),
               ),
             ),
@@ -127,8 +127,8 @@ class RibbonContactSheet extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: index.isEven
-                  ? PinneColors.card
-                  : PinneColors.midnightRaised,
+                  ? context.pinne.card
+                  : context.pinne.midnightRaised,
               borderRadius: BorderRadius.circular(18),
             ),
             child: Row(
@@ -139,8 +139,8 @@ class RibbonContactSheet extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 12),
                     child: Text(
                       '${RibbonGallery.seeds[index]}\n${PinneSpiritPalettes.values[index % 6].name}',
-                      style: const TextStyle(
-                        color: PinneColors.muted,
+                      style: TextStyle(
+                        color: context.pinne.muted,
                         fontSize: 12,
                       ),
                     ),

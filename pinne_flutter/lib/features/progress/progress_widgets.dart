@@ -83,18 +83,18 @@ class ProgressStatPills extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pills = [
-      ('Saved', report.savedCount, Icons.bookmark_rounded, PinneColors.peach),
+      ('Saved', report.savedCount, Icons.bookmark_rounded, context.pinne.peach),
       (
         'Reviewed',
         report.reviewedCount,
         Icons.check_circle_rounded,
-        PinneColors.mint,
+        context.pinne.mint,
       ),
       (
         'Upcoming',
         report.remainingCount,
         Icons.schedule_rounded,
-        PinneColors.sky,
+        context.pinne.sky,
       ),
     ];
     return Row(
@@ -121,7 +121,7 @@ class ProgressStatPills extends StatelessWidget {
                         color: colour,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, size: 18, color: PinneColors.ink),
+                      child: Icon(icon, size: 18, color: context.pinne.ink),
                     ),
                     const SizedBox(height: PinneSpacing.sm),
                     CountUpText(
@@ -131,8 +131,8 @@ class ProgressStatPills extends StatelessWidget {
                     ),
                     Text(
                       label,
-                      style: const TextStyle(
-                        color: PinneColors.muted,
+                      style: TextStyle(
+                        color: context.pinne.muted,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -199,7 +199,7 @@ class ReviewRateCard extends StatelessWidget {
               ],
             ),
           ),
-          Text(caption, style: const TextStyle(color: PinneColors.muted)),
+          Text(caption, style: TextStyle(color: context.pinne.muted)),
           const SizedBox(height: PinneSpacing.lg),
           if (marker >= 0)
             Semantics(
@@ -212,8 +212,9 @@ class ReviewRateCard extends StatelessWidget {
                     days: report.days,
                     marker: marker,
                     textDirection: Directionality.of(context),
+                    palette: context.pinne,
                     labelStyle: theme.textTheme.labelLarge!.copyWith(
-                      color: PinneColors.ink,
+                      color: context.pinne.ink,
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                     ),
@@ -227,16 +228,16 @@ class ReviewRateCard extends StatelessWidget {
               children: [
                 Text(
                   shortDate(report.startDate),
-                  style: const TextStyle(
-                    color: PinneColors.muted,
+                  style: TextStyle(
+                    color: context.pinne.muted,
                     fontSize: 12,
                   ),
                 ),
                 const Spacer(),
                 Text(
                   shortDate(report.days.last.date),
-                  style: const TextStyle(
-                    color: PinneColors.muted,
+                  style: TextStyle(
+                    color: context.pinne.muted,
                     fontSize: 12,
                   ),
                 ),
@@ -260,12 +261,14 @@ class RateTrendPainter extends CustomPainter {
     required this.marker,
     required this.textDirection,
     required this.labelStyle,
+    required this.palette,
   });
 
   final List<ProgressDay> days;
   final int marker;
   final TextDirection textDirection;
   final TextStyle labelStyle;
+  final PinnePalette palette;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -277,7 +280,7 @@ class RateTrendPainter extends CustomPainter {
 
     // Quiet guides at 0%, 50% and 100%.
     final guide = Paint()
-      ..color = PinneColors.line
+      ..color = palette.line
       ..strokeWidth = 1;
     for (final level in [0.0, 0.5, 1.0]) {
       canvas.drawLine(Offset(0, y(level)), Offset(size.width, y(level)), guide);
@@ -307,15 +310,15 @@ class RateTrendPainter extends CustomPainter {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              PinneColors.pink.withValues(alpha: 0.32),
-              PinneColors.pink.withValues(alpha: 0),
+              palette.pink.withValues(alpha: 0.32),
+              palette.pink.withValues(alpha: 0),
             ],
           ).createShader(Offset.zero & size),
       );
       canvas.drawPath(
         line,
         Paint()
-          ..color = PinneColors.pink
+          ..color = palette.pink
           ..style = PaintingStyle.stroke
           ..strokeWidth = 3
           ..strokeCap = StrokeCap.round,
@@ -328,24 +331,21 @@ class RateTrendPainter extends CustomPainter {
       Offset(point.dx, top - 6),
       Offset(point.dx, y(0)),
       Paint()
-        ..color = PinneColors.text.withValues(alpha: 0.18)
+        ..color = palette.text.withValues(alpha: 0.18)
         ..strokeWidth = 1,
     );
-    canvas.drawCircle(point, 7, Paint()..color = PinneColors.midnight);
+    canvas.drawCircle(point, 7, Paint()..color = palette.midnight);
     canvas.drawCircle(
       point,
       7,
       Paint()
-        ..color = PinneColors.text
+        ..color = palette.text
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3,
     );
 
     final label = TextPainter(
-      text: TextSpan(
-        text: percentLabel(rate),
-        style: labelStyle,
-      ),
+      text: TextSpan(text: percentLabel(rate), style: labelStyle),
       textDirection: textDirection,
     )..layout();
     final bubbleWidth = label.width + 20;
@@ -357,13 +357,15 @@ class RateTrendPainter extends CustomPainter {
       Rect.fromLTWH(left, 0, bubbleWidth, 26),
       const Radius.circular(13),
     );
-    canvas.drawRRect(bubble, Paint()..color = PinneColors.text);
+    canvas.drawRRect(bubble, Paint()..color = palette.text);
     label.paint(canvas, Offset(left + 10, 13 - label.height / 2));
   }
 
   @override
   bool shouldRepaint(RateTrendPainter oldDelegate) =>
-      oldDelegate.days != days || oldDelegate.marker != marker;
+      oldDelegate.days != days ||
+      oldDelegate.marker != marker ||
+      oldDelegate.palette != palette;
 }
 
 /// This week's goal as tall day tiles with check marks.
@@ -404,7 +406,7 @@ class WeeklyGoalCard extends StatelessWidget {
                 ? 'Reached: ${goal.reviewDayCount} review days this week.'
                 : '${goal.reviewDayCount} of ${goal.goalDays} review days '
                       'this week.',
-            style: const TextStyle(color: PinneColors.muted),
+            style: TextStyle(color: context.pinne.muted),
           ),
           const SizedBox(height: PinneSpacing.md),
           Row(
@@ -463,11 +465,13 @@ class _GoalTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: reviewed
-              ? PinneColors.lilac
-              : PinneColors.glass.withValues(alpha: day.isFuture ? 0.04 : 0.08),
+              ? context.pinne.lilac
+              : context.pinne.glass.withValues(
+                  alpha: day.isFuture ? 0.04 : 0.08,
+                ),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: day.isToday ? PinneColors.lilac : PinneColors.line,
+            color: day.isToday ? context.pinne.lilac : context.pinne.line,
             width: day.isToday ? 2 : 1,
           ),
         ),
@@ -478,13 +482,13 @@ class _GoalTile extends StatelessWidget {
               reviewed ? Icons.check_rounded : Icons.circle_outlined,
               size: reviewed ? 18 : 8,
               color: reviewed
-                  ? PinneColors.ink
-                  : PinneColors.muted.withValues(alpha: 0.5),
+                  ? context.pinne.ink
+                  : context.pinne.muted.withValues(alpha: 0.5),
             ),
             Text(
               weekdayLetter(day.date),
               style: TextStyle(
-                color: reviewed ? PinneColors.ink : PinneColors.muted,
+                color: reviewed ? context.pinne.ink : context.pinne.muted,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
@@ -506,14 +510,14 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
     decoration: BoxDecoration(
-      color: PinneColors.violet.withValues(alpha: 0.22),
+      color: context.pinne.violet.withValues(alpha: 0.22),
       borderRadius: BorderRadius.circular(PinneRadii.chip),
-      border: Border.all(color: PinneColors.violet.withValues(alpha: 0.6)),
+      border: Border.all(color: context.pinne.violet.withValues(alpha: 0.6)),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: PinneColors.lilac),
+        Icon(icon, size: 16, color: context.pinne.lilac),
         const SizedBox(width: 6),
         Text(
           label,
@@ -585,11 +589,11 @@ class CollectionProgressBar extends StatelessWidget {
           widthFactor: shown,
           child: ColoredBox(color: accent),
         ),
-        content(PinneColors.text),
+        content(context.pinne.text),
         // The same text in ink where it sits on the filled part.
         ClipRect(
           clipper: _LeadingFraction(shown),
-          child: content(PinneColors.ink),
+          child: content(context.pinne.ink),
         ),
       ],
     );
@@ -656,7 +660,7 @@ class ReviewDaysChart extends StatelessWidget {
             most == 0
                 ? 'Your first review day will show up here.'
                 : 'Saves revisited each day, ${periodPhrase(report.period)}.',
-            style: const TextStyle(color: PinneColors.muted),
+            style: TextStyle(color: context.pinne.muted),
           ),
           const SizedBox(height: PinneSpacing.lg),
           SizedBox(
@@ -716,13 +720,13 @@ class _DayBar extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: best
-            ? PinneColors.violet
+            ? context.pinne.violet
             : count > 0
-            ? PinneColors.lilac.withValues(alpha: 0.42)
-            : PinneColors.glass,
+            ? context.pinne.lilac.withValues(alpha: 0.42)
+            : context.pinne.glass,
         borderRadius: BorderRadius.circular(dense ? 4 : 10),
         border: day.isToday && !best
-            ? Border.all(color: PinneColors.lilac, width: 1.5)
+            ? Border.all(color: context.pinne.lilac, width: 1.5)
             : null,
       ),
     );
@@ -736,13 +740,13 @@ class _DayBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           if (best)
-            const FittedBox(
+            FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 'best day\nso far',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: PinneColors.lilac,
+                  color: context.pinne.lilac,
                   fontSize: 10,
                   height: 1.1,
                   fontWeight: FontWeight.w700,
@@ -774,8 +778,8 @@ class _DayBar extends StatelessWidget {
                       label,
                       style: TextStyle(
                         color: day.isToday
-                            ? PinneColors.text
-                            : PinneColors.muted,
+                            ? context.pinne.text
+                            : context.pinne.muted,
                         fontSize: 11,
                         fontWeight: day.isToday
                             ? FontWeight.w800

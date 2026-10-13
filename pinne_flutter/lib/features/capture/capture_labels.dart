@@ -22,16 +22,16 @@ class SourceBadge extends StatelessWidget {
           vertical: PinneSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: PinneColors.glass,
+          color: context.pinne.glass,
           borderRadius: BorderRadius.circular(PinneRadii.chip),
-          border: Border.all(color: PinneColors.line),
+          border: Border.all(color: context.pinne.line),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
-                color: PinneColors.sky,
+                color: context.pinne.sky,
                 shape: BoxShape.circle,
               ),
               child: SizedBox.square(dimension: 6),
@@ -39,8 +39,8 @@ class SourceBadge extends StatelessWidget {
             const SizedBox(width: PinneSpacing.xs + 2),
             Text(
               source.label,
-              style: const TextStyle(
-                color: PinneColors.text,
+              style: TextStyle(
+                color: context.pinne.text,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -78,13 +78,13 @@ class SyncStatusLabel extends StatelessWidget {
     final (icon, color) = switch (capture.syncState) {
       CaptureSyncState.synced => (
         Icons.cloud_done_outlined,
-        PinneColors.lilac,
+        context.pinne.lilac,
       ),
       CaptureSyncState.failed => (
         Icons.error_outline_rounded,
-        PinneColors.peach,
+        context.pinne.peach,
       ),
-      CaptureSyncState.pending => (Icons.schedule_rounded, PinneColors.muted),
+      CaptureSyncState.pending => (Icons.schedule_rounded, context.pinne.muted),
     };
     return Row(
       mainAxisSize: MainAxisSize.min,
