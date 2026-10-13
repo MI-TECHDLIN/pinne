@@ -23,10 +23,10 @@ Pinne brings it back about a day later, one calm review at a time. A small
 character, the Ribbon Spirit, keeps you company and keeps the progress honest.
 
 <p align="center">
-  <img src="docs/ui-fidelity/after-today.png" alt="Today: one save due now, with a review queue sized to your time" width="23%">
+  <img src="docs/onboarding/01-everything-one-home.png" alt="Save it once, find it later: links, posts and notes in one home" width="23%">
+  <img src="docs/onboarding/02-we-bring-it-back.png" alt="Good ideas, right on time: saves come back about a day later" width="23%">
   <img src="docs/ui-fidelity/after-collections.png" alt="Collections group saves by what you want to do with them" width="23%">
-  <img src="docs/ui-fidelity/after-search.png" alt="Search: describe it the way you would to a friend" width="23%">
-  <img src="docs/capture/save-sheet-393x851.png" alt="The Save sheet, with the optional why-did-you-save-this note" width="23%">
+  <img src="docs/onboarding/03-make-time-progress.png" alt="Turn saved into done: plan a review window and watch progress add up" width="23%">
 </p>
 
 **Quick links:**

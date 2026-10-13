@@ -2,7 +2,8 @@
 
 Run from the repo root:  python3 docs/readme/make_banner.py
 Needs Pillow. Uses only files in this repo: the Ribbon Spirit cutout, the
-bundled Outfit and Plus Jakarta Sans fonts and three existing screenshots.
+bundled Outfit and Plus Jakarta Sans fonts and three existing test-rendered screenshots whose text is all real
+fonts (no blank placeholder labels).
 """
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -15,9 +16,9 @@ OUTFIT = ROOT / "pinne_flutter/assets/fonts/outfit/Outfit-VariableFont_wght.ttf"
 JAKARTA = ROOT / "pinne_flutter/assets/fonts/plus_jakarta_sans/PlusJakartaSans-VariableFont_wght.ttf"
 SPIRIT = ROOT / "pinne_flutter/assets/art/cutout/ribbon_spirit_happy.webp"
 SHOTS = [
+    ROOT / "docs/onboarding/02-we-bring-it-back.png",
     ROOT / "docs/ui-fidelity/after-collections.png",
-    ROOT / "docs/ui-fidelity/after-today.png",
-    ROOT / "docs/ui-fidelity/after-search.png",
+    ROOT / "docs/onboarding/03-make-time-progress.png",
 ]
 
 
