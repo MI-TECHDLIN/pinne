@@ -131,6 +131,23 @@ but production registration codes and password resets are unavailable. To
 enable email delivery, set at least host and from address. Username and
 password must be set together; omit both for an unauthenticated relay.
 
+For Gmail SMTP, first enable 2-Step Verification on the sending Google account
+and create an app password. Use the account's full Gmail address as both the
+username and from address, and store the 16-character app password as
+`smtpPassword` (never the account's normal password):
+
+```powershell
+serverpod cloud password set smtpHost "smtp.gmail.com"
+serverpod cloud password set smtpPort "587"
+serverpod cloud password set smtpUsername "<YOUR_GMAIL_ADDRESS>"
+serverpod cloud password set smtpPassword "<GMAIL_APP_PASSWORD>"
+serverpod cloud password set smtpFromEmail "<YOUR_GMAIL_ADDRESS>"
+serverpod cloud password set smtpFromName "Pinne"
+serverpod cloud password set smtpSsl "false"
+```
+
+For another SMTP provider, use its corresponding connection details:
+
 ```powershell
 serverpod cloud password set smtpHost "<SMTP_HOST>"
 serverpod cloud password set smtpPort "<SMTP_PORT_USUALLY_587>"
