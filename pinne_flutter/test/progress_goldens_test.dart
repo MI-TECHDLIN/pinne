@@ -12,6 +12,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import 'progress/fake_progress_api.dart';
 import 'support/golden_theme.dart';
+import 'support/test_account.dart';
 
 class _SignedIn extends SignedInNotifier {
   @override
@@ -32,6 +33,7 @@ void main() {
   }) => ProviderScope(
     overrides: [
       signedInProvider.overrideWith(_SignedIn.new),
+      accountIdProvider.overrideWith(TestAccountId.new),
       avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 0)),
       progressApiProvider.overrideWithValue(api),
     ],

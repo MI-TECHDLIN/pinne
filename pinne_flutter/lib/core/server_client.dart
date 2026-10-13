@@ -135,6 +135,7 @@ class SignedInNotifier extends Notifier<bool> {
 class AccountIdNotifier extends Notifier<String?> {
   @override
   String? build() {
+    if (!ref.watch(signedInProvider)) return null;
     final auth = ref.watch(clientProvider).auth;
     void sync() => state = auth.authInfo?.authUserId.toString();
     auth.authInfoListenable.addListener(sync);

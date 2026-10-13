@@ -11,7 +11,7 @@ import 'outbox_sync.dart';
 /// The local capture database. Overridden in `main.dart`; null where there
 /// is no durable store (the web build), in which case capture is hidden.
 final captureStoreProvider = Provider<CaptureStore?>(
-  (ref) => throw UnimplementedError('captureStoreProvider must be overridden'),
+  (ref) => null,
 );
 
 final captureApiProvider = Provider<CaptureApi>(
