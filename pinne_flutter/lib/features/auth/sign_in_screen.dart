@@ -10,6 +10,7 @@ import '../../theme/pinne_tokens.dart';
 import '../../ui/feedback/friendly_error.dart';
 import '../../ui/feedback/toast.dart';
 import '../../ui/pinne_loading.dart';
+import 'email_auth_flow.dart';
 
 /// Guest-first sign-in, with email and optional Google for durable accounts.
 class SignInScreen extends ConsumerStatefulWidget {
@@ -23,14 +24,16 @@ class SignInScreen extends ConsumerStatefulWidget {
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   bool _guestLoading = false;
-  late final EmailAuthController _loginOnlyController;
+  late final EmailAuthController _emailController;
 
   @override
   void initState() {
     super.initState();
-    _loginOnlyController = EmailAuthController(
+    _emailController = EmailAuthController(
       client: ref.read(clientProvider),
-      startScreen: EmailFlowScreen.login,
+      startScreen: widget.createAccount
+          ? EmailFlowScreen.startRegistration
+          : EmailFlowScreen.login,
       onAuthenticated: _closeAfterAuthentication,
       onError: _showSignInError,
     );
@@ -38,7 +41,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   @override
   void dispose() {
-    _loginOnlyController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -130,17 +133,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (emailAvailable)
-                          EmailSignInWidget(
-                            client: client,
-                            startScreen: widget.createAccount
-                                ? EmailFlowScreen.startRegistration
-                                : EmailFlowScreen.login,
-                            onAuthenticated: _closeAfterAuthentication,
-                            onError: _showSignInError,
-                          )
-                        else
-                          _EmailLoginOnly(controller: _loginOnlyController),
+                        PinneEmailAuthFlow(
+                          controller: _emailController,
+                          allowSignUp: emailAvailable,
+                        ),
                         if (googleSignInConfigured) ...[
                           const SizedBox(height: PinneSpacing.lg),
                           SignInWidget(
@@ -180,51 +176,4 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       kind: ToastKind.error,
     );
   }
-}
-
-class _EmailLoginOnly extends StatelessWidget {
-  const _EmailLoginOnly({required this.controller});
-
-  final EmailAuthController controller;
-
-  @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: controller,
-    builder: (context, child) => Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          key: const ValueKey('email-login-only-email'),
-          controller: controller.emailController,
-          enabled: !controller.isLoading,
-          keyboardType: TextInputType.emailAddress,
-          autofillHints: const [AutofillHints.email],
-          decoration: const InputDecoration(labelText: 'Email'),
-        ),
-        const SizedBox(height: PinneSpacing.sm),
-        TextField(
-          key: const ValueKey('email-login-only-password'),
-          controller: controller.passwordController,
-          enabled: !controller.isLoading,
-          obscureText: true,
-          autofillHints: const [AutofillHints.password],
-          onSubmitted: (_) => _canSubmit ? controller.login() : null,
-          decoration: const InputDecoration(labelText: 'Password'),
-        ),
-        const SizedBox(height: PinneSpacing.md),
-        FilledButton(
-          key: const ValueKey('email-login-only-submit'),
-          onPressed: _canSubmit ? controller.login : null,
-          child: controller.isLoading
-              ? const PinneBrandedLoader(size: 20, label: 'Signing in')
-              : const Text('Sign in'),
-        ),
-      ],
-    ),
-  );
-
-  bool get _canSubmit =>
-      !controller.isLoading &&
-      controller.emailController.text.isNotEmpty &&
-      controller.passwordController.text.isNotEmpty;
 }

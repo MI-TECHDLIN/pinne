@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/server_client.dart';
+import '../../theme/pinne_tokens.dart';
+import '../../ui/pinne_loading.dart';
 import '../capture/capture_providers.dart';
 
 /// Warns about this account's durable pending saves, then signs out.
@@ -36,6 +40,31 @@ Future<bool> confirmSignOut(BuildContext context, WidgetRef ref) async {
     ),
   );
   if (confirmed != true) return false;
-  await ref.read(signedInProvider.notifier).signOut();
+  if (!context.mounted) return false;
+  final navigator = Navigator.of(context, rootNavigator: true);
+  unawaited(
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const PopScope(
+        canPop: false,
+        child: AlertDialog(
+          key: ValueKey('signing-out'),
+          content: Row(
+            children: [
+              PinneBrandedLoader(size: 28, label: 'Signing out'),
+              SizedBox(width: PinneSpacing.md),
+              Expanded(child: Text('Signing out…')),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+  try {
+    await ref.read(signedInProvider.notifier).signOut();
+  } finally {
+    navigator.pop();
+  }
   return true;
 }
