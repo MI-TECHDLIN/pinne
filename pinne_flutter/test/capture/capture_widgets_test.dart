@@ -8,6 +8,7 @@ import 'package:pinne_flutter/core/motion.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
+import 'package:pinne_flutter/features/capture/outbox_sync.dart';
 import 'package:pinne_flutter/features/capture/paste_capture_card.dart';
 import 'package:pinne_flutter/features/capture/save_celebration.dart';
 import 'package:pinne_flutter/features/capture/saved_section.dart';
@@ -41,6 +42,7 @@ Widget _host(
   FakeCaptureServer? server,
   bool signedIn = false,
   MotionPreference motion = MotionPreference.reduced,
+  Brightness brightness = Brightness.dark,
 }) {
   return ProviderScope(
     overrides: [
@@ -51,7 +53,9 @@ Widget _host(
       avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 0)),
     ],
     child: MaterialApp(
-      theme: pinneDarkTheme(),
+      theme: brightness == Brightness.light
+          ? pinneLightTheme()
+          : pinneDarkTheme(),
       builder: (context, app) =>
           MotionPreferenceScope(preference: motion, child: app!),
       home: child,
@@ -173,7 +177,7 @@ void main() {
   tearDown(() => store.close());
 
   group('share sheet', () {
-    testWidgets('is saved locally before it says Saved, then Done syncs', (
+    testWidgets('is kept locally at once, then Done confirms and syncs', (
       tester,
     ) async {
       final server = FakeCaptureServer();
@@ -191,12 +195,14 @@ void main() {
         ),
       );
 
-      // The row exists by the first frame that can show "Saved".
+      // The row exists by the first frame, held until the user decides.
       final stored = store.captures().single;
       expect(stored.held, isTrue);
       expect(stored.source, CaptureSource.x);
-      expect(find.text('Saved to Pinne'), findsOneWidget);
+      expect(find.text('Save to Pinne'), findsOneWidget);
+      expect(find.text('Saved to Pinne'), findsNothing);
       await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
 
       expect(find.text('X'), findsOneWidget);
       expect(find.bySemanticsLabel('Source: X'), findsOneWidget);
@@ -216,9 +222,15 @@ void main() {
         'Try this in my dashboard',
       );
       await tester.tap(find.byKey(const ValueKey('share-done')));
+      await tester.pump();
+      expect(find.text('Saved to Pinne'), findsOneWidget);
+      expect(find.byKey(const ValueKey('save-celebration')), findsOneWidget);
+      expect(done, isFalse, reason: 'closes once the celebration has played');
+      await tester.pump(saveCelebrationDuration);
       await tester.pumpAndSettle();
 
       expect(done, isTrue);
+      expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
       final sent = server.calls.single;
       expect(sent.title, 'Flutter desktop sidebar pattern');
       expect(sent.intention, 'Try this in my dashboard');
@@ -228,18 +240,21 @@ void main() {
       expect(synced.intention, 'Try this in my dashboard');
     });
 
-    testWidgets('edits are kept even if the sheet is closed by back', (
+    testWidgets('back keeps the save and edits, with a toast, no party', (
       tester,
     ) async {
       var done = false;
+      final toasts = <String>[];
       await tester.pumpWidget(
         _host(
           ShareSheetScreen(
             text: 'https://example.com/flutter-sidebar',
             subject: 'Building a desktop sidebar',
             onDone: () => done = true,
+            onToast: toasts.add,
           ),
           store: store,
+          motion: MotionPreference.full,
         ),
       );
       await tester.pumpAndSettle();
@@ -252,16 +267,19 @@ void main() {
         'Building a desktop sidebar',
       );
       expect(find.text('Done'), findsOneWidget);
-      expect(find.textContaining('Sign in to Pinne to sync'), findsOneWidget);
+      expect(find.textContaining('sign in to Pinne to sync'), findsOneWidget);
 
       await tester.enterText(
         find.byKey(const ValueKey('share-why')),
         'For the admin panel',
       );
       await tester.binding.handlePopRoute();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(done, isTrue);
+      expect(toasts, ['Saved to Pinne']);
+      expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
+      await tester.pumpAndSettle();
       final capture = store.captures().single;
       expect(capture.intention, 'For the admin panel');
       expect(capture.held, isFalse);
@@ -310,22 +328,30 @@ void main() {
         _showKeyboard(tester, phone);
         await tester.pumpAndSettle();
 
-        for (final key in ['share-title', 'share-why', 'share-done']) {
+        for (final key in [
+          'share-title',
+          'share-why',
+          'share-done',
+          'share-discard',
+        ]) {
           await _expectReachable(tester, key, phone: phone, keyboard: true);
         }
         await tester.pumpWidget(const SizedBox());
       });
     }
 
-    testWidgets('a new share celebrates once; a repeat does not', (
+    testWidgets('only Done celebrates a new share; a repeat never does', (
       tester,
     ) async {
+      var done = 0;
+      final toasts = <String>[];
       Future<void> share() async {
         await tester.pumpWidget(
           _host(
             ShareSheetScreen(
               text: 'https://example.com/shared',
-              onDone: () {},
+              onDone: () => done++,
+              onToast: toasts.add,
             ),
             store: store,
             motion: MotionPreference.full,
@@ -334,20 +360,194 @@ void main() {
         await tester.pump(const Duration(milliseconds: 1));
       }
 
+      // Regression: sharing alone used to play the celebration (#24).
       await share();
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
+      expect(done, 0);
+
+      await tester.tap(find.byKey(const ValueKey('share-done')));
+      await tester.pump();
       expect(find.byKey(const ValueKey('save-celebration')), findsOneWidget);
       expect(find.byKey(const ValueKey('save-sparkles')), findsOneWidget);
+      // A second tap while it plays neither restarts it nor closes twice.
+      await tester.tap(find.byKey(const ValueKey('share-done')));
       await tester.pump(const Duration(milliseconds: 16));
       await tester.pump(saveCelebrationDuration);
       await tester.pump();
       expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
+      expect(done, 1);
+      expect(toasts, isEmpty);
       await tester.pumpWidget(const SizedBox());
 
       await share();
       expect(find.text('Already in Pinne'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('share-done')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
+      expect(done, 2, reason: 'a repeat closes at once');
+      await tester.pumpWidget(const SizedBox());
+
+      await share();
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(toasts, ['Already in Pinne']);
       expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
       await tester.pumpWidget(const SizedBox());
     });
+
+    testWidgets('reduced motion confirms with a quiet Saved on Done', (
+      tester,
+    ) async {
+      var done = false;
+      await tester.pumpWidget(
+        _host(
+          ShareSheetScreen(
+            text: 'https://example.com/quiet',
+            onDone: () => done = true,
+          ),
+          store: store,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('share-done')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('save-celebration')), findsOneWidget);
+      expect(find.byKey(const ValueKey('save-sparkles')), findsNothing);
+      await tester.pump(saveCelebrationDuration);
+      await tester.pumpAndSettle();
+      expect(done, isTrue);
+    });
+
+    testWidgets("Don't save removes the capture and its outbox operation", (
+      tester,
+    ) async {
+      final server = FakeCaptureServer();
+      var done = false;
+      final toasts = <String>[];
+      await tester.pumpWidget(
+        _host(
+          ShareSheetScreen(
+            text: 'https://example.com/changed-my-mind',
+            onDone: () => done = true,
+            onToast: toasts.add,
+          ),
+          store: store,
+          server: server,
+          signedIn: true,
+          motion: MotionPreference.full,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(store.captures(), hasLength(1));
+      expect(store.outboxLength(), 1);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('share-why')),
+        'Never mind',
+      );
+      await tester.tap(find.byKey(const ValueKey('share-discard')));
+      await tester.pump();
+
+      expect(done, isTrue);
+      expect(toasts, ['Not saved']);
+      expect(store.captures(), isEmpty);
+      expect(store.outboxLength(), 0);
+      expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
+      await tester.pumpAndSettle();
+      expect(server.calls, isEmpty, reason: 'never sent');
+      expect(store.captures(), isEmpty, reason: 'a late edit does not revive');
+    });
+
+    testWidgets("Don't save removes an already-synced item on the server", (
+      tester,
+    ) async {
+      final server = FakeCaptureServer();
+      var done = false;
+      await tester.pumpWidget(
+        _host(
+          ShareSheetScreen(
+            text: 'https://example.com/synced-meanwhile',
+            onDone: () => done = true,
+          ),
+          store: store,
+          server: server,
+          signedIn: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      // The main app released a stale hold and synced it meanwhile.
+      final held = store.captures().single;
+      store.release(held.clientItemId);
+      final sync = OutboxSync(
+        store: store,
+        api: server,
+        accountId: CaptureStore.testAccountId,
+        canSync: () => true,
+      );
+      addTearDown(sync.dispose);
+      await tester.runAsync(sync.drain);
+      final serverItemId = store.captures().single.serverItemId!;
+
+      server.offline = true;
+      await tester.tap(find.byKey(const ValueKey('share-discard')));
+      await tester.pumpAndSettle();
+      expect(done, isFalse, reason: 'a failed removal keeps the sheet');
+      expect(store.captures(), hasLength(1));
+      expect(find.byKey(const ValueKey('pinne-toast-error')), findsOneWidget);
+
+      ScaffoldMessenger.of(
+        tester.element(find.byType(ShareSheetScreen)),
+      ).removeCurrentSnackBar();
+      await tester.pumpAndSettle();
+      server.offline = false;
+      await tester.tap(find.byKey(const ValueKey('share-discard')));
+      await tester.pumpAndSettle();
+      expect(server.removed, [serverItemId]);
+      expect(store.captures(), isEmpty);
+      expect(done, isTrue);
+    });
+
+    testWidgets("Cancel on a repeat keeps the earlier save", (tester) async {
+      final earlier = store.save(
+        parseCaptureInput('https://youtu.be/dQw4w9WgXcQ'),
+      );
+      var done = false;
+      await tester.pumpWidget(
+        _host(
+          ShareSheetScreen(
+            text: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            onDone: () => done = true,
+          ),
+          store: store,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Cancel'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('share-discard')));
+      await tester.pumpAndSettle();
+      expect(done, isTrue);
+      expect(store.captures().single.clientItemId, earlier.clientItemId);
+    });
+
+    for (final brightness in Brightness.values) {
+      testWidgets('share card text stays readable in ${brightness.name}', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _host(
+            ShareSheetScreen(text: 'https://example.com/theme', onDone: () {}),
+            store: store,
+            brightness: brightness,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      });
+    }
 
     testWidgets('an empty share saves nothing', (tester) async {
       var done = false;

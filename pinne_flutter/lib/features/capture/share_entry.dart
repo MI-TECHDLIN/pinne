@@ -34,15 +34,26 @@ class ShareChannel {
 
   /// Finishes the share activity, which returns to the app that shared.
   Future<void> finish() => _channel.invokeMethod<void>('finish');
+
+  /// A system toast, which stays up over the app that shared after
+  /// [finish].
+  Future<void> toast(String message) =>
+      _channel.invokeMethod<void>('toast', {'message': message});
 }
 
 /// The whole app the share engine runs: just the sheet, over a transparent
 /// window so the source app stays visible behind the dim.
 class ShareApp extends ConsumerWidget {
-  const ShareApp({super.key, required this.payload, required this.onDone});
+  const ShareApp({
+    super.key,
+    required this.payload,
+    required this.onDone,
+    this.onToast,
+  });
 
   final SharedPayload payload;
   final VoidCallback onDone;
+  final ValueChanged<String>? onToast;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -64,6 +75,7 @@ class ShareApp extends ConsumerWidget {
         text: payload.text,
         subject: payload.subject,
         onDone: onDone,
+        onToast: onToast,
       ),
     );
   }

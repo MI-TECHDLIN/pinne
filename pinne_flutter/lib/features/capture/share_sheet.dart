@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_capture/pinne_capture.dart';
+import 'package:pinne_client/pinne_client.dart';
 
 import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
+import '../../ui/feedback/toast.dart';
 import '../../ui/motion.dart';
 import '../settings/profile_provider.dart';
 import 'capture_labels.dart';
@@ -16,15 +18,19 @@ import 'save_celebration.dart';
 
 /// The compact "Saved to Pinne" sheet shown over the app that shared.
 ///
-/// The capture is written to the local database before the sheet says
-/// "Saved". Title and note edits go to the same row while the capture is
-/// held; Done releases it to the outbox and returns to the source app.
+/// The capture is written to the local database as soon as the sheet opens,
+/// held so nothing is lost while the user adds a note. Title and note edits
+/// go to the same row while it is held. Done confirms the save: it releases
+/// the capture to the outbox, plays the Saved celebration for a new save and
+/// returns to the source app. Leaving by back or the dim keeps the save
+/// quietly, with a toast; "Don't save" removes it.
 class ShareSheetScreen extends ConsumerStatefulWidget {
   const ShareSheetScreen({
     super.key,
     required this.text,
     this.subject,
     required this.onDone,
+    this.onToast,
   });
 
   /// The shared text, which usually is or contains the link.
@@ -35,6 +41,9 @@ class ShareSheetScreen extends ConsumerStatefulWidget {
 
   /// Closes the sheet and returns to the app that shared.
   final VoidCallback onDone;
+
+  /// Shows a short message that outlives the sheet, over the source app.
+  final ValueChanged<String>? onToast;
 
   @override
   ConsumerState<ShareSheetScreen> createState() => _ShareSheetScreenState();
@@ -53,7 +62,11 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
   LocalCapture? _earlier;
   bool _failed = false;
   bool _closing = false;
+  bool _confirmed = false;
+  bool _discarding = false;
+  bool _discarded = false;
   Timer? _editTimer;
+  Timer? _closeTimer;
   late final AppLifecycleListener _lifecycle;
   late final CaptureStore? _store;
   late final String? _accountId;
@@ -86,15 +99,7 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
       _failed = false;
     } on Object {
       _failed = true;
-      return;
     }
-    // A repeat already says "Already in Pinne"; only a new save celebrates.
-    if (_earlier != null) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final avatar = ref.read(avatarRecipeProvider);
-      showSaveCelebration(context, seed: avatar.seed, palette: avatar.palette);
-    });
   }
 
   void _scheduleEdit() {
@@ -107,7 +112,9 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
     final saved = _saved;
     final store = _store;
     final accountId = _accountId;
-    if (saved == null || store == null || accountId == null) return;
+    if (_discarded || saved == null || store == null || accountId == null) {
+      return;
+    }
     store.editHeld(
       saved.clientItemId,
       accountId: accountId,
@@ -116,23 +123,86 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
     );
   }
 
-  void _done() {
-    if (_closing) return;
-    _closing = true;
+  /// Lets the outbox send the capture. True when there was one to keep.
+  bool _keep() {
     final saved = _saved;
     final store = _store;
     final accountId = _accountId;
-    if (saved != null && store != null && accountId != null) {
-      _flushEdits();
-      store.release(saved.clientItemId, accountId: accountId);
-      final sync = ref.read(outboxSyncProvider);
-      if (sync != null) unawaited(sync.drain());
+    if (saved == null || store == null || accountId == null) return false;
+    _flushEdits();
+    store.release(saved.clientItemId, accountId: accountId);
+    final sync = ref.read(outboxSyncProvider);
+    if (sync != null) unawaited(sync.drain());
+    return true;
+  }
+
+  /// Done: the only place a new save is confirmed and celebrated. A repeat
+  /// already says "Already in Pinne", so it closes without celebrating.
+  void _done() {
+    if (_closing) return;
+    _closing = true;
+    if (!_keep() || _earlier != null) {
+      widget.onDone();
+      return;
     }
+    setState(() => _confirmed = true);
+    final avatar = ref.read(avatarRecipeProvider);
+    showSaveCelebration(context, seed: avatar.seed, palette: avatar.palette);
+    _closeTimer = Timer(saveCelebrationDuration, widget.onDone);
+  }
+
+  /// Back, swipe or a tap on the dim: the safe default keeps the save,
+  /// without the celebration that only Done plays.
+  void _leave() {
+    if (_closing) return;
+    _closing = true;
+    if (_keep()) {
+      widget.onToast?.call(
+        _earlier != null ? 'Already in Pinne' : 'Saved to Pinne',
+      );
+    }
+    widget.onDone();
+  }
+
+  /// "Don't save": removes the capture and its queued operation. If it
+  /// already synced as a new item, the server copy goes first, so a failed
+  /// call leaves both in place.
+  Future<void> _discard() async {
+    final saved = _saved;
+    final store = _store;
+    final accountId = _accountId;
+    if (_closing || saved == null || store == null || accountId == null) {
+      return;
+    }
+    _closing = true;
+    _editTimer?.cancel();
+    setState(() => _discarding = true);
+    final current = store.capture(saved.clientItemId, accountId: accountId);
+    final serverItemId = current?.serverItemId;
+    if (current != null && serverItemId != null && !current.duplicate) {
+      try {
+        await ref
+            .read(captureApiProvider)
+            .remove(UuidValue.fromString(serverItemId));
+      } on Object catch (error) {
+        if (!mounted) return;
+        setState(() {
+          _closing = false;
+          _discarding = false;
+        });
+        showErrorToast(context, error, 'Could not remove it');
+        return;
+      }
+    }
+    store.discard(saved.clientItemId, accountId: accountId);
+    _discarded = true;
+    widget.onToast?.call('Not saved');
     widget.onDone();
   }
 
   @override
   void dispose() {
+    _closeTimer?.cancel();
     _flushEdits();
     _lifecycle.dispose();
     _title.dispose();
@@ -147,7 +217,7 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) _done();
+        if (!didPop) _leave();
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -160,7 +230,7 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
                     label: 'Close and go back',
                     button: true,
                     child: GestureDetector(
-                      onTap: _done,
+                      onTap: _leave,
                       child: const ColoredBox(color: Color(0x99000000)),
                     ),
                   ).animate().fadeIn(
@@ -225,8 +295,17 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
     final status = earlier != null
         ? 'You saved this before. Anything you add here joins that save.'
         : signedIn
-        ? 'Kept on this phone. It syncs next time Pinne is open and online.'
-        : 'Kept on this phone. Sign in to Pinne to sync it.';
+        ? 'Kept safe on this phone. Add why if you like, then tap Done.'
+        : 'Kept safe on this phone. Tap Done, then sign in to Pinne to '
+              'sync it.';
+    final String heading;
+    if (earlier != null) {
+      heading = 'Already in Pinne';
+    } else if (_confirmed) {
+      heading = 'Saved to Pinne';
+    } else {
+      heading = 'Save to Pinne';
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -239,7 +318,7 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
                 header: true,
                 liveRegion: true,
                 child: Text(
-                  earlier != null ? 'Already in Pinne' : 'Saved to Pinne',
+                  heading,
                   key: const ValueKey('share-saved-heading'),
                   style: theme.textTheme.titleLarge,
                 ),
@@ -311,10 +390,19 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
             backgroundColor: context.pinne.accentPrimaryAction,
             foregroundColor: context.pinne.ink,
             minimumSize: const Size.fromHeight(48),
-            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            textStyle: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           onPressed: _done,
           child: Text(_doneLabel(saved.source)),
+        ),
+        const SizedBox(height: PinneSpacing.xs),
+        TextButton(
+          key: const ValueKey('share-discard'),
+          style: TextButton.styleFrom(minimumSize: const Size.fromHeight(44)),
+          onPressed: _discarding ? null : _discard,
+          child: Text(earlier != null ? 'Cancel' : "Don't save"),
         ),
       ],
     );

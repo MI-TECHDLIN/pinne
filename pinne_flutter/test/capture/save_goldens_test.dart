@@ -7,6 +7,7 @@ import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
 import 'package:pinne_flutter/features/capture/paste_capture_card.dart';
 import 'package:pinne_flutter/features/capture/save_celebration.dart';
+import 'package:pinne_flutter/features/capture/share_sheet.dart';
 import 'package:pinne_flutter/features/settings/profile_provider.dart';
 import 'package:pinne_flutter/shell/app_shell.dart';
 import 'package:pinne_flutter/shell/pill_nav_bar.dart';
@@ -27,8 +28,8 @@ class _AccountId extends AccountIdNotifier {
   String? build() => CaptureStore.testAccountId;
 }
 
-/// Renders the Save-a-link sheet over the pill nav and the save celebration
-/// for docs/capture/.
+/// Renders the Save-a-link sheet over the pill nav, the save celebration and
+/// the Android share card for docs/capture/ and docs/light-theme/.
 void main() {
   setUpAll(loadGoldenFonts);
   late CaptureStore store;
@@ -136,6 +137,47 @@ void main() {
       await tester.pump(saveCelebrationDuration);
       await tester.pump();
       expect(find.byKey(const ValueKey('save-celebration')), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
+
+  for (final brightness in Brightness.values) {
+    final light = brightness == Brightness.light;
+    testWidgets('share card before Done in ${brightness.name}', (tester) async {
+      usePhone(tester, const Size(393, 851), 48);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            captureStoreProvider.overrideWithValue(store),
+            captureApiProvider.overrideWithValue(FakeCaptureServer()),
+            signedInProvider.overrideWith(_SignedOut.new),
+            accountIdProvider.overrideWith(_AccountId.new),
+            avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 0)),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: goldenTheme(brightness: brightness),
+            builder: (context, child) => MotionPreferenceScope(
+              preference: MotionPreference.reduced,
+              child: child!,
+            ),
+            home: ShareSheetScreen(
+              text: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+              subject: 'Calm interface design, explained',
+              onDone: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile(
+          light
+              ? '../../../docs/light-theme/share-sheet.png'
+              : '../../../docs/capture/share-sheet.png',
+        ),
+      );
       await tester.pumpWidget(const SizedBox());
     });
   }

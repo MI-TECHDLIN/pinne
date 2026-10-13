@@ -305,6 +305,23 @@ class CaptureStore {
     if (_db.updatedRows > 0) _notify();
   }
 
+  /// Removes a capture the user chose not to keep, with its outbox
+  /// operation, so it is never sent. A capture that already synced must be
+  /// removed on the server first.
+  void discard(String clientItemId, {String accountId = testAccountId}) {
+    _transaction(() {
+      _db.execute(
+        'DELETE FROM outbox WHERE client_item_id = ? AND account_id = ?',
+        [clientItemId, accountId],
+      );
+      _db.execute(
+        'DELETE FROM captures WHERE client_item_id = ? AND account_id = ?',
+        [clientItemId, accountId],
+      );
+    });
+    _notify();
+  }
+
   /// Releases holds left by a share sheet that was killed before Done.
   int releaseStaleHolds({
     String accountId = testAccountId,

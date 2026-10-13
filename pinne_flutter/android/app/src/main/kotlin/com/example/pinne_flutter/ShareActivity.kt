@@ -1,6 +1,7 @@
 package com.mitechdlin.pinne
 
 import android.content.Intent
+import android.widget.Toast
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode
 import io.flutter.embedding.engine.FlutterEngine
@@ -23,6 +24,12 @@ class ShareActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "takeShare" -> result.success(readShare(intent))
+                    "toast" -> {
+                        val message = call.argument<String>("message").orEmpty()
+                        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT)
+                            .show()
+                        result.success(null)
+                    }
                     "finish" -> {
                         result.success(null)
                         finish()

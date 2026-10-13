@@ -95,6 +95,18 @@ class FakeCaptureServer implements CaptureApi {
     );
   }
 
+  /// Items taken out of the library by [remove].
+  final List<String> removed = [];
+
+  @override
+  Future<void> remove(UuidValue itemId) async {
+    if (offline) {
+      throw const ServerpodClientNetworkException('Failed host lookup');
+    }
+    removed.add(itemId.uuid);
+    items.remove(itemId.uuid);
+  }
+
   /// Simulates the connection coming back.
   void comeOnline() {
     offline = false;
