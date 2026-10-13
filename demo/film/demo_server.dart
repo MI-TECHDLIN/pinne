@@ -705,6 +705,9 @@ class DemoDeviceCalendar implements DeviceCalendarApi {
       DeviceCalendarAccess.granted;
 
   @override
+  Future<void> openSettings() async {}
+
+  @override
   Future<List<AdapterCalendar>> calendars() async => const [
     AdapterCalendar(id: '1', name: 'Work', readOnly: false),
     AdapterCalendar(id: '2', name: 'Family', readOnly: false),

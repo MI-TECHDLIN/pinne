@@ -170,14 +170,26 @@ class PlannerController extends AsyncNotifier<PlannerState> {
       );
     }
     final supported = _adapter.api.supported;
-    final access = supported
-        ? await _adapter.api.access()
-        : DeviceCalendarAccess.denied;
+    var access = DeviceCalendarAccess.denied;
+    String? deviceNotice;
+    if (supported) {
+      try {
+        access = await _adapter.api.access();
+      } on DeviceCalendarOperationException catch (error) {
+        deviceNotice = error.message;
+      }
+    }
     var connections = await _api.connections();
     final hasPhone = connections.any((c) => c.connection.deviceId == deviceId);
     if (supported && (hasPhone || access == DeviceCalendarAccess.granted)) {
-      await _reportCalendars(deviceId, access);
-      connections = await _api.connections();
+      try {
+        await _reportCalendars(deviceId, access);
+        connections = await _api.connections();
+      } on cal.CalendarCapabilityException catch (error) {
+        // The phone calendar is optional. A provider problem must not turn the
+        // whole server-backed Planner into a network-looking error screen.
+        deviceNotice = error.message;
+      }
     }
     final initial = PlannerState(
       deviceId: deviceId,
@@ -192,6 +204,7 @@ class PlannerController extends AsyncNotifier<PlannerState> {
           .map((c) => c.connection.lastCheckedAt)
           .nonNulls
           .firstOrNull,
+      notice: deviceNotice,
     );
     unawaited(Future.microtask(syncCalendar));
     return initial;
@@ -260,7 +273,48 @@ class PlannerController extends AsyncNotifier<PlannerState> {
 
   /// Asks for calendar access and reports this phone's calendars.
   Future<void> connectPhone() => _guard(() async {
-    final access = await _adapter.api.requestAccess();
+    var access = await _adapter.api.requestAccess();
+    // Android reports a just-declined request as denied even when it can ask
+    // once more. Re-read to distinguish that from a permanent denial.
+    if (access == DeviceCalendarAccess.denied) {
+      access = await _adapter.api.access();
+    }
+    await _reportCalendars(_current.deviceId, access);
+    state = AsyncData(
+      _current.copyWith(
+        access: access,
+        connections: await _api.connections(),
+        notice: () => switch (access) {
+          DeviceCalendarAccess.granted => null,
+          DeviceCalendarAccess.denied =>
+            'Calendar access is off. Open Android settings, turn on Calendar '
+                'permission for Pinne, then check access again.',
+          DeviceCalendarAccess.notAsked =>
+            'Calendar access was not given. Tap Allow calendar access to try '
+                'again, or keep sessions in Pinne without checking.',
+          DeviceCalendarAccess.writeOnly =>
+            'Pinne can add events but cannot read busy times. Allow full '
+                'calendar access before planning.',
+          DeviceCalendarAccess.restricted =>
+            'This phone blocks calendar access. Check its parental controls '
+                'or work profile settings.',
+        },
+      ),
+    );
+  });
+
+  /// Opens Android's app settings after a permanent permission denial.
+  Future<void> openPhoneSettings() => _guard(() async {
+    await _adapter.api.openSettings();
+    _notice(
+      'Turn on Calendar permission for Pinne in Android settings. When you '
+      'return, tap Check access again.',
+    );
+  });
+
+  /// Re-reads permission and calendars after Settings or a calendar-app fix.
+  Future<void> refreshPhoneCalendars() => _guard(() async {
+    final access = await _adapter.api.access();
     await _reportCalendars(_current.deviceId, access);
     state = AsyncData(
       _current.copyWith(
@@ -268,8 +322,8 @@ class PlannerController extends AsyncNotifier<PlannerState> {
         connections: await _api.connections(),
         notice: () => access == DeviceCalendarAccess.granted
             ? null
-            : 'Calendar access was not given. You can still plan, keep '
-                  'sessions in Pinne and export them.',
+            : 'Calendar access is still off. Turn on Calendar permission for '
+                  'Pinne in Android settings, then check again.',
       ),
     );
   });
@@ -290,16 +344,53 @@ class PlannerController extends AsyncNotifier<PlannerState> {
 
   /// Reads busy times of this phone's conflict calendars. A calendar that
   /// cannot be read is sent as unreadable, never as free.
-  Future<List<AvailabilitySnapshot>> _readAvailability() async {
+  Future<({List<AvailabilitySnapshot> snapshots, String? problem})>
+  _readAvailability() async {
     final current = _current;
     final phone = current.phone;
-    if (phone == null) return const [];
+    if (phone == null) {
+      return (
+        snapshots: const <AvailabilitySnapshot>[],
+        problem: switch (current.access) {
+          DeviceCalendarAccess.granted =>
+            'No phone calendars are connected. Open Calendar connections and '
+                'refresh calendars.',
+          DeviceCalendarAccess.denied =>
+            'Calendar access is off. Open Android settings and turn on '
+                'Calendar permission for Pinne.',
+          DeviceCalendarAccess.notAsked =>
+            'Allow calendar access in Calendar connections before planning.',
+          DeviceCalendarAccess.writeOnly =>
+            'Pinne needs full calendar access to check when you are busy.',
+          DeviceCalendarAccess.restricted =>
+            'This phone blocks calendar access. Check its parental controls '
+                'or work profile settings.',
+        },
+      );
+    }
+    if (phone.selections.isEmpty) {
+      return (
+        snapshots: const <AvailabilitySnapshot>[],
+        problem:
+            'No calendars were found. Add or sync a calendar in your phone\'s '
+            'Calendar app, then refresh calendars in Pinne.',
+      );
+    }
+    if (!phone.selections.any((selection) => selection.useForConflicts)) {
+      return (
+        snapshots: const <AvailabilitySnapshot>[],
+        problem:
+            'No calendar is chosen for busy times. Choose at least one in '
+            'Calendar connections, then plan again.',
+      );
+    }
     final now = DateTime.now().toUtc();
     final window = cal.TimeInterval(
       now.subtract(const Duration(hours: 1)),
       now.add(_readAhead),
     );
     final snapshots = <AvailabilitySnapshot>[];
+    final problems = <String>{};
     DateTime? checked;
     for (final selection in phone.selections) {
       if (!selection.useForConflicts) continue;
@@ -329,6 +420,7 @@ class PlannerController extends AsyncNotifier<PlannerState> {
           ),
         );
       } on cal.CalendarCapabilityException catch (e) {
+        problems.add(e.message);
         snapshots.add(
           AvailabilitySnapshot(
             selectionId: selection.id!,
@@ -345,17 +437,23 @@ class PlannerController extends AsyncNotifier<PlannerState> {
     if (checked != null) {
       state = AsyncData(_current.copyWith(lastCheckedAt: checked));
     }
-    return snapshots;
+    return (
+      snapshots: snapshots,
+      problem: problems.isEmpty ? null : problems.join(' '),
+    );
   }
 
   /// Proposes sessions for the planner's horizon. Nothing is scheduled.
   Future<void> propose({String? notice}) => _guard(() async {
     final availability = await _readAvailability();
     final proposal = await _api.propose(
-      PlanRequest(availability: availability),
+      PlanRequest(availability: availability.snapshots),
     );
     state = AsyncData(
-      _current.copyWith(proposal: () => proposal, notice: () => notice),
+      _current.copyWith(
+        proposal: () => proposal,
+        notice: () => notice ?? availability.problem,
+      ),
     );
   });
 
@@ -377,7 +475,7 @@ class PlannerController extends AsyncNotifier<PlannerState> {
         PlanCommitRequest(
           planId: planId,
           operationId: operationId,
-          availability: availability,
+          availability: availability.snapshots,
           acceptUnverified: unverified,
           deviceId: _current.deviceId,
         ),
@@ -388,7 +486,7 @@ class PlannerController extends AsyncNotifier<PlannerState> {
         // Revise the proposal with what is in the calendar now.
         _commitOperations.remove(planId);
         final revised = await _api.propose(
-          PlanRequest(availability: availability),
+          PlanRequest(availability: availability.snapshots),
         );
         state = AsyncData(
           _current.copyWith(
@@ -403,15 +501,17 @@ class PlannerController extends AsyncNotifier<PlannerState> {
       rethrow;
     }
     _commitOperations.remove(planId);
-    await _runWrites(result.writes);
+    final write = await _runWrites(result.writes);
     state = AsyncData(
       _current.copyWith(
         proposal: () => null,
         sessions: await _loadSessions(),
-        notice: () => unverified
-            ? 'Kept in Pinne. These times were not checked against your '
-                  'calendar.'
-            : null,
+        notice: () =>
+            write.problem ??
+            (unverified
+                ? 'Kept in Pinne. These times were not checked against your '
+                      'calendar.'
+                : null),
       ),
     );
   });
@@ -424,13 +524,18 @@ class PlannerController extends AsyncNotifier<PlannerState> {
         sessionId: view.session.id!,
         operationId: const Uuid().v4obj(),
         startAt: startAt.toUtc(),
-        availability: availability,
+        availability: availability.snapshots,
         acceptUnverified: !view.session.availabilityVerified,
         deviceId: _current.deviceId,
       ),
     );
-    await _runWrites(result.writes);
-    state = AsyncData(_current.copyWith(sessions: await _loadSessions()));
+    final write = await _runWrites(result.writes);
+    state = AsyncData(
+      _current.copyWith(
+        sessions: await _loadSessions(),
+        notice: () => write.problem,
+      ),
+    );
   });
 
   Future<void> cancel(SessionView view) => _guard(() async {
@@ -439,8 +544,13 @@ class PlannerController extends AsyncNotifier<PlannerState> {
       const Uuid().v4obj(),
       _current.deviceId,
     );
-    await _runWrites(result.writes);
-    state = AsyncData(_current.copyWith(sessions: await _loadSessions()));
+    final write = await _runWrites(result.writes);
+    state = AsyncData(
+      _current.copyWith(
+        sessions: await _loadSessions(),
+        notice: () => write.problem,
+      ),
+    );
   });
 
   /// Exports sessions as an `.ics` file through the share sheet.
@@ -457,8 +567,14 @@ class PlannerController extends AsyncNotifier<PlannerState> {
     try {
       final work = await _api.deviceWork(_current.deviceId);
       if (work.isEmpty) return;
-      if (await _runWrites(work)) {
-        state = AsyncData(_current.copyWith(sessions: await _loadSessions()));
+      final result = await _runWrites(work);
+      if (result.reported) {
+        state = AsyncData(
+          _current.copyWith(
+            sessions: await _loadSessions(),
+            notice: () => result.problem,
+          ),
+        );
       }
     } catch (_) {
       // Offline or no permission: the work stays queued on the server.
@@ -466,12 +582,23 @@ class PlannerController extends AsyncNotifier<PlannerState> {
   }
 
   /// Returns whether anything was reported.
-  Future<bool> _runWrites(List<CalendarWrite> writes) async {
-    if (writes.isEmpty || !_current.deviceSupported) return false;
+  Future<({bool reported, String? problem})> _runWrites(
+    List<CalendarWrite> writes,
+  ) async {
+    if (writes.isEmpty || !_current.deviceSupported) {
+      return (reported: false, problem: null);
+    }
     final results = await CalendarWriteRunner(_adapter).run(writes);
-    if (results.isEmpty) return false;
+    if (results.isEmpty) return (reported: false, problem: null);
     await _api.reportWrites(results);
-    return true;
+    return (
+      reported: true,
+      problem: results
+          .where((result) => result.outcome == CalendarWriteOutcome.failed)
+          .map((result) => result.message)
+          .nonNulls
+          .firstOrNull,
+    );
   }
 
   Future<void> _guard(Future<void> Function() action) async {
@@ -480,6 +607,10 @@ class PlannerController extends AsyncNotifier<PlannerState> {
     } on PlanningException catch (e) {
       _notice(e.message);
     } on CalendarRouteException catch (e) {
+      _notice(e.message);
+    } on cal.CalendarCapabilityException catch (e) {
+      _notice(e.message);
+    } on DeviceCalendarOperationException catch (e) {
       _notice(e.message);
     } on ValidationException catch (e) {
       _notice(e.message);

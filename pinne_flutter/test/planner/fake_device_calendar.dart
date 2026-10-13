@@ -27,6 +27,11 @@ class FakeDeviceCalendar implements DeviceCalendarApi {
   /// When set, the next create stores the event and then throws, like a
   /// platform call that times out after the provider committed.
   bool timeoutAfterNextCreate = false;
+  Object? calendarsError;
+  Object? eventsError;
+  Object? createError;
+  int permissionRequests = 0;
+  int settingsOpens = 0;
   int creates = 0;
   int updates = 0;
   int deletes = 0;
@@ -35,23 +40,35 @@ class FakeDeviceCalendar implements DeviceCalendarApi {
   Future<DeviceCalendarAccess> access() async => currentAccess;
 
   @override
-  Future<DeviceCalendarAccess> requestAccess() async => currentAccess;
+  Future<DeviceCalendarAccess> requestAccess() async {
+    permissionRequests++;
+    return currentAccess;
+  }
 
   @override
-  Future<List<AdapterCalendar>> calendars() async => _calendars;
+  Future<void> openSettings() async => settingsOpens++;
+
+  @override
+  Future<List<AdapterCalendar>> calendars() async {
+    if (calendarsError case final error?) throw error;
+    return _calendars;
+  }
 
   @override
   Future<List<DeviceEvent>> events(
     DateTime start,
     DateTime end, {
     List<String>? calendarIds,
-  }) async => [
-    for (final e in stored)
-      if ((calendarIds == null || calendarIds.contains(e.calendarId)) &&
-          e.start.isBefore(end) &&
-          e.end.isAfter(start))
-        e,
-  ];
+  }) async {
+    if (eventsError case final error?) throw error;
+    return [
+      for (final e in stored)
+        if ((calendarIds == null || calendarIds.contains(e.calendarId)) &&
+            e.start.isBefore(end) &&
+            e.end.isAfter(start))
+          e,
+    ];
+  }
 
   @override
   Future<DeviceEvent?> event(String id) async {
@@ -70,6 +87,7 @@ class FakeDeviceCalendar implements DeviceCalendarApi {
     required DateTime end,
     required String timezone,
   }) async {
+    if (createError case final error?) throw error;
     creates++;
     final id = '${_next++}';
     stored.add(

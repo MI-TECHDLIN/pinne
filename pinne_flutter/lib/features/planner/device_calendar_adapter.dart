@@ -7,6 +7,17 @@ import 'package:pinne_calendar/pinne_calendar.dart';
 /// Calendar access as the phone reports it.
 enum DeviceCalendarAccess { granted, writeOnly, denied, restricted, notAsked }
 
+/// A failure in the Android plugin boundary, kept distinct from server/network
+/// errors so the Planner can offer the right recovery action.
+final class DeviceCalendarOperationException implements Exception {
+  const DeviceCalendarOperationException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 /// One event as the phone's calendar store returns it. Timed events are
 /// instants; all-day events are floating dates in the date fields.
 @immutable
@@ -50,6 +61,7 @@ abstract interface class DeviceCalendarApi {
 
   Future<DeviceCalendarAccess> access();
   Future<DeviceCalendarAccess> requestAccess();
+  Future<void> openSettings();
   Future<List<AdapterCalendar>> calendars();
 
   /// Events overlapping `[start, end)`, recurring ones expanded.
@@ -100,12 +112,40 @@ class PluginDeviceCalendarApi implements DeviceCalendarApi {
       };
 
   @override
-  Future<DeviceCalendarAccess> access() async =>
-      _access(await _calendar.hasPermissions());
+  Future<DeviceCalendarAccess> access() async {
+    try {
+      return _access(await _calendar.hasPermissions());
+    } catch (_) {
+      throw const DeviceCalendarOperationException(
+        'Android could not check Calendar permission. Open Android settings '
+        'and check Calendar permission for Pinne, then try again.',
+      );
+    }
+  }
 
   @override
-  Future<DeviceCalendarAccess> requestAccess() async =>
-      _access(await _calendar.requestPermissions());
+  Future<DeviceCalendarAccess> requestAccess() async {
+    try {
+      return _access(await _calendar.requestPermissions());
+    } catch (_) {
+      throw const DeviceCalendarOperationException(
+        'Android could not show the Calendar permission request. Open Android '
+        'settings and turn on Calendar permission for Pinne.',
+      );
+    }
+  }
+
+  @override
+  Future<void> openSettings() async {
+    try {
+      await _calendar.openAppSettings();
+    } catch (_) {
+      throw const DeviceCalendarOperationException(
+        'Android settings did not open. Open Pinne in Android Settings and '
+        'turn on Calendar permission.',
+      );
+    }
+  }
 
   @override
   Future<List<AdapterCalendar>> calendars() async => [
@@ -265,7 +305,19 @@ class AndroidDeviceCalendarAdapter implements CalendarAdapter {
   @override
   Future<List<AdapterCalendar>> listCalendars() async {
     await _require(CalendarCapability.listCalendars);
-    return api.calendars();
+    try {
+      return await api.calendars();
+    } catch (_) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.listCalendars,
+        failure: CapabilityFailure.calendarMissing,
+        message:
+            'Android could not read your phone calendars. Open your phone\'s '
+            'Calendar app and make sure its calendars are visible, then '
+            'refresh calendars in Pinne.',
+      );
+    }
   }
 
   @override
@@ -276,13 +328,25 @@ class AndroidDeviceCalendarAdapter implements CalendarAdapter {
   }) async {
     await _require(CalendarCapability.readBusy);
     final checkedAt = _clock().toUtc();
-    final events = calendarIds.isEmpty
-        ? const <DeviceEvent>[]
-        : await api.events(
-            window.start.toLocal(),
-            window.end.toLocal(),
-            calendarIds: calendarIds,
-          );
+    final List<DeviceEvent> events;
+    try {
+      events = calendarIds.isEmpty
+          ? const <DeviceEvent>[]
+          : await api.events(
+              window.start.toLocal(),
+              window.end.toLocal(),
+              calendarIds: calendarIds,
+            );
+    } catch (_) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.readBusy,
+        failure: CapabilityFailure.calendarMissing,
+        message:
+            'Android could not read your phone calendar. Open your phone\'s '
+            'Calendar app and make sure it is syncing, then try again.',
+      );
+    }
     return BusyRead(
       calendarIds: calendarIds,
       window: window,
@@ -327,15 +391,54 @@ class AndroidDeviceCalendarAdapter implements CalendarAdapter {
   @override
   Future<SessionEventRef> createSessionEvent(SessionEventDraft draft) async {
     await _require(CalendarCapability.createEvent);
-    final id = await api.create(
-      calendarId: draft.calendarId,
-      title: draft.title,
-      notes: _notes(draft),
-      start: draft.span.start,
-      end: draft.span.end,
-      timezone: draft.timezone,
-    );
-    return SessionEventRef(calendarId: draft.calendarId, eventId: id);
+    final calendars = await listCalendars();
+    AdapterCalendar? target;
+    for (final calendar in calendars) {
+      if (calendar.id == draft.calendarId) {
+        target = calendar;
+        break;
+      }
+    }
+    if (target == null) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.createEvent,
+        failure: CapabilityFailure.calendarMissing,
+        message:
+            'The calendar chosen for sessions is no longer on this phone. '
+            'Choose another writable calendar in Calendar connections.',
+      );
+    }
+    if (target.readOnly) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.createEvent,
+        failure: CapabilityFailure.readOnlyCalendar,
+        message:
+            '"${target.name}" is read-only. Choose a writable calendar in '
+            'Calendar connections.',
+      );
+    }
+    try {
+      final id = await api.create(
+        calendarId: draft.calendarId,
+        title: draft.title,
+        notes: _notes(draft),
+        start: draft.span.start,
+        end: draft.span.end,
+        timezone: draft.timezone,
+      );
+      return SessionEventRef(calendarId: draft.calendarId, eventId: id);
+    } catch (_) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.createEvent,
+        failure: CapabilityFailure.unsupported,
+        message:
+            'Android could not add the session to "${target.name}". Make '
+            'sure that calendar is syncing and writable, then try again.',
+      );
+    }
   }
 
   @override
@@ -345,13 +448,24 @@ class AndroidDeviceCalendarAdapter implements CalendarAdapter {
   ) async {
     await _require(CalendarCapability.updateEvent);
     await _requireOurs(ref, draft.uid, CalendarCapability.updateEvent);
-    await api.update(
-      ref.eventId,
-      title: draft.title,
-      notes: _notes(draft),
-      start: draft.span.start,
-      end: draft.span.end,
-    );
+    try {
+      await api.update(
+        ref.eventId,
+        title: draft.title,
+        notes: _notes(draft),
+        start: draft.span.start,
+        end: draft.span.end,
+      );
+    } catch (_) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.updateEvent,
+        failure: CapabilityFailure.unsupported,
+        message:
+            'Android could not update this session. Make sure its calendar '
+            'is syncing and writable, then try again.',
+      );
+    }
     return ref;
   }
 
@@ -361,10 +475,33 @@ class AndroidDeviceCalendarAdapter implements CalendarAdapter {
     required String uid,
   }) async {
     await _require(CalendarCapability.deleteEvent);
-    final existing = await api.event(ref.eventId);
+    final DeviceEvent? existing;
+    try {
+      existing = await api.event(ref.eventId);
+    } catch (_) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.deleteEvent,
+        failure: CapabilityFailure.calendarMissing,
+        message:
+            'Android could not check this session before removing it. Make '
+            'sure its calendar is syncing, then try again.',
+      );
+    }
     if (existing == null) return;
     if (existing.sessionUid != uid) _foreign(CalendarCapability.deleteEvent);
-    await api.delete(ref.eventId);
+    try {
+      await api.delete(ref.eventId);
+    } catch (_) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.deleteEvent,
+        failure: CapabilityFailure.unsupported,
+        message:
+            'Android could not remove this session. Make sure its calendar '
+            'is syncing and writable, then try again.',
+      );
+    }
   }
 
   @override
@@ -373,27 +510,40 @@ class AndroidDeviceCalendarAdapter implements CalendarAdapter {
     SessionEventRef? known,
   }) async {
     await _require(CalendarCapability.reconcile);
-    var foreign = false;
-    if (known != null) {
-      final event = await api.event(known.eventId);
-      if (event != null && event.sessionUid == draft.uid) {
-        return _found(event, draft);
+    try {
+      var foreign = false;
+      if (known != null) {
+        final event = await api.event(known.eventId);
+        if (event != null && event.sessionUid == draft.uid) {
+          return _found(event, draft);
+        }
+        foreign = event != null;
       }
-      foreign = event != null;
-    }
-    final nearby = await api.events(
-      draft.span.start.subtract(searchMargin).toLocal(),
-      draft.span.end.add(searchMargin).toLocal(),
-      calendarIds: [draft.calendarId],
-    );
-    for (final event in nearby) {
-      if (event.sessionUid == draft.uid && !event.cancelled) {
-        return _found(event, draft);
+      final nearby = await api.events(
+        draft.span.start.subtract(searchMargin).toLocal(),
+        draft.span.end.add(searchMargin).toLocal(),
+        calendarIds: [draft.calendarId],
+      );
+      for (final event in nearby) {
+        if (event.sessionUid == draft.uid && !event.cancelled) {
+          return _found(event, draft);
+        }
       }
+      return ReconcileResult(
+        foreign ? ReconcileState.foreign : ReconcileState.missing,
+      );
+    } on CalendarCapabilityException {
+      rethrow;
+    } catch (_) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: CalendarCapability.reconcile,
+        failure: CapabilityFailure.calendarMissing,
+        message:
+            'Android could not check the session calendar. Open your phone\'s '
+            'Calendar app and make sure it is syncing, then try again.',
+      );
     }
-    return ReconcileResult(
-      foreign ? ReconcileState.foreign : ReconcileState.missing,
-    );
   }
 
   ReconcileResult _found(DeviceEvent event, SessionEventDraft draft) {
@@ -414,7 +564,19 @@ class AndroidDeviceCalendarAdapter implements CalendarAdapter {
     String uid,
     CalendarCapability capability,
   ) async {
-    final existing = await api.event(ref.eventId);
+    final DeviceEvent? existing;
+    try {
+      existing = await api.event(ref.eventId);
+    } catch (_) {
+      throw CalendarCapabilityException(
+        route: route,
+        capability: capability,
+        failure: CapabilityFailure.calendarMissing,
+        message:
+            'Android could not check this session. Open your phone\'s '
+            'Calendar app and make sure it is syncing, then try again.',
+      );
+    }
     if (existing == null) {
       throw CalendarCapabilityException(
         route: route,

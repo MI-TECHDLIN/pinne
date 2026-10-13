@@ -11,6 +11,9 @@ class FakePlannerApi implements PlannerApi {
   final proposeRequests = <PlanRequest>[];
   final exported = <List<UuidValue>>[];
   final reported = <CalendarWriteResult>[];
+  List<CalendarWrite> commitWrites = const [];
+  int routeRequests = 0;
+  int preferencesRequests = 0;
   final scheduled = <SessionView>[];
   PlanProposal? current;
   CalendarConnectionView? phone;
@@ -31,34 +34,37 @@ class FakePlannerApi implements PlannerApi {
   );
 
   @override
-  Future<List<CalendarRouteStatus>> routes() async => [
-    CalendarRouteStatus(
-      route: CalendarRoute.androidDevice,
-      label: 'Calendars on this phone',
-      available: true,
-      liveSync: true,
-      canReadBusy: true,
-      canWrite: true,
-    ),
-    CalendarRouteStatus(
-      route: CalendarRoute.googleCloud,
-      label: 'Google Calendar',
-      available: false,
-      liveSync: false,
-      canReadBusy: false,
-      canWrite: false,
-      limitation: 'Google Calendar is not configured on this server.',
-    ),
-    CalendarRouteStatus(
-      route: CalendarRoute.icsExport,
-      label: 'Calendar file (.ics)',
-      available: true,
-      liveSync: false,
-      canReadBusy: false,
-      canWrite: false,
-      limitation: 'Export only: not live sync and not proof of free time.',
-    ),
-  ];
+  Future<List<CalendarRouteStatus>> routes() async {
+    routeRequests++;
+    return [
+      CalendarRouteStatus(
+        route: CalendarRoute.androidDevice,
+        label: 'Calendars on this phone',
+        available: true,
+        liveSync: true,
+        canReadBusy: true,
+        canWrite: true,
+      ),
+      CalendarRouteStatus(
+        route: CalendarRoute.googleCloud,
+        label: 'Google Calendar',
+        available: false,
+        liveSync: false,
+        canReadBusy: false,
+        canWrite: false,
+        limitation: 'Google Calendar is not configured on this server.',
+      ),
+      CalendarRouteStatus(
+        route: CalendarRoute.icsExport,
+        label: 'Calendar file (.ics)',
+        available: true,
+        liveSync: false,
+        canReadBusy: false,
+        canWrite: false,
+        limitation: 'Export only: not live sync and not proof of free time.',
+      ),
+    ];
+  }
 
   @override
   Future<List<CalendarConnectionView>> connections() async => [?phone];
@@ -118,7 +124,10 @@ class FakePlannerApi implements PlannerApi {
   }
 
   @override
-  Future<PlannerPreferences> preferences() async => prefs;
+  Future<PlannerPreferences> preferences() async {
+    preferencesRequests++;
+    return prefs;
+  }
 
   @override
   Future<PlannerPreferences> savePreferences(
@@ -221,7 +230,7 @@ class FakePlannerApi implements PlannerApi {
     ];
     scheduled.addAll(views);
     current = null;
-    return PlanCommitResult(sessions: views, writes: const []);
+    return PlanCommitResult(sessions: views, writes: commitWrites);
   }
 
   @override
