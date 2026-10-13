@@ -274,7 +274,13 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
                   selectedColor: context.pinne.violet,
                   backgroundColor: context.pinne.card,
                   checkmarkColor: context.pinne.onViolet,
-                  labelStyle: TextStyle(color: context.pinne.onViolet),
+                  // Only the selected chip sits on violet; the rest sit on
+                  // the card and use body text.
+                  labelStyle: TextStyle(
+                    color: _palette == index
+                        ? context.pinne.onViolet
+                        : context.pinne.text,
+                  ),
                   side: BorderSide(color: context.pinne.line),
                   label: Text(PinneSpiritPalettes.values[index].name),
                   avatar: CircleAvatar(
