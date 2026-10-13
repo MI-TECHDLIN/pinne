@@ -1,13 +1,12 @@
-"""Draws the sample link-preview thumbnails the film's demo items point to.
+"""Draws the hero image of the drawn reading app the capture scene shares
+from.
 
 Self-made abstract art (no photos, logos or third-party material). Output:
 demo/assets/thumbs/*.png, committed because they are small and ours.
 Needs Pillow.
 """
 
-import math
 import pathlib
-import random
 
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -48,66 +47,9 @@ def onboarding():
     return img
 
 
-def knife():
-    img = gradient((36, 64, 52), (16, 30, 26))
-    soft(img, lambda d: d.ellipse((-100, 200, 500, 700), fill=(143, 232, 208, 50)), 40)
-    soft(img, lambda d: d.rounded_rectangle((110, 120, 690, 380), 40, fill=(196, 150, 104, 255)))
-    soft(img, lambda d: d.rounded_rectangle((110, 120, 690, 380), 40, outline=(150, 108, 70, 255), width=6))
-    rnd = random.Random(7)
-    for i in range(9):
-        cx, cy = 230 + i * 30, 250 + rnd.randint(-10, 10)
-        soft(img, lambda d, cx=cx, cy=cy: d.ellipse((cx - 22, cy - 22, cx + 22, cy + 22), fill=(255, 140, 90, 255), outline=(255, 214, 170, 255), width=5))
-    def blade(d):
-        d.polygon([(470, 180), (660, 160), (680, 190), (480, 215)], fill=(222, 228, 236, 255))
-        d.rounded_rectangle((380, 186, 480, 214), 10, fill=(40, 32, 30, 255))
-    soft(img, blade)
-    return img
-
-
-def pasta():
-    img = gradient((255, 194, 122), (214, 92, 70))
-    soft(img, lambda d: d.ellipse((180, 40, 620, 480), fill=(255, 248, 238, 255)), 0)
-    soft(img, lambda d: d.ellipse((230, 90, 570, 430), fill=(250, 220, 160, 255)))
-    rnd = random.Random(3)
-    def strands(d):
-        for _ in range(40):
-            a = rnd.uniform(0, math.tau)
-            r = rnd.uniform(20, 140)
-            x, y = 400 + r * math.cos(a), 260 + r * math.sin(a)
-            d.arc((x - 50, y - 30, x + 50, y + 30), rnd.randint(0, 180), rnd.randint(180, 360), fill=(236, 190, 110, 255), width=6)
-        for _ in range(9):
-            a = rnd.uniform(0, math.tau)
-            r = rnd.uniform(10, 110)
-            x, y = 400 + r * math.cos(a), 260 + r * math.sin(a)
-            d.ellipse((x - 20, y - 20, x + 20, y + 20), fill=(220, 60, 50, 255))
-        for _ in range(7):
-            a = rnd.uniform(0, math.tau)
-            r = rnd.uniform(10, 120)
-            x, y = 400 + r * math.cos(a), 260 + r * math.sin(a)
-            d.ellipse((x - 9, y - 5, x + 9, y + 5), fill=(80, 160, 90, 255))
-    soft(img, strands)
-    return img
-
-
-def navbar():
-    img = gradient((169, 196, 255), (124, 92, 255))
-    soft(img, lambda d: d.ellipse((-150, -200, 400, 300), fill=(255, 255, 255, 70)), 40)
-    soft(img, lambda d: d.rounded_rectangle((150, 290, 650, 370), 40, fill=(20, 16, 42, 110)), 14)
-    def bar(d):
-        d.rounded_rectangle((140, 270, 660, 350), 40, fill=(20, 16, 42, 235))
-        d.rounded_rectangle((152, 282, 330, 338), 28, fill=(185, 167, 255, 255))
-        for i in range(4):
-            cx = 380 + i * 72
-            d.ellipse((cx - 13, 297, cx + 13, 323), outline=(245, 242, 255, 200), width=4)
-    soft(img, bar)
-    for i in range(3):
-        soft(img, lambda d, i=i: d.rounded_rectangle((180 + i * 150, 90, 300 + i * 150, 220), 22, fill=(255, 255, 255, 120 + i * 30)))
-    return img
-
-
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, fn in [("onboarding", onboarding), ("knife", knife), ("pasta", pasta), ("navbar", navbar)]:
+    for name, fn in [("onboarding", onboarding)]:
         fn().save(OUT / f"{name}.png", optimize=True)
         print("wrote", name)
 

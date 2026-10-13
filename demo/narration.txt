@@ -1,0 +1,22 @@
+We save everything. <break time="0.4s" /> A tutorial on YouTube. A tip on X. An article for later.
+
+And then... we never come back to it. <break time="0.6s" />
+
+This is Pinne. <break time="0.3s" /> Save it. <break time="0.3s" /> Come back to it. <break time="0.8s" />
+
+When something is worth keeping, share it straight to Pinne. It is saved instantly, even offline, with a quick note on why it mattered to you. <break time="0.6s" />
+
+Then Pinne's AI suggests a collection, a few tags, and a short summary. <break time="0.3s" /> You stay in control. Accept what fits, dismiss what doesn't. The AI never overwrites your choices. <break time="0.8s" />
+
+Forgot where you saw it? Just search the way you remember it. Pinne even shows you why each result matched. <break time="0.8s" />
+
+About a day later, Pinne gently brings it back. <break time="0.3s" /> A small queue, sized to the time you have. Review it, snooze it, or let it go. <break time="0.8s" />
+
+Want real time for it? Pinne finds free slots in your calendar, and always tells you exactly what it checked. <break time="0.8s" />
+
+Your progress is honest. Opening isn't reviewing, so every number means something. <break time="0.3s" /> And when you hit a milestone, Pinne celebrates with you. <break time="0.8s" />
+
+Under the hood, Serverpod does the real work. <break time="0.3s" /> A typed Dart backend, a PostgreSQL database with migrations, secure endpoints that only ever touch your own data, and an AI pipeline that never makes you wait. <break time="0.3s" /> Running on Serverpod Cloud. <break time="1.0s" />
+
+Pinne. <break time="0.4s" /> Save it. <break time="0.4s" /> Come back to it.
+

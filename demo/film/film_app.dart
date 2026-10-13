@@ -9,7 +9,9 @@ import 'package:pinne_flutter/features/onboarding/onboarding_store.dart';
 import 'package:pinne_flutter/features/planner/planner_providers.dart';
 import 'package:pinne_flutter/features/progress/progress_providers.dart';
 import 'package:pinne_flutter/features/settings/profile_provider.dart';
+import 'package:pinne_flutter/features/today/today_greeting.dart';
 import 'package:pinne_flutter/features/today/today_providers.dart';
+import 'package:pinne_flutter/features/tour/tour_store.dart';
 import 'package:pinne_flutter/router.dart';
 import 'package:sqlite3/sqlite3.dart';
 
@@ -36,7 +38,7 @@ class _User extends ProfileUserId {
 ///
 /// With [firstRun] the app starts at onboarding, signed out, and the guest
 /// button signs in after a short wait, as the server's anonymous sign-in
-/// would.
+/// would; Today then opens its first-visit tour.
 class FilmApp {
   FilmApp({
     DemoClient? client,
@@ -62,7 +64,11 @@ class FilmApp {
           await Future<void>.delayed(const Duration(milliseconds: 500));
           (container.read(signedInProvider.notifier) as _SignedIn).signIn();
         }),
+        tourStoreProvider.overrideWithValue(MemoryTourStore(seen: !firstRun)),
         todayClockProvider.overrideWithValue(Sample.filmNow),
+        greetingClockProvider.overrideWithValue(() => Sample.filmNow),
+        // "Start small. Stay curious.", the same line in every scene.
+        greetingIndexPickerProvider.overrideWithValue((_) => 3),
         profileUserIdProvider.overrideWith(_User.new),
         progressApiProvider.overrideWithValue(this.progress),
         plannerApiProvider.overrideWithValue(planner),

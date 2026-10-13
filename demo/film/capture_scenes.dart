@@ -19,30 +19,13 @@ class _SignedIn extends SignedInNotifier {
   bool build() => true;
 }
 
-/// Capture, search and the Today review, with link previews.
+/// Capture, search and the Today review.
 void captureScenes() {
   shoot('02_capture', (film) async {
     final capture = DemoCaptureApi(offline: true);
     var captured = false;
-    var listsAfterCapture = 0;
     final client = DemoClient(
-      items: () {
-        final rest = Sample.items().skip(1).toList();
-        if (!captured) return rest;
-        // The preview job is still running on the first answer, then done.
-        final saved = Sample.items().first;
-        final item = listsAfterCapture++ == 0
-            ? saved.copyWith(
-                title: 'fieldnotes.example',
-                enrichmentState: EnrichmentState.pending,
-                accessState: AccessState.unknown,
-                thumbnailUrl: null,
-                previewSiteName: null,
-                previewAuthor: null,
-              )
-            : saved;
-        return [item, ...rest];
-      },
+      items: () => captured ? Sample.items() : Sample.items().skip(1).toList(),
     );
     capture.onCaptured = (_, _) => captured = true;
     final app = FilmApp(client: client, capture: capture);
@@ -61,15 +44,13 @@ void captureScenes() {
     final showShare = ValueNotifier(false);
     var sheetGoneAt = 1e9;
     await film.precache(spiritArt('welcome'));
-    for (final name in ['onboarding', 'knife', 'pasta', 'navbar']) {
-      await film.precache(NetworkImage(Sample.thumb(name)));
-    }
+    await film.precache(NetworkImage(Sample.thumb('onboarding')));
     await film.open(
       Stage(
         cues: const [
           Cue(
             0.2,
-            7.6,
+            7.2,
             kicker: 'Capture',
             title: 'Share it from any app.\nSay why.',
             body:
@@ -77,38 +58,38 @@ void captureScenes() {
                 'even offline.',
           ),
           Cue(
-            7.9,
-            15.5,
+            7.5,
+            13,
             kicker: 'Capture',
-            title: 'Synced, then\nfilled in.',
+            title: 'Back online,\nit syncs.',
             body:
-                'Back online, the Serverpod server fetches a safe preview. '
-                'The real title and thumbnail appear on their own.',
+                'The outbox sends it to the Serverpod server exactly once, '
+                'and the server organizes it as part of the save.',
           ),
         ],
         phone: PhoneRig(
           poses: [
             const Pose(0),
-            const Pose(3.0),
+            const Pose(2.9),
             Pose(
-              3.8,
+              3.6,
               focus: onScreen(206, 740),
               at: const Offset(1350, 600),
               scale: 1.42,
             ),
             Pose(
-              7.15,
+              6.4,
               focus: onScreen(206, 740),
               at: const Offset(1350, 600),
               scale: 1.42,
             ),
-            const Pose(7.9),
-            const Pose(9.3),
+            const Pose(7.1),
+            const Pose(8.3),
             Pose(
-              10.2,
-              focus: onScreen(206, 620),
+              9.1,
+              focus: onScreen(206, 560),
               at: const Offset(1350, 560),
-              scale: 1.32,
+              scale: 1.36,
             ),
           ],
           screen: Stack(
@@ -117,7 +98,7 @@ void captureScenes() {
               app.widget(),
               AtTime(
                 builder: (context, t, child) {
-                  final gone = ramp(t, 7.5, 0.5, Curves.easeInOutCubic);
+                  final gone = ramp(t, 6.9, 0.5, Curves.easeInOutCubic);
                   if (gone >= 1) return const SizedBox.shrink();
                   return IgnorePointer(
                     ignoring: gone > 0,
@@ -169,6 +150,7 @@ void captureScenes() {
                           child: ShareApp(
                             payload: const SharedPayload(
                               text: Sample.sharedUrl,
+                              subject: Sample.sharedTitle,
                             ),
                             onDone: () => sheetGoneAt = film.t,
                           ),
@@ -187,40 +169,38 @@ void captureScenes() {
     await film.tap(find.byKey(const ValueKey('chooser-pinne')));
     await film.until(2.55);
     showShare.value = true;
-    await film.until(3.7);
+    await film.until(3.5);
     await film.tap(find.byKey(const ValueKey('share-why')));
     await film.type(find.byKey(const ValueKey('share-why')), Sample.sharedWhy);
-    await film.until(6.8);
+    await film.until(6.2);
     await film.tap(find.byKey(const ValueKey('share-done')));
-    await film.until(8.3);
+    await film.until(7.4);
     await film.drag(
       const Offset(1350, 820),
       const Offset(0, -700),
       seconds: 0.9,
     );
-    await film.until(10.6);
+    await film.until(9.2);
     capture.comeOnline();
-    await film.until(12.3);
+    await film.until(9.9);
+    // Up to the synced card, as its AI suggestions arrive.
     await film.drag(
-      const Offset(1350, 700),
-      const Offset(0, -420),
-      seconds: 0.8,
+      const Offset(1350, 860),
+      const Offset(0, -520),
+      seconds: 0.9,
     );
-    await film.until(15.5);
+    await film.until(13);
   });
 
   shoot('04_search', (film) async {
     final app = FilmApp();
     app.router.go(Routes.search);
-    for (final name in ['knife', 'pasta']) {
-      await film.precache(NetworkImage(Sample.thumb(name)));
-    }
     await film.open(
       Stage(
         cues: const [
           Cue(
             0.2,
-            12,
+            10,
             kicker: 'Find',
             title: 'Find it by what\nyou remember.',
             body:
@@ -231,21 +211,21 @@ void captureScenes() {
         phone: PhoneRig(
           poses: [
             const Pose(0),
-            const Pose(3.4),
+            const Pose(2.6),
             Pose(
-              4.5,
+              3.6,
               focus: onScreen(206, 470),
               at: const Offset(1350, 520),
               scale: 1.34,
             ),
             Pose(
-              8.4,
+              6.4,
               focus: onScreen(206, 470),
               at: const Offset(1350, 520),
               scale: 1.34,
             ),
             Pose(
-              9.6,
+              7.6,
               focus: onScreen(206, 640),
               at: const Offset(1350, 520),
               scale: 1.34,
@@ -256,11 +236,11 @@ void captureScenes() {
       ),
     );
     await settle(film.tester);
-    await film.until(0.8);
+    await film.until(0.7);
     final field = find.byKey(const ValueKey('search-field'));
     await film.tap(field);
-    await film.type(field, 'sunday dinner video', charsPerSecond: 13);
-    await film.until(12);
+    await film.type(field, 'sunday dinner', charsPerSecond: 12);
+    await film.until(10);
   });
 
   shoot('05_today', (film) async {
@@ -268,15 +248,12 @@ void captureScenes() {
     final app = FilmApp(
       client: DemoClient(queue: due.result, onSnoozed: due.remove),
     );
-    for (final name in ['onboarding', 'navbar']) {
-      await film.precache(NetworkImage(Sample.thumb(name)));
-    }
     await film.open(
       Stage(
         cues: const [
           Cue(
             0.2,
-            7.2,
+            6.4,
             kicker: 'Come back',
             title: 'A day later,\nit comes back.',
             body:
@@ -284,8 +261,8 @@ void captureScenes() {
                 'back with your note on why. Lime means due now.',
           ),
           Cue(
-            7.5,
-            14,
+            6.7,
+            12,
             kicker: 'Come back',
             title: 'Review it, snooze it,\nor let it go.',
             body:
@@ -304,21 +281,21 @@ void captureScenes() {
               scale: 1.3,
             ),
             Pose(
-              11.6,
+              10.4,
               focus: onScreen(206, 400),
               at: const Offset(1350, 540),
               scale: 1.3,
             ),
-            const Pose(12.6),
+            const Pose(11.4),
           ],
           screen: app.widget(),
         ),
       ),
     );
     await settle(film.tester);
-    await film.until(6.9);
+    await film.until(6.0);
     await film.tap(find.byKey(const ValueKey('review-remind')));
-    await film.until(14);
+    await film.until(12);
   });
 }
 

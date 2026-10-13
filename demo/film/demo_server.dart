@@ -86,69 +86,53 @@ abstract final class Sample {
     ),
   ];
 
-  /// Saved items. Preview fields are added per branch by the scene files.
+  /// Saved items, as the server on Serverpod Cloud Starter stores them: the
+  /// title came with the share, and link previews (a future call) are off,
+  /// so no item has a thumbnail, byline or duration.
   static List<Item> items() => [
-    Item(
-      id: id(1),
-      ownerId: owner,
-      url: sharedUrl,
-      canonicalUrl: sharedUrl,
-      sourcePlatform: SourcePlatform.web,
-      title: sharedTitle,
-      contentType: ContentType.article,
-      intention: sharedWhy,
-      enrichmentState: EnrichmentState.ready,
-      accessState: AccessState.available,
-      previewSiteName: 'Field Notes',
-      previewAuthor: 'M. Okafor · Field Notes',
-      thumbnailUrl: thumb('onboarding'),
-      savedAt: now.subtract(const Duration(hours: 26)),
+    _link(1, sharedUrl, sharedTitle, sharedWhy, hours: 26),
+    _link(
+      2,
+      'https://kitchenlab.example/videos/knife-skills-12-minutes',
+      'Knife skills in 12 minutes',
+      'Practice before Sunday dinner with the family',
+      hours: 9 * 24,
     ),
-    Item(
-      id: id(2),
-      ownerId: owner,
-      url: 'https://kitchenlab.example/videos/knife-skills-12-minutes',
-      sourcePlatform: SourcePlatform.web,
-      title: 'Knife skills in 12 minutes',
-      contentType: ContentType.video,
-      intention: 'Practice before Sunday dinner with the family',
-      enrichmentState: EnrichmentState.ready,
-      accessState: AccessState.available,
-      previewAuthor: 'Kitchen Lab',
-      thumbnailUrl: thumb('knife'),
-      durationSeconds: 724,
-      savedAt: now.subtract(const Duration(days: 9)),
+    _link(
+      3,
+      'https://kitchenlab.example/videos/slow-roast-tomato-pasta',
+      'Slow-roast tomato pasta',
+      'Maybe for Sunday dinner, looks easy',
+      hours: 16 * 24,
     ),
-    Item(
-      id: id(3),
-      ownerId: owner,
-      url: 'https://kitchenlab.example/videos/slow-roast-tomato-pasta',
-      sourcePlatform: SourcePlatform.web,
-      title: 'Slow-roast tomato pasta',
-      contentType: ContentType.video,
-      intention: 'Maybe for Sunday dinner, looks easy',
-      enrichmentState: EnrichmentState.ready,
-      accessState: AccessState.available,
-      previewAuthor: 'Kitchen Lab',
-      thumbnailUrl: thumb('pasta'),
-      durationSeconds: 1135,
-      savedAt: now.subtract(const Duration(days: 16)),
-    ),
-    Item(
-      id: id(4),
-      ownerId: owner,
-      url: 'https://uipatterns.example/navigation/pill-bars',
-      sourcePlatform: SourcePlatform.web,
-      title: 'Designing a floating pill nav',
-      contentType: ContentType.article,
-      intention: 'Compare with our bottom nav',
-      enrichmentState: EnrichmentState.ready,
-      accessState: AccessState.available,
-      previewSiteName: 'UI Patterns',
-      thumbnailUrl: thumb('navbar'),
-      savedAt: now.subtract(const Duration(days: 4)),
+    _link(
+      4,
+      'https://uipatterns.example/navigation/pill-bars',
+      'Designing a floating pill nav',
+      'Compare with our bottom nav',
+      hours: 4 * 24,
     ),
   ];
+
+  static Item _link(
+    int n,
+    String url,
+    String title,
+    String why, {
+    required int hours,
+  }) => Item(
+    id: id(n),
+    ownerId: owner,
+    url: url,
+    canonicalUrl: url,
+    sourcePlatform: SourcePlatform.web,
+    title: title,
+    contentType: ContentType.other,
+    intention: why,
+    enrichmentState: EnrichmentState.failed,
+    accessState: AccessState.unknown,
+    savedAt: now.subtract(Duration(hours: hours)),
+  );
 }
 
 /// The in-memory `item.capture` side of the server: idempotent by operation
@@ -183,7 +167,8 @@ class DemoCaptureApi implements CaptureApi {
       sourceItemId: input.link?.sourceItemId,
       canonicalUrl: input.link?.canonicalUrl,
       duplicate: false,
-      enrichmentState: EnrichmentState.pending,
+      // Starter has no future calls, so the save skips the link preview.
+      enrichmentState: EnrichmentState.failed,
       savedAt: draft.capturedAt,
     );
   }
@@ -220,6 +205,21 @@ class DemoClient extends Client {
   List<Item> Function() itemsSource;
   ReviewQueueResult Function()? queueSource;
 
+  /// The AI organizing rows the server made while saving, per item.
+  final ai = DemoAiSuggestions();
+
+  /// Items as listed, with any accepted AI summary applied.
+  List<Item> listItems() => [
+    for (final item in itemsSource())
+      switch (ai.summaries[item.id]) {
+        final summary? => item.copyWith(
+          summary: summary,
+          summaryOrigin: AssignmentOrigin.ai,
+        ),
+        null => item,
+      },
+  ];
+
   /// The profile name; empty for a fresh guest, who is greeted as "Guest".
   final String displayName;
 
@@ -252,9 +252,15 @@ class _DemoItems extends EndpointItem {
   final DemoClient client;
 
   @override
-  Future<List<Item>> list({int? limit, DateTime? before}) async =>
-      client.itemsSource();
+  Future<List<Item>> list({int? limit, DateTime? before}) async {
+    await serverLatency();
+    return client.listItems();
+  }
 }
+
+/// A short wait like a real round trip, so loading skeletons show.
+Future<void> serverLatency([int milliseconds = 350]) =>
+    Future<void>.delayed(Duration(milliseconds: milliseconds));
 
 class _DemoCollections extends EndpointCollection {
   _DemoCollections(super.caller);
@@ -285,7 +291,7 @@ class _DemoSearch extends EndpointSearch {
       unicode: true,
     ).allMatches(query.toLowerCase()).map((m) => m.group(0)!).toSet();
     final results = <SearchResult>[];
-    for (final item in client.itemsSource()) {
+    for (final item in client.listItems()) {
       final haystack = [
         item.title,
         item.intention ?? '',
@@ -322,9 +328,11 @@ class _DemoQueue extends EndpointReviewQueue {
   final DemoClient client;
 
   @override
-  Future<ReviewQueueResult> get({required int timeBudgetMinutes}) async =>
-      client.queueSource?.call() ??
-      ReviewQueueResult(entries: [], timeBudgetMinutes: timeBudgetMinutes);
+  Future<ReviewQueueResult> get({required int timeBudgetMinutes}) async {
+    await serverLatency();
+    return client.queueSource?.call() ??
+        ReviewQueueResult(entries: [], timeBudgetMinutes: timeBudgetMinutes);
+  }
 
   @override
   Future<ItemReviewControl> snooze(UuidValue itemId, DateTime until) async {
@@ -378,8 +386,77 @@ class _DemoProfile extends EndpointProfile {
   );
 }
 
+/// What the server's organizing step (Groq, run inline during the save on
+/// Serverpod Cloud Starter) suggested for the saved article. Accepting
+/// applies it, as `AiOrganizingEndpoint.accept` does.
+class DemoAiSuggestions {
+  final pending = <UuidValue, List<AiSuggestion>>{
+    Sample.id(1): [
+      _suggestion(
+        0xf1,
+        AiSuggestionKind.collection,
+        collectionId: Sample.id(0xc1),
+      ),
+      _suggestion(0xf2, AiSuggestionKind.tag, value: 'onboarding'),
+      _suggestion(
+        0xf3,
+        AiSuggestionKind.tag,
+        value: 'ux writing',
+        uncertain: true,
+      ),
+      _suggestion(
+        0xf4,
+        AiSuggestionKind.summary,
+        value:
+            'Seven calm first-run patterns: show one useful thing first, '
+            'ask for nothing until people reach a small win.',
+      ),
+    ],
+  };
+  final summaries = <UuidValue?, String>{};
+
+  static AiSuggestion _suggestion(
+    int n,
+    AiSuggestionKind kind, {
+    UuidValue? collectionId,
+    String? value,
+    bool uncertain = false,
+  }) => AiSuggestion(
+    id: Sample.id(n),
+    ownerId: Sample.owner,
+    itemId: Sample.id(1),
+    kind: kind,
+    collectionId: collectionId,
+    value: value,
+    rationale: 'From the title and your note.',
+    uncertain: uncertain,
+  );
+
+  AiSuggestion? _take(UuidValue id) {
+    for (final list in pending.values) {
+      for (final s in list) {
+        if (s.id == id) {
+          list.remove(s);
+          return s;
+        }
+      }
+    }
+    return null;
+  }
+
+  AiSuggestion accept(UuidValue id) {
+    final s = _take(id)!;
+    if (s.kind == AiSuggestionKind.summary) summaries[s.itemId] = s.value!;
+    return s.copyWith(status: AiSuggestionStatus.accepted);
+  }
+
+  AiSuggestion reject(UuidValue id) =>
+      _take(id)!.copyWith(status: AiSuggestionStatus.rejected);
+}
+
 class _DemoAi extends EndpointAiOrganizing {
-  _DemoAi(super.caller);
+  _DemoAi(this.client) : super(client);
+  final DemoClient client;
 
   @override
   Future<AiSettings> getSettings() async =>
@@ -389,21 +466,35 @@ class _DemoAi extends EndpointAiOrganizing {
   Future<AiSettings> setEnabled(bool enabled) async =>
       AiSettings(available: true, enabled: enabled, disclosure: _disclosure);
 
-  // The film shows suggestions in its own panel, not on the Saved cards.
   @override
-  Future<List<AiSuggestion>> listSuggestions(UuidValue itemId) async =>
-      const [];
+  Future<List<AiSuggestion>> listSuggestions(UuidValue itemId) async {
+    await serverLatency(700);
+    return [...?client.ai.pending[itemId]];
+  }
 
-  // The server's AiOrganizingEndpoint.disclosure.
+  @override
+  Future<AiSuggestion> accept(UuidValue suggestionId) async {
+    await serverLatency(150);
+    return client.ai.accept(suggestionId);
+  }
+
+  @override
+  Future<AiSuggestion> reject(UuidValue suggestionId) async {
+    await serverLatency(150);
+    return client.ai.reject(suggestionId);
+  }
+
+  // The server's AiOrganizingEndpoint.groqDisclosure.
   static const _disclosure =
       "When AI organizing is on, Pinne sends the saved item's title, URL, "
       'source platform, your intention and notes, plus the names and IDs of '
-      "your collections, to Google's Gemini API. It does not fetch the page. "
-      "On Gemini's unpaid tier, Google may use prompts and responses to "
-      'improve its products, and human reviewers may process them. Google '
-      'says not to send sensitive, confidential or personal information. '
-      'Different data terms apply in the EEA, Switzerland and UK. Turn this '
-      'off to keep organizing on this server with simple rules only.';
+      'your collections and any stored preview description, author and site '
+      "name, to GroqCloud. It does not fetch the page. Groq says it does not "
+      'train models on inputs or outputs unless the customer explicitly '
+      'permits it. Requests are not retained by default, but Groq may '
+      'temporarily log inputs and outputs for up to 30 days for reliability '
+      'or suspected abuse. '
+      'Turn this off to organize on this server with simple rules only.';
 }
 
 class _DemoAccount extends EndpointAccount {
@@ -411,6 +502,16 @@ class _DemoAccount extends EndpointAccount {
 
   @override
   Future<bool> isGuest() async => false;
+
+  @override
+  Future<AccountSummary> summary() async {
+    await serverLatency();
+    return AccountSummary(
+      type: ProfileAccountType.email,
+      email: 'ada@pinne.example',
+      memberSince: Sample.filmNow.subtract(const Duration(days: 41)),
+    );
+  }
 }
 
 class _DemoHealth extends EndpointHealth {
@@ -455,8 +556,10 @@ class DemoProgressApi implements ProgressApi {
   }
 
   @override
-  Future<ProgressReport> report(ProgressQuery query) async =>
-      demoWeek(milestones: milestones, extraReviews: _extraReviews);
+  Future<ProgressReport> report(ProgressQuery query) async {
+    await serverLatency();
+    return demoWeek(milestones: milestones, extraReviews: _extraReviews);
+  }
 
   @override
   Future<void> markCelebrated(List<String> keys) async {

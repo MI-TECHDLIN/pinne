@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_flutter/theme/pinne_tokens.dart';
 
 import 'director.dart';
@@ -10,15 +9,16 @@ import 'director.dart';
 /// The film's own drawing: stage, captions, a brand-free phone frame and
 /// touch markers. Colours are the app's tokens.
 abstract final class Words {
-  static TextStyle kicker([Color color = PinneColors.lilac]) =>
-      GoogleFonts.plusJakartaSans(
-        fontSize: 22,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 3.2,
-        color: color,
-      );
+  static TextStyle kicker([Color color = PinneColors.lilac]) => TextStyle(
+    fontFamily: 'Plus Jakarta Sans',
+    fontSize: 22,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 3.2,
+    color: color,
+  );
 
-  static TextStyle title([double size = 66]) => GoogleFonts.outfit(
+  static TextStyle title([double size = 66]) => TextStyle(
+    fontFamily: 'Outfit',
     fontSize: size,
     fontWeight: FontWeight.w600,
     height: 1.06,
@@ -26,7 +26,8 @@ abstract final class Words {
     color: PinneColors.text,
   );
 
-  static TextStyle light([double size = 66]) => GoogleFonts.outfit(
+  static TextStyle light([double size = 66]) => TextStyle(
+    fontFamily: 'Outfit',
     fontSize: size,
     fontWeight: FontWeight.w300,
     height: 1.06,
@@ -34,7 +35,8 @@ abstract final class Words {
     color: PinneColors.text,
   );
 
-  static TextStyle body([double size = 31]) => GoogleFonts.plusJakartaSans(
+  static TextStyle body([double size = 31]) => TextStyle(
+    fontFamily: 'Plus Jakarta Sans',
     fontSize: size,
     fontWeight: FontWeight.w500,
     height: 1.42,
@@ -372,7 +374,8 @@ class _StatusBar extends StatelessWidget {
             children: [
               Text(
                 '10:24',
-                style: GoogleFonts.plusJakartaSans(
+                style: TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: PinneColors.text,
