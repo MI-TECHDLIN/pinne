@@ -61,7 +61,7 @@ SCENES = [
     ("06_planner", 9.0, [(7, 0.3)]),
     ("07_progress", 14.0, [(8, 0.3)]),
     ("08_serverpod", 16.6, [(9, 0.3)]),
-    ("09_close", 7.0, [(10, 0.3)]),
+    ("09_close", 6.0, [(10, 0.3)]),
 ]
 BLOCKS = [(i, para, at) for i, (_, _, blocks) in enumerate(SCENES) for para, at in blocks]
 

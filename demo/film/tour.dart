@@ -290,7 +290,7 @@ class Guide {
       app,
       s,
       start: shown,
-      end: math.max(shown + (hold ?? 1.8), landAt + (click ? 0.9 : 0.6)),
+      end: math.max(shown + (hold ?? 1.7), landAt + (click ? 0.9 : 0.6)),
     );
     final room = s == Side.right
         ? 1920 - 24 - (shot.toCanvasRect(app).right + _calloutGap)

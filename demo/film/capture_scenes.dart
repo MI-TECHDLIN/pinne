@@ -173,7 +173,7 @@ void captureScenes() {
     );
     sourceGoneAt = film.t + 0.4;
     guide.home();
-    await film.hold(1.2);
+    await film.hold(0.8);
     // The same link again, from Pinne's own Save sheet above the nav.
     await guide.step(
       key('capture-entry'),

@@ -32,13 +32,12 @@ void main() {
     await film.precache(spiritArt('welcome'));
     await film.open(Stage(extra: [HookCard()], screen: app.widget()));
     await settle(film.tester);
-    await film.until(18.3);
-    await guide.waitFor(key('tour-next'));
-    await film.hold(0.6);
+    await film.until(17.4);
     await guide.step(
       key('tour-next'),
       'A short first-run tour shows you around',
       zoom: 1.4,
+      side: Side.right,
     );
     await film.until(guide.current!.end + 0.3);
   });
@@ -85,21 +84,22 @@ void main() {
       key('accept-${_sid}f1'),
       'AI suggests a collection. You decide.',
       zoom: 1.5,
+      side: Side.right,
     );
-    await guide.step(key('accept-${_sid}f2'), 'Keep the tags that fit');
+    await guide.step(
+      key('accept-${_sid}f2'),
+      'Keep the tags that fit',
+      side: Side.right,
+    );
     await guide.step(
       key('accept-${_sid}f4'),
       'Add the short summary in one tap',
+      side: Side.right,
     );
     await guide.step(
       key('dismiss-${_sid}f3'),
       '“Maybe” marks a guess. Dismiss it.',
-    );
-    await guide.step(
-      key('saved-summary'),
-      'The AI never overwrites your choices',
-      click: false,
-      zoom: 1.4,
+      side: Side.right,
     );
     await film.until(guide.current!.end + 0.3);
   });
@@ -124,13 +124,6 @@ void main() {
       click: false,
       zoom: 1.6,
       hold: 2.4,
-    );
-    await guide.drag(checked, const Offset(0, -380), shot: Shot.home());
-    await film.hold(0.3);
-    await guide.step(
-      button('Accept plan'),
-      'Accept, and the sessions go in your calendar',
-      zoom: 1.4,
     );
     await film.until(guide.current!.end + 0.3);
   });
@@ -163,12 +156,6 @@ void main() {
       zoom: 1.2,
       hold: 2.2,
     );
-    await guide.drag(
-      key('progress-stack-top'),
-      const Offset(-260, 20),
-      seconds: 0.32,
-      curve: Curves.easeIn,
-    );
     await guide.step(key('nav-today'), 'Back to Today’s save', zoom: 1.5);
     await guide.step(
       key('review-reviewed'),
@@ -190,6 +177,13 @@ void main() {
     );
     final signIn = key('profile-sign-in');
     await guide.waitFor(signIn);
+    await film.hold(0.3);
+    // Down to the account card, clear of the "Counted as reviewed" bar.
+    await guide.drag(
+      find.text('Your progress'),
+      Offset(0, -(guide.appRect(signIn).center.dy - 520)),
+      shot: Shot.home(),
+    );
     await guide.step(
       signIn,
       'A guest now. Sign in whenever you like.',
@@ -208,7 +202,7 @@ void main() {
   shoot('09_close', (film) async {
     await film.precache(spiritArt('happy'));
     await film.open(const Stage(extra: [CloseCard()]));
-    await film.until(7);
+    await film.until(6);
   });
 }
 

@@ -41,9 +41,7 @@ Finder text(String value) => find.text(value);
 Finder key(String value) => find.byKey(ValueKey(value));
 
 /// The whole button labelled [label], so a callout keeps clear of all of it.
-Finder button(String label) => find
-    .ancestor(
-      of: find.text(label),
-      matching: find.bySubtype<ButtonStyleButton>(),
-    )
-    .first;
+Finder button(String label) => find.ancestor(
+  of: find.text(label),
+  matching: find.bySubtype<ButtonStyleButton>(),
+);
