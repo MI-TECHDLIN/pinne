@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_flutter/theme/pinne_tokens.dart';
 import 'package:pinne_flutter/ui/ribbon_spirit/ribbon_spirit.dart';
 
@@ -268,7 +267,8 @@ class HookCard extends StatelessWidget {
                 5.4,
                 Text(
                   'Pinne',
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
                     fontSize: 140,
                     fontWeight: FontWeight.w600,
                     letterSpacing: -4,
@@ -588,7 +588,8 @@ class _ServerBox extends StatelessWidget {
                       children: [
                         Text(
                           row.title,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                             color: PinneColors.text,
@@ -663,7 +664,8 @@ class CloseCard extends StatelessWidget {
                   0.6,
                   Text(
                     'Pinne',
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
                       fontSize: 132,
                       fontWeight: FontWeight.w600,
                       letterSpacing: -3.5,
@@ -702,7 +704,8 @@ class CloseCard extends StatelessWidget {
                         const SizedBox(width: 14),
                         Text(
                           'github.com/MI-TECHDLIN/pinne',
-                          style: GoogleFonts.plusJakartaSans(
+                          style: TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 34,
                             fontWeight: FontWeight.w600,
                             color: PinneColors.text,
@@ -744,7 +747,8 @@ class SourceAppPage extends StatelessWidget {
     final ink = const Color(0xFF1E1A2B);
     final muted = const Color(0xFF6E6880);
     TextStyle s(double size, FontWeight w, Color c, [double h = 1.35]) =>
-        GoogleFonts.plusJakartaSans(
+        TextStyle(
+          fontFamily: 'Plus Jakarta Sans',
           fontSize: size,
           fontWeight: w,
           color: c,
@@ -808,7 +812,8 @@ class SourceAppPage extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               'Calm onboarding: 7 patterns that don’t nag',
-              style: GoogleFonts.outfit(
+              style: TextStyle(
+                fontFamily: 'Outfit',
                 fontSize: 30,
                 fontWeight: FontWeight.w600,
                 color: ink,
@@ -869,7 +874,8 @@ class ShareChooser extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
+            style: TextStyle(
+              fontFamily: 'Plus Jakarta Sans',
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
               color: ink,
@@ -913,7 +919,8 @@ class ShareChooser extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   'Share',
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                     color: ink,

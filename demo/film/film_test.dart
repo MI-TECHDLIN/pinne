@@ -1,7 +1,6 @@
 // Scenes filmed from origin/main. Run through demo/tool/render.sh.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/router.dart';
 import 'package:pinne_flutter/theme/pinne_theme.dart';
@@ -381,7 +380,8 @@ class _SuggestionPanelState extends State<_SuggestionPanel> {
             children: [
               Text(
                 'AI SUGGESTIONS · APP CHIP COMPONENT',
-                style: GoogleFonts.plusJakartaSans(
+                style: TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.4,
@@ -391,7 +391,8 @@ class _SuggestionPanelState extends State<_SuggestionPanel> {
               const SizedBox(height: 8),
               Text(
                 Sample.sharedTitle,
-                style: GoogleFonts.outfit(
+                style: TextStyle(
+                  fontFamily: 'Outfit',
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                   color: PinneColors.text,

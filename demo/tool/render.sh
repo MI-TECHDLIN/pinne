@@ -23,7 +23,6 @@ if [[ ${1:-} == --assemble ]]; then
   FFMPEG="$ffmpeg" exec python3 -I "$demo/tool/assemble.py" "$out" "$@"
 fi
 scene="${1:-}"
-python3 -I "$demo/tool/fetch_fonts.py"
 engine="$("$demo/tool/film_engine.sh")"
 
 cd "$repo/pinne_flutter"
