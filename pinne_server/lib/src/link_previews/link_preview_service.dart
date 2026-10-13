@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../ai/ai_organization_service.dart';
+import '../ai/ai_provider_status.dart';
 import '../generated/protocol.dart';
 import '../generated/serverpod.dart';
 import 'link_preview_parser.dart';
@@ -415,7 +416,11 @@ class LinkPreviewService {
           )
           .aiOrganize
           .process(item.id!, item.ownerId);
-    } catch (_) {}
+    } catch (error) {
+      AiProviderStatus.recordTaskError(
+        'could not requeue organizing after a preview (${error.runtimeType})',
+      );
+    }
   }
 
   Future<void> _politeDelay(String key, Duration spacing) {

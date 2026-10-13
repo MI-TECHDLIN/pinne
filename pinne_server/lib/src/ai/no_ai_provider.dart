@@ -3,6 +3,10 @@ import 'ai_output_validator.dart';
 import 'ai_provider.dart';
 
 /// Fully local, deterministic fallback. It never fetches a URL.
+///
+/// Every saved link gets at least a site tag, and a summary once a preview
+/// description (or the user's note) is stored, so an item never ends up with
+/// no suggestions just because the remote provider is unavailable.
 class NoAiProvider implements AiProvider {
   const NoAiProvider();
 
@@ -17,10 +21,11 @@ class NoAiProvider implements AiProvider {
     'substack.com': 'newsletter',
   };
 
-  static const _pathKeywords = {
+  static const _keywords = {
     'recipe',
     'design',
     'flutter',
+    'dart',
     'serverpod',
     'travel',
     'finance',
@@ -28,6 +33,45 @@ class NoAiProvider implements AiProvider {
     'music',
     'video',
     'article',
+    'tutorial',
+    'podcast',
+    'python',
+    'javascript',
+    'typescript',
+    'react',
+    'rust',
+    'kotlin',
+    'swift',
+    'android',
+    'ios',
+    'fitness',
+    'cooking',
+    'productivity',
+    'career',
+  };
+
+  /// Platforms that say nothing about the content, so never become tags.
+  static const _untaggedPlatforms = {'web', 'other', 'unknown', 'note'};
+
+  /// Host labels that name a section of a site rather than the site.
+  static const _genericHostLabels = {
+    'www',
+    'docs',
+    'doc',
+    'blog',
+    'blogs',
+    'm',
+    'mobile',
+    'en',
+    'api',
+    'app',
+    'dev',
+    'developer',
+    'developers',
+    'news',
+    'help',
+    'support',
+    'web',
   };
 
   @override
@@ -37,23 +81,35 @@ class NoAiProvider implements AiProvider {
   }) async {
     final tags = <String>{};
     final platform = AiOutputValidator.normalizeTag(evidence.sourcePlatform);
-    if (platform != 'web' && platform != 'other' && platform.isNotEmpty) {
+    if (!_untaggedPlatforms.contains(platform) && platform.isNotEmpty) {
       tags.add(platform);
     }
 
     final uri = Uri.tryParse(evidence.url ?? '');
-    if (uri != null) {
-      final host = uri.host.toLowerCase().replaceFirst(RegExp(r'^www\.'), '');
+    final host = (uri?.host ?? '').toLowerCase().replaceFirst(
+      RegExp(r'^www\.'),
+      '',
+    );
+    if (host.isNotEmpty) {
       for (final entry in _hostTags.entries) {
         if (host == entry.key || host.endsWith('.${entry.key}')) {
           tags.add(entry.value);
         }
       }
-      final pathTokens = uri.pathSegments
-          .expand((part) => part.toLowerCase().split(RegExp(r'[^a-z0-9]+')))
-          .where(_pathKeywords.contains);
-      tags.addAll(pathTokens);
+      if (_siteLabel(host) case final site?) tags.add(site);
     }
+
+    final text = [
+      ...?uri?.pathSegments,
+      evidence.title,
+      evidence.intention,
+      evidence.notes,
+      evidence.description,
+      evidence.siteName,
+    ].whereType<String>().join(' ').toLowerCase();
+    tags.addAll(
+      text.split(RegExp(r'[^a-z0-9]+')).where(_keywords.contains).toSet(),
+    );
 
     final haystack = [
       evidence.title,
@@ -77,14 +133,31 @@ class NoAiProvider implements AiProvider {
         .map((collection) => collection.id)
         .toList();
 
+    // Extractive only: the page's own description, else the user's note.
+    // The validator keeps at most two sentences.
+    final summary =
+        [
+              evidence.description,
+              evidence.notes,
+            ]
+            .whereType<String>()
+            .map((value) => value.trim())
+            .firstWhere(
+              (value) => value.isNotEmpty,
+              orElse: () => '',
+            );
+
     return AiOutputValidator.sanitize(
       AiOrganizationResult(
         collectionIds: collectionIds,
         tags: tags.toList(),
-        summary: null,
-        rationale: collectionIds.isEmpty
-            ? 'Matched source and URL metadata only.'
-            : 'Matched collection names and metadata keywords exactly.',
+        summary: summary.isEmpty ? null : summary,
+        rationale: [
+          collectionIds.isEmpty
+              ? 'Matched source and URL metadata only.'
+              : 'Matched collection names and metadata keywords exactly.',
+          if (summary.isNotEmpty) 'The summary quotes the saved text.',
+        ].join(' '),
         evidenceCoverage: evidence.previewAvailable
             ? AiEvidenceCoverage.metadataPlusPreview
             : AiEvidenceCoverage.metadataOnly,
@@ -93,5 +166,22 @@ class NoAiProvider implements AiProvider {
       ),
       allowedCollectionIds: collections.map((collection) => collection.id),
     );
+  }
+
+  /// The registrable name of [host]: `docs.flutter.dev` is `flutter`,
+  /// `bbc.co.uk` is `bbc`. Null for IP addresses and single labels.
+  static String? _siteLabel(String host) {
+    if (RegExp(r'^[0-9.:]+$').hasMatch(host)) return null;
+    final labels = host.split('.').where((part) => part.isNotEmpty).toList();
+    if (labels.length < 2) return null;
+    // A two-letter country code after a short second level (co.uk, com.au).
+    final countrySecondLevel =
+        labels.length >= 3 &&
+        labels.last.length == 2 &&
+        labels[labels.length - 2].length <= 3;
+    final index = labels.length - (countrySecondLevel ? 3 : 2);
+    final label = AiOutputValidator.normalizeTag(labels[index]);
+    if (label.isEmpty || _genericHostLabels.contains(label)) return null;
+    return label;
   }
 }

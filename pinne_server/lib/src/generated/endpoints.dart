@@ -875,6 +875,16 @@ class Endpoints extends _is.EndpointDispatch {
               ) async => (endpoints['health'] as _id9paj9q.HealthEndpoint)
                   .emailDeliveryAvailable(session),
         ),
+        'aiProviderStatus': _is.MethodConnector(
+          name: 'aiProviderStatus',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['health'] as _id9paj9q.HealthEndpoint)
+                  .aiProviderStatus(session),
+        ),
         'check': _is.MethodConnector(
           name: 'check',
           params: {},

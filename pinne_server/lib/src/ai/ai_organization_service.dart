@@ -3,6 +3,7 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'ai_output_validator.dart';
 import 'ai_provider.dart';
+import 'ai_provider_status.dart';
 import 'ai_provider_registry.dart';
 import 'no_ai_provider.dart';
 
@@ -144,11 +145,15 @@ class AiOrganizationService {
         ? FallbackAiProvider(
             primary: remote,
             fallback: const NoAiProvider(),
-            onPrimaryFailure: (error) => session.log(
-              'AI provider ${remote.name} failed, organized with rules '
-              'instead: ${describeAiFailure(error)}',
-              level: LogLevel.warning,
-            ),
+            onPrimaryFailure: (error) {
+              final reason = describeAiFailure(error);
+              session.log(
+                'AI provider ${remote.name} failed, organized with rules '
+                'instead: $reason',
+                level: LogLevel.warning,
+              );
+              AiProviderStatus.recordFailure(remote.name, reason);
+            },
           )
         : const NoAiProvider();
     final evidence = AiItemEvidence(
@@ -163,6 +168,9 @@ class AiOrganizationService {
       previewAvailable: item.previewMetadataJson != null,
     );
     final result = await _organizeSafely(session, provider, evidence, options);
+    if (remote != null && result.provider == remote.name) {
+      AiProviderStatus.recordSuccess(remote.name);
+    }
 
     await session.db.transaction((transaction) async {
       final latestTask = await AiOrganizeTask.db.findFirstRow(
@@ -259,11 +267,13 @@ class AiOrganizationService {
     } catch (error) {
       // Typed providers are still untrusted. A malformed test double or future
       // provider must have the same safe behavior as an HTTP/JSON failure.
+      final reason = describeAiFailure(error);
       session.log(
         'AI output from ${provider.name} was rejected, organized with rules '
-        'instead: ${describeAiFailure(error)}',
+        'instead: $reason',
         level: LogLevel.warning,
       );
+      AiProviderStatus.recordFailure(provider.name, reason);
       return const NoAiProvider().organize(
         evidence: evidence,
         collections: options,

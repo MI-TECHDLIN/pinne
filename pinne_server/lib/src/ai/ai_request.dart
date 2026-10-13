@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'ai_output_validator.dart';
 import 'ai_provider.dart';
 
 /// Provider-neutral prompt and schema for saved-item organizing.
@@ -31,12 +30,13 @@ abstract final class AiRequest {
     List<String> collectionIds, {
     required bool previewAvailable,
   }) => {
+    // Only keywords Groq documents for strict mode. Counts and lengths are
+    // enforced by AiOutputValidator, which also drops ids not offered in INPUT.
     'type': 'object',
     'additionalProperties': false,
     'properties': {
       'collectionIds': {
         'type': 'array',
-        'maxItems': collectionIds.length,
         'items': {
           'type': 'string',
           if (collectionIds.isNotEmpty) 'enum': collectionIds,
@@ -44,7 +44,6 @@ abstract final class AiRequest {
       },
       'tags': {
         'type': 'array',
-        'maxItems': AiOutputValidator.maxTags,
         'items': {'type': 'string'},
       },
       'summary': {
