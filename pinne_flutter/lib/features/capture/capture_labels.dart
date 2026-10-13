@@ -82,7 +82,7 @@ class SyncStatusLabel extends StatelessWidget {
       ),
       CaptureSyncState.failed => (
         Icons.error_outline_rounded,
-        context.pinne.peach,
+        context.pinne.warning,
       ),
       CaptureSyncState.pending => (Icons.schedule_rounded, context.pinne.muted),
     };

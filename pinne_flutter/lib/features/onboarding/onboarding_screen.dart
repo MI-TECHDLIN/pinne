@@ -738,10 +738,16 @@ class _MiniSaveCard extends StatelessWidget {
           ? context.pinne.accentDue
           : context.pinne.card.withValues(alpha: .94),
       borderRadius: BorderRadius.circular(PinneRadii.card),
-      border: due ? null : Border.all(color: context.pinne.line),
-      boxShadow: const [
+      border: due
+          ? Theme.of(context).brightness == Brightness.light
+                ? Border.all(color: context.pinne.dueEdge, width: 1.5)
+                : null
+          : Border.all(color: context.pinne.line),
+      boxShadow: [
         BoxShadow(
-          color: Color(0x55000000),
+          color: Theme.of(context).brightness == Brightness.light
+              ? context.pinne.shadow
+              : const Color(0x55000000),
           blurRadius: 20,
           offset: Offset(0, 10),
         ),

@@ -95,7 +95,7 @@ class PinneToastBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, tint, label) = switch (kind) {
-      ToastKind.success => (Icons.check_rounded, context.pinne.mint, 'Done'),
+      ToastKind.success => (Icons.check_rounded, context.pinne.success, 'Done'),
       ToastKind.info => (
         Icons.info_outline_rounded,
         context.pinne.lilac,
@@ -103,7 +103,7 @@ class PinneToastBody extends StatelessWidget {
       ),
       ToastKind.error => (
         Icons.priority_high_rounded,
-        context.pinne.pink,
+        context.pinne.error,
         'Problem',
       ),
     };
@@ -123,9 +123,11 @@ class PinneToastBody extends StatelessWidget {
           color: context.pinne.cardRaised,
           borderRadius: BorderRadius.circular(PinneRadii.tile),
           border: Border.all(color: tint.withValues(alpha: .35)),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x99000000),
+              color: Theme.of(context).brightness == Brightness.light
+                  ? context.pinne.shadow
+                  : const Color(0x99000000),
               blurRadius: 24,
               offset: Offset(0, 10),
             ),

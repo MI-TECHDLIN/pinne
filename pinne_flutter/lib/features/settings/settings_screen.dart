@@ -7,6 +7,7 @@ import '../../core/server_client.dart';
 import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
+import '../../theme/theme_mode.dart';
 import '../../ui/motion.dart';
 import '../tour/tour_controller.dart';
 import 'account_kind_provider.dart';
@@ -27,6 +28,8 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: PinneSpacing.md),
         const _AccountCard(),
         const SizedBox(height: PinneSpacing.md),
+        const _AppearanceCard(),
+        const SizedBox(height: PinneSpacing.md),
         const _MotionCard(),
         const SizedBox(height: PinneSpacing.md),
         const _AiOrganizingCard(),
@@ -38,6 +41,59 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('Ribbon studio'),
           ),
       ],
+    );
+  }
+}
+
+class _AppearanceCard extends ConsumerWidget {
+  const _AppearanceCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final preference = ref.watch(themePreferenceProvider);
+    final theme = Theme.of(context);
+    final description = switch (preference) {
+      PinneThemePreference.system => 'Following your device appearance.',
+      PinneThemePreference.dark => 'Midnight mode is on.',
+      PinneThemePreference.light => 'Lavender Mist is on.',
+    };
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Appearance', style: theme.textTheme.titleMedium),
+          Text(description, style: TextStyle(color: context.pinne.muted)),
+          const SizedBox(height: PinneSpacing.md),
+          SegmentedButton<PinneThemePreference>(
+            key: const ValueKey('appearance-control'),
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: context.pinne.violet,
+              selectedForegroundColor: context.pinne.onViolet,
+              foregroundColor: context.pinne.muted,
+              side: BorderSide(color: context.pinne.line),
+            ),
+            segments: const [
+              ButtonSegment(
+                value: PinneThemePreference.system,
+                label: Text('System'),
+              ),
+              ButtonSegment(
+                value: PinneThemePreference.dark,
+                label: Text('Dark'),
+              ),
+              ButtonSegment(
+                value: PinneThemePreference.light,
+                label: Text('Light'),
+              ),
+            ],
+            selected: {preference},
+            onSelectionChanged: (selection) => ref
+                .read(themePreferenceProvider.notifier)
+                .set(selection.single),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -296,7 +352,7 @@ class _MotionCard extends ConsumerWidget {
             showSelectedIcon: false,
             style: SegmentedButton.styleFrom(
               selectedBackgroundColor: context.pinne.violet,
-              selectedForegroundColor: context.pinne.text,
+              selectedForegroundColor: context.pinne.onViolet,
               foregroundColor: context.pinne.muted,
               side: BorderSide(color: context.pinne.line),
             ),
