@@ -2,35 +2,70 @@ import 'package:flutter/material.dart';
 
 import 'pinne_tokens.dart';
 
-/// The dark theme Pinne ships first. Outfit for headlines, Plus Jakarta Sans
-/// for body text.
-ThemeData pinneDarkTheme() {
-  const scheme = ColorScheme.dark(
-    primary: PinneColors.violet,
-    onPrimary: PinneColors.text,
-    secondary: PinneColors.lilac,
-    onSecondary: PinneColors.ink,
-    surface: PinneColors.midnight,
-    onSurface: PinneColors.text,
-    onSurfaceVariant: PinneColors.muted,
-    surfaceContainerLow: PinneColors.midnightRaised,
-    surfaceContainer: PinneColors.card,
-    surfaceContainerHigh: PinneColors.cardRaised,
-    outline: PinneColors.line,
-    outlineVariant: PinneColors.line,
-  );
+/// The dark theme Pinne ships first. It remains pixel-identical to the
+/// original theme while widgets read colours through [PinnePalette].
+ThemeData pinneDarkTheme() => _pinneTheme(
+  palette: PinnePalette.dark,
+  brightness: Brightness.dark,
+);
 
-  final body = ThemeData.dark().textTheme.apply(
+/// Pinne's approved Lavender Mist daytime theme.
+ThemeData pinneLightTheme() => _pinneTheme(
+  palette: PinnePalette.light,
+  brightness: Brightness.light,
+);
+
+ThemeData _pinneTheme({
+  required PinnePalette palette,
+  required Brightness brightness,
+}) {
+  final scheme = brightness == Brightness.dark
+      ? ColorScheme.dark(
+          primary: palette.violet,
+          onPrimary: palette.onViolet,
+          secondary: palette.lilac,
+          onSecondary: palette.ink,
+          error: palette.error,
+          surface: palette.midnight,
+          onSurface: palette.text,
+          onSurfaceVariant: palette.muted,
+          surfaceContainerLow: palette.midnightRaised,
+          surfaceContainer: palette.card,
+          surfaceContainerHigh: palette.cardRaised,
+          outline: palette.line,
+          outlineVariant: palette.line,
+        )
+      : ColorScheme.light(
+          primary: palette.violet,
+          onPrimary: palette.onViolet,
+          secondary: palette.lilac,
+          onSecondary: palette.onViolet,
+          error: palette.error,
+          onError: palette.onViolet,
+          surface: palette.midnight,
+          onSurface: palette.text,
+          onSurfaceVariant: palette.muted,
+          surfaceContainerLow: palette.midnightRaised,
+          surfaceContainer: palette.card,
+          surfaceContainerHigh: palette.cardRaised,
+          outline: palette.line,
+          outlineVariant: palette.line,
+        );
+
+  final base = brightness == Brightness.dark
+      ? ThemeData.dark()
+      : ThemeData.light();
+  final body = base.textTheme.apply(
     fontFamily: 'Plus Jakarta Sans',
-    bodyColor: PinneColors.text,
-    displayColor: PinneColors.text,
+    bodyColor: palette.text,
+    displayColor: palette.text,
   );
 
-  TextStyle? headline(TextStyle? base, FontWeight weight) => base?.copyWith(
+  TextStyle? headline(TextStyle? style, FontWeight weight) => style?.copyWith(
     fontFamily: 'Outfit',
     fontWeight: weight,
     letterSpacing: -0.4,
-    color: PinneColors.text,
+    color: palette.text,
   );
 
   final textTheme = body.copyWith(
@@ -46,53 +81,55 @@ ThemeData pinneDarkTheme() {
 
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: brightness,
     colorScheme: scheme,
-    extensions: const [PinnePalette.dark],
-    scaffoldBackgroundColor: PinneColors.midnight,
+    extensions: [palette],
+    scaffoldBackgroundColor: palette.midnight,
     textTheme: textTheme,
-    cardTheme: const CardThemeData(
-      color: PinneColors.card,
+    cardTheme: CardThemeData(
+      color: palette.card,
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(PinneRadii.card)),
-        side: BorderSide(color: PinneColors.line),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(PinneRadii.card),
+        ),
+        side: BorderSide(color: palette.line),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: PinneColors.violet,
-        foregroundColor: PinneColors.text,
+        backgroundColor: palette.violet,
+        foregroundColor: palette.onViolet,
         shape: const StadiumBorder(),
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(foregroundColor: PinneColors.lilac),
+      style: TextButton.styleFrom(foregroundColor: palette.lilac),
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith(
         (states) => states.contains(WidgetState.selected)
-            ? PinneColors.text
-            : PinneColors.muted,
+            ? palette.onViolet
+            : palette.muted,
       ),
       trackColor: WidgetStateProperty.resolveWith(
         (states) => states.contains(WidgetState.selected)
-            ? PinneColors.violet
-            : PinneColors.glass,
+            ? palette.violet
+            : palette.glass,
       ),
     ),
-    dividerTheme: const DividerThemeData(color: PinneColors.line),
+    dividerTheme: DividerThemeData(color: palette.line),
     // Fallback for any plain SnackBar; prefer showPinneToast (ui/feedback).
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: PinneColors.cardRaised,
-      contentTextStyle: const TextStyle(color: PinneColors.text),
-      actionTextColor: PinneColors.lilac,
+      backgroundColor: palette.cardRaised,
+      contentTextStyle: TextStyle(color: palette.text),
+      actionTextColor: palette.lilac,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(PinneRadii.tile),
-        side: const BorderSide(color: PinneColors.line),
+        side: BorderSide(color: palette.line),
       ),
     ),
   );

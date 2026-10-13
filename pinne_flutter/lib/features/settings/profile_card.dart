@@ -273,8 +273,8 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
                 ChoiceChip(
                   selectedColor: context.pinne.violet,
                   backgroundColor: context.pinne.card,
-                  checkmarkColor: context.pinne.text,
-                  labelStyle: TextStyle(color: context.pinne.text),
+                  checkmarkColor: context.pinne.onViolet,
+                  labelStyle: TextStyle(color: context.pinne.onViolet),
                   side: BorderSide(color: context.pinne.line),
                   label: Text(PinneSpiritPalettes.values[index].name),
                   avatar: CircleAvatar(
@@ -293,7 +293,7 @@ class _AvatarPickerState extends ConsumerState<_AvatarPicker> {
               padding: const EdgeInsets.only(top: 12),
               child: Text(
                 _error!,
-                style: TextStyle(color: context.pinne.pink),
+                style: TextStyle(color: context.pinne.error),
               ),
             ),
           const SizedBox(height: 20),

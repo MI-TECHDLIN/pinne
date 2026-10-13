@@ -33,7 +33,7 @@ class PinneSkeleton extends StatelessWidget {
               ? SolidColorEffect(color: context.pinne.cardRaised)
               : ShimmerEffect(
                   baseColor: context.pinne.cardRaised,
-                  highlightColor: Color(0xFF4A3D6B),
+                  highlightColor: context.pinne.shimmerHighlight,
                   duration: Duration(milliseconds: 1400),
                 ),
           child: child,

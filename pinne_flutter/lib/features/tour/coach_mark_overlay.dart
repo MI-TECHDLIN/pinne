@@ -348,9 +348,11 @@ class _Callout extends StatelessWidget {
           color: context.pinne.cardRaised,
           borderRadius: BorderRadius.circular(PinneRadii.card),
           border: Border.all(color: context.pinne.lilac.withValues(alpha: .35)),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0xAA000000),
+              color: Theme.of(context).brightness == Brightness.light
+                  ? context.pinne.shadow
+                  : const Color(0xAA000000),
               blurRadius: 30,
               offset: Offset(0, 14),
             ),
@@ -500,7 +502,7 @@ class _StepBadge extends StatelessWidget {
         colors: [context.pinne.lilac, context.pinne.violet],
       ),
     ),
-    child: Icon(icon, size: 21, color: context.pinne.text),
+    child: Icon(icon, size: 21, color: context.pinne.onViolet),
   );
 }
 

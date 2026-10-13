@@ -465,7 +465,7 @@ class _GoalTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: reviewed
-              ? context.pinne.lilac
+              ? context.pinne.selectionFill
               : context.pinne.glass.withValues(
                   alpha: day.isFuture ? 0.04 : 0.08,
                 ),
@@ -482,13 +482,15 @@ class _GoalTile extends StatelessWidget {
               reviewed ? Icons.check_rounded : Icons.circle_outlined,
               size: reviewed ? 18 : 8,
               color: reviewed
-                  ? context.pinne.ink
+                  ? context.pinne.selectionText
                   : context.pinne.muted.withValues(alpha: 0.5),
             ),
             Text(
               weekdayLetter(day.date),
               style: TextStyle(
-                color: reviewed ? context.pinne.ink : context.pinne.muted,
+                color: reviewed
+                    ? context.pinne.selectionText
+                    : context.pinne.muted,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),

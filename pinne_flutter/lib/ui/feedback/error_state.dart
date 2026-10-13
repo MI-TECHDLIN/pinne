@@ -164,7 +164,7 @@ class _ErrorCopy extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(friendly.icon, size: 16, color: context.pinne.pink),
+            Icon(friendly.icon, size: 16, color: context.pinne.error),
             const SizedBox(width: PinneSpacing.xs),
             Flexible(
               child: Text(
@@ -179,7 +179,7 @@ class _ErrorCopy extends StatelessWidget {
                   ErrorCause.unknown => 'HICCUP',
                 },
                 style: TextStyle(
-                  color: context.pinne.pink,
+                  color: context.pinne.error,
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
@@ -293,7 +293,7 @@ class _SpiritBadge extends StatelessWidget {
               width: size * .34,
               height: size * .34,
               decoration: BoxDecoration(
-                color: context.pinne.pink,
+                color: context.pinne.error,
                 shape: BoxShape.circle,
                 border: Border.all(color: context.pinne.card, width: 2),
               ),

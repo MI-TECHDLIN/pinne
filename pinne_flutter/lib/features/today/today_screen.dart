@@ -410,6 +410,7 @@ class _BudgetChoice extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final light = Theme.of(context).brightness == Brightness.light;
     return Semantics(
       label: 'Review time budget. Durations are estimates.',
       child: Wrap(
@@ -421,6 +422,14 @@ class _BudgetChoice extends ConsumerWidget {
               key: ValueKey('budget-$minutes'),
               label: Text('$minutes min'),
               selected: selected == minutes,
+              selectedColor: light ? context.pinne.selectionFill : null,
+              labelStyle: light
+                  ? TextStyle(
+                      color: selected == minutes
+                          ? context.pinne.selectionText
+                          : context.pinne.text,
+                    )
+                  : null,
               onSelected: (_) =>
                   ref.read(reviewBudgetProvider.notifier).select(minutes),
               visualDensity: VisualDensity.compact,
@@ -479,6 +488,9 @@ class TodaySpiritCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.pinne.accentDue,
         borderRadius: BorderRadius.circular(PinneRadii.card),
+        border: Theme.of(context).brightness == Brightness.light
+            ? Border.all(color: context.pinne.dueEdge, width: 1.5)
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -564,7 +576,7 @@ class TodaySpiritCard extends StatelessWidget {
                 key: const ValueKey('review-reviewed'),
                 style: FilledButton.styleFrom(
                   backgroundColor: context.pinne.ink,
-                  foregroundColor: context.pinne.text,
+                  foregroundColor: context.pinne.onViolet,
                   visualDensity: VisualDensity.compact,
                 ),
                 onPressed: onReviewed,
@@ -628,7 +640,7 @@ class _EmptyQueueCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 18, 112, 20),
       constraints: const BoxConstraints(minHeight: 154),
       decoration: BoxDecoration(
-        color: context.pinne.lilac,
+        color: context.pinne.lilacTile,
         borderRadius: BorderRadius.circular(PinneRadii.card),
       ),
       child: Stack(
@@ -728,11 +740,20 @@ class _DayChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final foreground = today ? context.pinne.ink : context.pinne.text;
+    final light = Theme.of(context).brightness == Brightness.light;
+    final foreground = today
+        ? light
+              ? context.pinne.onViolet
+              : context.pinne.ink
+        : context.pinne.text;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: today ? Colors.white : context.pinne.glass,
+        color: today
+            ? light
+                  ? context.pinne.ink
+                  : Colors.white
+            : context.pinne.glass,
         borderRadius: BorderRadius.circular(PinneRadii.chip),
         border: Border.all(color: context.pinne.line),
       ),
