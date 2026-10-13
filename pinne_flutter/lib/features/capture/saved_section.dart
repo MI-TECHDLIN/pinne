@@ -11,6 +11,7 @@ import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/item_preview.dart';
+import 'ai_suggestions.dart';
 import 'capture_labels.dart';
 import 'capture_providers.dart';
 import 'capture_store.dart';
@@ -171,6 +172,16 @@ class SavedCard extends ConsumerWidget {
                 color: PinneColors.muted,
               ),
             ),
+          if (preview?.summary case final summary?) ...[
+            const SizedBox(height: PinneSpacing.xs),
+            Text(
+              summary,
+              key: const ValueKey('saved-summary'),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
           if (intention != null) ...[
             const SizedBox(height: PinneSpacing.sm),
             Text(
@@ -182,6 +193,8 @@ class SavedCard extends ConsumerWidget {
               ),
             ),
           ],
+          if (preview?.id case final itemId? when signedIn)
+            SavedItemAiSuggestions(itemId: itemId),
           if (capture.syncState == CaptureSyncState.failed) ...[
             const SizedBox(height: PinneSpacing.xs),
             Row(

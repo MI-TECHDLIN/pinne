@@ -68,9 +68,9 @@ the status bar is drawn.
 
 ## Known app gaps the film shows
 
-- `AiSuggestionChips` is not placed on any screen yet, so the Organize shot
-  shows the real widget in a panel labelled "App chip component" next to the
-  real Settings screen.
+- The film predates `AiSuggestionChips` on the Saved cards, so the Organize
+  shot shows the real widget in a panel labelled "App chip component" next to
+  the real Settings screen. The app now lists them on each Saved card.
 
 Fixed on `main` since the first cut and verified in this render: the source
 and duration chips are readable on pastel and lime cards, and the lime card's

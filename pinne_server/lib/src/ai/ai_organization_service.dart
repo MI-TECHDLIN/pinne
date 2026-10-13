@@ -144,6 +144,11 @@ class AiOrganizationService {
         ? FallbackAiProvider(
             primary: remote,
             fallback: const NoAiProvider(),
+            onPrimaryFailure: (error) => session.log(
+              'AI provider ${remote.name} failed, organized with rules '
+              'instead: ${describeAiFailure(error)}',
+              level: LogLevel.warning,
+            ),
           )
         : const NoAiProvider();
     final evidence = AiItemEvidence(
@@ -157,7 +162,7 @@ class AiOrganizationService {
       siteName: item.previewSiteName,
       previewAvailable: item.previewMetadataJson != null,
     );
-    final result = await _organizeSafely(provider, evidence, options);
+    final result = await _organizeSafely(session, provider, evidence, options);
 
     await session.db.transaction((transaction) async {
       final latestTask = await AiOrganizeTask.db.findFirstRow(
@@ -234,6 +239,7 @@ class AiOrganizationService {
   }
 
   Future<AiOrganizationResult> _organizeSafely(
+    Session session,
     AiProvider provider,
     AiItemEvidence evidence,
     List<AiCollectionOption> options,
@@ -250,9 +256,14 @@ class AiOrganizationService {
             ? AiEvidenceCoverage.metadataPlusPreview
             : AiEvidenceCoverage.metadataOnly,
       );
-    } catch (_) {
+    } catch (error) {
       // Typed providers are still untrusted. A malformed test double or future
       // provider must have the same safe behavior as an HTTP/JSON failure.
+      session.log(
+        'AI output from ${provider.name} was rejected, organized with rules '
+        'instead: ${describeAiFailure(error)}',
+        level: LogLevel.warning,
+      );
       return const NoAiProvider().organize(
         evidence: evidence,
         collections: options,

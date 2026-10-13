@@ -132,15 +132,15 @@ class _GuideRow extends StatelessWidget {
 class _AiOrganizingCard extends ConsumerWidget {
   const _AiOrganizingCard();
 
+  // Shown until the server answers with its own provider's disclosure, so it
+  // names no provider.
   static const fallbackDisclosure =
       "When AI organizing is on, Pinne sends the saved item's title, URL, "
       'source platform, your intention and notes, plus the names and IDs of '
-      "your collections, to Google's Gemini API. It does not fetch the page. "
-      "On Gemini's unpaid tier, Google may use prompts and responses to "
-      'improve its products, and human reviewers may process them. Google '
-      'says not to send sensitive, confidential or personal information. '
-      'Different data terms apply in the EEA, Switzerland and UK. Turn this '
-      'off to keep organizing on this server with simple rules only.';
+      "your collections, to the server's external AI provider. It does not "
+      'fetch the page. The provider and its data terms are shown here once '
+      'Pinne reaches the server. Turn this off to keep organizing on this '
+      'server with simple rules only.';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -7,8 +7,9 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 /// Server URL resolution, in order: `--dart-define=SERVER_URL=...`, a
-/// Serverpod Cloud API URL derived from its default web host, then `apiUrl` in
-/// `assets/config.json`, then `http://localhost:8080/`.
+/// Serverpod Cloud API URL derived from its default web host, the production
+/// API in release builds for phones, then `apiUrl` in `assets/config.json`,
+/// then `http://localhost:8080/`.
 ///
 /// On a physical device use your computer's LAN address, not localhost.
 Future<String> resolveServerUrl() async {
@@ -20,8 +21,20 @@ Future<String> resolveServerUrl() async {
     if (cloudUrl != null) return cloudUrl;
   }
 
+  final releaseUrl = releaseServerUrl(isRelease: kReleaseMode, isWeb: kIsWeb);
+  if (releaseUrl != null) return releaseUrl;
+
   return getServerUrl();
 }
+
+/// The hosted Pinne API on Serverpod Cloud (project `pinneapp`).
+const productionServerUrl = 'https://pinneapp.api.serverpod.space/';
+
+/// A release APK built without `SERVER_URL` must not fall back to the
+/// localhost in `assets/config.json`, which no phone can reach.
+@visibleForTesting
+String? releaseServerUrl({required bool isRelease, required bool isWeb}) =>
+    isRelease && !isWeb ? productionServerUrl : null;
 
 /// Returns the matching API host for a default Serverpod Cloud web URL.
 ///

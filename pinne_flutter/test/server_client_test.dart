@@ -20,4 +20,18 @@ void main() {
       );
     });
   });
+
+  group('releaseServerUrl', () {
+    test('release phone builds use the hosted API, never localhost', () {
+      expect(
+        releaseServerUrl(isRelease: true, isWeb: false),
+        'https://pinneapp.api.serverpod.space/',
+      );
+    });
+
+    test('debug and web builds keep config.json and host detection', () {
+      expect(releaseServerUrl(isRelease: false, isWeb: false), isNull);
+      expect(releaseServerUrl(isRelease: true, isWeb: true), isNull);
+    });
+  });
 }
