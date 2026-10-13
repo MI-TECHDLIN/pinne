@@ -9,6 +9,7 @@ import 'package:pinne_flutter/features/settings/profile_provider.dart';
 import 'package:pinne_flutter/ui/ribbon_spirit/ribbon_spirit.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 
 class _SignedIn extends SignedInNotifier {
@@ -46,11 +47,60 @@ class _ProfileEndpoint extends Fake implements EndpointProfile {
   }
 }
 
+Widget _app(
+  _ProfileEndpoint endpoint, {
+  Brightness brightness = Brightness.dark,
+}) => ProviderScope(
+  overrides: [
+    accountIdProvider.overrideWith(_Alice.new),
+    profileEndpointProvider.overrideWithValue(endpoint),
+    signedInProvider.overrideWith(_SignedIn.new),
+    serverUrlProvider.overrideWithValue('http://localhost:8080/'),
+  ],
+  child: MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: goldenTheme(brightness: brightness),
+    builder: (context, child) => MotionPreferenceScope(
+      preference: MotionPreference.reduced,
+      child: child!,
+    ),
+    home: const Scaffold(body: SettingsScreen()),
+  ),
+);
+
 void main() {
   setUpAll(loadGoldenFonts);
   setUp(
     () => VisibilityDetectorController.instance.updateInterval = Duration.zero,
   );
+
+  for (final brightness in Brightness.values) {
+    testWidgets('the spirit sheet is readable in ${brightness.name} theme', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(430, 1000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(_app(_ProfileEndpoint(), brightness: brightness));
+      await tester.pumpAndSettle();
+      // Dark visuals are frozen; contrast is enforced in Lavender Mist.
+      final light = brightness == Brightness.light;
+      if (light) await expectReadableText(tester, reason: 'Settings');
+      await tester.tap(find.text('Choose your spirit'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Sky'));
+      await tester.pumpAndSettle();
+      if (light) await expectReadableText(tester, reason: 'Find your spirit');
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile(
+          light
+              ? '../../docs/light-theme/spirit-sheet.png'
+              : '../../docs/ribbon-spirit/spirit-sheet-dark.png',
+        ),
+      );
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
 
   testWidgets(
     'choose, save and reload an avatar after app state is destroyed',
@@ -58,23 +108,7 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(430, 1000));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       final endpoint = _ProfileEndpoint();
-      Widget app() => ProviderScope(
-        overrides: [
-          accountIdProvider.overrideWith(_Alice.new),
-          profileEndpointProvider.overrideWithValue(endpoint),
-          signedInProvider.overrideWith(_SignedIn.new),
-          serverUrlProvider.overrideWithValue('http://localhost:8080/'),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: goldenTheme(),
-          builder: (context, child) => MotionPreferenceScope(
-            preference: MotionPreference.reduced,
-            child: child!,
-          ),
-          home: const Scaffold(body: SettingsScreen()),
-        ),
-      );
+      Widget app() => _app(endpoint);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
