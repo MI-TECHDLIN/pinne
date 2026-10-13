@@ -8,6 +8,7 @@ import 'package:pinne_client/pinne_client.dart';
 
 import '../../core/server_client.dart';
 import '../../shell/pinne_page.dart';
+import '../../shell/responsive.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/item_preview.dart';
@@ -72,21 +73,40 @@ class SavedSection extends ConsumerWidget {
                 'It shows up here right away, even offline.',
           )
         else
-          for (final (index, capture) in captures.indexed) ...[
-            if (index > 0) const SizedBox(height: PinneSpacing.sm),
-            _staggered(
-              context,
-              index,
-              SavedCard(
-                key: ValueKey('saved-${capture.clientItemId}'),
-                capture: capture,
-                signedIn: signedIn,
-                item: capture.serverItemId == null
-                    ? null
-                    : byId[capture.serverItemId],
-              ),
-            ),
-          ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = switch (PinneBreakpoints.of(context)) {
+                PinneWindowClass.compact => 1,
+                PinneWindowClass.medium => 2,
+                PinneWindowClass.expanded => 2,
+              };
+              final width =
+                  (constraints.maxWidth - PinneSpacing.md * (columns - 1)) /
+                  columns;
+              return Wrap(
+                spacing: PinneSpacing.md,
+                runSpacing: PinneSpacing.md,
+                children: [
+                  for (final (index, capture) in captures.indexed)
+                    SizedBox(
+                      width: width,
+                      child: _staggered(
+                        context,
+                        index,
+                        SavedCard(
+                          key: ValueKey('saved-${capture.clientItemId}'),
+                          capture: capture,
+                          signedIn: signedIn,
+                          item: capture.serverItemId == null
+                              ? null
+                              : byId[capture.serverItemId],
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
       ],
     );
   }

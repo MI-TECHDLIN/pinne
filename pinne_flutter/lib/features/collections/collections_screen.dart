@@ -6,6 +6,7 @@ import 'package:pinne_client/pinne_client.dart';
 
 import '../../core/server_client.dart';
 import '../../shell/pinne_page.dart';
+import '../../shell/responsive.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/pinne_loading.dart';
@@ -129,8 +130,12 @@ class _CollectionGrid extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: items.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: switch (PinneBreakpoints.of(context)) {
+              PinneWindowClass.compact => 2,
+              PinneWindowClass.medium => 3,
+              PinneWindowClass.expanded => 4,
+            },
             crossAxisSpacing: PinneSpacing.md,
             mainAxisSpacing: PinneSpacing.md,
             childAspectRatio: 0.82,
@@ -404,7 +409,11 @@ class _LoadingGrid extends StatelessWidget {
     key: const ValueKey('collections-skeleton'),
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
-    crossAxisCount: 2,
+    crossAxisCount: switch (PinneBreakpoints.of(context)) {
+      PinneWindowClass.compact => 2,
+      PinneWindowClass.medium => 3,
+      PinneWindowClass.expanded => 4,
+    },
     crossAxisSpacing: PinneSpacing.md,
     mainAxisSpacing: PinneSpacing.md,
     childAspectRatio: 0.82,

@@ -94,11 +94,12 @@ class OutboxOperation {
 /// timeout keep their writes apart, and the server's idempotency makes a
 /// doubly sent operation harmless.
 class CaptureStore {
-  CaptureStore(this._db) {
+  CaptureStore(this._db, {this.persistCallback}) {
     _migrate();
   }
 
   final CommonDatabase _db;
+  final Future<void> Function()? persistCallback;
   final _changes = StreamController<void>.broadcast();
 
   static const _schemaVersion = 2;
@@ -114,6 +115,10 @@ class CaptureStore {
   /// Fires after every write made through this store, and on
   /// [notifyExternalChange].
   Stream<void> get changes => _changes.stream;
+
+  /// Flushes the platform store when its database writes are asynchronous.
+  /// Native SQLite commits synchronously, so this is a no-op there.
+  Future<void> persist() => persistCallback?.call() ?? Future<void>.value();
 
   /// Sets the pragmas that make a commit durable. Call once per connection.
   static void configureDurable(CommonDatabase db) {

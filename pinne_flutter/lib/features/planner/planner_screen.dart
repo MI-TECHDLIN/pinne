@@ -7,6 +7,7 @@ import 'package:pinne_client/pinne_client.dart';
 import '../../core/server_client.dart';
 import '../../router.dart';
 import '../../shell/pinne_page.dart';
+import '../../shell/responsive.dart';
 import '../../theme/pinne_theme.dart';
 import '../../theme/pinne_tokens.dart';
 import 'month_calendar.dart';
@@ -52,6 +53,7 @@ class PlannerScreen extends ConsumerWidget {
     }
     final planner = ref.watch(plannerProvider);
     return PinnePage(
+      maxWidth: 1100,
       leading: back,
       headline: 'Review',
       headlineBold: 'schedule',
@@ -127,31 +129,9 @@ class _PlannerBodyState extends ConsumerState<_PlannerBody> {
     ];
     final theme = Theme.of(context);
 
-    return Column(
+    final calendar = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: TextButton.icon(
-                style: TextButton.styleFrom(alignment: Alignment.centerLeft),
-                onPressed: () => context.push(Routes.calendarConnections),
-                icon: const Icon(Icons.event_available_outlined, size: 18),
-                label: Text(
-                  state.writeCalendar == null
-                      ? 'Calendar connections'
-                      : 'Sessions go to ${state.writeCalendar!.name}',
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            IconButton(
-              tooltip: 'Planner settings',
-              onPressed: () => showPlannerSettings(context, state.preferences),
-              icon: const Icon(Icons.tune),
-            ),
-          ],
-        ),
         MonthCalendar(
           zone: zone,
           today: today,
@@ -165,7 +145,11 @@ class _PlannerBodyState extends ConsumerState<_PlannerBody> {
           const SizedBox(height: PinneSpacing.md),
           _Notice(text: notice, onClose: _controller.clearNotice),
         ],
-        const SizedBox(height: PinneSpacing.lg),
+      ],
+    );
+    final agenda = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         Text(longDate(selected), style: theme.textTheme.titleMedium),
         const SizedBox(height: PinneSpacing.sm),
         if (onDay.isEmpty)
@@ -212,6 +196,47 @@ class _PlannerBodyState extends ConsumerState<_PlannerBody> {
                 ? null
                 : () => _run(() => _controller.exportIcs(state.sessions)),
           ),
+      ],
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextButton.icon(
+                style: TextButton.styleFrom(alignment: Alignment.centerLeft),
+                onPressed: () => context.push(Routes.calendarConnections),
+                icon: const Icon(Icons.event_available_outlined, size: 18),
+                label: Text(
+                  state.writeCalendar == null
+                      ? 'Calendar connections'
+                      : 'Sessions go to ${state.writeCalendar!.name}',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Planner settings',
+              onPressed: () => showPlannerSettings(context, state.preferences),
+              icon: const Icon(Icons.tune),
+            ),
+          ],
+        ),
+        if (PinneBreakpoints.of(context).isExpanded)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 6, child: calendar),
+              const SizedBox(width: PinneSpacing.xxl),
+              Expanded(flex: 5, child: agenda),
+            ],
+          )
+        else ...[
+          calendar,
+          const SizedBox(height: PinneSpacing.lg),
+          agenda,
+        ],
       ],
     );
   }

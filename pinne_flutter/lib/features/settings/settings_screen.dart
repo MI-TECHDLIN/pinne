@@ -22,6 +22,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PinnePage(
+      maxWidth: 760,
       headline: 'Settings',
       subtitle: 'Reminders, AI and privacy controls will live here.',
       children: [
