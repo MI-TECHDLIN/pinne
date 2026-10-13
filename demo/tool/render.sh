@@ -4,7 +4,7 @@
 #   demo/tool/render.sh                 every scene, then the final MP4
 #   demo/tool/render.sh --preview       PNG stills every 0.5 s, no video
 #   demo/tool/render.sh 05_today        one scene (a test-name regex)
-#   demo/tool/render.sh --assemble [--voiceover FILE] [--bed]
+#   demo/tool/render.sh --assemble [--voiceover FILE] [--cues T,...] [--no-bed]
 #                                       only re-join the rendered segments
 #
 # Output goes to $FILM_OUT (default demo/out, git-ignored).

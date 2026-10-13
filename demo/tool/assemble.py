@@ -17,7 +17,8 @@ must be seen. Each paragraph starts as its scene fades in. pinne-demo.mp4
 then carries the narration, loudness-normalised, over the music ducked low
 under it (--no-bed: no music), and pinne-demo-silent.mp4 the same cut with
 the music only. --cues gives the voiceover times (seconds) where scenes 2
-to 9 begin, if the detected ones are wrong. The film never reaches 2:00.
+to 9 begin, if the detected ones are wrong. The film never reaches 2:00: a
+narration too long for that is sped up by up to 1.2x first.
 """
 
 import argparse
@@ -34,6 +35,8 @@ LIMIT = 119.0
 LEAD = 0.3
 # The closing card holds this long after the last words.
 CLOSE_HOLD = 2.5
+# The most a long narration is sped up to fit.
+MAX_TEMPO = 1.2
 TOOL = pathlib.Path(__file__).resolve().parent
 NARRATION = TOOL.parent / "narration.txt"
 
@@ -117,6 +120,7 @@ def main():
     rendered = [duration(ffmpeg, s) for s in segments]
 
     voice = pathlib.Path(args.voiceover) if args.voiceover else None
+    recording, tempo = voice, 1.0
     if voice is not None and not voice.is_file():
         sys.exit(f"voiceover not found: {voice}")
 
@@ -127,6 +131,17 @@ def main():
         last = SCENES[-1][1]
     else:
         spoken = duration(ffmpeg, voice)
+        room = LIMIT - CLOSE_HOLD - 1.5
+        if spoken > room and not args.cues:
+            # A slow read is sped up a little, as ElevenLabs' Speed would.
+            tempo = spoken / room
+            if tempo > MAX_TEMPO:
+                sys.exit(f"voiceover runs {spoken:.1f} s; even at {MAX_TEMPO}x it would not fit in {LIMIT} s")
+            faster = out / "voiceover-fitted.wav"
+            subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-i", str(voice),
+                            "-af", f"atempo={tempo:.4f}", str(faster)], check=True)
+            print(f"voiceover sped up {tempo:.3f}x to fit", file=sys.stderr)
+            voice, spoken = faster, duration(ffmpeg, faster)
         cues = ([float(c) for c in args.cues.split(",")] if args.cues
                 else scene_cues(ffmpeg, voice, spoken))
         if len(cues) != len(SCENES) - 1 or cues != sorted(cues):
@@ -153,7 +168,7 @@ def main():
     for i, (seg, want, have) in enumerate(zip(segments, used, rendered)):
         inputs += ["-i", str(seg)]
         pad = f"tpad=stop_mode=clone:stop_duration={want - have + 0.1:.3f}," if want > have - 0.02 else ""
-        chain.append(f"[{i}:v]{pad}trim=0:{want:.3f},setpts=PTS-STARTPTS[s{i}]")
+        chain.append(f"[{i}:v]{pad}trim=0:{want:.3f},setpts=PTS-STARTPTS,fps=30[s{i}]")
     last_label, offset = "[s0]", 0.0
     for i in range(1, len(segments)):
         offset += slots[i - 1]
@@ -205,7 +220,9 @@ def main():
                 ["-i", str(voice), "-i", str(music)], final)
         mux("[1:a]anull[a]", ["-i", str(music)], silent)
     picture.unlink()
-    report = {"seconds": round(length, 2), "voiceover": str(voice) if voice else None,
+    (out / "voiceover-fitted.wav").unlink(missing_ok=True)
+    report = {"seconds": round(length, 2), "voiceover": str(recording) if recording else None,
+              "voice_tempo": round(tempo, 3),
               "voice_cues": cues,
               "scenes": [{"scene": name, "starts": round(sum(slots[:i]), 2), "seconds": round(u, 2)}
                          for i, ((name, *_), u) in enumerate(zip(SCENES, used))]}
