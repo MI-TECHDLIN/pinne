@@ -67,11 +67,11 @@ BLOCKS = [(i, para, at) for i, (_, _, blocks) in enumerate(SCENES) for para, at 
 
 
 def run(args, **kw):
-    return subprocess.run(args, check=True, **kw)
+    return subprocess.run(args, check=True, stdin=subprocess.DEVNULL, **kw)
 
 
 def duration(ffmpeg, path):
-    probe = subprocess.run([ffmpeg, "-i", str(path)], capture_output=True, text=True).stderr
+    probe = subprocess.run([ffmpeg, "-i", str(path)], capture_output=True, text=True, stdin=subprocess.DEVNULL).stderr
     stamp = probe.split("Duration: ")[1].split(",")[0]
     h, m, s = stamp.split(":")
     return int(h) * 3600 + int(m) * 60 + float(s)
@@ -79,7 +79,7 @@ def duration(ffmpeg, path):
 
 def silences(ffmpeg, path):
     log = subprocess.run([ffmpeg, "-i", str(path), "-af", "silencedetect=noise=-40dB:d=0.2",
-                          "-f", "null", "-"], capture_output=True, text=True).stderr
+                          "-f", "null", "-"], capture_output=True, text=True, stdin=subprocess.DEVNULL).stderr
     starts = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", log)]
     ends = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", log)]
     return list(zip(starts, ends))
@@ -89,7 +89,7 @@ def loudness(ffmpeg, path):
     """Integrated loudness, loudness range and true peak of a file."""
     log = subprocess.run([ffmpeg, "-hide_banner", "-i", str(path), "-af",
                           "ebur128=peak=true", "-f", "null", "-"],
-                         capture_output=True, text=True).stderr
+                         capture_output=True, text=True, stdin=subprocess.DEVNULL).stderr
     summary = log[log.rindex("Summary:"):]
     return {
         "lufs": float(re.search(r"I:\s+(-?[\d.]+) LUFS", summary).group(1)),
@@ -231,7 +231,7 @@ def main():
             if tempo > MAX_TEMPO:
                 sys.exit(f"voiceover runs {spoken:.1f} s; even at {MAX_TEMPO}x it would not fit in {LIMIT} s")
             faster = out / "voiceover-fitted.wav"
-            run([ffmpeg, "-y", "-loglevel", "error", "-i", str(voice),
+            run([ffmpeg, "-nostdin", "-y", "-loglevel", "error", "-i", str(voice),
                  "-af", f"atempo={tempo:.4f}", str(faster)])
             print(f"voiceover sped up {tempo:.3f}x to fit", file=sys.stderr)
             voice, spoken = faster, duration(ffmpeg, faster)
@@ -257,9 +257,9 @@ def main():
     chain.append(f"{last_label}fade=t=in:st=0:d=0.4,fade=t=out:st={length - 0.6:.3f}:d=0.6,format=yuv420p[v]")
 
     picture = out / "picture.mp4"
-    video = ["-c:v", "libx264", "-preset", "slow", "-crf", "17", "-r", "30",
+    video = ["-c:v", "libx264", "-preset", "slow", "-crf", "17", "-r", "30", "-threads", "2",
              "-pix_fmt", "yuv420p", "-movflags", "+faststart"]
-    run([ffmpeg, "-y", "-loglevel", "error", *inputs,
+    run([ffmpeg, "-nostdin", "-y", "-loglevel", "error", *inputs,
          "-filter_complex", ";".join(chain), "-map", "[v]", *video, str(picture)])
 
     # Music, lifted for the Serverpod scene and resolving as the close
@@ -275,20 +275,20 @@ def main():
     bed_gain = BED - loudness(ffmpeg, music)["lufs"]
 
     def render_audio(graph, extra, target):
-        run([ffmpeg, "-y", "-loglevel", "error", *extra, "-filter_complex", graph,
+        run([ffmpeg, "-nostdin", "-y", "-loglevel", "error", *extra, "-filter_complex", graph,
              "-map", "[a]", "-ar", "48000", "-c:a", "pcm_s24le", "-t", f"{length:.3f}", str(target)])
 
     def finish(mix, lufs, target):
         """Two-pass loudness normalisation to [lufs], then mux."""
         first = subprocess.run([ffmpeg, "-hide_banner", "-i", str(mix), "-af",
                                 f"loudnorm=I={lufs}:TP=-1.5:LRA=11:print_format=json",
-                                "-f", "null", "-"], capture_output=True, text=True).stderr
+                                "-f", "null", "-"], capture_output=True, text=True, stdin=subprocess.DEVNULL).stderr
         m = json.loads(first[first.rindex("{"):first.rindex("}") + 1])
         norm = (f"loudnorm=I={lufs}:TP=-1.5:LRA=11:measured_I={m['input_i']}:"
                 f"measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}:"
                 f"measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true,"
                 f"afade=t=out:st={length - 1.2:.3f}:d=1.2")
-        run([ffmpeg, "-y", "-loglevel", "error", "-i", str(picture), "-i", str(mix),
+        run([ffmpeg, "-nostdin", "-y", "-loglevel", "error", "-i", str(picture), "-i", str(mix),
              "-af", norm, "-map", "0:v", "-map", "1:a", "-c:v", "copy",
              "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-t", f"{length:.3f}", str(target)])
 
