@@ -66,6 +66,8 @@ dev_dependencies:
   flutter_native_splash: ^2.4.8
   flutter_test:
     sdk: flutter
+  # MockClient feeds recorded server answers to the generated client.
+  http: ^1.6.0
   image: ^4.10.1
 
 dependency_overrides:
