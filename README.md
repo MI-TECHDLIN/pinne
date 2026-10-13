@@ -68,7 +68,7 @@ flowchart LR
   FC -->|"oEmbed / Open Graph<br/>SSRF-guarded fetcher"| Web["YouTube · X · TikTok · web pages"]
   FC -->|"organizing suggestions"| Groq["Groq gpt-oss-20b"]
   Groq -.->|"unavailable or off"| Rules["Deterministic rules"]
-  API -->|"verification codes"| Mail["Gmail SMTP"]
+  API -->|"verification codes"| Mail["SMTP, else Serverpod Cloud email"]
 ```
 
 Link previews and the digest scheduler need durable future calls, which the
@@ -219,13 +219,17 @@ the limitation until an audited merge of all owned Pinne tables is built.
 
 Email/password sign-in remains available and unchanged. In development and
 tests, registration and password-reset codes are printed in the server console.
-For staging or production, configure any SMTP server in the git-ignored
-`pinne_server/config/passwords.yaml` (`smtpHost`, `smtpPort`, optional
-`smtpUsername`/`smtpPassword`, `smtpFromEmail`, `smtpFromName`, `smtpSsl`) or
-with the matching `PINNE_SMTP_*` environment variables. No email vendor is
-required. If SMTP is absent outside development, the server logs a warning,
-rejects code requests instead of silently discarding them, and the app points
-new users to guest access.
+For staging or production, codes go through SMTP when it is configured in the
+git-ignored `pinne_server/config/passwords.yaml` (`smtpHost`, `smtpPort`,
+optional `smtpUsername`/`smtpPassword`, `smtpFromEmail`, `smtpFromName`,
+`smtpSsl`) or the matching `PINNE_SMTP_*` environment variables, and otherwise
+(or when SMTP fails) through the Serverpod Cloud email service, whose
+`scloudAuthEmailKey` Serverpod Cloud sets on deploy. Serverpod Cloud could not
+reach Gmail SMTP in production, so there the Cloud service is the working
+route. Each failed route is logged as `ERROR: Email delivery: ...` without the
+code or secrets. With no route at all the server logs a warning, rejects code
+requests instead of silently discarding them, and the app points new users to
+guest access.
 
 To create or verify the empty judge demo account idempotently, set
 `demoAccountEmail` and `demoAccountPassword` in the active secrets section (or
