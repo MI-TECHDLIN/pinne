@@ -379,6 +379,9 @@ class _MenuFilter<T> extends StatelessWidget {
         PopupMenuItem<T?>(value: value, child: Text(display(value))),
     ],
     child: Chip(
+      labelStyle: TextStyle(
+        color: selected == null ? context.pinne.text : context.pinne.onViolet,
+      ),
       side: BorderSide(
         color: selected == null ? context.pinne.line : context.pinne.violet,
       ),
@@ -390,7 +393,13 @@ class _MenuFilter<T> extends StatelessWidget {
         children: [
           Text(label),
           const SizedBox(width: PinneSpacing.xs),
-          const Icon(Icons.expand_more_rounded, size: 16),
+          Icon(
+            Icons.expand_more_rounded,
+            size: 16,
+            color: selected == null
+                ? context.pinne.text
+                : context.pinne.onViolet,
+          ),
         ],
       ),
     ),

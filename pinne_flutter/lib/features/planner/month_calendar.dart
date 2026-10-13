@@ -160,7 +160,7 @@ class _DayCell extends StatelessWidget {
       if (proposed > 0)
         proposed == 1 ? '1 session proposed' : '$proposed sessions proposed',
     ];
-    final text = isSelected ? context.pinne.ink : context.pinne.text;
+    final text = isSelected ? context.pinne.selectionText : context.pinne.text;
     return Semantics(
       button: true,
       selected: isSelected,
@@ -184,7 +184,7 @@ class _DayCell extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected ? context.pinne.lilac : null,
+                    color: isSelected ? context.pinne.selectionFill : null,
                     border: isToday && !isSelected
                         ? Border.all(color: context.pinne.muted)
                         : null,

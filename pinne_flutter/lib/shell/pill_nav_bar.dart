@@ -59,14 +59,19 @@ class PillNavBar extends StatelessWidget {
                 height: height,
                 padding: const EdgeInsets.all(_inset),
                 decoration: BoxDecoration(
-                  color: const Color(0xD90A0716),
+                  color: context.pinne.navFill,
                   borderRadius: BorderRadius.circular(PinneRadii.chip),
                   border: Border.all(color: context.pinne.line),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0xAA000000),
-                      blurRadius: 30,
-                      offset: Offset(0, 10),
+                      color: context.pinne.shadow,
+                      blurRadius:
+                          Theme.of(context).brightness == Brightness.light
+                          ? 18
+                          : 30,
+                      offset: Theme.of(context).brightness == Brightness.light
+                          ? const Offset(0, 6)
+                          : const Offset(0, 10),
                     ),
                   ],
                 ),
@@ -80,10 +85,10 @@ class PillNavBar extends StatelessWidget {
                           ? Duration.zero
                           : PinneMotionDurations.standard,
                       curve: PinneMotionCurves.spring,
-                      child: const DecoratedBox(
-                        key: ValueKey('pill-nav-selected-indicator'),
+                      child: DecoratedBox(
+                        key: const ValueKey('pill-nav-selected-indicator'),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.pinne.navSelected,
                           shape: BoxShape.circle,
                         ),
                         child: SizedBox.square(dimension: _indicatorExtent),
@@ -125,6 +130,7 @@ class _PillNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final light = Theme.of(context).brightness == Brightness.light;
     return Semantics(
       button: true,
       selected: selected,
@@ -145,7 +151,11 @@ class _PillNavItem extends StatelessWidget {
                   'pill-nav-icon-${destination.label.toLowerCase()}',
                 ),
                 size: 21,
-                color: selected ? context.pinne.ink : context.pinne.muted,
+                color: selected
+                    ? light
+                          ? context.pinne.onViolet
+                          : context.pinne.ink
+                    : context.pinne.muted,
               ),
             ),
           ),

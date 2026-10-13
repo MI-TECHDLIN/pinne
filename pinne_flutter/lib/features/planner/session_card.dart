@@ -70,7 +70,7 @@ class SessionCard extends StatelessWidget {
             : LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [context.pinne.sky, context.pinne.lilac],
+                colors: [context.pinne.sky, context.pinne.lilacTile],
               ),
         color: proposed ? context.pinne.card : null,
         border: proposed ? Border.all(color: context.pinne.lilac) : null,

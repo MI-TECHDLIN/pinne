@@ -163,7 +163,7 @@ class _AccountBadge extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: context.pinne.text,
+            color: context.pinne.onViolet,
             fontWeight: FontWeight.w800,
             letterSpacing: 1,
           ),

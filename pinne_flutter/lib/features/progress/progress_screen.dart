@@ -222,7 +222,7 @@ List<ProgressCardData> progressCards(
                 'Each save counts once.'
           : 'Each save counts once, however often you return.',
       background: palette.violet,
-      foreground: palette.text,
+      foreground: palette.onViolet,
     ),
     ProgressCardData(
       id: 'saved',

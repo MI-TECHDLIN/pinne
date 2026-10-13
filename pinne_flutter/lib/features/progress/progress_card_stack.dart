@@ -464,9 +464,11 @@ class ProgressCardFace extends StatelessWidget {
         color: card.background,
         borderRadius: BorderRadius.circular(28),
         border: dark ? Border.all(color: context.pinne.line) : null,
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x66000000),
+            color: Theme.of(context).brightness == Brightness.light
+                ? context.pinne.shadow
+                : const Color(0x66000000),
             blurRadius: 26,
             offset: Offset(0, 14),
           ),

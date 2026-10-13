@@ -86,9 +86,10 @@ class _ExampleSavesCardState extends ConsumerState<ExampleSavesCard> {
                   color: context.pinne.violet,
                   borderRadius: BorderRadius.circular(PinneRadii.chip),
                 ),
-                child: const Text(
+                child: Text(
                   'EXAMPLE',
                   style: TextStyle(
+                    color: context.pinne.onViolet,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: .8,
