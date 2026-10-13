@@ -56,6 +56,9 @@ class Film {
   Film(this.tester, this.name);
 
   static const fps = 30;
+
+  /// Seconds filmed past each scene's planned end (see tool/assemble.py).
+  static const tail = 1.5;
   static const size = Size(1920, 1080);
   static const preview = bool.fromEnvironment('FILM_PREVIEW');
   static const ffmpeg = String.fromEnvironment('FILM_FFMPEG');

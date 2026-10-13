@@ -129,7 +129,7 @@ class HookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AtTime(
     builder: (context, t, _) {
-      final away = ramp(t, 4.3, 1.0, Curves.easeInOutCubic);
+      final away = ramp(t, 5.0, 1.0, Curves.easeInOutCubic);
       final heap = Stack(
         children: [
           for (final tile in _tiles)
@@ -157,7 +157,7 @@ class HookCard extends StatelessWidget {
             right: 0,
             top: 150,
             child: Opacity(
-              opacity: 1 - ramp(t, 4.2, 0.5),
+              opacity: 1 - ramp(t, 4.9, 0.5),
               child: Column(
                 children: [
                   fadeRise(
@@ -168,7 +168,7 @@ class HookCard extends StatelessWidget {
                   const SizedBox(height: 14),
                   fadeRise(
                     t,
-                    1.9,
+                    2.6,
                     Text(
                       'And never come back to it.',
                       style: Words.light(88).copyWith(color: PinneColors.lilac),
@@ -178,7 +178,7 @@ class HookCard extends StatelessWidget {
               ),
             ),
           ),
-          if (t > 4.6) _reveal(t),
+          if (t > 5.3) _reveal(t),
         ],
       );
     },
@@ -222,9 +222,9 @@ class HookCard extends StatelessWidget {
   /// slides in with the real onboarding.
   Widget _reveal(double t) {
     const x = 510.0;
-    final p = ramp(t, 4.7, 1.1, Curves.easeOutBack);
-    final glow = ramp(t, 4.6, 1.4);
-    final float = math.sin((t - 4.6) * 1.6) * 8;
+    final p = ramp(t, 5.4, 1.1, Curves.easeOutBack);
+    final glow = ramp(t, 5.3, 1.4);
+    final float = math.sin((t - 5.3) * 1.6) * 8;
     return Stack(
       children: [
         Positioned(
@@ -249,7 +249,7 @@ class HookCard extends StatelessWidget {
           width: 320,
           height: 400,
           child: Opacity(
-            opacity: ramp(t, 4.7, 0.5),
+            opacity: ramp(t, 5.4, 0.5),
             child: Transform.scale(
               scale: 0.6 + 0.4 * p,
               child: Image(image: spiritArt('welcome'), fit: BoxFit.contain),
@@ -264,7 +264,7 @@ class HookCard extends StatelessWidget {
             children: [
               fadeRise(
                 t,
-                5.4,
+                6.1,
                 Text(
                   'Pinne',
                   style: TextStyle(
@@ -280,17 +280,40 @@ class HookCard extends StatelessWidget {
               const SizedBox(height: 24),
               fadeRise(
                 t,
-                6.0,
+                6.7,
                 Text(
                   'Save it. Come back to it.',
                   style: Words.light(54).copyWith(color: PinneColors.lilac),
                 ),
               ),
               const SizedBox(height: 40),
-              fadeRise(
-                t,
-                8.4,
-                Text('Try it without an account.', style: Words.body(32)),
+              // Sign-in, then the first-visit tour.
+              SizedBox(
+                height: 46,
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Opacity(
+                      opacity: 1 - ramp(t, 12.6, 0.3),
+                      child: fadeRise(
+                        t,
+                        9.4,
+                        Text(
+                          'Try it without an account.',
+                          style: Words.body(32),
+                        ),
+                      ),
+                    ),
+                    fadeRise(
+                      t,
+                      12.9,
+                      Text(
+                        'A short tour shows you around.',
+                        style: Words.body(32),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -309,26 +332,28 @@ class _Row {
   final String detail;
 }
 
+// In the order the narration names them.
 const _serverRows = [
   _Row(
-    Icons.lock_person_rounded,
-    'Owner-scoped endpoints',
-    'Owner from the session, never the client. A foreign id is a missing id.',
+    Icons.code_rounded,
+    'A typed Dart backend',
+    'Models in .spy.yaml; the client the app calls is generated from them.',
   ),
   _Row(
     Icons.storage_rounded,
-    'Postgres models and migrations',
-    'Items, reviews, plans and progress as .spy.yaml models, typed client generated.',
+    'PostgreSQL with migrations',
+    'Items, reviews, plans and progress. Migrations checked in.',
   ),
   _Row(
-    Icons.schedule_rounded,
-    'A review queue and future calls',
-    'Saves come due about 24 h later. Future calls run the hourly digest, AI organizing and link previews.',
+    Icons.lock_person_rounded,
+    'Owner-scoped endpoints',
+    'Owner from the session, never the client. Only ever your own data.',
   ),
   _Row(
-    Icons.shield_rounded,
-    'Safe link-preview fetcher',
-    'Checks every address before fetching. No cookies, no credentials.',
+    Icons.bolt_rounded,
+    'An AI pipeline that never makes you wait',
+    'Saves land on the phone first. Organizing runs as the outbox syncs and '
+        'falls back to rules if the AI fails.',
   ),
   _Row(
     Icons.person_rounded,
@@ -336,6 +361,9 @@ const _serverRows = [
     'Try it as a guest, or keep an email account.',
   ),
 ];
+
+/// When each server row appears, in step with the narration.
+const _rowTimes = [3.0, 4.6, 6.2, 8.2, 10.4];
 
 class ServerpodCard extends StatelessWidget {
   const ServerpodCard({super.key});
@@ -398,13 +426,13 @@ class ServerpodCard extends StatelessWidget {
           width: 330,
           child: fadeRise(
             t,
-            2.0,
+            4.4,
             _SideBox(
               icon: Icons.dns_rounded,
               title: 'PostgreSQL',
               lines: const [
                 'Every owned row filtered by owner',
-                'Migrations checked in',
+                'Managed by Serverpod Cloud',
               ],
               color: PinneColors.mint,
             ),
@@ -412,15 +440,31 @@ class ServerpodCard extends StatelessWidget {
         ),
         Positioned(
           left: 130,
-          top: 880,
+          top: 870,
           right: 130,
           child: fadeRise(
             t,
-            5.0,
-            Text(
-              'Set up for Serverpod Cloud: managed Postgres, automatic '
-              'migrations and durable future calls.',
-              style: Words.body(26).copyWith(color: PinneColors.lilac),
+            12.0,
+            Row(
+              children: [
+                const Icon(
+                  Icons.cloud_done_rounded,
+                  color: PinneColors.lilac,
+                  size: 40,
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  'Running on Serverpod Cloud',
+                  style: Words.title(40).copyWith(color: PinneColors.text),
+                ),
+                const SizedBox(width: 22),
+                Flexible(
+                  child: Text(
+                    'Managed PostgreSQL, migrations applied on every deploy.',
+                    style: Words.body(24).copyWith(color: PinneColors.lilac),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -430,12 +474,13 @@ class ServerpodCard extends StatelessWidget {
           width: 330,
           child: fadeRise(
             t,
-            2.4,
+            8.0,
             _SideBox(
               icon: Icons.auto_awesome_rounded,
-              title: 'Gemini API',
+              title: 'Groq (gpt-oss-20b)',
               lines: const [
-                'Structured JSON, validated',
+                'Strict JSON, validated',
+                'Rules if it is down',
                 'Opt-out in Settings',
               ],
               color: PinneColors.pink,
@@ -479,14 +524,14 @@ class _Wires extends CustomPainter {
     wire(
       const Offset(1360, 450),
       const Offset(1460, 450),
-      2.2,
+      4.8,
       PinneColors.mint,
       null,
     );
     wire(
       const Offset(1360, 760),
       const Offset(1460, 760),
-      2.6,
+      8.4,
       PinneColors.pink,
       null,
     );
@@ -527,7 +572,13 @@ class _SideBox extends StatelessWidget {
               child: Icon(icon, color: PinneColors.ink, size: 27),
             ),
             const SizedBox(width: 14),
-            Text(title, style: Words.title(32)),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(title, style: Words.title(32)),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -566,7 +617,7 @@ class _ServerBox extends StatelessWidget {
         for (final (i, row) in _serverRows.indexed)
           fadeRise(
             t,
-            2.0 + i * 0.55,
+            _rowTimes[i],
             Padding(
               padding: const EdgeInsets.only(top: 16),
               child: Row(
