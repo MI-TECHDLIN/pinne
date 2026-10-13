@@ -213,8 +213,11 @@ class ReviewRateCard extends StatelessWidget {
                     marker: marker,
                     textDirection: Directionality.of(context),
                     palette: context.pinne,
+                    // The bubble is filled with `text`, so its label takes
+                    // the opposite surface colour in either theme. `ink`
+                    // equals `text` in Lavender Mist and vanished there.
                     labelStyle: theme.textTheme.labelLarge!.copyWith(
-                      color: context.pinne.ink,
+                      color: context.pinne.midnight,
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                     ),
@@ -365,7 +368,8 @@ class RateTrendPainter extends CustomPainter {
   bool shouldRepaint(RateTrendPainter oldDelegate) =>
       oldDelegate.days != days ||
       oldDelegate.marker != marker ||
-      oldDelegate.palette != palette;
+      oldDelegate.palette != palette ||
+      oldDelegate.labelStyle != labelStyle;
 }
 
 /// This week's goal as tall day tiles with check marks.
