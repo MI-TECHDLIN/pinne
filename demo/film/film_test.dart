@@ -18,22 +18,22 @@ void main() {
   captureScenes();
 
   shoot('01_hook', (film) async {
-    final app = FilmApp(firstRun: true, client: DemoClient(displayName: ''));
-    // The screen waits below the canvas while saves pile up, then rises in
-    // beside the name with the real onboarding.
+    final app = FilmApp(
+      firstRun: true,
+      onboarded: true,
+      client: DemoClient(displayName: ''),
+    );
+    // The screen waits below the canvas while saves pile up and the
+    // bookmarks comparison plays, then rises in beside the name with the
+    // real sign-in screen.
     final guide = film.guided(
       const Shot(Offset(206, 446), Offset(1350, 1700), 1),
     );
-    guide.camera.move(Shot.home(1350), start: 9.9, seconds: 1.1);
+    guide.camera.move(Shot.home(1350), start: 15.3, seconds: 1.1);
     await film.precache(spiritArt('welcome'));
     await film.open(Stage(extra: [HookCard()], screen: app.widget()));
     await settle(film.tester);
-    await film.until(12.9);
-    await guide.step(
-      key('onboarding-skip'),
-      'Skip the intro whenever you like',
-      zoom: 1.7,
-    );
+    await film.until(18.3);
     await guide.step(
       key('guest-sign-in-button'),
       'No account needed: try it as a guest',

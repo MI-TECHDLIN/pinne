@@ -193,6 +193,8 @@ void captureScenes() {
       hold: 2.2,
     );
     await film.until(guide.current!.end + 0.3);
+    // Back online: the outbox sends the save (shown in the next scene).
+    capture.comeOnline();
   });
 
   shoot('04_search', (film) async {

@@ -661,7 +661,7 @@ class CalloutLayer extends StatelessWidget {
               : target.left - _calloutGap - width;
           final edge = c.side == Side.right ? left : left + width;
           final dot = Offset(
-            c.side == Side.right ? target.right + 8 : target.left - 8,
+            c.side == Side.right ? target.right + 14 : target.left - 14,
             target.center.dy.clamp(target.top + 8, target.bottom - 8),
           );
           return Opacity(

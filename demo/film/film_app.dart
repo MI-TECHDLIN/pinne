@@ -47,6 +47,7 @@ class FilmApp {
     DemoProgressApi? progress,
     CaptureStore? store,
     bool firstRun = false,
+    bool onboarded = false,
     List<String> recentSearches = const [],
   }) : client = client ?? DemoClient(),
        capture = capture ?? DemoCaptureApi(),
@@ -60,7 +61,7 @@ class FilmApp {
         captureApiProvider.overrideWithValue(this.capture),
         signedInProvider.overrideWith(() => _SignedIn(!firstRun)),
         onboardingStoreProvider.overrideWithValue(
-          MemoryOnboardingStore(completed: !firstRun),
+          MemoryOnboardingStore(completed: !firstRun || onboarded),
         ),
         guestSignInActionProvider.overrideWithValue(() async {
           await Future<void>.delayed(const Duration(milliseconds: 500));

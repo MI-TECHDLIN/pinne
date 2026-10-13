@@ -129,7 +129,7 @@ class HookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AtTime(
     builder: (context, t, _) {
-      final away = ramp(t, 9.1, 1.0, Curves.easeInOutCubic);
+      final away = ramp(t, 8.9, 0.9, Curves.easeInOutCubic);
       final heap = Stack(
         children: [
           for (final tile in _tiles)
@@ -178,7 +178,8 @@ class HookCard extends StatelessWidget {
               ),
             ),
           ),
-          if (t > 9.6) _reveal(t),
+          if (t > 9.4 && t < 15.2) _compare(t),
+          if (t > 15.0) _reveal(t),
         ],
       );
     },
@@ -218,16 +219,143 @@ class HookCard extends StatelessWidget {
     );
   }
 
+  /// "Why not just use bookmarks?": the save button in each app against
+  /// Pinne, read in silence between the hook's lines. Sources in
+  /// demo/README.md.
+  Widget _compare(double t) {
+    final out = 1 - ramp(t, 14.7, 0.5, Curves.easeInCubic);
+    Widget row(
+      double at,
+      IconData icon,
+      Color color,
+      String text,
+      bool pinne,
+    ) => fadeRise(
+      t,
+      at,
+      Padding(
+        padding: const EdgeInsets.only(top: 22),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 34),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Text(
+                text,
+                style: Words.body(29).copyWith(
+                  color: pinne ? PinneColors.text : PinneColors.muted,
+                  height: 1.25,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      dy: 16,
+      span: 0.45,
+    );
+    Widget column(double at, String title, List<String> lines, bool pinne) =>
+        fadeRise(
+          t,
+          at,
+          GlassPanel(
+            tint: pinne ? const Color(0x337C5CFF) : PinneColors.glass,
+            padding: const EdgeInsets.fromLTRB(40, 34, 40, 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Words.title(44).copyWith(
+                    color: pinne ? PinneColors.text : PinneColors.muted,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                for (final (i, line) in lines.indexed)
+                  row(
+                    at + 0.35 + i * 0.28,
+                    pinne
+                        ? Icons.check_circle_rounded
+                        : Icons.remove_circle_outline,
+                    pinne ? PinneColors.mint : PinneColors.muted,
+                    line,
+                    pinne,
+                  ),
+              ],
+            ),
+          ),
+        );
+    return Opacity(
+      opacity: out,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 96,
+            child: Center(
+              child: fadeRise(
+                t,
+                9.6,
+                Text('Why not just use bookmarks?', style: Words.title(70)),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 170,
+            top: 250,
+            width: 760,
+            child: column(9.9, 'Saved in each app', const [
+              'Scattered across apps',
+              'No note on why you saved it',
+              'Never brought back to you',
+              'Saving feels like progress, but isn’t',
+            ], false),
+          ),
+          Positioned(
+            left: 990,
+            top: 250,
+            width: 760,
+            child: column(11.0, 'Pinne', const [
+              'One home for saves from every app',
+              'Your why, saved with it',
+              'Comes back at the right time',
+              'Honest progress: only reviews count',
+              'AI organizing that you control',
+            ], true),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 960,
+            child: Center(
+              child: fadeRise(
+                t,
+                12.8,
+                Text(
+                  'A browser study found people add bookmarks far faster '
+                  'than they delete them. Cockburn et al., 2003',
+                  style: Words.body(22).copyWith(color: PinneColors.lilac),
+                ),
+                dy: 10,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// The name and the Ribbon Spirit on the left, beside the app screen
   /// that rises in with the real onboarding. They make way for the tour.
   Widget _reveal(double t) =>
-      Opacity(opacity: 1 - ramp(t, 12.9, 0.5), child: _brand(t));
+      Opacity(opacity: 1 - ramp(t, 18.2, 0.5), child: _brand(t));
 
   Widget _brand(double t) {
     const x = 510.0;
-    final p = ramp(t, 9.8, 1.1, Curves.easeOutBack);
-    final glow = ramp(t, 9.7, 1.4);
-    final float = math.sin((t - 9.7) * 1.6) * 8;
+    final p = ramp(t, 15.2, 1.1, Curves.easeOutBack);
+    final glow = ramp(t, 15.1, 1.4);
+    final float = math.sin((t - 15.1) * 1.6) * 8;
     return Stack(
       children: [
         Positioned(
@@ -252,7 +380,7 @@ class HookCard extends StatelessWidget {
           width: 320,
           height: 400,
           child: Opacity(
-            opacity: ramp(t, 9.8, 0.5),
+            opacity: ramp(t, 15.2, 0.5),
             child: Transform.scale(
               scale: 0.6 + 0.4 * p,
               child: Image(image: spiritArt('welcome'), fit: BoxFit.contain),
@@ -267,7 +395,7 @@ class HookCard extends StatelessWidget {
             children: [
               fadeRise(
                 t,
-                10.3,
+                15.7,
                 Text(
                   'Pinne',
                   style: TextStyle(
@@ -283,7 +411,7 @@ class HookCard extends StatelessWidget {
               const SizedBox(height: 24),
               fadeRise(
                 t,
-                11.1,
+                16.5,
                 Text(
                   'Save it. Come back to it.',
                   style: Words.light(54).copyWith(color: PinneColors.lilac),
