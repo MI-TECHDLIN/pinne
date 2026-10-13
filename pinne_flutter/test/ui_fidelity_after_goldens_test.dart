@@ -74,6 +74,9 @@ void main() {
   }) => ProviderScope(
     overrides: [
       signedInProvider.overrideWith(_SignedOut.new),
+      greetingClockProvider.overrideWithValue(
+        () => DateTime(2026, 10, 7, 9),
+      ),
       greetingIndexPickerProvider.overrideWithValue((_) => 0),
       captureStoreProvider.overrideWithValue(
         CaptureStore(sqlite3.openInMemory()),

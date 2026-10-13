@@ -42,6 +42,9 @@ Widget _app(TourStore store) => ProviderScope(
     signedInProvider.overrideWith(_SignedOut.new),
     motionPreferenceProvider.overrideWith(_AlwaysReduced.new),
     tourStoreProvider.overrideWithValue(store),
+    greetingClockProvider.overrideWithValue(
+      () => DateTime(2026, 10, 7, 9),
+    ),
     greetingIndexPickerProvider.overrideWithValue((_) => 0),
   ],
   child: const PinneApp(),
@@ -265,6 +268,9 @@ void main() {
             CaptureStore(sqlite3.openInMemory()),
           ),
           tourStoreProvider.overrideWithValue(MemoryTourStore()),
+          greetingClockProvider.overrideWithValue(
+            () => DateTime(2026, 10, 7, 9),
+          ),
           greetingIndexPickerProvider.overrideWithValue((_) => 0),
           todayClockProvider.overrideWithValue(DateTime(2026, 10, 7, 17, 30)),
           profileProvider.overrideWith(
