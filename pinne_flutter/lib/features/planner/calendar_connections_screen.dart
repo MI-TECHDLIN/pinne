@@ -37,12 +37,6 @@ class CalendarConnectionsScreen extends ConsumerWidget {
             const SizedBox(height: PinneSpacing.md),
           ],
           _PhoneCard(state: value),
-          const SizedBox(height: PinneSpacing.md),
-          for (final route in value.routes)
-            if (route.route != CalendarRoute.androidDevice) ...[
-              _RouteCard(route: route),
-              const SizedBox(height: PinneSpacing.md),
-            ],
         ],
         AsyncError(:final error) => [
           PinneErrorCard(
@@ -65,10 +59,6 @@ class _CalendarConnectionsSkeleton extends StatelessWidget {
     key: ValueKey('calendar-connections-skeleton'),
     children: [
       PinneCardSkeleton(height: 156, label: 'Loading phone calendars'),
-      SizedBox(height: PinneSpacing.md),
-      PinneCardSkeleton(height: 116, label: 'Loading calendar connection'),
-      SizedBox(height: PinneSpacing.md),
-      PinneCardSkeleton(height: 116, label: 'Loading calendar connection'),
     ],
   );
 }
@@ -140,21 +130,19 @@ class _PhoneCard extends ConsumerWidget {
             for (final selection in phone.selections)
               _CalendarRow(
                 selection: selection,
-                onChanged: (conflicts, writes) => controller.setChoices(
-                  phone.connection.id!,
-                  [
-                    for (final s in phone.selections)
-                      CalendarSelectionChoice(
-                        selectionId: s.id!,
-                        useForConflicts: s.id == selection.id
-                            ? conflicts
-                            : s.useForConflicts,
-                        useForWrites: s.id == selection.id
-                            ? writes
-                            : (writes ? false : s.useForWrites),
-                      ),
-                  ],
-                ),
+                onChanged: (conflicts, writes) =>
+                    controller.setChoices(phone.connection.id!, [
+                      for (final s in phone.selections)
+                        CalendarSelectionChoice(
+                          selectionId: s.id!,
+                          useForConflicts: s.id == selection.id
+                              ? conflicts
+                              : s.useForConflicts,
+                          useForWrites: s.id == selection.id
+                              ? writes
+                              : (writes ? false : s.useForWrites),
+                        ),
+                    ]),
               ),
             const SizedBox(height: PinneSpacing.xs),
             Text(
@@ -221,78 +209,6 @@ class _CalendarRow extends StatelessWidget {
             const Divider(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _RouteCard extends StatelessWidget {
-  const _RouteCard({required this.route});
-
-  final CalendarRouteStatus route;
-
-  @override
-  Widget build(BuildContext context) {
-    final exportOnly = route.route == CalendarRoute.icsExport;
-    final tag = exportOnly
-        ? 'Export only'
-        : route.available
-        ? 'Available'
-        : 'Not configured';
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                exportOnly ? Icons.ios_share : Icons.cloud_outlined,
-                color: PinneColors.lilac,
-              ),
-              const SizedBox(width: PinneSpacing.sm),
-              Expanded(
-                child: Text(
-                  route.label,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: PinneColors.glass,
-                  borderRadius: BorderRadius.circular(PinneRadii.chip),
-                  border: Border.all(color: PinneColors.line),
-                ),
-                child: Text(
-                  tag,
-                  style: const TextStyle(
-                    color: PinneColors.lilac,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (route.limitation case final limitation?) ...[
-            const SizedBox(height: PinneSpacing.xs),
-            Text(
-              limitation,
-              style: const TextStyle(color: PinneColors.muted, fontSize: 13),
-            ),
-          ],
-          if (exportOnly)
-            const Padding(
-              padding: EdgeInsets.only(top: PinneSpacing.xs),
-              child: Text(
-                'Export from the Planner or a session card.',
-                style: TextStyle(color: PinneColors.muted, fontSize: 13),
-              ),
-            ),
-        ],
       ),
     );
   }

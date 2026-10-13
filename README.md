@@ -11,6 +11,9 @@ building the judge APK are covered in [docs/deploy.md](docs/deploy.md). AI
 organizing (Groq, with deterministic rules as the fallback) and its data terms
 are described in [docs/ai.md](docs/ai.md).
 
+**Project status:** Pinne started as a hackathon entry and is being built
+toward a polished public release.
+
 ## Layout
 
 | Path | What it is |
@@ -211,7 +214,6 @@ schedules them only after you accept. Code: `pinne_flutter/lib/features/planner/
 | Route | Busy times | Sessions | Notes |
 | --- | --- | --- | --- |
 | Android phone calendars | Read on the phone from the calendars you check | Written to the one calendar you choose | Uses [`device_calendar_plus`](https://pub.dev/packages/device_calendar_plus) 0.10.1 (MIT). Asks for `READ_CALENDAR` and `WRITE_CALENDAR` only when you tap *Allow calendar access*. |
-| Google Calendar | No | No | Reports "not configured" until `googleCalendarClientSecret` exists, and "not built yet" after. It never claims to have read a Google calendar. |
 | Calendar file (.ics) | No | You import the file | Export only: not live sync and not proof of free time. |
 
 How it stays honest:
@@ -288,6 +290,42 @@ FLUX.2 [klein] 4B (Apache-2.0). Prompts, seeds, the licence record and the
 AI-use disclosure for the submission are in
 [`docs/ai-art/README.md`](docs/ai-art/README.md). The animated spirit in the
 app is drawn in code (`docs/ribbon-spirit/`).
+
+## What's Next
+
+The hackathon is Pinne's first stage, not the intended finish line. The current
+priority is a stable, polished app for judging, focused on the features that
+work today. After that, the plan is to keep improving Pinne for real users and
+develop it toward a sustainable startup, without presenting roadmap items as
+features that already exist.
+
+Planned work includes:
+
+- **Google Calendar and Apple Calendar integrations.** Today the app exposes
+  only calendars available on the phone, while `.ics` export remains available
+  from the Planner. Direct Google and Apple connections will return when they
+  can be authenticated, synchronized, tested and described honestly end to
+  end.
+- **A stronger everyday experience.** Future improvements include broader
+  capture and review workflows, more useful organization and retrieval,
+  accessibility and reliability work, and continued refinement based on real
+  user feedback.
+- **Production hosting.** Link previews and the digest are disabled on the
+  current Serverpod Cloud Starter deployment because they need a hosting plan
+  with background jobs. A production deployment will restore those jobs with
+  appropriate monitoring, retry behavior and operational safeguards.
+- **Public mobile distribution.** A production-ready release is intended for
+  the Google Play Store and Apple App Store after store compliance, privacy,
+  security, observability and release processes are in place. There is no Mac
+  available for iOS development yet, so iOS builds will use a cloud macOS build
+  service or a Mac when that stage begins.
+- **Engineering for growth.** Scalability, maintainability, performance and
+  production readiness will guide the backend, mobile clients, data model and
+  operations as usage grows.
+
+These are directions rather than dated promises. The immediate goal remains a
+dependable hackathon build; public launch work follows only when each part is
+ready for real users.
 
 ## License
 

@@ -65,7 +65,6 @@ class PlannerState {
   const PlannerState({
     required this.deviceId,
     required this.preferences,
-    required this.routes,
     required this.connections,
     required this.access,
     required this.deviceSupported,
@@ -77,7 +76,6 @@ class PlannerState {
 
   final UuidValue deviceId;
   final PlannerPreferences preferences;
-  final List<CalendarRouteStatus> routes;
   final List<CalendarConnectionView> connections;
   final DeviceCalendarAccess access;
   final bool deviceSupported;
@@ -120,7 +118,6 @@ class PlannerState {
 
   PlannerState copyWith({
     PlannerPreferences? preferences,
-    List<CalendarRouteStatus>? routes,
     List<CalendarConnectionView>? connections,
     DeviceCalendarAccess? access,
     List<SessionView>? sessions,
@@ -130,7 +127,6 @@ class PlannerState {
   }) => PlannerState(
     deviceId: deviceId,
     preferences: preferences ?? this.preferences,
-    routes: routes ?? this.routes,
     connections: connections ?? this.connections,
     access: access ?? this.access,
     deviceSupported: deviceSupported,
@@ -184,7 +180,6 @@ class PlannerController extends AsyncNotifier<PlannerState> {
     final initial = PlannerState(
       deviceId: deviceId,
       preferences: prefs,
-      routes: await _api.routes(),
       connections: connections,
       access: access,
       deviceSupported: supported,

@@ -154,15 +154,16 @@ void main() {
     expect(server.exported.single, hasLength(1));
   });
 
-  testWidgets('calendar connections show routes honestly', (tester) async {
+  testWidgets('calendar connections show only phone calendars', (tester) async {
     await pump(tester, const CalendarConnectionsScreen());
     expect(find.text('Calendars on this phone'), findsOneWidget);
     expect(find.text('Access allowed'), findsOneWidget);
     expect(find.text('Work'), findsOneWidget);
     expect(find.text('Check for busy times'), findsNWidgets(2));
     expect(find.text('Sessions are added to Family.'), findsOneWidget);
-    expect(find.text('Not configured'), findsOneWidget);
-    expect(find.text('Export only'), findsOneWidget);
-    expect(find.textContaining('not proof of free time'), findsOneWidget);
+    expect(find.text('Google Calendar'), findsNothing);
+    expect(find.text('Apple Calendar'), findsNothing);
+    expect(find.text('Calendar file (.ics)'), findsNothing);
+    expect(find.text('Not configured'), findsNothing);
   });
 }

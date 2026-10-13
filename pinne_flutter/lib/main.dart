@@ -8,6 +8,7 @@ import 'features/capture/capture_providers.dart';
 import 'features/capture/open_capture_store.dart';
 import 'features/capture/share_entry.dart';
 import 'features/onboarding/onboarding_store.dart';
+import 'features/search/search_history.dart';
 import 'features/tour/tour_store.dart';
 import 'features/today/today_greeting.dart';
 
@@ -17,6 +18,7 @@ void main() async {
   final client = await createServerClient(serverUrl);
   final store = await openCaptureStore();
   final preferences = await SharedPreferences.getInstance();
+  final searchHistoryStore = SharedPreferencesSearchHistoryStore(preferences);
   store?.releaseStaleHolds();
   runApp(
     ProviderScope(
@@ -32,6 +34,11 @@ void main() async {
         ),
         greetingStoreProvider.overrideWithValue(
           SharedPreferencesGreetingStore(preferences),
+        ),
+        searchHistoryStoreProvider.overrideWithValue(searchHistoryStore),
+        signOutCleanupProvider.overrideWith(
+          (ref) =>
+              () => ref.read(searchHistoryProvider.notifier).clear(),
         ),
       ],
       child: const PinneApp(),
