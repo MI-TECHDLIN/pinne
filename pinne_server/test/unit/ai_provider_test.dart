@@ -6,6 +6,8 @@ import 'package:pinne_server/src/ai/ai_output_validator.dart';
 import 'package:pinne_server/src/ai/ai_organizing_endpoint.dart';
 import 'package:pinne_server/src/ai/ai_provider.dart';
 import 'package:pinne_server/src/ai/ai_provider_registry.dart';
+import 'package:pinne_server/src/ai/ai_provider_status.dart';
+import 'package:pinne_server/src/ai/ai_request.dart';
 import 'package:pinne_server/src/ai/fake_ai_provider.dart';
 import 'package:pinne_server/src/ai/gemini_provider.dart';
 import 'package:pinne_server/src/ai/groq_provider.dart';
@@ -89,13 +91,82 @@ void main() {
     );
   });
 
-  test('fallback summaries are always absent', () async {
+  test('fallback summaries are absent without saved text', () async {
     final result = await const NoAiProvider().organize(
       evidence: evidence,
       collections: const [],
     );
     expect(result.summary, isNull);
     expect(result.evidenceCoverage, AiEvidenceCoverage.metadataOnly);
+  });
+
+  test(
+    'rules always tag a link by its site and quote the description',
+    () async {
+      final result = await const NoAiProvider().organize(
+        evidence: const AiItemEvidence(
+          title: 'Layouts in Flutter',
+          sourcePlatform: 'web',
+          url: 'https://docs.flutter.dev/ui/layout',
+          description:
+              'Learn how the layout mechanism works. Widgets build UIs. '
+              'A third sentence is dropped.',
+          previewAvailable: true,
+        ),
+        collections: const [],
+      );
+      expect(result.tags, ['flutter']);
+      expect(
+        result.summary,
+        'Learn how the layout mechanism works. Widgets build UIs.',
+      );
+      expect(result.rationale, contains('quotes the saved text'));
+
+      final dart = await const NoAiProvider().organize(
+        evidence: const AiItemEvidence(
+          title: 'dart.dev/language/async',
+          sourcePlatform: 'unknown',
+          url: 'https://dart.dev/language/async',
+          intention: 'learn async for my python job',
+        ),
+        collections: const [],
+      );
+      expect(dart.tags, ['dart', 'python']);
+      expect(dart.summary, isNull);
+    },
+  );
+
+  test('rules site tags skip section hosts and country suffixes', () async {
+    Future<List<String>> tagsFor(String url) async =>
+        (await const NoAiProvider().organize(
+          evidence: AiItemEvidence(
+            title: 'Saved',
+            sourcePlatform: 'web',
+            url: url,
+          ),
+          collections: const [],
+        )).tags;
+
+    expect(await tagsFor('https://www.bbc.co.uk/news/1'), ['bbc']);
+    expect(await tagsFor('https://blog.example.com/post'), ['example']);
+    expect(await tagsFor('http://127.0.0.1/a'), isEmpty);
+    expect(await tagsFor('https://docs.github.com/x'), [
+      'development',
+      'github',
+    ]);
+  });
+
+  test('a note is summarized from its own text', () async {
+    final result = await const NoAiProvider().organize(
+      evidence: const AiItemEvidence(
+        title: 'Recipe idea',
+        sourcePlatform: 'note',
+        notes: 'Try the miso glaze on salmon. Bake 12 minutes.',
+      ),
+      collections: const [],
+    );
+    expect(result.tags, ['recipe']);
+    expect(result.summary, 'Try the miso glaze on salmon. Bake 12 minutes.');
   });
 
   test('preview evidence coverage is derived from supplied evidence', () async {
@@ -359,6 +430,114 @@ void main() {
     expect(result.provider, 'rules');
     expect(failures, ['Groq returned HTTP 401.']);
     expect(failures.single, isNot(contains('gsk_')));
+  });
+
+  test('Groq errors name the error code, never the message', () async {
+    Future<String> failureFor(String body) async {
+      final failures = <String>[];
+      await FallbackAiProvider(
+        primary: GroqProvider(
+          apiKey: 'gsk_secret-key',
+          httpClient: _FakeGroqHttpClient(
+            (uri, headers, sent, timeout) async =>
+                GroqHttpResponse(statusCode: 400, body: body),
+          ),
+        ),
+        fallback: const NoAiProvider(),
+        onPrimaryFailure: (error) => failures.add(describeAiFailure(error)),
+      ).organize(evidence: evidence, collections: const []);
+      return failures.single;
+    }
+
+    expect(
+      await failureFor(
+        jsonEncode({
+          'error': {
+            'message': 'Failed to validate JSON for Flutter layout',
+            'type': 'invalid_request_error',
+            'code': 'json_validate_failed',
+            'failed_generation': '{"tags": ["flutter"]}',
+          },
+        }),
+      ),
+      'Groq returned HTTP 400 (json_validate_failed).',
+    );
+    expect(
+      await failureFor('{"error":{"code":"has spaces: Flutter layout"}}'),
+      'Groq returned HTTP 400.',
+    );
+    expect(
+      await failureFor('<html>bad gateway</html>'),
+      'Groq returned HTTP 400.',
+    );
+  });
+
+  test('Groq output cut off at the token limit is reported', () async {
+    final failures = <String>[];
+    final client = _FakeGroqHttpClient((uri, headers, body, timeout) async {
+      return GroqHttpResponse(
+        statusCode: HttpStatus.ok,
+        body: jsonEncode({
+          'choices': [
+            {
+              'finish_reason': 'length',
+              'message': {'content': '{"collectionIds": ['},
+            },
+          ],
+        }),
+      );
+    });
+    await FallbackAiProvider(
+      primary: GroqProvider(apiKey: 'test-key', httpClient: client),
+      fallback: const NoAiProvider(),
+      onPrimaryFailure: (error) => failures.add(describeAiFailure(error)),
+    ).organize(evidence: evidence, collections: const []);
+    expect(failures, ['Groq output hit the token limit.']);
+  });
+
+  test('the shared schema uses only Groq strict-mode keywords', () {
+    final schema = jsonEncode(
+      AiRequest.schema(const [], previewAvailable: false),
+    );
+    expect(schema, isNot(contains('maxItems')));
+    expect(schema, isNot(contains('minItems')));
+  });
+
+  group('AI provider status', () {
+    tearDown(AiProviderStatus.resetForTest);
+
+    test('reports the configured provider and its last outcome', () {
+      final lines = <String>[];
+      AiProviderStatus.sink = lines.add;
+      expect(
+        AiProviderStatus.describe(configuredProvider: null),
+        'rules: no remote AI provider is configured.',
+      );
+      expect(
+        AiProviderStatus.describe(configuredProvider: 'groq'),
+        'groq: not called since this server started.',
+      );
+
+      AiProviderStatus.recordFailure('groq', 'Groq returned HTTP 401.');
+      expect(
+        AiProviderStatus.describe(configuredProvider: 'groq'),
+        allOf(
+          startsWith('groq: last call failed at '),
+          endsWith(': Groq returned HTTP 401.'),
+        ),
+      );
+      expect(lines, [
+        'AI organizing: groq failed, organized with rules instead: '
+            'Groq returned HTTP 401.',
+      ]);
+
+      AiProviderStatus.recordSuccess('groq');
+      expect(
+        AiProviderStatus.describe(configuredProvider: 'groq'),
+        startsWith('groq: last call succeeded at '),
+      );
+      expect(lines, hasLength(1));
+    });
   });
 
   test('AI failure descriptions name the class, not the payload', () {
