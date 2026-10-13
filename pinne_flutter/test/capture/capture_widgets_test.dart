@@ -660,6 +660,40 @@ void main() {
       await tester.pump();
     });
 
+    testWidgets('the celebration shows above a keyboard that is still up', (
+      tester,
+    ) async {
+      final phone = _phones.first;
+      _usePhone(tester, phone);
+      await tester.pumpWidget(_shellHost(store: store));
+      await tester.tap(find.byKey(const ValueKey('capture-entry')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('paste-content')),
+        'https://example.com/typed-save',
+      );
+      _showKeyboard(tester, phone);
+      await tester.pumpAndSettle();
+      final save = find.byKey(const ValueKey('paste-save'));
+      await tester.ensureVisible(save);
+      await tester.pumpAndSettle();
+      await tester.tap(save);
+      await tester.pump();
+      await tester.pump(saveCelebrationDuration * 0.5);
+
+      final card = tester.getRect(
+        find.byKey(const ValueKey('save-celebration-card')),
+      );
+      expect(card.top, greaterThanOrEqualTo(0));
+      expect(
+        card.bottom,
+        lessThanOrEqualTo(phone.size.height - phone.keyboard),
+      );
+
+      await tester.pump(saveCelebrationDuration);
+      await tester.pump();
+    });
+
     testWidgets('a repeat is acknowledged as already saved', (tester) async {
       store.save(parseCaptureInput('https://example.com/post?a=1'));
       await tester.pumpWidget(

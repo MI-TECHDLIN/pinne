@@ -46,3 +46,5 @@ offline saves. The Spirit hops in a burst of ribbon sparkles in the
 milestone confetti colours, never lime. It ignores taps and fades by itself;
 a quick second save replaces it. A repeat save only shows "Already in
 Pinne". Reduced motion shows the happy Spirit and a check without movement.
+It centres in the space the keyboard leaves, since a save from the "why"
+field keeps the keyboard up.

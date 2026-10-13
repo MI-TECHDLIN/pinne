@@ -87,112 +87,119 @@ class _SaveCelebrationState extends State<_SaveCelebration>
         child: Semantics(
           liveRegion: true,
           label: 'Saved',
-          child: SafeArea(
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                final progress = _controller.value;
-                final opacity = _fade(progress);
-                final entrance = Curves.easeOutBack.transform(
-                  (progress / 0.28).clamp(0, 1),
-                );
-                final settle = Curves.easeInOut.transform(
-                  ((progress - 0.28) / 0.34).clamp(0, 1),
-                );
-                final hop = _reduced
-                    ? 0.0
-                    : (-18 * math.sin(math.pi * settle)) -
-                          (8 * math.sin(math.pi * entrance));
-                final angle = _reduced
-                    ? 0.0
-                    : math.sin(progress * math.pi * 2.2) *
-                          0.045 *
-                          (1 - progress);
-                final scale = _reduced ? 1.0 : 0.82 + (0.18 * entrance);
-                return Opacity(
-                  opacity: opacity,
-                  child: Align(
-                    alignment: const Alignment(0, -0.12),
-                    child: Transform.translate(
-                      offset: Offset(0, hop),
-                      child: Transform.rotate(
-                        angle: angle,
-                        child: Transform.scale(scale: scale, child: child),
+          // Centre in what the keyboard leaves visible, which is still up
+          // after a save from the "why" field.
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(context).bottom,
+            ),
+            child: SafeArea(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  final progress = _controller.value;
+                  final opacity = _fade(progress);
+                  final entrance = Curves.easeOutBack.transform(
+                    (progress / 0.28).clamp(0, 1),
+                  );
+                  final settle = Curves.easeInOut.transform(
+                    ((progress - 0.28) / 0.34).clamp(0, 1),
+                  );
+                  final hop = _reduced
+                      ? 0.0
+                      : (-18 * math.sin(math.pi * settle)) -
+                            (8 * math.sin(math.pi * entrance));
+                  final angle = _reduced
+                      ? 0.0
+                      : math.sin(progress * math.pi * 2.2) *
+                            0.045 *
+                            (1 - progress);
+                  final scale = _reduced ? 1.0 : 0.82 + (0.18 * entrance);
+                  return Opacity(
+                    opacity: opacity,
+                    child: Align(
+                      alignment: const Alignment(0, -0.12),
+                      child: Transform.translate(
+                        offset: Offset(0, hop),
+                        child: Transform.rotate(
+                          angle: angle,
+                          child: Transform.scale(scale: scale, child: child),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-              child: SizedBox(
-                width: 300,
-                height: 300,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (!_reduced)
-                      Positioned.fill(
-                        child: RepaintBoundary(
-                          child: CustomPaint(
-                            key: const ValueKey('save-sparkles'),
-                            painter: _SaveSparklesPainter(_controller),
+                  );
+                },
+                child: SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (!_reduced)
+                        Positioned.fill(
+                          child: RepaintBoundary(
+                            child: CustomPaint(
+                              key: const ValueKey('save-sparkles'),
+                              painter: _SaveSparklesPainter(_controller),
+                            ),
                           ),
                         ),
-                      ),
-                    Container(
-                      key: const ValueKey('save-celebration-card'),
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [PinneColors.cardRaised, PinneColors.card],
-                        ),
-                        borderRadius: BorderRadius.circular(PinneRadii.card),
-                        border: Border.all(
-                          color: PinneColors.lilac.withValues(alpha: 0.4),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: PinneColors.violet.withValues(alpha: 0.3),
-                            blurRadius: 34,
-                            spreadRadius: 2,
+                      Container(
+                        key: const ValueKey('save-celebration-card'),
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [PinneColors.cardRaised, PinneColors.card],
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          RibbonSpirit(
-                            seed: widget.seed,
-                            palette: widget.palette,
-                            mood: _reduced
-                                ? RibbonMood.happy
-                                : RibbonMood.excited,
-                            size: 92,
-                            animate: !_reduced,
+                          borderRadius: BorderRadius.circular(PinneRadii.card),
+                          border: Border.all(
+                            color: PinneColors.lilac.withValues(alpha: 0.4),
                           ),
-                          const SizedBox(height: PinneSpacing.xs),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                size: 21,
-                                color: PinneColors.mint,
-                              ),
-                              const SizedBox(width: PinneSpacing.sm),
-                              Text(
-                                'Saved',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
+                          boxShadow: [
+                            BoxShadow(
+                              color: PinneColors.violet.withValues(alpha: 0.3),
+                              blurRadius: 34,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            RibbonSpirit(
+                              seed: widget.seed,
+                              palette: widget.palette,
+                              mood: _reduced
+                                  ? RibbonMood.happy
+                                  : RibbonMood.excited,
+                              size: 92,
+                              animate: !_reduced,
+                            ),
+                            const SizedBox(height: PinneSpacing.xs),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 21,
+                                  color: PinneColors.mint,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                const SizedBox(width: PinneSpacing.sm),
+                                Text(
+                                  'Saved',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
