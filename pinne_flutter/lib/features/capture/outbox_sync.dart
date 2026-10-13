@@ -10,6 +10,9 @@ import 'capture_store.dart';
 abstract interface class CaptureApi {
   Future<CaptureResult> capture(CaptureDraft draft);
 
+  /// Takes a synced item the user chose not to keep out of their library.
+  Future<void> remove(UuidValue itemId);
+
   /// Calls [onOnline] when the device regains a connection. Returns a
   /// function that stops listening.
   VoidCallback watchConnectivity(VoidCallback onOnline);
@@ -23,6 +26,9 @@ class ServerCaptureApi implements CaptureApi {
   @override
   Future<CaptureResult> capture(CaptureDraft draft) =>
       _client.item.capture(draft);
+
+  @override
+  Future<void> remove(UuidValue itemId) => _client.reviewQueue.archive(itemId);
 
   @override
   VoidCallback watchConnectivity(VoidCallback onOnline) {

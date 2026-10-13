@@ -74,7 +74,11 @@ void shareMain() async {
           SharedPreferencesThemePreferenceStore(preferences),
         ),
       ],
-      child: ShareApp(payload: payload, onDone: channel.finish),
+      child: ShareApp(
+        payload: payload,
+        onDone: channel.finish,
+        onToast: channel.toast,
+      ),
     ),
   );
 }
