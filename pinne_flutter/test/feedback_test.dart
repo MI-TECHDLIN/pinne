@@ -8,6 +8,7 @@ import 'package:pinne_flutter/ui/feedback/friendly_error.dart';
 import 'package:pinne_flutter/ui/feedback/toast.dart';
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart';
 
+import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 
 /// Stands in for the auth widgets' unexported `UserFacingException`.
@@ -136,15 +137,16 @@ void main() {
   group('error surfaces', () {
     setUpAll(loadGoldenFonts);
 
-    Widget host(Widget child) => MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: goldenTheme(),
-      home: Scaffold(
-        body: SafeArea(
-          child: Padding(padding: const EdgeInsets.all(16), child: child),
-        ),
-      ),
-    );
+    Widget host(Widget child, {Brightness brightness = Brightness.dark}) =>
+        MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: goldenTheme(brightness: brightness),
+          home: Scaffold(
+            body: SafeArea(
+              child: Padding(padding: const EdgeInsets.all(16), child: child),
+            ),
+          ),
+        );
 
     testWidgets('the error card explains and retries', (tester) async {
       var retried = 0;
@@ -304,6 +306,65 @@ void main() {
         find.byType(Scaffold),
         matchesGoldenFile('../../docs/errors/full-screen.png'),
       );
+    });
+
+    testWidgets('error cards, toasts and the full-screen state are readable '
+        'in Lavender Mist', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        host(
+          Builder(
+            builder: (context) => Column(
+              children: [
+                PinneErrorCard(
+                  error: const ServerpodClientNetworkException('down'),
+                  subject: 'your queue',
+                  onRetry: () {},
+                ),
+                const SizedBox(height: 16),
+                for (final kind in ToastKind.values) ...[
+                  PinneToastBody(
+                    message: 'A ${kind.name} toast.',
+                    kind: kind,
+                    actionLabel: 'Undo',
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                TextButton(
+                  onPressed: () => showPinneToast(
+                    context,
+                    'Counted as reviewed.',
+                    kind: ToastKind.success,
+                    actionLabel: 'Undo',
+                    onAction: () {},
+                  ),
+                  child: const Text('go'),
+                ),
+              ],
+            ),
+          ),
+          brightness: Brightness.light,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectReadableText(tester, reason: 'cards and toasts');
+      await tester.tap(find.text('go'));
+      await tester.pumpAndSettle();
+      await expectReadableText(tester, reason: 'live toast');
+
+      await tester.pumpWidget(
+        host(
+          PinneErrorState(
+            error: const ServerpodClientNetworkException('down'),
+            subject: 'your planner',
+            onRetry: () {},
+          ),
+          brightness: Brightness.light,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectReadableText(tester, reason: 'full-screen error');
     });
   });
 }
