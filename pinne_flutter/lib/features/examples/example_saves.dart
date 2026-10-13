@@ -164,7 +164,7 @@ class ExampleChip extends StatelessWidget {
     child: Text(
       'EXAMPLE',
       style: TextStyle(
-        color: dark ? context.pinne.ink : context.pinne.text,
+        color: dark ? context.pinne.ink : context.pinne.onViolet,
         fontSize: 9,
         fontWeight: FontWeight.w900,
         letterSpacing: .8,

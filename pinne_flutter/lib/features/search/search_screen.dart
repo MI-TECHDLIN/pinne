@@ -150,7 +150,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   SearchResultCard(
                     key: ValueKey('search-result-${data.results[i].item.id}'),
                     result: data.results[i],
-                    color: PinneColors
+                    color: context
+                        .pinne
                         .tilePalette[i % context.pinne.tilePalette.length],
                     onOpen: () => _open(data.results[i].item),
                   ),

@@ -67,7 +67,7 @@ class CaptureEntryTile extends StatelessWidget {
                   color: context.pinne.ink,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.add_rounded, color: context.pinne.text),
+                child: Icon(Icons.add_rounded, color: context.pinne.onViolet),
               ),
               const SizedBox(width: PinneSpacing.md),
               Expanded(
