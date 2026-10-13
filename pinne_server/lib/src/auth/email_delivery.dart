@@ -12,11 +12,16 @@ abstract final class EmailDelivery {
   /// Whether this server can deliver registration and password-reset codes.
   static bool get available => _available;
 
-  /// Loads optional SMTP settings and returns the email identity provider.
+  /// Loads the configured email routes and returns the email identity
+  /// provider.
   ///
   /// Development and tests deliberately keep codes in the server console.
-  /// Staging and production require SMTP; an unavailable sender fails fast so
-  /// no user is left waiting for a code that was discarded.
+  /// Staging and production send through SMTP when it is configured and fall
+  /// back to the Serverpod Cloud email service, whose `scloudAuthEmailKey`
+  /// Cloud sets on every deploy. Serverpod Cloud does not reliably allow
+  /// outbound SMTP, so on Cloud the fallback is what keeps sign-up working.
+  /// With no route at all the sender fails fast so no user is left waiting
+  /// for a code that was discarded.
   static EmailIdpConfig configure(Serverpod pod) {
     if (pod.runMode == ServerpodRunMode.development ||
         pod.runMode == ServerpodRunMode.test) {
@@ -46,10 +51,18 @@ abstract final class EmailDelivery {
     }
 
     final settings = SmtpSettings.maybeFromServerpod(pod);
-    if (settings == null) {
+    final cloudKey = SmtpSettings._configured(
+      pod.getPassword(CloudEmailCodeSender.passwordKey),
+    );
+    final routes = <AuthCodeSender>[
+      if (settings != null) SmtpCodeSender(settings),
+      if (cloudKey != null) CloudEmailCodeSender(token: cloudKey),
+    ];
+    if (routes.isEmpty) {
       _available = false;
       stderr.writeln(
-        'WARNING: SMTP is not configured; email registration and password '
+        'WARNING: No email route is configured (neither SMTP nor the '
+        'Serverpod Cloud email service); email registration and password '
         'reset are unavailable. Guest sign-in remains available.',
       );
       return EmailIdpConfigFromPasswords(
@@ -59,14 +72,17 @@ abstract final class EmailDelivery {
     }
 
     _available = true;
-    final sender = SmtpEmailSender(settings);
+    final delivery = AuthCodeDelivery(
+      routes,
+      secrets: [?settings?.password, ?cloudKey],
+    );
     stdout.writeln(
-      'Email delivery is enabled through SMTP at '
-      '${settings.host}:${settings.port}.',
+      'Email delivery is enabled through '
+      '${routes.map((route) => route.route).join(', then ')}.',
     );
     return EmailIdpConfigFromPasswords(
-      sendRegistrationVerificationCode: sender.sendRegistrationCode,
-      sendPasswordResetVerificationCode: sender.sendPasswordResetCode,
+      sendRegistrationVerificationCode: delivery.sendRegistrationCode,
+      sendPasswordResetVerificationCode: delivery.sendPasswordResetCode,
     );
   }
 
@@ -88,6 +104,182 @@ abstract final class EmailDelivery {
     required Transaction? transaction,
   }) => throw StateError(
     'Email delivery is not configured. Password reset is unavailable.',
+  );
+}
+
+/// Which verification email is being sent.
+enum AuthEmailKind {
+  registration('registration'),
+  passwordReset('password reset');
+
+  const AuthEmailKind(this.label);
+
+  final String label;
+}
+
+/// One way to get a verification code into an inbox.
+abstract interface class AuthCodeSender {
+  /// Names the route in logs, such as `SMTP smtp.gmail.com:587`. Never
+  /// contains a secret.
+  String get route;
+
+  /// Sends [code] to [email]. Throws when the email did not leave.
+  Future<void> send({
+    required String email,
+    required AuthEmailKind kind,
+    required String code,
+  });
+}
+
+/// Sends verification codes through the first route that works.
+///
+/// Every failed route is logged with its reason; the code and the configured
+/// secrets never appear in the log. A route that fails while a later one
+/// exists rests for [cooldown], so one blocked SMTP port slows down a single
+/// sign-up instead of every one. When no route works the endpoint answers
+/// with the auth package's own `unknown` reason, which the app explains,
+/// and the pending request is rolled back so the person can simply retry.
+class AuthCodeDelivery {
+  AuthCodeDelivery(
+    List<AuthCodeSender> routes, {
+    this.cooldown = const Duration(minutes: 30),
+    Iterable<String> secrets = const [],
+    DateTime Function()? now,
+    void Function(String line)? report,
+  }) : routes = List.unmodifiable(routes),
+       _secrets = secrets.where((secret) => secret.isNotEmpty).toList(),
+       _now = now ?? DateTime.now,
+       _report = report ?? stderr.writeln {
+    if (routes.isEmpty) throw ArgumentError.value(routes, 'routes');
+  }
+
+  final List<AuthCodeSender> routes;
+  final Duration cooldown;
+  final List<String> _secrets;
+  final DateTime Function() _now;
+  final void Function(String line) _report;
+  final Map<AuthCodeSender, DateTime> _restingUntil = {};
+
+  Future<void> sendRegistrationCode(
+    Session session, {
+    required String email,
+    required UuidValue accountRequestId,
+    required String verificationCode,
+    required Transaction? transaction,
+  }) async {
+    if (!await deliver(
+      email: email,
+      kind: AuthEmailKind.registration,
+      code: verificationCode,
+    )) {
+      throw EmailAccountRequestException(
+        reason: EmailAccountRequestExceptionReason.unknown,
+      );
+    }
+  }
+
+  Future<void> sendPasswordResetCode(
+    Session session, {
+    required String email,
+    required UuidValue passwordResetRequestId,
+    required String verificationCode,
+    required Transaction? transaction,
+  }) async {
+    if (!await deliver(
+      email: email,
+      kind: AuthEmailKind.passwordReset,
+      code: verificationCode,
+    )) {
+      throw EmailAccountPasswordResetException(
+        reason: EmailAccountPasswordResetExceptionReason.unknown,
+      );
+    }
+  }
+
+  /// Tries each route in order and returns whether one sent the email.
+  Future<bool> deliver({
+    required String email,
+    required AuthEmailKind kind,
+    required String code,
+  }) async {
+    final failed = <String>[];
+    for (final (index, sender) in routes.indexed) {
+      final hasFallback = index < routes.length - 1;
+      final restingUntil = _restingUntil[sender];
+      if (hasFallback &&
+          restingUntil != null &&
+          _now().isBefore(restingUntil)) {
+        continue;
+      }
+      try {
+        await sender.send(email: email, kind: kind, code: code);
+        _restingUntil.remove(sender);
+        if (failed.isNotEmpty) {
+          _report(
+            'Email delivery: sent the ${kind.label} code via ${sender.route} '
+            'after ${failed.join(', ')} failed.',
+          );
+        }
+        return true;
+      } catch (error) {
+        failed.add(sender.route);
+        if (hasFallback) _restingUntil[sender] = _now().add(cooldown);
+        _report(
+          'ERROR: Email delivery: could not send the ${kind.label} code via '
+          '${sender.route}: ${_redact('${error.runtimeType}: $error', code)}'
+          '${hasFallback ? ' Trying the next route; this one rests for '
+                    '${cooldown.inMinutes} minutes.' : ''}',
+        );
+      }
+    }
+    _report(
+      'ERROR: Email delivery: no route sent the ${kind.label} code '
+      '(${failed.isEmpty ? 'none tried' : 'tried ${failed.join(', ')}'}). '
+      'The person sees "We could not send your code".',
+    );
+    return false;
+  }
+
+  String _redact(String text, String code) {
+    var redacted = text;
+    for (final secret in [..._secrets, code]) {
+      redacted = redacted.replaceAll(secret, '<redacted>');
+    }
+    return redacted.replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+}
+
+/// Sends codes through the Serverpod Cloud transactional email service over
+/// HTTPS, using Serverpod's own email template.
+class CloudEmailCodeSender implements AuthCodeSender {
+  CloudEmailCodeSender({required this.token, ServerpodCloudEmailClient? client})
+    : client =
+          client ??
+          ServerpodCloudEmailClient(timeout: const Duration(seconds: 15));
+
+  /// The password Serverpod Cloud sets on deploy for this service.
+  static const passwordKey = 'scloudAuthEmailKey';
+
+  final String token;
+  final ServerpodCloudEmailClient client;
+
+  @override
+  String get route => 'the Serverpod Cloud email service';
+
+  @override
+  Future<void> send({
+    required String email,
+    required AuthEmailKind kind,
+    required String code,
+  }) => client.sendEmail(
+    token: token,
+    emailType: switch (kind) {
+      AuthEmailKind.registration => ServerpodCloudEmailType.signup,
+      AuthEmailKind.passwordReset => ServerpodCloudEmailType.lostpassword,
+    },
+    email: email,
+    projectName: 'Pinne',
+    authCode: code,
   );
 }
 
@@ -153,52 +345,44 @@ class SmtpSettings {
   }
 }
 
-class SmtpEmailSender {
-  SmtpEmailSender(this.settings)
-    : server = SmtpServer(
-        settings.host,
-        port: settings.port,
-        ssl: settings.ssl,
-        username: settings.username,
-        password: settings.password,
-      );
+/// Sends Pinne's branded code emails through an SMTP server.
+class SmtpCodeSender implements AuthCodeSender {
+  SmtpCodeSender(
+    this.settings, {
+    this.timeout = const Duration(seconds: 10),
+  }) : server = SmtpServer(
+         settings.host,
+         port: settings.port,
+         ssl: settings.ssl,
+         username: settings.username,
+         password: settings.password,
+       );
 
   final SmtpSettings settings;
   final SmtpServer server;
 
-  Future<void> sendRegistrationCode(
-    Session session, {
-    required String email,
-    required UuidValue accountRequestId,
-    required String verificationCode,
-    required Transaction? transaction,
-  }) {
-    final content = PinneAuthEmail.registration(verificationCode);
-    return _send(recipient: email, content: content);
-  }
+  /// Bounds the connection and each SMTP reply, so a blocked port fails over
+  /// quickly instead of holding the registration transaction open.
+  final Duration timeout;
 
-  Future<void> sendPasswordResetCode(
-    Session session, {
-    required String email,
-    required UuidValue passwordResetRequestId,
-    required String verificationCode,
-    required Transaction? transaction,
-  }) {
-    final content = PinneAuthEmail.passwordReset(verificationCode);
-    return _send(recipient: email, content: content);
-  }
+  @override
+  String get route => 'SMTP ${settings.host}:${settings.port}';
 
-  Future<void> _send({
-    required String recipient,
-    required PinneAuthEmail content,
+  @override
+  Future<void> send({
+    required String email,
+    required AuthEmailKind kind,
+    required String code,
   }) async {
-    final message = mailer.Message()
-      ..from = mailer.Address(settings.fromEmail, settings.fromName)
-      ..recipients.add(recipient)
-      ..subject = content.subject
-      ..text = content.text
-      ..html = content.html;
-    await mailer.send(message, server, timeout: const Duration(seconds: 20));
+    final content = switch (kind) {
+      AuthEmailKind.registration => PinneAuthEmail.registration(code),
+      AuthEmailKind.passwordReset => PinneAuthEmail.passwordReset(code),
+    };
+    await mailer.send(
+      content.toMessage(settings, email),
+      server,
+      timeout: timeout,
+    );
   }
 }
 
@@ -216,6 +400,15 @@ class PinneAuthEmail {
   final String subject;
   final String text;
   final String html;
+
+  /// A multipart message with a plain-text part and an HTML part.
+  mailer.Message toMessage(SmtpSettings settings, String recipient) =>
+      mailer.Message()
+        ..from = mailer.Address(settings.fromEmail, settings.fromName)
+        ..recipients.add(recipient)
+        ..subject = subject
+        ..text = text
+        ..html = html;
 
   factory PinneAuthEmail.registration(String verificationCode) => _build(
     verificationCode: verificationCode,

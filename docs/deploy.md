@@ -126,10 +126,20 @@ serverpod cloud password set demoAccountEmail "<JUDGE_DEMO_EMAIL>"
 serverpod cloud password set demoAccountPassword "<STRONG_JUDGE_DEMO_PASSWORD>"
 ```
 
-SMTP is optional. Without it, guest sign-in and the pre-seeded demo login work,
-but production registration codes and password resets are unavailable. To
-enable email delivery, set at least host and from address. Username and
-password must be set together; omit both for an unauthenticated relay.
+Email codes need no password here: Serverpod Cloud sets `scloudAuthEmailKey`
+on deploy, and Pinne sends registration and password-reset codes through the
+Serverpod Cloud email service (Serverpod's template, project name "Pinne").
+
+SMTP is optional and, when set, is tried first so codes arrive in Pinne's
+branded email. On 2026-10-13 production could not reach `smtp.gmail.com:587`
+at all (the connection timed out, while the same settings answered within a
+second elsewhere), so on Cloud expect SMTP to fail over to the Cloud service.
+A failing route is skipped for 30 minutes, and every failure appears in
+`serverpod cloud log` as a line starting `ERROR: Email delivery:` with the
+route and the reason, never the code or a password. To use only the Cloud
+service, delete the `smtp*` passwords and redeploy. To use SMTP, set at least
+host and from address. Username and password must be set together; omit both
+for an unauthenticated relay.
 
 For Gmail SMTP, first enable 2-Step Verification on the sending Google account
 and create an app password. Use the account's full Gmail address as both the

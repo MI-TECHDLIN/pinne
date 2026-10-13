@@ -39,6 +39,27 @@ void main() {
       EmailAccountLoginException(
         reason: EmailAccountLoginExceptionReason.tooManyAttempts,
       ): ErrorCause.tooManyAttempts,
+      EmailAccountRequestException(
+        reason: EmailAccountRequestExceptionReason.unknown,
+      ): ErrorCause.server,
+      EmailAccountRequestException(
+        reason: EmailAccountRequestExceptionReason.invalid,
+      ): ErrorCause.rejected,
+      EmailAccountRequestException(
+        reason: EmailAccountRequestExceptionReason.expired,
+      ): ErrorCause.rejected,
+      EmailAccountRequestException(
+        reason: EmailAccountRequestExceptionReason.policyViolation,
+      ): ErrorCause.rejected,
+      EmailAccountRequestException(
+        reason: EmailAccountRequestExceptionReason.tooManyAttempts,
+      ): ErrorCause.tooManyAttempts,
+      EmailAccountPasswordResetException(
+        reason: EmailAccountPasswordResetExceptionReason.unknown,
+      ): ErrorCause.server,
+      EmailAccountPasswordResetException(
+        reason: EmailAccountPasswordResetExceptionReason.policyViolation,
+      ): ErrorCause.rejected,
       _Wrapped(const ServerpodClientNetworkException('down')):
           ErrorCause.offline,
       StateError('Bad state: no element'): ErrorCause.unknown,
@@ -67,6 +88,38 @@ void main() {
       );
       expect(friendly.message, 'Titles can be 200 characters at most.');
       expect(friendly.canRetry, isFalse);
+    });
+
+    test('sign-up failures name the step, not a busy server', () {
+      String titleOf(EmailAccountRequestExceptionReason reason) =>
+          FriendlyError.from(
+            _Wrapped(EmailAccountRequestException(reason: reason)),
+          ).title;
+
+      expect(
+        titleOf(EmailAccountRequestExceptionReason.unknown),
+        'We could not send your code',
+      );
+      expect(
+        titleOf(EmailAccountRequestExceptionReason.invalid),
+        'That code did not match',
+      );
+      expect(
+        titleOf(EmailAccountRequestExceptionReason.expired),
+        'That code has expired',
+      );
+      expect(
+        FriendlyError.from(
+          EmailAccountRequestException(
+            reason: EmailAccountRequestExceptionReason.policyViolation,
+          ),
+        ).hint,
+        contains('at least 8 characters'),
+      );
+      expect(
+        titleOf(EmailAccountRequestExceptionReason.tooManyAttempts),
+        'Too many tries for now',
+      );
     });
 
     test('offline loads say saves are safe on the phone', () {

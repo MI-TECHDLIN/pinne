@@ -47,6 +47,9 @@ class FriendlyError {
   /// Maps any exception to plain language. [subject] names what was being
   /// loaded, such as "your queue", and appears in the longer [message].
   factory FriendlyError.from(Object? error, {String subject = 'this'}) {
+    if (_emailFlowError(_unwrap(error)) case final emailFlow?) {
+      return emailFlow;
+    }
     final cause = errorCauseOf(error);
     final serverMessage = _serverMessage(error);
     return switch (cause) {
@@ -185,12 +188,90 @@ ErrorCause errorCauseOf(Object? error) {
         ErrorCause.tooManyAttempts,
       EmailAccountLoginExceptionReason.unknown => ErrorCause.unknown,
     },
+    EmailAccountRequestException(:final reason) => switch (reason) {
+      EmailAccountRequestExceptionReason.tooManyAttempts =>
+        ErrorCause.tooManyAttempts,
+      EmailAccountRequestExceptionReason.unknown => ErrorCause.server,
+      _ => ErrorCause.rejected,
+    },
+    EmailAccountPasswordResetException(:final reason) => switch (reason) {
+      EmailAccountPasswordResetExceptionReason.tooManyAttempts =>
+        ErrorCause.tooManyAttempts,
+      EmailAccountPasswordResetExceptionReason.unknown => ErrorCause.server,
+      _ => ErrorCause.rejected,
+    },
     AnonymousAccountBlockedException(:final reason) => switch (reason) {
       AnonymousAccountBlockedExceptionReason.tooManyAttempts =>
         ErrorCause.tooManyAttempts,
       AnonymousAccountBlockedExceptionReason.denied => ErrorCause.rejected,
     },
     _ => ErrorCause.unknown,
+  };
+}
+
+/// Sign-up and password-reset failures, said in terms of the step the person
+/// is on. Too many attempts keeps the shared wording.
+FriendlyError? _emailFlowError(Object? error) {
+  const sendFailed = FriendlyError(
+    cause: ErrorCause.server,
+    title: 'We could not send your code',
+    message:
+        'Pinne could not email your code just now. Nothing was created. Try '
+        'again in a few minutes, or keep using Pinne as a guest.',
+    hint: 'Try again in a few minutes, or keep using Pinne as a guest.',
+  );
+  const codeMismatch = FriendlyError(
+    cause: ErrorCause.rejected,
+    title: 'That code did not match',
+    message: 'Check the code in your latest Pinne email and try again.',
+    hint: 'Check the code in your latest Pinne email and try again.',
+  );
+  const codeExpired = FriendlyError(
+    cause: ErrorCause.rejected,
+    title: 'That code has expired',
+    message: 'Codes last 15 minutes. Go back and request a new one.',
+    hint: 'Go back and request a new code.',
+    canRetry: false,
+  );
+  const passwordRule =
+      'Use a password of at least 8 characters, with no space at the start '
+      'or end.';
+  return switch (error) {
+    EmailAccountRequestException(:final reason) => switch (reason) {
+      EmailAccountRequestExceptionReason.unknown => sendFailed,
+      EmailAccountRequestExceptionReason.invalid => codeMismatch,
+      EmailAccountRequestExceptionReason.expired => codeExpired,
+      EmailAccountRequestExceptionReason.policyViolation => const FriendlyError(
+        cause: ErrorCause.rejected,
+        title: 'Check your email and password',
+        message: 'Use a valid email address. $passwordRule',
+        hint: 'Use a valid email address. $passwordRule',
+        canRetry: false,
+      ),
+      EmailAccountRequestExceptionReason.tooManyAttempts => null,
+    },
+    EmailAccountPasswordResetException(:final reason) => switch (reason) {
+      EmailAccountPasswordResetExceptionReason.unknown => const FriendlyError(
+        cause: ErrorCause.server,
+        title: 'We could not send your code',
+        message:
+            'Pinne could not email your reset code just now. Try again in a '
+            'few minutes.',
+        hint: 'Try again in a few minutes.',
+      ),
+      EmailAccountPasswordResetExceptionReason.invalid => codeMismatch,
+      EmailAccountPasswordResetExceptionReason.expired => codeExpired,
+      EmailAccountPasswordResetExceptionReason.policyViolation =>
+        const FriendlyError(
+          cause: ErrorCause.rejected,
+          title: 'Choose a different password',
+          message: passwordRule,
+          hint: passwordRule,
+          canRetry: false,
+        ),
+      EmailAccountPasswordResetExceptionReason.tooManyAttempts => null,
+    },
+    _ => null,
   };
 }
 
