@@ -56,11 +56,13 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
   Timer? _editTimer;
   late final AppLifecycleListener _lifecycle;
   late final CaptureStore? _store;
+  late final String? _accountId;
 
   @override
   void initState() {
     super.initState();
     _store = ref.read(captureStoreProvider);
+    _accountId = ref.read(accountIdProvider);
     _persist();
     // Leaving the sheet without Done still keeps every word typed.
     _lifecycle = AppLifecycleListener(onHide: _flushEdits);
@@ -68,11 +70,17 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
 
   void _persist() {
     final store = _store;
-    if (store == null || _input.isEmpty) return;
+    final accountId = _accountId;
+    if (store == null || accountId == null || _input.isEmpty) {
+      _failed = true;
+      return;
+    }
     try {
       final link = _input.link;
-      _earlier = link == null ? null : store.findSaved(link);
-      final saved = store.save(_input, hold: true);
+      _earlier = link == null
+          ? null
+          : store.findSaved(link, accountId: accountId);
+      final saved = store.save(_input, accountId: accountId, hold: true);
       _title.text = saved.title;
       _saved = saved;
       _failed = false;
@@ -98,9 +106,11 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
     _editTimer?.cancel();
     final saved = _saved;
     final store = _store;
-    if (saved == null || store == null) return;
+    final accountId = _accountId;
+    if (saved == null || store == null || accountId == null) return;
     store.editHeld(
       saved.clientItemId,
+      accountId: accountId,
       title: _title.text,
       intention: _why.text,
     );
@@ -111,9 +121,10 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
     _closing = true;
     final saved = _saved;
     final store = _store;
-    if (saved != null && store != null) {
+    final accountId = _accountId;
+    if (saved != null && store != null && accountId != null) {
       _flushEdits();
-      store.release(saved.clientItemId);
+      store.release(saved.clientItemId, accountId: accountId);
       final sync = ref.read(outboxSyncProvider);
       if (sync != null) unawaited(sync.drain());
     }
@@ -186,6 +197,14 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
       return _Message(
         title: 'Nothing to save',
         body: 'This share had no link or text in it.',
+        onClose: widget.onDone,
+      );
+    }
+    if (_accountId == null) {
+      return _Message(
+        title: 'Open Pinne first',
+        body:
+            'Sign in or start a guest account before saving from another app.',
         onClose: widget.onDone,
       );
     }

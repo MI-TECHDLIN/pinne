@@ -23,10 +23,13 @@ final captureApiProvider = Provider<CaptureApi>(
 /// between are timed by the sender's backoff.
 final outboxSyncProvider = Provider<OutboxSync?>((ref) {
   final store = ref.watch(captureStoreProvider);
-  if (store == null) return null;
+  final accountId = ref.watch(accountIdProvider);
+  if (store == null || accountId == null) return null;
+  store.claimLegacyCaptures(accountId);
   final sync = OutboxSync(
     store: store,
     api: ref.watch(captureApiProvider),
+    accountId: accountId,
     canSync: () => ref.read(signedInProvider),
   );
   void kick() => unawaited(sync.drain());
@@ -54,22 +57,24 @@ final outboxSyncProvider = Provider<OutboxSync?>((ref) {
 /// Every local capture, newest first, refreshed after each write.
 final capturesProvider = StreamProvider<List<LocalCapture>>((ref) async* {
   final store = ref.watch(captureStoreProvider);
-  if (store == null) {
+  final accountId = ref.watch(accountIdProvider);
+  if (store == null || accountId == null) {
     yield const [];
     return;
   }
-  yield store.captures();
+  store.claimLegacyCaptures(accountId);
+  yield store.captures(accountId: accountId);
   await for (final _ in store.changes) {
-    yield store.captures();
+    yield store.captures(accountId: accountId);
   }
 });
 
 /// Server-side preview state overlaid on the durable local saves. Polling only
 /// continues while preview jobs are pending or processing.
 final savedItemsProvider = StreamProvider.autoDispose<List<Item>>((ref) async* {
-  final signedIn = ref.watch(signedInProvider);
+  final accountId = ref.watch(accountIdProvider);
   ref.watch(capturesProvider);
-  if (!signedIn) {
+  if (accountId == null) {
     yield const [];
     return;
   }

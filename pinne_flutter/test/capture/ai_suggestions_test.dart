@@ -22,6 +22,11 @@ class _SignedIn extends SignedInNotifier {
   bool build() => true;
 }
 
+class _AccountId extends AccountIdNotifier {
+  @override
+  String? build() => CaptureStore.testAccountId;
+}
+
 class _FakeAiSuggestions implements AiSuggestionsApi {
   _FakeAiSuggestions(this.suggestions);
 
@@ -106,6 +111,7 @@ void main() {
           captureStoreProvider.overrideWithValue(store),
           captureApiProvider.overrideWithValue(FakeCaptureServer()),
           signedInProvider.overrideWith(_SignedIn.new),
+          accountIdProvider.overrideWith(_AccountId.new),
           aiSuggestionsApiProvider.overrideWithValue(api),
         ],
         child: MaterialApp(

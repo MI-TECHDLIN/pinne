@@ -76,7 +76,7 @@ const _sampleCollections = <CollectionTileData>[
 final collectionsProvider =
     FutureProvider.autoDispose<List<CollectionTileData>>(
       (ref) async {
-        if (!ref.watch(signedInProvider)) return _sampleCollections;
+        if (ref.watch(accountIdProvider) == null) return _sampleCollections;
         final collections = await ref.watch(clientProvider).collection.list();
         if (collections.isEmpty) return _sampleCollections;
         return collections.map(CollectionTileData.fromCollection).toList();

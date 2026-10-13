@@ -19,7 +19,7 @@ class TodayOverview {
 final todayOverviewProvider = FutureProvider.autoDispose<TodayOverview>((
   ref,
 ) async {
-  if (!ref.watch(signedInProvider)) return const TodayOverview();
+  if (ref.watch(accountIdProvider) == null) return const TodayOverview();
   final now = ref.watch(todayClockProvider);
   final progressFuture = ref
       .watch(progressApiProvider)
@@ -52,7 +52,10 @@ final reviewBudgetProvider = NotifierProvider<ReviewBudget, int>(
 
 class ReviewBudget extends Notifier<int> {
   @override
-  int build() => 10;
+  int build() {
+    ref.watch(accountIdProvider);
+    return 10;
+  }
 
   void select(int minutes) => state = minutes;
 }
@@ -61,7 +64,7 @@ final todayQueueProvider = FutureProvider.autoDispose<ReviewQueueResult>((
   ref,
 ) async {
   final budget = ref.watch(reviewBudgetProvider);
-  if (!ref.watch(signedInProvider)) {
+  if (ref.watch(accountIdProvider) == null) {
     return ReviewQueueResult(entries: [], timeBudgetMinutes: budget);
   }
   return ref

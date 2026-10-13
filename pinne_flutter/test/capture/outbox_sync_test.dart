@@ -18,9 +18,13 @@ void main() {
   var signedIn = true;
   late OutboxSync sync;
 
-  OutboxSync newSync(CaptureStore store) => OutboxSync(
+  OutboxSync newSync(
+    CaptureStore store, {
+    String accountId = CaptureStore.testAccountId,
+  }) => OutboxSync(
     store: store,
     api: server,
+    accountId: accountId,
     canSync: () => signedIn,
     clock: () => now,
     jitter: () => 0.5,
@@ -137,12 +141,18 @@ void main() {
   });
 
   test('an unsynced capture is not sent after the account changes', () async {
-    // Account A saves while offline, then signs out. The current unscoped
-    // outbox cannot distinguish this operation from account B's work.
+    const accountA = 'account-a';
+    const accountB = 'account-b';
     signedIn = false;
-    save('A private save');
+    store.save(
+      parseCaptureInput('A private save'),
+      accountId: accountA,
+      now: now,
+    );
 
     signedIn = true; // Account B signs in on the same phone.
+    sync.dispose();
+    sync = newSync(store, accountId: accountB);
     await sync.drain();
 
     expect(
@@ -151,9 +161,18 @@ void main() {
       reason: "account A's outbox must never be uploaded as account B",
     );
     expect(
-      store.outboxLength(),
+      store.outboxLength(accountId: accountA),
       1,
       reason: 'A can sync it after signing back in',
+    );
+
+    sync.dispose();
+    sync = newSync(store, accountId: accountA);
+    expect(await sync.drain(), 1);
+    expect(
+      store.outboxLength(accountId: accountA),
+      0,
+      reason: 'A flushes its own outbox after signing back in',
     );
   });
 

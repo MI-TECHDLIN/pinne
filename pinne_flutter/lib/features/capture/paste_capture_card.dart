@@ -154,13 +154,16 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
 
   void _save() {
     final store = ref.read(captureStoreProvider);
-    if (store == null || _input.isEmpty) return;
+    final accountId = ref.read(accountIdProvider);
+    if (store == null || accountId == null || _input.isEmpty) return;
     final link = _input.link;
     var duplicate = false;
     try {
-      final earlier = link == null ? null : store.findSaved(link);
+      final earlier = link == null
+          ? null
+          : store.findSaved(link, accountId: accountId);
       duplicate = earlier != null;
-      store.save(_input, intention: _why.text);
+      store.save(_input, accountId: accountId, intention: _why.text);
       final sync = ref.read(outboxSyncProvider);
       if (sync != null) unawaited(sync.drain());
       final syncLine = ref.read(signedInProvider)
@@ -192,7 +195,9 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final available = ref.watch(captureStoreProvider) != null;
+    final available =
+        ref.watch(captureStoreProvider) != null &&
+        ref.watch(accountIdProvider) != null;
     final confirmation = _confirmation;
     final error = _error;
     return GlassCard(

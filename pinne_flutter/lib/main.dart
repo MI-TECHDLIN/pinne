@@ -19,7 +19,6 @@ void main() async {
   final store = await openCaptureStore();
   final preferences = await SharedPreferences.getInstance();
   final searchHistoryStore = SharedPreferencesSearchHistoryStore(preferences);
-  store?.releaseStaleHolds();
   runApp(
     ProviderScope(
       overrides: [

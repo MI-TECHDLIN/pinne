@@ -8,6 +8,7 @@ import '../../router.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../auth/sign_out.dart';
 import '../tour/tour_controller.dart';
 import 'account_kind_provider.dart';
 import 'ai_settings_provider.dart';
@@ -241,8 +242,12 @@ class _AccountCard extends ConsumerWidget {
               ),
               signedIn
                   ? TextButton(
-                      onPressed: () =>
-                          ref.read(signedInProvider.notifier).signOut(),
+                      onPressed: () async {
+                        final signedOut = await confirmSignOut(context, ref);
+                        if (signedOut && context.mounted) {
+                          context.go(Routes.signIn);
+                        }
+                      },
                       child: const Text('Sign out'),
                     )
                   : FilledButton(

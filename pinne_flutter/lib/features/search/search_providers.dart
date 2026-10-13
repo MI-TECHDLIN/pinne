@@ -17,7 +17,10 @@ final searchQueryProvider = NotifierProvider<SearchQuery, String>(
 
 class SearchQuery extends Notifier<String> {
   @override
-  String build() => '';
+  String build() {
+    ref.watch(accountIdProvider);
+    return '';
+  }
 
   void set(String value) => state = value.trim();
 }
@@ -45,7 +48,10 @@ final searchFiltersProvider =
 
 class SearchFilterController extends Notifier<SearchFilters> {
   @override
-  SearchFilters build() => const SearchFilters();
+  SearchFilters build() {
+    ref.watch(accountIdProvider);
+    return const SearchFilters();
+  }
 
   void clear() => state = const SearchFilters();
 
@@ -85,7 +91,7 @@ class SearchFilterController extends Notifier<SearchFilters> {
 final searchCollectionsProvider = FutureProvider.autoDispose<List<Collection>>((
   ref,
 ) async {
-  if (!ref.watch(signedInProvider)) return [];
+  if (ref.watch(accountIdProvider) == null) return [];
   return ref.watch(collectionEndpointProvider).list();
 });
 
@@ -99,16 +105,16 @@ class SearchResults extends AsyncNotifier<SearchPage> {
   Future<SearchPage> build() => _fetch(
     query: ref.watch(searchQueryProvider),
     filters: ref.watch(searchFiltersProvider),
-    signedIn: ref.watch(signedInProvider),
+    accountId: ref.watch(accountIdProvider),
   );
 
   Future<SearchPage> _fetch({
     required String query,
     required SearchFilters filters,
-    required bool signedIn,
+    required String? accountId,
     String? cursor,
   }) async {
-    if (query.isEmpty || !signedIn) {
+    if (query.isEmpty || accountId == null) {
       return SearchPage(results: []);
     }
     return ref
@@ -132,7 +138,7 @@ class SearchResults extends AsyncNotifier<SearchPage> {
       final next = await _fetch(
         query: ref.read(searchQueryProvider),
         filters: ref.read(searchFiltersProvider),
-        signedIn: ref.read(signedInProvider),
+        accountId: ref.read(accountIdProvider),
         cursor: cursor,
       );
       return SearchPage(
