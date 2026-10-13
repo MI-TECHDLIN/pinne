@@ -14,6 +14,7 @@ import 'package:pinne_flutter/ui/motion.dart';
 
 import 'fake_device_calendar.dart';
 import 'fake_planner_api.dart';
+import '../support/contrast.dart';
 import '../support/test_account.dart';
 
 class _SignedIn extends SignedInNotifier {
@@ -44,7 +45,11 @@ void main() {
     shared = [];
   });
 
-  Future<void> pump(WidgetTester tester, Widget screen) async {
+  Future<void> pump(
+    WidgetTester tester,
+    Widget screen, {
+    Brightness brightness = Brightness.dark,
+  }) async {
     tester.view.physicalSize = const Size(1200, 3000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -61,7 +66,9 @@ void main() {
           icsSharerProvider.overrideWithValue((ics) async => shared.add(ics)),
         ],
         child: MaterialApp(
-          theme: pinneDarkTheme(),
+          theme: brightness == Brightness.light
+              ? pinneLightTheme()
+              : pinneDarkTheme(),
           home: Scaffold(body: screen),
         ),
       ),
@@ -76,6 +83,25 @@ void main() {
             b.style?.backgroundColor?.resolve({}) ==
             PinneColors.accentPrimaryAction,
       );
+
+  testWidgets('Planner and calendars are readable in Lavender Mist', (
+    tester,
+  ) async {
+    await pump(tester, const PlannerScreen(), brightness: Brightness.light);
+    await expectReadableText(tester, reason: 'Planner');
+    await tester.tap(find.text('Plan my week'));
+    await tester.pumpAndSettle();
+    await expectReadableText(tester, reason: 'proposed plan');
+    await tester.tap(find.text('Accept plan'));
+    await tester.pumpAndSettle();
+    await expectReadableText(tester, reason: 'accepted plan');
+    await pump(
+      tester,
+      const CalendarConnectionsScreen(),
+      brightness: Brightness.light,
+    );
+    await expectReadableText(tester, reason: 'calendar connections');
+  });
 
   testWidgets('propose then accept a checked plan', (tester) async {
     await pump(tester, const PlannerScreen());
