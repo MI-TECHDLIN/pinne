@@ -40,14 +40,15 @@ class ContrastFailure {
 /// Fails when any visible text on the current screen is below WCAG AA.
 ///
 /// Every [RichText] (which includes [Text] and [Icon]) and [EditableText] in
-/// the top-most route and in overlays is checked: its style colour (blended
+/// the top-most route and in overlays, and not under a [ModalBarrier], is
+/// checked: its style colour (blended
 /// onto the background when translucent) against the colour actually painted
 /// just outside its box, sampled from the rendered frame. Body text needs
 /// 4.5:1; large text (24 px, or 18.66 px bold) and icons need 3:1.
 ///
 /// Text under a lower route, fully transparent, faded by an [Opacity] or
-/// outside the screen is skipped; so is text in [skip], which is for
-/// disabled controls only (WCAG exempts them).
+/// outside the screen is skipped, as are disabled controls (WCAG exempts
+/// them) and text in [skip].
 Future<void> expectReadableText(
   WidgetTester tester, {
   Finder? skip,
@@ -78,6 +79,11 @@ Future<List<ContrastFailure>> findContrastFailures(
   }))!;
   final skipped = skip == null ? const <Element>{} : skip.evaluate().toSet();
 
+  final barriers = {
+    for (final element in find.byType(ModalBarrier).evaluate())
+      if (element.renderObject case final RenderObject object) object,
+  };
+
   final failures = <ContrastFailure>[];
   final seen = <String>{};
   for (final element in [
@@ -85,6 +91,7 @@ Future<List<ContrastFailure>> findContrastFailures(
     ...find.byType(EditableText, skipOffstage: true).evaluate(),
   ]) {
     if (_isSkipped(element, skipped) || !_isOnTopRoute(element)) continue;
+    if (_isDisabledControl(element)) continue;
     final box = element.renderObject;
     if (box is! RenderBox || !box.hasSize || box.size.isEmpty) continue;
     if (!box.attached || _isFaded(box)) continue;
@@ -100,6 +107,7 @@ Future<List<ContrastFailure>> findContrastFailures(
       rect.bottom * ratio,
     );
     if (!physical.overlaps(Offset.zero & pixels.size)) continue;
+    if (_isUnderBarrier(tester, rect.center, barriers)) continue;
     final background = pixels.ringMode(physical.inflate(ratio));
     if (background == null) continue;
 
@@ -185,11 +193,49 @@ bool _isSkipped(Element element, Set<Element> skipped) {
   return found;
 }
 
+/// WCAG exempts inactive controls, which Material paints at 38%.
+bool _isDisabledControl(Element element) {
+  var disabled = false;
+  element.visitAncestorElements((ancestor) {
+    final widget = ancestor.widget;
+    disabled = switch (widget) {
+      ButtonStyleButton() => !widget.enabled,
+      IconButton() => widget.onPressed == null,
+      RawChip() => !widget.isEnabled,
+      ChoiceChip() => !widget.isEnabled,
+      FilterChip() => !widget.isEnabled,
+      ListTile() => !widget.enabled,
+      TextField() => !(widget.enabled ?? true),
+      _ => false,
+    };
+    return !disabled;
+  });
+  return disabled;
+}
+
 /// Text on a route covered by another route sits under a scrim and is not
 /// what the user is reading.
 bool _isOnTopRoute(Element element) {
   final route = ModalRoute.of(element);
   return route == null || route.isCurrent;
+}
+
+/// Text under a modal scrim is dimmed with its background and not what the
+/// user is reading; the scrim, not the text, is what a hit test finds there.
+bool _isUnderBarrier(
+  WidgetTester tester,
+  Offset point,
+  Set<RenderObject> barriers,
+) {
+  if (barriers.isEmpty) return false;
+  for (final entry in tester.hitTestOnBinding(point).path) {
+    final target = entry.target;
+    if (target is! RenderObject) continue;
+    for (RenderObject? node = target; node != null; node = node.parent) {
+      if (barriers.contains(node)) return true;
+    }
+  }
+  return false;
 }
 
 bool _isFaded(RenderObject object) {
