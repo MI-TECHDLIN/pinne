@@ -72,7 +72,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         ? const ValueKey('guest-account-switch-notice')
                         : null,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: PinneColors.muted),
+                    style: TextStyle(color: context.pinne.muted),
                   ),
                   const SizedBox(height: PinneSpacing.xl),
                   if (!alreadySignedIn)
@@ -96,13 +96,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     ),
                   if (!emailAvailable) ...[
                     const SizedBox(height: PinneSpacing.md),
-                    const Text(
+                    Text(
                       'New-account email codes are not available on this '
                       'server. Use guest access now, or sign in with the demo '
                       'account from the testing instructions.',
                       key: ValueKey('email-delivery-unavailable'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: PinneColors.muted),
+                      style: TextStyle(color: context.pinne.muted),
                     ),
                   ],
                   const SizedBox(height: PinneSpacing.xl),

@@ -160,7 +160,7 @@ class ProgressBody extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ProgressCardStack(
-          cards: progressCards(report),
+          cards: progressCards(report, context.pinne),
           spiritCardId: 'reviewed',
           spirit: RibbonSpirit(
             seed: avatar.seed,
@@ -203,7 +203,10 @@ class ProgressBody extends ConsumerWidget {
 }
 
 /// The hero cards for a report, only with numbers the report really has.
-List<ProgressCardData> progressCards(ProgressReport report) {
+List<ProgressCardData> progressCards(
+  ProgressReport report,
+  PinnePalette palette,
+) {
   final phrase = periodPhrase(report.period);
   final goal = report.weeklyGoal;
   String saves(int n) => n == 1 ? 'save' : 'saves';
@@ -218,8 +221,8 @@ List<ProgressCardData> progressCards(ProgressReport report) {
           ? '${report.firstReviewedTodayCount} first looked at today. '
                 'Each save counts once.'
           : 'Each save counts once, however often you return.',
-      background: PinneColors.violet,
-      foreground: PinneColors.text,
+      background: palette.violet,
+      foreground: palette.text,
     ),
     ProgressCardData(
       id: 'saved',
@@ -230,8 +233,8 @@ List<ProgressCardData> progressCards(ProgressReport report) {
       caption: report.reviewRate == null
           ? 'Nothing saved $phrase yet. Share a link to Pinne any time.'
           : '${percentLabel(report.reviewRate)} of them revisited so far.',
-      background: PinneColors.peach,
-      foreground: PinneColors.ink,
+      background: palette.peach,
+      foreground: palette.ink,
     ),
     ProgressCardData(
       id: 'remaining',
@@ -244,8 +247,8 @@ List<ProgressCardData> progressCards(ProgressReport report) {
                 ? 'Nothing waiting from $phrase.'
                 : 'Every save from $phrase has had a look.')
           : 'Ready whenever you are.',
-      background: PinneColors.mint,
-      foreground: PinneColors.ink,
+      background: palette.mint,
+      foreground: palette.ink,
     ),
     ProgressCardData(
       id: 'days',
@@ -256,8 +259,8 @@ List<ProgressCardData> progressCards(ProgressReport report) {
       caption: goal.reached
           ? 'Weekly goal reached.'
           : 'Any day with a review counts.',
-      background: PinneColors.cardRaised,
-      foreground: PinneColors.text,
+      background: palette.cardRaised,
+      foreground: palette.text,
       dayBars: [
         for (final day in goal.days)
           day.isFuture ? null : day.reviewedCount > 0,
@@ -272,8 +275,8 @@ List<ProgressCardData> progressCards(ProgressReport report) {
         value: report.appliedCount,
         unit: saves(report.appliedCount),
         caption: 'Saves from $phrase you applied.',
-        background: PinneColors.pink,
-        foreground: PinneColors.ink,
+        background: palette.pink,
+        foreground: palette.ink,
       ),
     if (report.currentStreakDays case final streak? when streak > 0)
       ProgressCardData(
@@ -283,8 +286,8 @@ List<ProgressCardData> progressCards(ProgressReport report) {
         value: streak,
         unit: streak == 1 ? 'day' : 'days',
         caption: 'In a row, counting today once you review.',
-        background: PinneColors.sky,
-        foreground: PinneColors.ink,
+        background: palette.sky,
+        foreground: palette.ink,
       ),
   ];
 }
@@ -336,7 +339,10 @@ class ProgressEmptyState extends ConsumerWidget {
                 const SizedBox(height: PinneSpacing.sm),
                 Text(
                   body,
-                  style: const TextStyle(color: PinneColors.muted, height: 1.5),
+                  style: TextStyle(
+                    color: context.pinne.muted,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -360,7 +366,7 @@ class ProgressEmptyState extends ConsumerWidget {
 Future<void> showGoalSettings(BuildContext context) =>
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: PinneColors.midnightRaised,
+      backgroundColor: context.pinne.midnightRaised,
       showDragHandle: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
@@ -444,10 +450,10 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
           children: [
             Text('Weekly goal', style: theme.textTheme.titleLarge),
             const SizedBox(height: PinneSpacing.xs),
-            const Text(
+            Text(
               'Days a week with at least one review. Missing a day never '
               'takes anything away.',
-              style: TextStyle(color: PinneColors.muted),
+              style: TextStyle(color: context.pinne.muted),
             ),
             const SizedBox(height: PinneSpacing.md),
             Row(
@@ -491,7 +497,7 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
                 padding: const EdgeInsets.only(bottom: PinneSpacing.sm),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: PinneColors.pink),
+                  style: TextStyle(color: context.pinne.pink),
                 ),
               ),
             const SizedBox(height: PinneSpacing.sm),
@@ -501,10 +507,7 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
                 key: const ValueKey('goal-save'),
                 onPressed: _saving ? null : () => _save(current),
                 child: _saving
-                    ? const PinneBrandedLoader(
-                        size: 20,
-                        label: 'Saving goal',
-                      )
+                    ? const PinneBrandedLoader(size: 20, label: 'Saving goal')
                     : const Text('Save'),
               ),
             ),

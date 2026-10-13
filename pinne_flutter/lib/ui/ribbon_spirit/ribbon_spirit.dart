@@ -162,6 +162,7 @@ class _RibbonSpiritState extends ConsumerState<RibbonSpirit>
         recipe: _recipe,
         palette: PinneSpiritPalettes.values[widget.palette],
         mood: widget.mood,
+        faceColor: context.pinne.text,
         phase: phase,
         reducedMotion: _reduced,
         transitionFrom: _transitionFrom,

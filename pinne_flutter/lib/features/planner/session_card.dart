@@ -54,7 +54,7 @@ class SessionCard extends StatelessWidget {
     final proposed = session.status == SessionStatus.proposed;
     final items = view.items;
     final theme = Theme.of(context);
-    const ink = PinneColors.ink;
+    final ink = context.pinne.ink;
     final details = [
       itemCount(items.length),
       if (items.any((i) => i.estimated))
@@ -67,18 +67,18 @@ class SessionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(PinneRadii.card),
         gradient: proposed
             ? null
-            : const LinearGradient(
+            : LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [PinneColors.sky, PinneColors.lilac],
+                colors: [context.pinne.sky, context.pinne.lilac],
               ),
-        color: proposed ? PinneColors.card : null,
-        border: proposed ? Border.all(color: PinneColors.lilac) : null,
+        color: proposed ? context.pinne.card : null,
+        border: proposed ? Border.all(color: context.pinne.lilac) : null,
       ),
       child: Stack(
         children: [
           if (!proposed)
-            const Positioned(
+            Positioned(
               right: -18,
               top: -14,
               child: SizedBox(
@@ -87,7 +87,7 @@ class SessionCard extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: PinneColors.violet,
+                    color: context.pinne.violet,
                   ),
                 ),
               ),
@@ -118,14 +118,14 @@ class SessionCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: proposed ? PinneColors.text : ink,
+                    color: proposed ? context.pinne.text : ink,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   items.isEmpty ? 'Pick anything from your queue.' : details,
                   style: TextStyle(
-                    color: proposed ? PinneColors.muted : ink,
+                    color: proposed ? context.pinne.muted : ink,
                     fontSize: 13,
                   ),
                 ),
@@ -133,7 +133,7 @@ class SessionCard extends StatelessWidget {
                 Text(
                   sessionStatusLine(view),
                   style: TextStyle(
-                    color: proposed ? PinneColors.muted : ink,
+                    color: proposed ? context.pinne.muted : ink,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -187,13 +187,13 @@ class _Pill extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(PinneRadii.chip),
         color: dark
-            ? PinneColors.ink.withValues(alpha: 0.12)
-            : PinneColors.glass,
+            ? context.pinne.ink.withValues(alpha: 0.12)
+            : context.pinne.glass,
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: dark ? PinneColors.ink : PinneColors.lilac,
+          color: dark ? context.pinne.ink : context.pinne.lilac,
           fontSize: 12,
           fontWeight: FontWeight.w700,
         ),
@@ -217,7 +217,7 @@ class _CardAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: TextButton.styleFrom(
-        foregroundColor: dark ? PinneColors.ink : PinneColors.lilac,
+        foregroundColor: dark ? context.pinne.ink : context.pinne.lilac,
         textStyle: const TextStyle(
           fontWeight: FontWeight.w700,
           decoration: TextDecoration.underline,

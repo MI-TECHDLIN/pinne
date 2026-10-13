@@ -232,7 +232,9 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
         const SizedBox(height: PinneSpacing.xs),
         Text(
           status,
-          style: theme.textTheme.bodySmall?.copyWith(color: PinneColors.muted),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: context.pinne.muted,
+          ),
         ),
         const SizedBox(height: PinneSpacing.md),
         _Field(
@@ -260,7 +262,7 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: PinneColors.muted,
+                  color: context.pinne.muted,
                 ),
               ),
             ],
@@ -276,9 +278,9 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
             minLines: 1,
             maxLines: 3,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration.collapsed(
+            decoration: InputDecoration.collapsed(
               hintText: 'Why did you save this? (optional)',
-              hintStyle: TextStyle(color: PinneColors.muted),
+              hintStyle: TextStyle(color: context.pinne.muted),
             ).copyWith(counterText: ''),
           ),
         ),
@@ -287,8 +289,8 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
         FilledButton(
           key: const ValueKey('share-done'),
           style: FilledButton.styleFrom(
-            backgroundColor: PinneColors.accentPrimaryAction,
-            foregroundColor: PinneColors.ink,
+            backgroundColor: context.pinne.accentPrimaryAction,
+            foregroundColor: context.pinne.ink,
             minimumSize: const Size.fromHeight(48),
             textStyle: const TextStyle(fontWeight: FontWeight.w700),
           ),
@@ -315,12 +317,12 @@ class _SheetFrame extends StatelessWidget {
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 560),
-      decoration: const BoxDecoration(
-        color: PinneColors.midnightRaised,
+      decoration: BoxDecoration(
+        color: context.pinne.midnightRaised,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(PinneRadii.sheet),
         ),
-        border: Border(top: BorderSide(color: PinneColors.line)),
+        border: Border(top: BorderSide(color: context.pinne.line)),
       ),
       child: SafeArea(
         top: false,
@@ -351,9 +353,9 @@ class _Field extends StatelessWidget {
         vertical: PinneSpacing.sm + 2,
       ),
       decoration: BoxDecoration(
-        color: PinneColors.glass,
+        color: context.pinne.glass,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: PinneColors.line),
+        border: Border.all(color: context.pinne.line),
       ),
       child: child,
     );
@@ -386,7 +388,7 @@ class _Message extends StatelessWidget {
           child: Text(title, style: theme.textTheme.titleLarge),
         ),
         const SizedBox(height: PinneSpacing.xs),
-        Text(body, style: const TextStyle(color: PinneColors.muted)),
+        Text(body, style: TextStyle(color: context.pinne.muted)),
         const SizedBox(height: PinneSpacing.lg),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,

@@ -22,7 +22,7 @@ class CaptureEntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: PinneColors.sky,
+      color: context.pinne.sky,
       borderRadius: BorderRadius.circular(PinneRadii.tile),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -63,11 +63,11 @@ class CaptureEntryTile extends StatelessWidget {
               Container(
                 width: 38,
                 height: 38,
-                decoration: const BoxDecoration(
-                  color: PinneColors.ink,
+                decoration: BoxDecoration(
+                  color: context.pinne.ink,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.add_rounded, color: PinneColors.text),
+                child: Icon(Icons.add_rounded, color: context.pinne.text),
               ),
               const SizedBox(width: PinneSpacing.md),
               Expanded(
@@ -77,18 +77,18 @@ class CaptureEntryTile extends StatelessWidget {
                     Text(
                       'Save a link',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: PinneColors.ink,
+                        color: context.pinne.ink,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const Text(
+                    Text(
                       'Paste a link or jot a note',
-                      style: TextStyle(color: PinneColors.ink, fontSize: 12),
+                      style: TextStyle(color: context.pinne.ink, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_rounded, color: PinneColors.ink),
+              Icon(Icons.arrow_forward_rounded, color: context.pinne.ink),
             ],
           ),
         ),
@@ -102,7 +102,7 @@ class _ManualCaptureSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: PinneColors.midnightRaised,
+    color: context.pinne.midnightRaised,
     borderRadius: BorderRadius.circular(PinneRadii.sheet),
     clipBehavior: Clip.antiAlias,
     child: SingleChildScrollView(
@@ -181,11 +181,7 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
     }
     if (!duplicate) {
       final avatar = ref.read(avatarRecipeProvider);
-      showSaveCelebration(
-        context,
-        seed: avatar.seed,
-        palette: avatar.palette,
-      );
+      showSaveCelebration(context, seed: avatar.seed, palette: avatar.palette);
     }
   }
 
@@ -206,7 +202,7 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
                 ? 'Paste a link or jot a note. It is kept on this phone first.'
                 : 'Saving needs the Android or iOS app.',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: PinneColors.muted,
+              color: context.pinne.muted,
             ),
           ),
           const SizedBox(height: PinneSpacing.md),
@@ -241,7 +237,7 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: PinneColors.muted,
+                      color: context.pinne.muted,
                     ),
                   ),
                 ),
@@ -274,8 +270,8 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: error != null
-                          ? PinneColors.peach
-                          : PinneColors.lilac,
+                          ? context.pinne.peach
+                          : context.pinne.lilac,
                     ),
                   ),
                 ),
