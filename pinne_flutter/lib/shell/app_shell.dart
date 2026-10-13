@@ -27,26 +27,15 @@ class AppShell extends ConsumerWidget {
     final scaffold = Scaffold(
       extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.only(bottom: 14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            heightFactor: 1,
-            child: SizedBox(
-              width: PillNavBar.maxWidth,
-              child: TourAnchor(
-                target: TourTarget.nav,
-                child: PillNavBar(
-                  destinations: shellDestinations,
-                  selectedIndex: navigationShell.currentIndex,
-                  onSelected: (index) => navigationShell.goBranch(
-                    index,
-                    initialLocation: index == navigationShell.currentIndex,
-                  ),
-                ),
-              ),
+      bottomNavigationBar: FloatingPillNav(
+        child: TourAnchor(
+          target: TourTarget.nav,
+          child: PillNavBar(
+            destinations: shellDestinations,
+            selectedIndex: navigationShell.currentIndex,
+            onSelected: (index) => navigationShell.goBranch(
+              index,
+              initialLocation: index == navigationShell.currentIndex,
             ),
           ),
         ),

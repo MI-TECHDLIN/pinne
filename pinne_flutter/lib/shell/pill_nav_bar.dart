@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -29,6 +30,9 @@ class PillNavBar extends StatelessWidget {
   static const _indicatorExtent = 44.0;
   static const _inset = 5.0;
 
+  /// The pill's height: the border sits outside the content inset.
+  static const height = _indicatorExtent + (_inset * 2) + 2;
+
   @override
   Widget build(BuildContext context) {
     final reduced = reduceMotionOf(context);
@@ -52,7 +56,7 @@ class PillNavBar extends StatelessWidget {
                 key: const ValueKey('pill-nav-pill'),
                 // The border is outside the five-pixel content inset, so the
                 // 44px indicator has six visual pixels above and below it.
-                height: _indicatorExtent + (_inset * 2) + 2,
+                height: height,
                 padding: const EdgeInsets.all(_inset),
                 decoration: BoxDecoration(
                   color: const Color(0xD90A0716),
@@ -152,4 +156,32 @@ class _PillNavItem extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Places the pill nav as the shell shows it: centred and floating above the
+/// phone's bottom inset, or [bottomGap] above the edge without one.
+class FloatingPillNav extends StatelessWidget {
+  const FloatingPillNav({super.key, required this.child});
+
+  final Widget child;
+
+  static const bottomGap = 14.0;
+
+  /// How far up from the bottom of the screen the nav reaches, for anything
+  /// that has to sit above it, such as the Save sheet.
+  static double extentOf(MediaQueryData media) =>
+      math.max(media.padding.bottom, bottomGap) + PillNavBar.height;
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    minimum: const EdgeInsets.only(bottom: bottomGap),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        heightFactor: 1,
+        child: SizedBox(width: PillNavBar.maxWidth, child: child),
+      ),
+    ),
+  );
 }
