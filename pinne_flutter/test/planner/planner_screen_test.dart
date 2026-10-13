@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/planner/calendar_connections_screen.dart';
@@ -26,8 +25,6 @@ class _Reduced extends MotionPreferenceNotifier {
 }
 
 void main() {
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
-
   late FakePlannerApi server;
   late FakeDeviceCalendar phone;
   late List<String> shared;

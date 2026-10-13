@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_flutter/app.dart';
 import 'package:pinne_flutter/core/motion.dart';
 import 'package:pinne_flutter/core/server_client.dart';
@@ -42,8 +41,6 @@ Widget _app({List overrides = const []}) => ProviderScope(
 );
 
 void main() {
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
-
   testWidgets('starts on Today and the pill nav switches tabs', (
     tester,
   ) async {

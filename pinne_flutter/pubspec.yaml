@@ -36,7 +36,6 @@ dependencies:
   flutter_svg: 2.3.0
   flutter_timezone: ^5.1.1
   go_router: ^18.0.2
-  google_fonts: ^8.1.0
   loading_animation_widget: ^1.3.0
   mesh: 0.5.0
   path: ^1.9.0
@@ -98,6 +97,16 @@ flutter:
     # Still AI art (docs/ai-art/). Not used by any screen yet.
     - assets/art/
     - assets/art/cutout/
+    - assets/fonts/outfit/OFL.txt
+    - assets/fonts/plus_jakarta_sans/OFL.txt
+
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/outfit/Outfit-VariableFont_wght.ttf
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-VariableFont_wght.ttf
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

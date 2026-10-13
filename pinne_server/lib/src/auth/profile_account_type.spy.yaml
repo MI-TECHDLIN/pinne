@@ -1,0 +1,6 @@
+### Account label shown on the owner-only profile screen.
+enum: ProfileAccountType
+values:
+  - guest
+  - email
+  - demo

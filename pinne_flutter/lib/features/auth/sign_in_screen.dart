@@ -13,7 +13,9 @@ import '../../ui/pinne_loading.dart';
 
 /// Guest-first sign-in, with email and optional Google for durable accounts.
 class SignInScreen extends ConsumerStatefulWidget {
-  const SignInScreen({super.key});
+  const SignInScreen({super.key, this.createAccount = false});
+
+  final bool createAccount;
 
   @override
   ConsumerState<SignInScreen> createState() => _SignInScreenState();
@@ -104,7 +106,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       disableGoogleSignInWidget: !googleSignInConfigured,
                       emailSignInWidget: EmailSignInWidget(
                         client: client,
-                        startScreen: EmailFlowScreen.login,
+                        startScreen: widget.createAccount
+                            ? EmailFlowScreen.startRegistration
+                            : EmailFlowScreen.login,
                         onAuthenticated: _closeAfterAuthentication,
                         onError: _showSignInError,
                       ),

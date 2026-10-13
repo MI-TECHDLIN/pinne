@@ -15,6 +15,8 @@ import 'dart:async' as _ida;
 import 'dart:io' as _idi;
 import 'package:pinne_server/src/generated/ai/ai_settings.dart' as _ibk13w13;
 import 'package:pinne_server/src/generated/ai/ai_suggestion.dart' as _i9k1kmrj;
+import 'package:pinne_server/src/generated/auth/account_summary.dart'
+    as _ig5svj08;
 import 'package:pinne_server/src/generated/calendar/calendar_connection_view.dart'
     as _i0xb4k4o;
 import 'package:pinne_server/src/generated/calendar/calendar_route_status.dart'
@@ -585,6 +587,36 @@ class _AccountEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ig5svj08.AccountSummary> summary(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'account',
+            method: 'summary',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'account',
+          methodName: 'summary',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ig5svj08.AccountSummary>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

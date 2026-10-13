@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/app.dart';
 import 'package:pinne_flutter/core/server_client.dart';
@@ -61,7 +60,6 @@ Future<void> _setSize(WidgetTester tester, Size size, {double text = 1}) async {
 }
 
 void main() {
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
   setUp(
     () => VisibilityDetectorController.instance.updateInterval = Duration.zero,
   );

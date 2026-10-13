@@ -4,6 +4,7 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../../core/server_client.dart';
 import '../../ui/ribbon_spirit/ribbon_recipe.dart';
+import '../progress/progress_providers.dart';
 
 /// Identity, rather than a signed-in boolean, invalidates cached profiles on
 /// account switches (including a switch directly between authenticated users).
@@ -30,6 +31,24 @@ final profileEndpointProvider = Provider<EndpointProfile>(
 final profileProvider = FutureProvider<PinneProfile?>((ref) async {
   if (ref.watch(profileUserIdProvider) == null) return null;
   return ref.watch(profileEndpointProvider).get();
+});
+
+final accountSummaryProvider = FutureProvider.autoDispose<AccountSummary?>((
+  ref,
+) async {
+  if (ref.watch(profileUserIdProvider) == null) return null;
+  return ref.watch(clientProvider).account.summary();
+});
+
+/// This-week saves plus all-time reviewed/streak fields already calculated by
+/// the progress API. Null while signed out.
+final profileProgressProvider = FutureProvider.autoDispose<ProgressReport?>((
+  ref,
+) {
+  if (!ref.watch(signedInProvider)) return null;
+  return ref
+      .watch(progressApiProvider)
+      .report(progressQuery(ProgressPeriod.thisWeek));
 });
 
 final avatarRecipeProvider = Provider<({int seed, int palette})>((ref) {

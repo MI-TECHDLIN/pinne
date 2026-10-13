@@ -42,6 +42,8 @@ import 'ai/ai_settings.dart' as _i8oswxfq;
 import 'ai/ai_suggestion.dart' as _ispfx06l;
 import 'ai/ai_suggestion_kind.dart' as _il1lz8eg;
 import 'ai/ai_suggestion_status.dart' as _it1ujq25;
+import 'auth/account_summary.dart' as _iwcn4ziy;
+import 'auth/profile_account_type.dart' as _isbnfbq5;
 import 'calendar/calendar_connection.dart' as _iqtchur3;
 import 'calendar/calendar_connection_view.dart' as _ijwz5xp0;
 import 'calendar/calendar_event_link.dart' as _ily35bfr;
@@ -144,6 +146,8 @@ export 'ai/ai_settings.dart';
 export 'ai/ai_suggestion.dart';
 export 'ai/ai_suggestion_kind.dart';
 export 'ai/ai_suggestion_status.dart';
+export 'auth/account_summary.dart';
+export 'auth/profile_account_type.dart';
 export 'calendar/calendar_connection.dart';
 export 'calendar/calendar_connection_view.dart';
 export 'calendar/calendar_event_link.dart';
@@ -3388,6 +3392,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _it1ujq25.AiSuggestionStatus) {
       return _it1ujq25.AiSuggestionStatus.fromJson(data) as T;
     }
+    if (t == _iwcn4ziy.AccountSummary) {
+      return _iwcn4ziy.AccountSummary.fromJson(data) as T;
+    }
+    if (t == _isbnfbq5.ProfileAccountType) {
+      return _isbnfbq5.ProfileAccountType.fromJson(data) as T;
+    }
     if (t == _iqtchur3.CalendarConnection) {
       return _iqtchur3.CalendarConnection.fromJson(data) as T;
     }
@@ -3691,6 +3701,14 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _is.getType<_it1ujq25.AiSuggestionStatus?>()) {
       return (data != null ? _it1ujq25.AiSuggestionStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iwcn4ziy.AccountSummary?>()) {
+      return (data != null ? _iwcn4ziy.AccountSummary.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_isbnfbq5.ProfileAccountType?>()) {
+      return (data != null ? _isbnfbq5.ProfileAccountType.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_iqtchur3.CalendarConnection?>()) {
@@ -4259,6 +4277,8 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ispfx06l.AiSuggestion => 'AiSuggestion',
       _il1lz8eg.AiSuggestionKind => 'AiSuggestionKind',
       _it1ujq25.AiSuggestionStatus => 'AiSuggestionStatus',
+      _iwcn4ziy.AccountSummary => 'AccountSummary',
+      _isbnfbq5.ProfileAccountType => 'ProfileAccountType',
       _iqtchur3.CalendarConnection => 'CalendarConnection',
       _ijwz5xp0.CalendarConnectionView => 'CalendarConnectionView',
       _ily35bfr.CalendarEventLink => 'CalendarEventLink',
@@ -4384,6 +4404,10 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'AiSuggestionKind';
       case _it1ujq25.AiSuggestionStatus():
         return 'AiSuggestionStatus';
+      case _iwcn4ziy.AccountSummary():
+        return 'AccountSummary';
+      case _isbnfbq5.ProfileAccountType():
+        return 'ProfileAccountType';
       case _iqtchur3.CalendarConnection():
         return 'CalendarConnection';
       case _ijwz5xp0.CalendarConnectionView():
@@ -4618,6 +4642,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'AiSuggestionStatus') {
       return deserialize<_it1ujq25.AiSuggestionStatus>(data['data']);
+    }
+    if (dataClassName == 'AccountSummary') {
+      return deserialize<_iwcn4ziy.AccountSummary>(data['data']);
+    }
+    if (dataClassName == 'ProfileAccountType') {
+      return deserialize<_isbnfbq5.ProfileAccountType>(data['data']);
     }
     if (dataClassName == 'CalendarConnection') {
       return deserialize<_iqtchur3.CalendarConnection>(data['data']);

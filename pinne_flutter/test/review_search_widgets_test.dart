@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/search/search_providers.dart';
@@ -17,8 +16,6 @@ class _SignedOut extends SignedInNotifier {
 }
 
 void main() {
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
-
   final ownerId = UuidValue.fromString(
     '00000000-0000-4000-8000-000000000001',
   );
