@@ -11,6 +11,7 @@ import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
 import '../../ui/item_preview.dart';
+import '../../ui/pinne_loading.dart';
 import 'ai_suggestions.dart';
 import 'capture_labels.dart';
 import 'capture_providers.dart';
@@ -24,7 +25,8 @@ class SavedSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(captureStoreProvider) == null) return const SizedBox();
-    final captures = ref.watch(capturesProvider).value ?? const [];
+    final capturesState = ref.watch(capturesProvider);
+    final captures = capturesState.value ?? const [];
     final signedIn = ref.watch(signedInProvider);
     final serverItems = ref.watch(savedItemsProvider).value ?? const [];
     final byId = {
@@ -54,7 +56,9 @@ class SavedSection extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: PinneSpacing.md),
-        if (captures.isEmpty)
+        if (capturesState.isLoading && !capturesState.hasValue)
+          const _SavedListSkeleton()
+        else if (captures.isEmpty)
           const ComingSoonCard(
             title: 'Nothing saved yet',
             body:
@@ -95,6 +99,22 @@ class SavedSection extends ConsumerWidget {
           curve: PinneMotionCurves.enter,
         );
   }
+}
+
+class _SavedListSkeleton extends StatelessWidget {
+  const _SavedListSkeleton();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+    key: ValueKey('saved-list-skeleton'),
+    children: [
+      PinneCardSkeleton(height: 132, label: 'Loading saved item'),
+      SizedBox(height: PinneSpacing.sm),
+      PinneCardSkeleton(height: 132, label: 'Loading saved item'),
+      SizedBox(height: PinneSpacing.sm),
+      PinneCardSkeleton(height: 132, label: 'Loading saved item'),
+    ],
+  );
 }
 
 class SavedCard extends ConsumerWidget {

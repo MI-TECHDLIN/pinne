@@ -1,11 +1,11 @@
 {
-    "name": "pinne_flutter",
-    "short_name": "pinne_flutter",
+    "name": "Pinne",
+    "short_name": "Pinne",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#150F26",
+    "theme_color": "#150F26",
+    "description": "Save what matters. Come back to it on purpose.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

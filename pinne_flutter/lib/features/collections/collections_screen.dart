@@ -8,6 +8,7 @@ import '../../core/server_client.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../../ui/pinne_loading.dart';
 import '../capture/saved_section.dart';
 import 'collection_cover.dart';
 import '../../ui/feedback/error_state.dart';
@@ -393,12 +394,19 @@ class _LoadingGrid extends StatelessWidget {
   const _LoadingGrid();
 
   @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 220,
-      child: Center(
-        child: CircularProgressIndicator(color: PinneColors.violet),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => GridView.count(
+    key: const ValueKey('collections-skeleton'),
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    crossAxisCount: 2,
+    crossAxisSpacing: PinneSpacing.md,
+    mainAxisSpacing: PinneSpacing.md,
+    childAspectRatio: 0.82,
+    children: const [
+      PinneTileSkeleton(),
+      PinneTileSkeleton(),
+      PinneTileSkeleton(),
+      PinneTileSkeleton(),
+    ],
+  );
 }

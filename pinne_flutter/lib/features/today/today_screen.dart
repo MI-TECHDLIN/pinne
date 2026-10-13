@@ -12,6 +12,7 @@ import '../../ui/feedback/error_state.dart';
 import '../../ui/feedback/toast.dart';
 import '../../ui/item_preview.dart';
 import '../../ui/motion.dart';
+import '../../ui/pinne_loading.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../capture/paste_capture_card.dart';
 import '../examples/example_saves.dart';
@@ -29,7 +30,8 @@ class TodayScreen extends ConsumerWidget {
     final avatar = ref.watch(avatarRecipeProvider);
     final profile = ref.watch(profileProvider).asData?.value;
     final budget = ref.watch(reviewBudgetProvider);
-    final overview = ref.watch(todayOverviewProvider).asData?.value;
+    final overviewState = ref.watch(todayOverviewProvider);
+    final overview = overviewState.asData?.value;
     final now = ref.watch(todayClockProvider);
     final data = queue.asData?.value;
     final top = data?.entries.firstOrNull;
@@ -144,35 +146,43 @@ class TodayScreen extends ConsumerWidget {
                 const SizedBox(height: PinneSpacing.md),
                 TourAnchor(
                   target: TourTarget.planTiles,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _PastelActionTile(
-                          color: PinneColors.peach,
-                          tag: 'NEXT UP',
-                          title: overview?.nextSession == null
-                              ? 'Plan a review session'
-                              : 'Review session',
-                          body: _sessionLabel(overview?.nextSession, now),
-                          icon: Icons.calendar_month_rounded,
-                          onTap: () => context.push(Routes.planner),
+                  child: overviewState.isLoading
+                      ? const Row(
+                          children: [
+                            Expanded(child: PinneTileSkeleton(height: 126)),
+                            SizedBox(width: PinneSpacing.sm),
+                            Expanded(child: PinneTileSkeleton(height: 126)),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(
+                              child: _PastelActionTile(
+                                color: PinneColors.peach,
+                                tag: 'NEXT UP',
+                                title: overview?.nextSession == null
+                                    ? 'Plan a review session'
+                                    : 'Review session',
+                                body: _sessionLabel(overview?.nextSession, now),
+                                icon: Icons.calendar_month_rounded,
+                                onTap: () => context.push(Routes.planner),
+                              ),
+                            ),
+                            const SizedBox(width: PinneSpacing.sm),
+                            Expanded(
+                              child: _PastelActionTile(
+                                color: PinneColors.mint,
+                                tag: 'THIS WEEK',
+                                title:
+                                    '${overview?.progress?.savedCount ?? 0} saved this week',
+                                body:
+                                    '${overview?.progress?.reviewedInPeriodCount ?? 0} reviewed',
+                                icon: Icons.insights_rounded,
+                                onTap: () => context.go(Routes.progress),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: PinneSpacing.sm),
-                      Expanded(
-                        child: _PastelActionTile(
-                          color: PinneColors.mint,
-                          tag: 'THIS WEEK',
-                          title:
-                              '${overview?.progress?.savedCount ?? 0} saved this week',
-                          body:
-                              '${overview?.progress?.reviewedInPeriodCount ?? 0} reviewed',
-                          icon: Icons.insights_rounded,
-                          onTap: () => context.go(Routes.progress),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: PinneSpacing.sm),
                 const TourAnchor(
@@ -833,16 +843,9 @@ class _HeroLoading extends StatelessWidget {
   const _HeroLoading();
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 180,
-    decoration: BoxDecoration(
-      color: PinneColors.card,
-      borderRadius: BorderRadius.circular(PinneRadii.card),
-      border: Border.all(color: PinneColors.line),
-    ),
-    child: const Center(
-      child: CircularProgressIndicator(color: PinneColors.violet),
-    ),
+  Widget build(BuildContext context) => const PinneCardSkeleton(
+    height: 148,
+    label: 'Loading your next review',
   );
 }
 

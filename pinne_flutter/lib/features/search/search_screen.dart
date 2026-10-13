@@ -9,6 +9,7 @@ import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../../ui/item_preview.dart';
+import '../../ui/pinne_loading.dart';
 import '../settings/profile_provider.dart';
 import '../examples/example_saves.dart';
 import 'search_providers.dart';
@@ -97,7 +98,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const _FilterChips(),
         const SizedBox(height: PinneSpacing.lg),
         page.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const _SearchResultsSkeleton(),
           error: (error, _) => PinneErrorCard(
             error: error,
             subject: 'search results',
@@ -158,6 +159,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (uri == null) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
+}
+
+class _SearchResultsSkeleton extends StatelessWidget {
+  const _SearchResultsSkeleton();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+    key: ValueKey('search-results-skeleton'),
+    children: [
+      PinneCardSkeleton(
+        height: 246,
+        showThumbnail: true,
+        label: 'Loading search result',
+      ),
+      SizedBox(height: PinneSpacing.md),
+      PinneCardSkeleton(
+        height: 246,
+        showThumbnail: true,
+        label: 'Loading search result',
+      ),
+    ],
+  );
 }
 
 class _FilterChips extends ConsumerWidget {

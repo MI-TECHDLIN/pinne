@@ -1,0 +1,14 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/branding/pinne_icon.png
+  adaptive_icon_background: "#150F26"
+  adaptive_icon_foreground: assets/branding/pinne_icon_foreground.png
+  adaptive_icon_foreground_inset: 18
+  remove_alpha_ios: true
+  background_color_ios: "#150F26"
+  web:
+    generate: true
+    image_path: assets/branding/pinne_icon.png
+    background_color: "#150F26"
+    theme_color: "#150F26"

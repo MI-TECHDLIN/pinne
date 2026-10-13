@@ -9,6 +9,7 @@ import 'device_calendar_adapter.dart';
 import 'planner_format.dart';
 import 'planner_providers.dart';
 import '../../ui/feedback/error_state.dart';
+import '../../ui/pinne_loading.dart';
 
 /// Routes, permission state, freshness, and which calendars are checked for
 /// conflicts and which one takes sessions.
@@ -50,10 +51,26 @@ class CalendarConnectionsScreen extends ConsumerWidget {
             onRetry: () => ref.invalidate(plannerProvider),
           ),
         ],
-        _ => [const Center(child: CircularProgressIndicator())],
+        _ => [const _CalendarConnectionsSkeleton()],
       },
     );
   }
+}
+
+class _CalendarConnectionsSkeleton extends StatelessWidget {
+  const _CalendarConnectionsSkeleton();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+    key: ValueKey('calendar-connections-skeleton'),
+    children: [
+      PinneCardSkeleton(height: 156, label: 'Loading phone calendars'),
+      SizedBox(height: PinneSpacing.md),
+      PinneCardSkeleton(height: 116, label: 'Loading calendar connection'),
+      SizedBox(height: PinneSpacing.md),
+      PinneCardSkeleton(height: 116, label: 'Loading calendar connection'),
+    ],
+  );
 }
 
 class _PhoneCard extends ConsumerWidget {

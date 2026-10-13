@@ -5,6 +5,7 @@ import 'package:pinne_client/pinne_client.dart';
 import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/glass_card.dart';
+import '../../ui/pinne_loading.dart';
 import '../collections/collections_screen.dart';
 import '../progress/progress_providers.dart';
 import '../search/search_providers.dart';
@@ -129,9 +130,9 @@ class _ExampleSavesCardState extends ConsumerState<ExampleSavesCard> {
               key: const ValueKey('load-example-saves'),
               onPressed: _busy ? null : () => _change(remove: false),
               icon: _busy
-                  ? const SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                  ? const PinneBrandedLoader(
+                      size: 18,
+                      label: 'Adding example saves',
                     )
                   : const Icon(Icons.auto_awesome_rounded),
               label: Text(_busy ? 'Adding…' : 'Load examples'),
