@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
 import '../../shell/pinne_page.dart';
+import '../../shell/responsive.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../../ui/pinne_loading.dart';
@@ -156,22 +157,21 @@ class ProgressBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final avatar = ref.watch(avatarRecipeProvider);
     final theme = Theme.of(context);
-    return Column(
+    final deck = ProgressCardStack(
+      cards: progressCards(report),
+      spiritCardId: 'reviewed',
+      spirit: RibbonSpirit(
+        seed: avatar.seed,
+        palette: avatar.palette,
+        size: 90,
+        mood: report.reviewedInPeriodCount > 0
+            ? RibbonMood.happy
+            : RibbonMood.idle,
+      ),
+    );
+    final details = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ProgressCardStack(
-          cards: progressCards(report),
-          spiritCardId: 'reviewed',
-          spirit: RibbonSpirit(
-            seed: avatar.seed,
-            palette: avatar.palette,
-            size: 90,
-            mood: report.reviewedInPeriodCount > 0
-                ? RibbonMood.happy
-                : RibbonMood.idle,
-          ),
-        ),
-        const SizedBox(height: PinneSpacing.xl),
         Text(
           'Saved ${periodPhrase(report.period)}, and where they stand',
           style: theme.textTheme.titleMedium,
@@ -197,6 +197,24 @@ class ProgressBody extends ConsumerWidget {
         ],
         const SizedBox(height: PinneSpacing.md),
         ReviewDaysChart(report: report),
+      ],
+    );
+    if (!PinneBreakpoints.of(context).isExpanded) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          deck,
+          const SizedBox(height: PinneSpacing.xl),
+          details,
+        ],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: 5, child: deck),
+        const SizedBox(width: PinneSpacing.xxl),
+        Expanded(flex: 6, child: details),
       ],
     );
   }

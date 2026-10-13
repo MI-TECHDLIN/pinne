@@ -6,6 +6,7 @@ import 'package:pinne_client/pinne_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../shell/pinne_page.dart';
+import '../../shell/responsive.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../../ui/item_preview.dart';
@@ -144,31 +145,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     'Try fewer words or clear a filter. Your saves are still here.',
               );
             }
-            return Column(
-              children: [
-                for (var i = 0; i < data.results.length; i++) ...[
-                  SearchResultCard(
-                    key: ValueKey('search-result-${data.results[i].item.id}'),
-                    result: data.results[i],
-                    color: PinneColors
-                        .tilePalette[i % PinneColors.tilePalette.length],
-                    onOpen: () => _open(data.results[i].item),
-                  ),
-                  if (i != data.results.length - 1)
-                    const SizedBox(height: PinneSpacing.sm),
-                ],
-                if (data.nextCursor != null) ...[
-                  const SizedBox(height: PinneSpacing.md),
-                  FilledButton(
-                    key: const ValueKey('search-more'),
-                    onPressed: page.isLoading
-                        ? null
-                        : () =>
-                              ref.read(searchPageProvider.notifier).loadMore(),
-                    child: const Text('More results'),
-                  ),
-                ],
-              ],
+            return _SearchResults(
+              data: data,
+              loading: page.isLoading,
+              onOpen: _open,
+              onMore: () => ref.read(searchPageProvider.notifier).loadMore(),
             );
           },
         ),
@@ -204,6 +185,70 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (clear == true) {
       await ref.read(searchHistoryProvider.notifier).clear();
     }
+  }
+}
+
+class _SearchResults extends StatelessWidget {
+  const _SearchResults({
+    required this.data,
+    required this.loading,
+    required this.onOpen,
+    required this.onMore,
+  });
+
+  final SearchPage data;
+  final bool loading;
+  final ValueChanged<Item> onOpen;
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = switch (PinneBreakpoints.of(context)) {
+          PinneWindowClass.compact => 1,
+          PinneWindowClass.medium => 2,
+          PinneWindowClass.expanded => 3,
+        };
+        final width =
+            (constraints.maxWidth - PinneSpacing.md * (columns - 1)) / columns;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              spacing: PinneSpacing.md,
+              runSpacing: PinneSpacing.md,
+              children: [
+                for (var i = 0; i < data.results.length; i++)
+                  SizedBox(
+                    width: width,
+                    child: SearchResultCard(
+                      key: ValueKey(
+                        'search-result-${data.results[i].item.id}',
+                      ),
+                      result: data.results[i],
+                      color: PinneColors
+                          .tilePalette[i % PinneColors.tilePalette.length],
+                      onOpen: () => onOpen(data.results[i].item),
+                    ),
+                  ),
+              ],
+            ),
+            if (data.nextCursor != null) ...[
+              const SizedBox(height: PinneSpacing.md),
+              Align(
+                alignment: Alignment.center,
+                child: FilledButton(
+                  key: const ValueKey('search-more'),
+                  onPressed: loading ? null : onMore,
+                  child: const Text('More results'),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -422,6 +467,9 @@ class SearchResultCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(PinneRadii.tile),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
+          mouseCursor: item.url == null
+              ? MouseCursor.defer
+              : SystemMouseCursors.click,
           onTap: item.url == null ? null : onOpen,
           child: Padding(
             padding: const EdgeInsets.all(PinneSpacing.lg),

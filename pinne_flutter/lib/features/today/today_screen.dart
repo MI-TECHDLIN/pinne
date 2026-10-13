@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pinne_client/pinne_client.dart';
 
 import '../../router.dart';
+import '../../shell/responsive.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/feedback/error_state.dart';
 import '../../ui/feedback/toast.dart';
@@ -39,6 +40,108 @@ class TodayScreen extends ConsumerWidget {
     final rotatingLine = ref.watch(todayGreetingProvider);
     final top = data?.entries.firstOrNull;
     final displayName = profile?.displayName.trim();
+    final window = PinneBreakpoints.of(context);
+    final reviewCard = TourAnchor(
+      target: TourTarget.reviewCard,
+      child: queue.isLoading
+          ? const _HeroLoading()
+          : queue.hasError
+          ? PinneErrorCard(
+              error: queue.error,
+              subject: 'your queue',
+              onRetry: () => ref.invalidate(todayQueueProvider),
+            )
+          : TodaySpiritCard(
+              due: top != null,
+              seed: avatar.seed,
+              palette: avatar.palette,
+              entry: top,
+              digestText: data?.digestText,
+              timeBudgetMinutes: budget,
+              onReviewed: top == null
+                  ? null
+                  : () => _review(context, ref, top.item),
+              onRemindLater: top == null
+                  ? null
+                  : () => _run(
+                      context,
+                      () => ref
+                          .read(todayActionGatewayProvider)
+                          .remindLater(top.item),
+                      'We’ll bring it back tomorrow.',
+                      'Could not snooze it',
+                    ),
+              onArchive: top == null
+                  ? null
+                  : () => _run(
+                      context,
+                      () => ref
+                          .read(todayActionGatewayProvider)
+                          .archive(top.item),
+                      'Archived without counting it as reviewed.',
+                      'Could not archive it',
+                    ),
+              onOpen: top?.item.url == null
+                  ? null
+                  : () => _run(
+                      context,
+                      () =>
+                          ref.read(todayActionGatewayProvider).open(top!.item),
+                      'Opened. It still waits for your review.',
+                      'Could not open it',
+                    ),
+            ),
+    );
+    final weekStrip = TourAnchor(
+      target: TourTarget.weekStrip,
+      child: _WeekStrip(
+        now: now,
+        reviewedDates: {
+          for (final day in overview?.progress?.days ?? <ProgressDay>[])
+            if (day.reviewedCount > 0) day.date,
+        },
+      ),
+    );
+    final planTiles = TourAnchor(
+      target: TourTarget.planTiles,
+      child: overviewState.isLoading
+          ? const Row(
+              children: [
+                Expanded(child: PinneTileSkeleton(height: 126)),
+                SizedBox(width: PinneSpacing.sm),
+                Expanded(child: PinneTileSkeleton(height: 126)),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: _PastelActionTile(
+                    color: PinneColors.peach,
+                    tag: 'NEXT UP',
+                    title: overview?.nextSession == null
+                        ? 'Plan a review session'
+                        : 'Review session',
+                    body: _sessionLabel(overview?.nextSession, now),
+                    icon: Icons.calendar_month_rounded,
+                    onTap: () => context.push(Routes.planner),
+                  ),
+                ),
+                const SizedBox(width: PinneSpacing.sm),
+                Expanded(
+                  child: _PastelActionTile(
+                    color: PinneColors.mint,
+                    tag: 'THIS WEEK',
+                    title:
+                        '${overview?.progress?.savedCount ?? 0} saved this week',
+                    body:
+                        '${overview?.progress?.reviewedInPeriodCount ?? 0} reviewed',
+                    icon: Icons.insights_rounded,
+                    onTap: () => context.go(Routes.progress),
+                  ),
+                ),
+              ],
+            ),
+    );
 
     return TourAutoStart(
       child: DecoratedBox(
@@ -53,160 +156,101 @@ class TodayScreen extends ConsumerWidget {
           bottom: false,
           // Not lazy: the tour must reach every part of Today on any screen.
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              PinneSpacing.gutter,
+            padding: EdgeInsets.fromLTRB(
+              window.pageGutter,
               PinneSpacing.lg,
-              PinneSpacing.gutter,
-              PinneSpacing.navClearance,
+              window.pageGutter,
+              window.isExpanded ? PinneSpacing.xxl : PinneSpacing.navClearance,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _TodayHeader(
-                  seed: avatar.seed,
-                  palette: avatar.palette,
-                  greeting: dueCount == 0 ? _greeting(now.hour) : rotatingLine,
-                  name: displayName == null || displayName.isEmpty
-                      ? 'Guest'
-                      : displayName,
-                  onProfile: () => context.push(Routes.profile),
-                  onSearch: () => context.go(Routes.search),
-                ),
-                const SizedBox(height: PinneSpacing.lg),
-                TodayHeadline(count: dueCount, calmLine: rotatingLine),
-                const SizedBox(height: PinneSpacing.md),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TourAnchor(
-                    target: TourTarget.timeChips,
-                    child: _BudgetChoice(selected: budget),
-                  ),
-                ),
-                const SizedBox(height: PinneSpacing.md),
-                TourAnchor(
-                  target: TourTarget.reviewCard,
-                  child: queue.isLoading
-                      ? const _HeroLoading()
-                      : queue.hasError
-                      ? PinneErrorCard(
-                          error: queue.error,
-                          subject: 'your queue',
-                          onRetry: () => ref.invalidate(todayQueueProvider),
-                        )
-                      : TodaySpiritCard(
-                          due: top != null,
-                          seed: avatar.seed,
-                          palette: avatar.palette,
-                          entry: top,
-                          digestText: data?.digestText,
-                          timeBudgetMinutes: budget,
-                          onReviewed: top == null
-                              ? null
-                              : () => _review(context, ref, top.item),
-                          onRemindLater: top == null
-                              ? null
-                              : () => _run(
-                                  context,
-                                  () => ref
-                                      .read(todayActionGatewayProvider)
-                                      .remindLater(top.item),
-                                  'We’ll bring it back tomorrow.',
-                                  'Could not snooze it',
-                                ),
-                          onArchive: top == null
-                              ? null
-                              : () => _run(
-                                  context,
-                                  () => ref
-                                      .read(todayActionGatewayProvider)
-                                      .archive(top.item),
-                                  'Archived without counting it as reviewed.',
-                                  'Could not archive it',
-                                ),
-                          onOpen: top?.item.url == null
-                              ? null
-                              : () => _run(
-                                  context,
-                                  () => ref
-                                      .read(todayActionGatewayProvider)
-                                      .open(top!.item),
-                                  'Opened. It still waits for your review.',
-                                  'Could not open it',
-                                ),
-                        ),
-                ),
-                const SizedBox(height: PinneSpacing.md),
-                TourAnchor(
-                  target: TourTarget.weekStrip,
-                  child: _WeekStrip(
-                    now: now,
-                    reviewedDates: {
-                      for (final day
-                          in overview?.progress?.days ?? <ProgressDay>[])
-                        if (day.reviewedCount > 0) day.date,
-                    },
-                  ),
-                ),
-                const SizedBox(height: PinneSpacing.md),
-                TourAnchor(
-                  target: TourTarget.planTiles,
-                  child: overviewState.isLoading
-                      ? const Row(
-                          children: [
-                            Expanded(child: PinneTileSkeleton(height: 126)),
-                            SizedBox(width: PinneSpacing.sm),
-                            Expanded(child: PinneTileSkeleton(height: 126)),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Expanded(
-                              child: _PastelActionTile(
-                                color: PinneColors.peach,
-                                tag: 'NEXT UP',
-                                title: overview?.nextSession == null
-                                    ? 'Plan a review session'
-                                    : 'Review session',
-                                body: _sessionLabel(overview?.nextSession, now),
-                                icon: Icons.calendar_month_rounded,
-                                onTap: () => context.push(Routes.planner),
-                              ),
-                            ),
-                            const SizedBox(width: PinneSpacing.sm),
-                            Expanded(
-                              child: _PastelActionTile(
-                                color: PinneColors.mint,
-                                tag: 'THIS WEEK',
-                                title:
-                                    '${overview?.progress?.savedCount ?? 0} saved this week',
-                                body:
-                                    '${overview?.progress?.reviewedInPeriodCount ?? 0} reviewed',
-                                icon: Icons.insights_rounded,
-                                onTap: () => context.go(Routes.progress),
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
-                const SizedBox(height: PinneSpacing.sm),
-                const TourAnchor(
-                  target: TourTarget.saveLink,
-                  child: CaptureEntryTile(),
-                ),
-                const SizedBox(height: PinneSpacing.md),
-                const ExampleSavesCard(),
-                if ((data?.entries.length ?? 0) > 1) ...[
-                  const SizedBox(height: PinneSpacing.md),
-                  Text(
-                    '${data!.entries.length - 1} more fit this session. '
-                    'Durations are estimates.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: PinneColors.muted,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: window.defaultMaxWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _TodayHeader(
+                      seed: avatar.seed,
+                      palette: avatar.palette,
+                      greeting: dueCount == 0
+                          ? _greeting(now.hour)
+                          : rotatingLine,
+                      name: displayName == null || displayName.isEmpty
+                          ? 'Guest'
+                          : displayName,
+                      onProfile: () => context.push(Routes.profile),
+                      onSearch: () => context.go(Routes.search),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ],
+                    const SizedBox(height: PinneSpacing.lg),
+                    TodayHeadline(count: dueCount, calmLine: rotatingLine),
+                    const SizedBox(height: PinneSpacing.md),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TourAnchor(
+                        target: TourTarget.timeChips,
+                        child: _BudgetChoice(selected: budget),
+                      ),
+                    ),
+                    const SizedBox(height: PinneSpacing.md),
+                    if (window.isExpanded)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 6,
+                            child: Column(
+                              children: [
+                                reviewCard,
+                                const SizedBox(height: PinneSpacing.md),
+                                weekStrip,
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: PinneSpacing.xl),
+                          Expanded(
+                            flex: 5,
+                            child: Column(
+                              children: [
+                                planTiles,
+                                const SizedBox(height: PinneSpacing.sm),
+                                const TourAnchor(
+                                  target: TourTarget.saveLink,
+                                  child: CaptureEntryTile(),
+                                ),
+                                const SizedBox(height: PinneSpacing.md),
+                                const ExampleSavesCard(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    else ...[
+                      reviewCard,
+                      const SizedBox(height: PinneSpacing.md),
+                      weekStrip,
+                      const SizedBox(height: PinneSpacing.md),
+                      planTiles,
+                      const SizedBox(height: PinneSpacing.sm),
+                      const TourAnchor(
+                        target: TourTarget.saveLink,
+                        child: CaptureEntryTile(),
+                      ),
+                      const SizedBox(height: PinneSpacing.md),
+                      const ExampleSavesCard(),
+                    ],
+                    if ((data?.entries.length ?? 0) > 1) ...[
+                      const SizedBox(height: PinneSpacing.md),
+                      Text(
+                        '${data!.entries.length - 1} more fit this session. '
+                        'Durations are estimates.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PinneColors.muted,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
         ),

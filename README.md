@@ -175,7 +175,9 @@ sign-in or reconnect. Code: `pinne_flutter/lib/features/capture/` and
   app (WorkManager) is not built yet.
 - **Manual:** paste a link or type a note on Today. Captures show under
   Collections, in Saved.
-- **Web:** has no durable local store, so capture is hidden there.
+- **Web:** manual capture uses the same SQLite outbox persisted in IndexedDB.
+  The browser confirms a save only after the IndexedDB write is flushed; web
+  has no share-sheet entry point, so visitors paste a link or note on Today.
 
 ### iOS Share Extension (not built yet)
 

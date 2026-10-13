@@ -27,6 +27,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       body: PinnePage(
+        maxWidth: 760,
         leading: IconButton.filledTonal(
           tooltip: 'Back',
           onPressed: () =>

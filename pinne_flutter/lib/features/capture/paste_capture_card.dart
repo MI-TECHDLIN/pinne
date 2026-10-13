@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:pinne_capture/pinne_capture.dart';
 
 import '../../core/server_client.dart';
 import '../../shell/pill_nav_bar.dart';
+import '../../shell/responsive.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/glass_card.dart';
 import '../settings/profile_provider.dart';
@@ -27,32 +29,8 @@ class CaptureEntryTile extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         key: const ValueKey('capture-entry'),
-        onTap: () => showModalBottomSheet<void>(
-          context: context,
-          // On the root navigator the sheet sits above the shell, so the
-          // floating nav can no longer paint over its fields.
-          useRootNavigator: true,
-          isScrollControlled: true,
-          useSafeArea: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) {
-            final media = MediaQuery.of(context);
-            // Float above the nav, or above the keyboard that hides it.
-            final bottom = math.max(
-              media.viewInsets.bottom,
-              FloatingPillNav.extentOf(media),
-            );
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                PinneSpacing.sm,
-                0,
-                PinneSpacing.sm,
-                bottom + PinneSpacing.sm,
-              ),
-              child: const _ManualCaptureSheet(),
-            );
-          },
-        ),
+        mouseCursor: SystemMouseCursors.click,
+        onTap: () => _showCapture(context),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: PinneSpacing.lg,
@@ -93,6 +71,51 @@ class CaptureEntryTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _showCapture(BuildContext context) {
+    final wide = !PinneBreakpoints.of(context).isCompact;
+    if (kIsWeb || wide) {
+      return showDialog<void>(
+        context: context,
+        useRootNavigator: true,
+        builder: (context) => Dialog(
+          key: const ValueKey('capture-dialog'),
+          insetPadding: const EdgeInsets.all(PinneSpacing.xl),
+          backgroundColor: Colors.transparent,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: const _ManualCaptureSheet(),
+          ),
+        ),
+      );
+    }
+    return showModalBottomSheet<void>(
+      context: context,
+      // On the root navigator the sheet sits above the shell, so the
+      // floating nav can no longer paint over its fields.
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final media = MediaQuery.of(context);
+        // Float above the nav, or above the keyboard that hides it.
+        final bottom = math.max(
+          media.viewInsets.bottom,
+          FloatingPillNav.extentOf(media),
+        );
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            PinneSpacing.sm,
+            0,
+            PinneSpacing.sm,
+            bottom + PinneSpacing.sm,
+          ),
+          child: const _ManualCaptureSheet(),
+        );
+      },
     );
   }
 }
@@ -152,7 +175,7 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
     _onContentChanged(_content.text);
   }
 
-  void _save() {
+  Future<void> _save() async {
     final store = ref.read(captureStoreProvider);
     if (store == null || _input.isEmpty) return;
     final link = _input.link;
@@ -161,6 +184,8 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
       final earlier = link == null ? null : store.findSaved(link);
       duplicate = earlier != null;
       store.save(_input, intention: _why.text);
+      await store.persist();
+      if (!mounted) return;
       final sync = ref.read(outboxSyncProvider);
       if (sync != null) unawaited(sync.drain());
       final syncLine = ref.read(signedInProvider)
@@ -219,6 +244,8 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
             maxLines: 4,
             maxLength: CaptureLimits.maxTextLength,
             keyboardType: TextInputType.url,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _save(),
             decoration: InputDecoration(
               hintText: 'Paste a link or type a note',
               counterText: '',
@@ -255,6 +282,8 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
               maxLines: 3,
               maxLength: CaptureLimits.maxIntentionLength,
               textCapitalization: TextCapitalization.sentences,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _save(),
               decoration: const InputDecoration(
                 hintText: 'Why did you save this? (optional)',
                 counterText: '',

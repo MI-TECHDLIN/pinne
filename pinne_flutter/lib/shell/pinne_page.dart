@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/pinne_tokens.dart';
 import '../ui/glass_card.dart';
+import 'responsive.dart';
 
 export '../ui/glass_card.dart';
 
@@ -15,6 +16,7 @@ class PinnePage extends StatelessWidget {
     this.subtitle,
     this.leading,
     this.children = const [],
+    this.maxWidth,
   });
 
   /// Shown above the headline, such as a back button on pushed screens.
@@ -25,10 +27,18 @@ class PinnePage extends StatelessWidget {
   final String? subtitle;
   final List<Widget> children;
 
+  /// Overrides the shared readable width for unusually dense or narrow pages.
+  final double? maxWidth;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final display = theme.textTheme.displaySmall;
+    final window = PinneBreakpoints.of(context);
+    final horizontal = window.pageGutter;
+    final bottom = window.isExpanded
+        ? PinneSpacing.xxl
+        : PinneSpacing.navClearance;
     return DecoratedBox(
       decoration: const BoxDecoration(
         gradient: RadialGradient(
@@ -40,44 +50,58 @@ class PinnePage extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            PinneSpacing.gutter,
+          padding: EdgeInsets.fromLTRB(
+            horizontal,
             PinneSpacing.xl,
-            PinneSpacing.gutter,
-            PinneSpacing.navClearance,
+            horizontal,
+            bottom,
           ),
           children: [
-            if (leading != null) ...[
-              Align(alignment: Alignment.centerLeft, child: leading),
-              const SizedBox(height: PinneSpacing.sm),
-            ],
-            Semantics(
-              header: true,
-              child: Text.rich(
-                TextSpan(
-                  text: headline,
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: maxWidth ?? window.defaultMaxWidth,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (headlineBold != null)
-                      TextSpan(
-                        text: ' $headlineBold',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                    if (leading != null) ...[
+                      Align(alignment: Alignment.centerLeft, child: leading),
+                      const SizedBox(height: PinneSpacing.sm),
+                    ],
+                    Semantics(
+                      header: true,
+                      child: Text.rich(
+                        TextSpan(
+                          text: headline,
+                          children: [
+                            if (headlineBold != null)
+                              TextSpan(
+                                text: ' $headlineBold',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                          ],
+                        ),
+                        style: display,
                       ),
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: PinneSpacing.sm),
+                      Text(
+                        subtitle!,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: PinneColors.muted,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: PinneSpacing.xl),
+                    ...children,
                   ],
                 ),
-                style: display,
               ),
             ),
-            if (subtitle != null) ...[
-              const SizedBox(height: PinneSpacing.sm),
-              Text(
-                subtitle!,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: PinneColors.muted,
-                ),
-              ),
-            ],
-            const SizedBox(height: PinneSpacing.xl),
-            ...children,
           ],
         ),
       ),

@@ -167,6 +167,7 @@ class _DayCell extends StatelessWidget {
       label: parts.join(', '),
       excludeSemantics: true,
       child: InkWell(
+        mouseCursor: SystemMouseCursors.click,
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: SizedBox(
