@@ -54,6 +54,12 @@ void main() {
       find.byKey(const ValueKey('email-delivery-unavailable')),
       findsOneWidget,
     );
+    expect(find.text('Create account'), findsNothing);
+    expect(find.text('Forgot password?'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('email-login-only-submit')),
+      findsOneWidget,
+    );
 
     await tester.tap(guestButton);
     await tester.pumpAndSettle();
@@ -124,5 +130,11 @@ void main() {
       find.byKey(const ValueKey('guest-sign-in-button')),
       findsNothing,
     );
+    expect(
+      find.byKey(const ValueKey('email-delivery-unavailable')),
+      findsNothing,
+    );
+    expect(find.text('Forgot password?'), findsOneWidget);
+    expect(find.text('Sign up'), findsOneWidget);
   });
 }

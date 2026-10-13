@@ -23,6 +23,24 @@ class SignInScreen extends ConsumerStatefulWidget {
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   bool _guestLoading = false;
+  late final EmailAuthController _loginOnlyController;
+
+  @override
+  void initState() {
+    super.initState();
+    _loginOnlyController = EmailAuthController(
+      client: ref.read(clientProvider),
+      startScreen: EmailFlowScreen.login,
+      onAuthenticated: _closeAfterAuthentication,
+      onError: _showSignInError,
+    );
+  }
+
+  @override
+  void dispose() {
+    _loginOnlyController.dispose();
+    super.dispose();
+  }
 
   Future<void> _signInAsGuest() async {
     setState(() => _guestLoading = true);
@@ -97,9 +115,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   if (!emailAvailable) ...[
                     const SizedBox(height: PinneSpacing.md),
                     const Text(
-                      'New-account email codes are not available on this '
-                      'server. Use guest access now, or sign in with the demo '
-                      'account from the testing instructions.',
+                      'Email sign-up opens soon - try Pinne as a guest.',
                       key: ValueKey('email-delivery-unavailable'),
                       textAlign: TextAlign.center,
                       style: TextStyle(color: PinneColors.muted),
@@ -111,20 +127,31 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       dontHaveAnAccount: 'New to Pinne?',
                       alreadyHaveAnAccount: 'Have an account?',
                     ),
-                    child: SignInWidget(
-                      client: client,
-                      disableAnonymousSignInWidget: true,
-                      disableGoogleSignInWidget: !googleSignInConfigured,
-                      emailSignInWidget: EmailSignInWidget(
-                        client: client,
-                        startScreen: widget.createAccount
-                            ? EmailFlowScreen.startRegistration
-                            : EmailFlowScreen.login,
-                        onAuthenticated: _closeAfterAuthentication,
-                        onError: _showSignInError,
-                      ),
-                      onAuthenticated: _closeAfterAuthentication,
-                      onError: _showSignInError,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (emailAvailable)
+                          EmailSignInWidget(
+                            client: client,
+                            startScreen: widget.createAccount
+                                ? EmailFlowScreen.startRegistration
+                                : EmailFlowScreen.login,
+                            onAuthenticated: _closeAfterAuthentication,
+                            onError: _showSignInError,
+                          )
+                        else
+                          _EmailLoginOnly(controller: _loginOnlyController),
+                        if (googleSignInConfigured) ...[
+                          const SizedBox(height: PinneSpacing.lg),
+                          SignInWidget(
+                            client: client,
+                            disableAnonymousSignInWidget: true,
+                            disableEmailSignInWidget: true,
+                            onAuthenticated: _closeAfterAuthentication,
+                            onError: _showSignInError,
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
@@ -153,4 +180,51 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       kind: ToastKind.error,
     );
   }
+}
+
+class _EmailLoginOnly extends StatelessWidget {
+  const _EmailLoginOnly({required this.controller});
+
+  final EmailAuthController controller;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: controller,
+    builder: (context, child) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          key: const ValueKey('email-login-only-email'),
+          controller: controller.emailController,
+          enabled: !controller.isLoading,
+          keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
+          decoration: const InputDecoration(labelText: 'Email'),
+        ),
+        const SizedBox(height: PinneSpacing.sm),
+        TextField(
+          key: const ValueKey('email-login-only-password'),
+          controller: controller.passwordController,
+          enabled: !controller.isLoading,
+          obscureText: true,
+          autofillHints: const [AutofillHints.password],
+          onSubmitted: (_) => _canSubmit ? controller.login() : null,
+          decoration: const InputDecoration(labelText: 'Password'),
+        ),
+        const SizedBox(height: PinneSpacing.md),
+        FilledButton(
+          key: const ValueKey('email-login-only-submit'),
+          onPressed: _canSubmit ? controller.login : null,
+          child: controller.isLoading
+              ? const PinneBrandedLoader(size: 20, label: 'Signing in')
+              : const Text('Sign in'),
+        ),
+      ],
+    ),
+  );
+
+  bool get _canSubmit =>
+      !controller.isLoading &&
+      controller.emailController.text.isNotEmpty &&
+      controller.passwordController.text.isNotEmpty;
 }
