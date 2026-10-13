@@ -237,12 +237,12 @@ class HookCard extends StatelessWidget {
         padding: const EdgeInsets.only(top: 22),
         child: Row(
           children: [
-            Icon(icon, color: color, size: 34),
+            Icon(icon, color: color, size: 38),
             const SizedBox(width: 18),
             Expanded(
               child: Text(
                 text,
-                style: Words.body(29).copyWith(
+                style: Words.body(34).copyWith(
                   color: pinne ? PinneColors.text : PinneColors.muted,
                   height: 1.25,
                 ),
@@ -266,7 +266,7 @@ class HookCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Words.title(44).copyWith(
+                  style: Words.title(52).copyWith(
                     color: pinne ? PinneColors.text : PinneColors.muted,
                   ),
                 ),
@@ -297,14 +297,14 @@ class HookCard extends StatelessWidget {
               child: fadeRise(
                 t,
                 9.6,
-                Text('Why not just use bookmarks?', style: Words.title(70)),
+                Text('Why not just use bookmarks?', style: Words.title(80)),
               ),
             ),
           ),
           Positioned(
-            left: 170,
+            left: 120,
             top: 250,
-            width: 760,
+            width: 800,
             child: column(9.9, 'Saved in each app', const [
               'Scattered across apps',
               'No note on why you saved it',
@@ -313,9 +313,9 @@ class HookCard extends StatelessWidget {
             ], false),
           ),
           Positioned(
-            left: 990,
+            left: 1000,
             top: 250,
-            width: 760,
+            width: 800,
             child: column(11.0, 'Pinne', const [
               'One home for saves from every app',
               'Your why, saved with it',
@@ -335,7 +335,7 @@ class HookCard extends StatelessWidget {
                 Text(
                   'A browser study found people add bookmarks far faster '
                   'than they delete them. Cockburn et al., 2003',
-                  style: Words.body(22).copyWith(color: PinneColors.lilac),
+                  style: Words.body(26).copyWith(color: PinneColors.lilac),
                 ),
                 dy: 10,
               ),

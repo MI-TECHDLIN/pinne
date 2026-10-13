@@ -234,7 +234,11 @@ class Guide {
     if (callout == null || t < callout.start || t > callout.end) return;
     final target = callout.target;
     if (target != null && target.evaluate().isNotEmpty) {
-      callout.app = appRect(target);
+      final now = appRect(target);
+      final moved = (now.center - callout.app.center).distance > 1.5;
+      callout.app = now;
+      // Drawn this frame at the old place; check once it has caught up.
+      if (moved) return;
     }
     final context = callout.key.currentContext;
     if (context == null || t < callout.start + 0.5) return;
@@ -399,6 +403,9 @@ class Guide {
     Offset offset = Offset.zero,
     Shot? shot,
   }) async {
+    // A drag changes what the visible callout points at; let it finish.
+    final last = current;
+    if (last != null) await film.until(last.end + _calloutFade);
     if (shot != null) camera.move(shot, start: t, seconds: 0.7);
     await glideTo(
       target,

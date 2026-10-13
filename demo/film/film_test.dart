@@ -19,13 +19,12 @@ void main() {
 
   shoot('01_hook', (film) async {
     final app = FilmApp(
-      firstRun: true,
-      onboarded: true,
-      client: DemoClient(displayName: ''),
+      freshGuest: true,
+      client: DemoClient(displayName: '', guest: true),
     );
     // The screen waits below the canvas while saves pile up and the
     // bookmarks comparison plays, then rises in beside the name with the
-    // real sign-in screen.
+    // first-visit tour of a new guest.
     final guide = film.guided(
       const Shot(Offset(206, 446), Offset(1350, 1700), 1),
     );
@@ -34,11 +33,6 @@ void main() {
     await film.open(Stage(extra: [HookCard()], screen: app.widget()));
     await settle(film.tester);
     await film.until(18.3);
-    await guide.step(
-      key('guest-sign-in-button'),
-      'No account needed: try it as a guest',
-      zoom: 1.5,
-    );
     await guide.waitFor(key('tour-next'));
     await film.hold(0.6);
     await guide.step(
@@ -77,7 +71,16 @@ void main() {
       zoom: 1.6,
     );
     capture.comeOnline();
-    await guide.waitFor(key('accept-${_sid}f1'));
+    final first = key('accept-${_sid}f1');
+    await guide.waitFor(first);
+    await film.hold(0.4);
+    // Up to the card's suggestions, as a person scrolls.
+    await guide.drag(
+      find.text('Synced'),
+      Offset(0, -(guide.appRect(first).center.dy - 560)),
+      shot: Shot.home(),
+    );
+    await film.hold(0.2);
     await guide.step(
       key('accept-${_sid}f1'),
       'AI suggests a collection. You decide.',
@@ -109,7 +112,7 @@ void main() {
     await settle(film.tester, 2);
     await film.until(0.3);
     await guide.step(
-      find.text('Plan my week'),
+      button('Plan my week'),
       'Plan my week finds free slots',
       zoom: 1.5,
     );
@@ -125,7 +128,7 @@ void main() {
     await guide.drag(checked, const Offset(0, -380), shot: Shot.home());
     await film.hold(0.3);
     await guide.step(
-      find.text('Accept plan'),
+      button('Accept plan'),
       'Accept, and the sessions go in your calendar',
       zoom: 1.4,
     );

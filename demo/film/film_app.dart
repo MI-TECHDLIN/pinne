@@ -47,7 +47,7 @@ class FilmApp {
     DemoProgressApi? progress,
     CaptureStore? store,
     bool firstRun = false,
-    bool onboarded = false,
+    bool freshGuest = false,
     List<String> recentSearches = const [],
   }) : client = client ?? DemoClient(),
        capture = capture ?? DemoCaptureApi(),
@@ -61,13 +61,15 @@ class FilmApp {
         captureApiProvider.overrideWithValue(this.capture),
         signedInProvider.overrideWith(() => _SignedIn(!firstRun)),
         onboardingStoreProvider.overrideWithValue(
-          MemoryOnboardingStore(completed: !firstRun || onboarded),
+          MemoryOnboardingStore(completed: !firstRun),
         ),
         guestSignInActionProvider.overrideWithValue(() async {
           await Future<void>.delayed(const Duration(milliseconds: 500));
           (container.read(signedInProvider.notifier) as _SignedIn).signIn();
         }),
-        tourStoreProvider.overrideWithValue(MemoryTourStore(seen: !firstRun)),
+        tourStoreProvider.overrideWithValue(
+          MemoryTourStore(seen: !firstRun && !freshGuest),
+        ),
         todayClockProvider.overrideWithValue(Sample.filmNow),
         greetingClockProvider.overrideWithValue(() => Sample.filmNow),
         // "Start small. Stay curious.", the same line in every scene.
