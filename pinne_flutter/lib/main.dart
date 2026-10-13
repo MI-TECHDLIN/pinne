@@ -9,6 +9,7 @@ import 'features/capture/open_capture_store.dart';
 import 'features/capture/share_entry.dart';
 import 'features/onboarding/onboarding_store.dart';
 import 'features/tour/tour_store.dart';
+import 'features/today/today_greeting.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,9 @@ void main() async {
         ),
         tourStoreProvider.overrideWithValue(
           SharedPreferencesTourStore(preferences),
+        ),
+        greetingStoreProvider.overrideWithValue(
+          SharedPreferencesGreetingStore(preferences),
         ),
       ],
       child: const PinneApp(),

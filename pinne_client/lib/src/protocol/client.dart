@@ -14,6 +14,8 @@ import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
 import 'package:pinne_client/src/protocol/ai/ai_settings.dart' as _iqo53bjr;
 import 'package:pinne_client/src/protocol/ai/ai_suggestion.dart' as _iq5krdy3;
+import 'package:pinne_client/src/protocol/auth/account_summary.dart'
+    as _i8fiinuh;
 import 'package:pinne_client/src/protocol/calendar/calendar_connection_view.dart'
     as _i0t8t4zu;
 import 'package:pinne_client/src/protocol/calendar/calendar_route_status.dart'
@@ -162,6 +164,14 @@ class EndpointAccount extends _isc.EndpointRef {
     'isGuest',
     {},
   );
+
+  /// Details for the current owner only. No owner id is accepted from clients.
+  _ida.Future<_i8fiinuh.AccountSummary> summary() =>
+      caller.callServerEndpoint<_i8fiinuh.AccountSummary>(
+        'account',
+        'summary',
+        {},
+      );
 }
 
 /// Creates device-bound guest accounts with ordinary Serverpod auth user ids.

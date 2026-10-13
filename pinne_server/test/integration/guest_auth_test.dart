@@ -68,6 +68,10 @@ void main() {
 
           expect(item.ownerId, firstAuth.authUserId);
           expect(await endpoints.account.isGuest(firstGuest), isTrue);
+          final guestSummary = await endpoints.account.summary(firstGuest);
+          expect(guestSummary.type, ProfileAccountType.guest);
+          expect(guestSummary.email, isNull);
+          expect(guestSummary.memberSince, isNotNull);
           expect(await endpoints.account.isGuest(registered), isFalse);
           expect(await endpoints.item.get(secondGuest, item.id!), isNull);
           expect(
@@ -127,6 +131,16 @@ void main() {
             password: password,
           );
           expect(login.authUserId, first.authUserId);
+          final accountSummary = await endpoints.account.summary(
+            sessionBuilder.copyWith(
+              authentication: AuthenticationOverride.authenticationInfo(
+                login.authUserId.uuid,
+                {},
+              ),
+            ),
+          );
+          expect(accountSummary.type, isNot(ProfileAccountType.guest));
+          expect(accountSummary.email, email);
           expect(
             await endpoints.item.list(
               sessionBuilder.copyWith(

@@ -13,7 +13,9 @@ import '../../ui/pinne_loading.dart';
 
 /// Guest-first sign-in, with email and optional Google for durable accounts.
 class SignInScreen extends ConsumerStatefulWidget {
-  const SignInScreen({super.key});
+  const SignInScreen({super.key, this.createAccount = false});
+
+  final bool createAccount;
 
   @override
   ConsumerState<SignInScreen> createState() => _SignInScreenState();
@@ -39,6 +41,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final emailDelivery = ref.watch(emailDeliveryAvailableProvider);
     final emailAvailable = emailDelivery.asData?.value ?? false;
     final client = ref.watch(clientProvider);
+    final alreadySignedIn = ref.watch(signedInProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Sign in')),
       body: SafeArea(
@@ -51,36 +54,46 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Start saving in one tap',
+                    alreadySignedIn
+                        ? 'Choose an account'
+                        : 'Start saving in one tap',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: PinneSpacing.sm),
-                  const Text(
-                    'You can try every core feature without setting up an '
-                    'account.',
+                  Text(
+                    alreadySignedIn
+                        ? 'Signing in or creating an account switches away '
+                              'from your guest account. Guest saves do not '
+                              'transfer.'
+                        : 'You can try every core feature without setting up '
+                              'an account.',
+                    key: alreadySignedIn
+                        ? const ValueKey('guest-account-switch-notice')
+                        : null,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: PinneColors.muted),
+                    style: const TextStyle(color: PinneColors.muted),
                   ),
                   const SizedBox(height: PinneSpacing.xl),
-                  FilledButton(
-                    key: const ValueKey('guest-sign-in-button'),
-                    style: pinnePrimaryActionStyle(),
-                    onPressed: _guestLoading ? null : _signInAsGuest,
-                    child: _guestLoading
-                        ? const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              PinneBrandedLoader(
-                                size: 20,
-                                label: 'Starting guest session',
-                              ),
-                              SizedBox(width: PinneSpacing.sm),
-                              Text('Starting…'),
-                            ],
-                          )
-                        : const Text('Try without an account'),
-                  ),
+                  if (!alreadySignedIn)
+                    FilledButton(
+                      key: const ValueKey('guest-sign-in-button'),
+                      style: pinnePrimaryActionStyle(),
+                      onPressed: _guestLoading ? null : _signInAsGuest,
+                      child: _guestLoading
+                          ? const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                PinneBrandedLoader(
+                                  size: 20,
+                                  label: 'Starting guest session',
+                                ),
+                                SizedBox(width: PinneSpacing.sm),
+                                Text('Starting…'),
+                              ],
+                            )
+                          : const Text('Try without an account'),
+                    ),
                   if (!emailAvailable) ...[
                     const SizedBox(height: PinneSpacing.md),
                     const Text(
@@ -104,7 +117,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       disableGoogleSignInWidget: !googleSignInConfigured,
                       emailSignInWidget: EmailSignInWidget(
                         client: client,
-                        startScreen: EmailFlowScreen.login,
+                        startScreen: widget.createAccount
+                            ? EmailFlowScreen.startRegistration
+                            : EmailFlowScreen.login,
                         onAuthenticated: _closeAfterAuthentication,
                         onError: _showSignInError,
                       ),

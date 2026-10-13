@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'pinne_tokens.dart';
 
@@ -21,12 +20,14 @@ ThemeData pinneDarkTheme() {
     outlineVariant: PinneColors.line,
   );
 
-  final body = GoogleFonts.plusJakartaSansTextTheme(
-    ThemeData.dark().textTheme,
-  ).apply(bodyColor: PinneColors.text, displayColor: PinneColors.text);
+  final body = ThemeData.dark().textTheme.apply(
+    fontFamily: 'Plus Jakarta Sans',
+    bodyColor: PinneColors.text,
+    displayColor: PinneColors.text,
+  );
 
-  TextStyle? headline(TextStyle? base, FontWeight weight) => GoogleFonts.outfit(
-    textStyle: base,
+  TextStyle? headline(TextStyle? base, FontWeight weight) => base?.copyWith(
+    fontFamily: 'Outfit',
     fontWeight: weight,
     letterSpacing: -0.4,
     color: PinneColors.text,

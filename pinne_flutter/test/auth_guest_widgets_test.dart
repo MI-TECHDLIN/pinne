@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/auth/sign_in_screen.dart';
@@ -26,8 +25,6 @@ Client _client() =>
       ..authSessionManager = FlutterAuthSessionManager();
 
 void main() {
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
-
   testWidgets('sign-in screen offers and runs the guest path', (tester) async {
     await tester.binding.setSurfaceSize(const Size(500, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -96,5 +93,36 @@ void main() {
     );
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('guest account switch never offers a second guest account', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(500, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          clientProvider.overrideWithValue(_client()),
+          signedInProvider.overrideWith(_SignedIn.new),
+          emailDeliveryAvailableProvider.overrideWith((ref) async => true),
+        ],
+        child: MaterialApp(
+          theme: pinneDarkTheme(),
+          home: const SignInScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('guest-account-switch-notice')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('guest-sign-in-button')),
+      findsNothing,
+    );
   });
 }

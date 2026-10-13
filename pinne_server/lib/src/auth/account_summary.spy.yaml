@@ -1,0 +1,6 @@
+### Owner-only authentication details safe to show on the profile screen.
+class: AccountSummary
+fields:
+  type: ProfileAccountType
+  email: String?
+  memberSince: DateTime

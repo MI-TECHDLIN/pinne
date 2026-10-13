@@ -20,6 +20,7 @@ import '../progress/celebration.dart';
 import '../settings/profile_provider.dart';
 import '../tour/tour_controller.dart';
 import 'today_providers.dart';
+import 'today_greeting.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key});
@@ -34,6 +35,8 @@ class TodayScreen extends ConsumerWidget {
     final overview = overviewState.asData?.value;
     final now = ref.watch(todayClockProvider);
     final data = queue.asData?.value;
+    final dueCount = data?.entries.length ?? 0;
+    final rotatingLine = ref.watch(todayGreetingProvider);
     final top = data?.entries.firstOrNull;
     final displayName = profile?.displayName.trim();
 
@@ -62,14 +65,15 @@ class TodayScreen extends ConsumerWidget {
                 _TodayHeader(
                   seed: avatar.seed,
                   palette: avatar.palette,
-                  greeting: _greeting(now.hour),
+                  greeting: dueCount == 0 ? _greeting(now.hour) : rotatingLine,
                   name: displayName == null || displayName.isEmpty
                       ? 'Guest'
                       : displayName,
+                  onProfile: () => context.push(Routes.profile),
                   onSearch: () => context.go(Routes.search),
                 ),
                 const SizedBox(height: PinneSpacing.lg),
-                _QueueHeadline(count: data?.entries.length ?? 0),
+                TodayHeadline(count: dueCount, calmLine: rotatingLine),
                 const SizedBox(height: PinneSpacing.md),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -272,6 +276,7 @@ class _TodayHeader extends StatelessWidget {
     required this.palette,
     required this.greeting,
     required this.name,
+    required this.onProfile,
     required this.onSearch,
   });
 
@@ -279,25 +284,35 @@ class _TodayHeader extends StatelessWidget {
   final int palette;
   final String greeting;
   final String name;
+  final VoidCallback onProfile;
   final VoidCallback onSearch;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: const BoxDecoration(
-            color: PinneColors.glass,
-            shape: BoxShape.circle,
-          ),
-          child: ClipOval(
-            child: RibbonSpirit(
-              seed: seed,
-              palette: palette,
-              size: 48,
-              animate: false,
+        Semantics(
+          button: true,
+          label: 'Open profile',
+          child: InkWell(
+            key: const ValueKey('today-profile'),
+            onTap: onProfile,
+            customBorder: const CircleBorder(),
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: PinneColors.glass,
+                shape: BoxShape.circle,
+              ),
+              child: ClipOval(
+                child: RibbonSpirit(
+                  seed: seed,
+                  palette: palette,
+                  size: 48,
+                  animate: false,
+                ),
+              ),
             ),
           ),
         ),
@@ -308,6 +323,8 @@ class _TodayHeader extends StatelessWidget {
             children: [
               Text(
                 greeting,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: PinneColors.muted,
                 ),
@@ -337,32 +354,46 @@ class _TodayHeader extends StatelessWidget {
   }
 }
 
-class _QueueHeadline extends StatelessWidget {
-  const _QueueHeadline({required this.count});
+class TodayHeadline extends StatelessWidget {
+  const TodayHeadline({
+    super.key,
+    required this.count,
+    required this.calmLine,
+  });
 
   final int count;
+  final String calmLine;
 
   @override
   Widget build(BuildContext context) {
     final display = Theme.of(context).textTheme.displaySmall;
-    final prefix = count == 0
-        ? 'A calm day for'
-        : '${_countWord(count)} ${count == 1 ? 'thing' : 'things'} worth';
-    final bold = count == 0 ? 'curiosity' : 'revisiting';
+    final prefix =
+        '${_countWord(count)} ${count == 1 ? 'thing' : 'things'} worth';
     return Semantics(
       header: true,
-      child: Text.rich(
-        TextSpan(
-          text: '$prefix\n',
-          children: [
-            TextSpan(
-              text: bold,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+      child: count == 0
+          ? Text(
+              calmLine,
+              key: const ValueKey('today-calm-headline'),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: display,
+            )
+          : Text.rich(
+              TextSpan(
+                text: '$prefix\n',
+                children: const [
+                  TextSpan(
+                    text: 'revisiting',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              key: const ValueKey('today-due-headline'),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: display,
             ),
-          ],
-        ),
-        style: display,
-      ),
     );
   }
 

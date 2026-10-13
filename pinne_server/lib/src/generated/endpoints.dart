@@ -311,6 +311,16 @@ class Endpoints extends _is.EndpointDispatch {
               ) async => (endpoints['account'] as _ii6ycf6v.AccountEndpoint)
                   .isGuest(session),
         ),
+        'summary': _is.MethodConnector(
+          name: 'summary',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _ii6ycf6v.AccountEndpoint)
+                  .summary(session),
+        ),
       },
     );
     connectors['anonymousIdp'] = _is.EndpointConnector(

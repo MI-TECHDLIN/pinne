@@ -12,6 +12,7 @@ import 'features/onboarding/onboarding_store.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/search/search_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/settings/profile_screen.dart';
 import 'features/today/today_screen.dart';
 import 'shell/app_shell.dart';
 import 'ui/feedback/error_state.dart';
@@ -25,6 +26,7 @@ abstract final class Routes {
   static const search = '/search';
   static const progress = '/progress';
   static const settings = '/settings';
+  static const profile = '/profile';
   static const signIn = '/sign-in';
   static const onboarding = '/onboarding';
   static const ribbonGallery = '/debug/ribbon-spirit';
@@ -84,8 +86,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
+        path: Routes.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
         path: Routes.signIn,
-        builder: (context, state) => const SignInScreen(),
+        builder: (context, state) => SignInScreen(
+          createAccount: state.uri.queryParameters['mode'] == 'create',
+        ),
       ),
     ],
   );

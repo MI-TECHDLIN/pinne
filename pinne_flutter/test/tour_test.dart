@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/app.dart';
 import 'package:pinne_flutter/core/server_client.dart';
@@ -10,6 +9,7 @@ import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
 import 'package:pinne_flutter/features/settings/profile_provider.dart';
 import 'package:pinne_flutter/features/today/today_providers.dart';
+import 'package:pinne_flutter/features/today/today_greeting.dart';
 import 'package:pinne_flutter/features/today/today_screen.dart';
 import 'package:pinne_flutter/features/tour/tour_controller.dart';
 import 'package:pinne_flutter/features/tour/tour_store.dart';
@@ -42,6 +42,7 @@ Widget _app(TourStore store) => ProviderScope(
     signedInProvider.overrideWith(_SignedOut.new),
     motionPreferenceProvider.overrideWith(_AlwaysReduced.new),
     tourStoreProvider.overrideWithValue(store),
+    greetingIndexPickerProvider.overrideWithValue((_) => 0),
   ],
   child: const PinneApp(),
 );
@@ -61,7 +62,6 @@ Future<void> _setSize(WidgetTester tester, Size size, {double text = 1}) async {
 }
 
 void main() {
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
   setUp(
     () => VisibilityDetectorController.instance.updateInterval = Duration.zero,
   );
@@ -145,7 +145,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(_overlay, findsNothing);
     expect(store.seen, isTrue);
-    expect(find.textContaining('curiosity'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('today-calm-headline')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Settings can show the tour again', (tester) async {
@@ -160,7 +163,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(_overlay, findsOneWidget);
     expect(_title(tester), 'Welcome to Pinne');
-    expect(find.textContaining('curiosity'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('today-calm-headline')),
+      findsOneWidget,
+    );
   });
 
   const screens = {
@@ -259,6 +265,7 @@ void main() {
             CaptureStore(sqlite3.openInMemory()),
           ),
           tourStoreProvider.overrideWithValue(MemoryTourStore()),
+          greetingIndexPickerProvider.overrideWithValue((_) => 0),
           todayClockProvider.overrideWithValue(DateTime(2026, 10, 7, 17, 30)),
           profileProvider.overrideWith(
             (_) async => PinneProfile(
