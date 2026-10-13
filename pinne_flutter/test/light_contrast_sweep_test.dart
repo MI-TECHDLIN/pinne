@@ -7,6 +7,7 @@ import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
 import 'package:pinne_flutter/features/onboarding/onboarding_store.dart';
+import 'package:pinne_flutter/features/search/search_history.dart';
 import 'package:pinne_flutter/features/today/today_greeting.dart';
 import 'package:pinne_flutter/features/tour/tour_store.dart';
 import 'package:pinne_flutter/theme/theme_mode.dart';
@@ -38,9 +39,15 @@ void main() {
     () => VisibilityDetectorController.instance.updateInterval = Duration.zero,
   );
 
-  Widget app({bool onboarded = true, bool toured = true}) => ProviderScope(
+  Widget app({
+    bool onboarded = true,
+    bool toured = true,
+    List overrides = const [],
+  }) => ProviderScope(
     overrides: [
+      ...overrides,
       serverUrlProvider.overrideWithValue('http://localhost:8080/'),
+      emailDeliveryAvailableProvider.overrideWith((ref) async => false),
       captureStoreProvider.overrideWithValue(
         CaptureStore(sqlite3.openInMemory()),
       ),
@@ -58,16 +65,35 @@ void main() {
     child: const PinneApp(),
   );
 
+  Future<void> tall(WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(412, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+  }
+
   Future<void> phone(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(412, 915));
     addTearDown(() => tester.binding.setSurfaceSize(null));
   }
 
+  Future<void> check(
+    WidgetTester tester,
+    String where, {
+    Finder? within,
+  }) async {
+    await expectReadableText(tester, within: within, reason: where);
+  }
+
+  Future<void> tapAndSettle(WidgetTester tester, Finder finder) async {
+    await tester.ensureVisible(finder.first);
+    await tester.pumpAndSettle();
+    await tester.tap(finder.first);
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('every tab', (tester) async {
-    await phone(tester);
+    await tall(tester);
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
-    final failures = <String>[];
     for (final tab in [
       'today',
       'collections',
@@ -75,19 +101,90 @@ void main() {
       'progress',
       'settings',
     ]) {
-      final key = find.byKey(ValueKey('nav-$tab'));
-      if (key.evaluate().isNotEmpty) {
-        await tester.tap(key);
-        await tester.pumpAndSettle();
-      }
-      failures.add(
-        '[$tab] n=${find.byType(RichText).evaluate().length} texts=${find.byType(Text).evaluate().map((e) => (e.widget as Text).data).take(8).toList()}',
-      );
-      failures.add(
-        '[$tab] ${(await findContrastFailures(tester)).join('\n  ')}',
-      );
+      await tapAndSettle(tester, find.byKey(ValueKey('nav-$tab')));
+      await check(tester, tab);
     }
-    // ignore: avoid_print
-    print(failures.join('\n'));
+  });
+
+  testWidgets('collection detail', (tester) async {
+    await tall(tester);
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    await tapAndSettle(tester, find.byKey(const ValueKey('nav-collections')));
+    await tapAndSettle(
+      tester,
+      find.byWidgetPredicate(
+        (w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('collection-'),
+      ),
+    );
+    expect(find.byTooltip('Back'), findsOneWidget);
+    await check(tester, 'collection detail');
+  });
+
+  testWidgets('search: recent searches and clear dialog', (tester) async {
+    await tall(tester);
+    await tester.pumpWidget(
+      app(
+        overrides: [
+          searchHistoryStoreProvider.overrideWithValue(
+            MemorySearchHistoryStore(['Newest search', 'Older search']),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tapAndSettle(tester, find.byKey(const ValueKey('nav-search')));
+    await check(tester, 'recent searches');
+    await tapAndSettle(
+      tester,
+      find.byKey(const ValueKey('clear-search-history')),
+    );
+    await check(tester, 'clear recent searches dialog');
+  });
+
+  testWidgets('app tour coach marks', (tester) async {
+    await tall(tester);
+    await tester.pumpWidget(app(toured: false));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('tour-callout')), findsOneWidget);
+    var steps = 0;
+    for (var step = 0; step < 12; step++, steps++) {
+      if (find.byKey(const ValueKey('tour-callout')).evaluate().isEmpty) break;
+      await check(
+        tester,
+        'tour step $step',
+        within: find.byKey(const ValueKey('tour-callout')),
+      );
+      final next = find.byKey(const ValueKey('tour-next'));
+      if (next.evaluate().isEmpty) break;
+      await tester.tap(next);
+      await tester.pumpAndSettle();
+    }
+    expect(steps, greaterThan(1));
+  });
+
+  testWidgets('onboarding pages', (tester) async {
+    await phone(tester);
+    await tester.pumpWidget(app(onboarded: false));
+    await tester.pumpAndSettle();
+    for (var page = 0; page < 3; page++) {
+      await check(tester, 'onboarding page $page');
+      await tester.drag(find.byType(PageView), const Offset(-400, 0));
+      await tester.pumpAndSettle();
+    }
+  });
+
+  testWidgets('guest profile', (tester) async {
+    await tall(tester);
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    await tapAndSettle(tester, find.byKey(const ValueKey('nav-settings')));
+    await tapAndSettle(
+      tester,
+      find.byKey(const ValueKey('settings-profile-link')),
+    );
+    await check(tester, 'guest profile');
   });
 }

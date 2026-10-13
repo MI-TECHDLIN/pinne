@@ -164,5 +164,13 @@ void main() {
       find.byType(Scaffold),
       matchesGoldenFile('../../docs/light-theme/profile.png'),
     );
+    final signOut = find.byKey(const ValueKey('profile-sign-out'));
+    await tester.ensureVisible(signOut);
+    await tester.pumpAndSettle();
+    await expectReadableText(tester, reason: 'profile, scrolled');
+    await tester.tap(signOut);
+    await tester.pumpAndSettle();
+    expect(find.text('Sign out?'), findsOneWidget);
+    await expectReadableText(tester, reason: 'sign-out dialog');
   });
 }

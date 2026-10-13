@@ -149,6 +149,7 @@ void main() {
     bool withSearchData = false,
     Brightness brightness = Brightness.dark,
     String? goldenPath,
+    bool golden = true,
   }) async {
     await tester.binding.setSurfaceSize(const Size(412, 915));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -164,12 +165,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
     if (brightness == Brightness.light) await expectReadableText(tester);
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile(
-        goldenPath ?? '../../docs/ui-fidelity/after-$name.png',
-      ),
-    );
+    if (golden) {
+      await expectLater(
+        find.byType(Scaffold).first,
+        matchesGoldenFile(
+          goldenPath ?? '../../docs/ui-fidelity/after-$name.png',
+        ),
+      );
+    }
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
   }
@@ -242,6 +245,29 @@ void main() {
         ),
       ),
       'nav',
+    ),
+  );
+
+  testWidgets(
+    'Search results are readable in Lavender Mist',
+    (tester) => capture(
+      tester,
+      const SearchScreen(),
+      'search-light',
+      withSearchData: true,
+      brightness: Brightness.light,
+      golden: false,
+    ),
+  );
+
+  testWidgets(
+    'Collections are readable in Lavender Mist',
+    (tester) => capture(
+      tester,
+      const CollectionsScreen(),
+      'collections-light',
+      brightness: Brightness.light,
+      golden: false,
     ),
   );
 }

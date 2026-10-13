@@ -48,13 +48,19 @@ class ContrastFailure {
 ///
 /// Text under a lower route, fully transparent, faded by an [Opacity] or
 /// outside the screen is skipped, as are disabled controls (WCAG exempts
-/// them) and text in [skip].
+/// them) and text in [skip]. [within] limits the check to one subtree, for
+/// overlays such as coach marks whose scrim is painted, not a barrier.
 Future<void> expectReadableText(
   WidgetTester tester, {
   Finder? skip,
+  Finder? within,
   String? reason,
 }) async {
-  final failures = await findContrastFailures(tester, skip: skip);
+  final failures = await findContrastFailures(
+    tester,
+    skip: skip,
+    within: within,
+  );
   if (failures.isEmpty) return;
   fail(
     '${reason == null ? '' : '$reason: '}'
@@ -66,6 +72,7 @@ Future<void> expectReadableText(
 Future<List<ContrastFailure>> findContrastFailures(
   WidgetTester tester, {
   Finder? skip,
+  Finder? within,
 }) async {
   final view = tester.binding.renderViews.first;
   final ratio = view.configuration.devicePixelRatio;
@@ -86,9 +93,11 @@ Future<List<ContrastFailure>> findContrastFailures(
 
   final failures = <ContrastFailure>[];
   final seen = <String>{};
+  Finder scoped(Finder finder) =>
+      within == null ? finder : find.descendant(of: within, matching: finder);
   for (final element in [
-    ...find.byType(RichText, skipOffstage: true).evaluate(),
-    ...find.byType(EditableText, skipOffstage: true).evaluate(),
+    ...scoped(find.byType(RichText, skipOffstage: true)).evaluate(),
+    ...scoped(find.byType(EditableText, skipOffstage: true)).evaluate(),
   ]) {
     if (_isSkipped(element, skipped) || !_isOnTopRoute(element)) continue;
     if (_isDisabledControl(element)) continue;
