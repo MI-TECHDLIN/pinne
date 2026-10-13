@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/core/motion.dart';
+import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/collections/collections_screen.dart';
 import 'package:pinne_flutter/features/progress/progress_providers.dart';
@@ -15,6 +16,7 @@ import 'package:pinne_flutter/ui/pinne_loading.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import 'support/golden_theme.dart';
+import 'support/test_account.dart';
 
 void main() {
   setUpAll(() async {
@@ -22,7 +24,10 @@ void main() {
   });
 
   Widget app(Widget child, {List overrides = const []}) => ProviderScope(
-    overrides: [...overrides],
+    overrides: [
+      accountIdProvider.overrideWith(TestAccountId.new),
+      ...overrides,
+    ],
     child: MaterialApp(
       theme: pinneDarkTheme(),
       builder: (context, child) => MotionPreferenceScope(
