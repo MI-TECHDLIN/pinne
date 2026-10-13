@@ -15,6 +15,7 @@ import 'package:pinne_flutter/theme/pinne_tokens.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../support/contrast.dart';
 import '../support/golden_theme.dart';
 import 'fake_capture_server.dart';
 
@@ -39,47 +40,49 @@ void main() {
   });
   tearDown(() => store.close());
 
-  Widget app({MotionPreference motion = MotionPreference.full}) =>
-      ProviderScope(
-        overrides: [
-          captureStoreProvider.overrideWithValue(store),
-          captureApiProvider.overrideWithValue(FakeCaptureServer()),
-          signedInProvider.overrideWith(_SignedOut.new),
-          accountIdProvider.overrideWith(_AccountId.new),
-          avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 0)),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: goldenTheme(),
-          builder: (context, child) =>
-              MotionPreferenceScope(preference: motion, child: child!),
-          home: Scaffold(
-            extendBody: true,
-            body: Navigator(
-              onGenerateRoute: (_) => MaterialPageRoute<void>(
-                builder: (_) => const Scaffold(
-                  body: SafeArea(
-                    child: Padding(
-                      padding: EdgeInsets.all(PinneSpacing.lg),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: CaptureEntryTile(),
-                      ),
-                    ),
+  Widget app({
+    MotionPreference motion = MotionPreference.full,
+    Brightness brightness = Brightness.dark,
+  }) => ProviderScope(
+    overrides: [
+      captureStoreProvider.overrideWithValue(store),
+      captureApiProvider.overrideWithValue(FakeCaptureServer()),
+      signedInProvider.overrideWith(_SignedOut.new),
+      accountIdProvider.overrideWith(_AccountId.new),
+      avatarRecipeProvider.overrideWithValue((seed: 2026, palette: 0)),
+    ],
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: goldenTheme(brightness: brightness),
+      builder: (context, child) =>
+          MotionPreferenceScope(preference: motion, child: child!),
+      home: Scaffold(
+        extendBody: true,
+        body: Navigator(
+          onGenerateRoute: (_) => MaterialPageRoute<void>(
+            builder: (_) => const Scaffold(
+              body: SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.all(PinneSpacing.lg),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: CaptureEntryTile(),
                   ),
                 ),
               ),
             ),
-            bottomNavigationBar: FloatingPillNav(
-              child: PillNavBar(
-                destinations: shellDestinations,
-                selectedIndex: 0,
-                onSelected: (_) {},
-              ),
-            ),
           ),
         ),
-      );
+        bottomNavigationBar: FloatingPillNav(
+          child: PillNavBar(
+            destinations: shellDestinations,
+            selectedIndex: 0,
+            onSelected: (_) {},
+          ),
+        ),
+      ),
+    ),
+  );
 
   void usePhone(WidgetTester tester, Size size, double systemBottom) {
     final ratio = tester.view.devicePixelRatio;
@@ -181,4 +184,25 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
   }
+
+  testWidgets('save sheet and celebration are readable in Lavender Mist', (
+    tester,
+  ) async {
+    usePhone(tester, const Size(393, 851), 48);
+    await tester.pumpWidget(
+      app(motion: MotionPreference.reduced, brightness: Brightness.light),
+    );
+    await tester.pumpAndSettle();
+    await expectReadableText(tester, reason: 'capture entry');
+    await openWithLink(tester, 'https://example.com/read-later');
+    await expectReadableText(tester, reason: 'save sheet');
+    await tester.tap(find.byKey(const ValueKey('paste-save')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 560));
+    await expectReadableText(tester, reason: 'save celebration');
+    await tester.pump(saveCelebrationDuration);
+    await tester.pumpAndSettle();
+    await expectReadableText(tester, reason: 'after saving');
+    await tester.pumpWidget(const SizedBox());
+  });
 }

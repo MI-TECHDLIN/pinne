@@ -139,7 +139,14 @@ class PinneToastBody extends StatelessWidget {
               width: 30,
               height: 30,
               decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
-              child: Icon(icon, size: 18, color: context.pinne.ink),
+              // Dark tints the pastel badges; Lavender Mist tints are deep.
+              child: Icon(
+                icon,
+                size: 18,
+                color: Theme.of(context).brightness == Brightness.light
+                    ? context.pinne.onViolet
+                    : context.pinne.ink,
+              ),
             ),
             const SizedBox(width: PinneSpacing.md),
             Expanded(

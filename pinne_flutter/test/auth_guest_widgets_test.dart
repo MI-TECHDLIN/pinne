@@ -10,6 +10,9 @@ import 'package:pinne_flutter/theme/pinne_theme.dart';
 import 'package:pinne_flutter/ui/motion.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
+import 'support/contrast.dart';
+import 'support/golden_theme.dart';
+
 class _SignedIn extends SignedInNotifier {
   @override
   bool build() => true;
@@ -25,6 +28,65 @@ Client _client() =>
       ..authSessionManager = FlutterAuthSessionManager();
 
 void main() {
+  setUpAll(loadGoldenFonts);
+
+  testWidgets('sign-in, sign-up and guest Settings are readable in '
+      'Lavender Mist', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(412, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    for (final (emailAvailable, createAccount) in [
+      (false, false),
+      (true, false),
+      (true, true),
+    ]) {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            clientProvider.overrideWithValue(_client()),
+            emailDeliveryAvailableProvider.overrideWith(
+              (ref) async => emailAvailable,
+            ),
+          ],
+          child: MaterialApp(
+            theme: pinneLightTheme(),
+            home: SignInScreen(createAccount: createAccount),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await expectReadableText(
+        tester,
+        reason: 'sign in (email $emailAvailable, create $createAccount)',
+      );
+      await tester.enterText(find.byType(TextField).first, 'r@example.com');
+      // Let the email validation debounce finish before the screen goes.
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+      await expectReadableText(tester, reason: 'sign in, typed');
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          clientProvider.overrideWithValue(_client()),
+          serverUrlProvider.overrideWithValue('http://localhost:8080/'),
+          signedInProvider.overrideWith(_SignedIn.new),
+          accountKindProvider.overrideWith((ref) async => AccountKind.guest),
+          motionPreferenceProvider.overrideWith(_AlwaysReduced.new),
+        ],
+        child: MaterialApp(
+          theme: pinneLightTheme(),
+          home: const Scaffold(body: SettingsScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await expectReadableText(tester, reason: 'signed-in guest Settings');
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+  });
+
   testWidgets('sign-in screen offers and runs the guest path', (tester) async {
     await tester.binding.setSurfaceSize(const Size(500, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -57,7 +119,7 @@ void main() {
     expect(find.text('Create account'), findsNothing);
     expect(find.text('Forgot password?'), findsNothing);
     expect(
-      find.byKey(const ValueKey('email-login-only-submit')),
+      find.byKey(const ValueKey('email-login-submit')),
       findsOneWidget,
     );
 

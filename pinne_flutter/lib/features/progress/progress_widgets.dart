@@ -487,6 +487,8 @@ class _GoalTile extends StatelessWidget {
               size: reviewed ? 18 : 8,
               color: reviewed
                   ? context.pinne.selectionText
+                  : Theme.of(context).brightness == Brightness.light
+                  ? context.pinne.muted
                   : context.pinne.muted.withValues(alpha: 0.5),
             ),
             Text(

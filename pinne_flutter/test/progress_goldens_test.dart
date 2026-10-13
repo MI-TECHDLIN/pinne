@@ -11,6 +11,7 @@ import 'package:pinne_flutter/features/settings/profile_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'progress/fake_progress_api.dart';
+import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 import 'support/test_account.dart';
 
@@ -30,6 +31,7 @@ void main() {
     Widget home, {
     required FakeProgressApi api,
     MotionPreference motion = MotionPreference.full,
+    Brightness brightness = Brightness.dark,
   }) => ProviderScope(
     overrides: [
       signedInProvider.overrideWith(_SignedIn.new),
@@ -39,7 +41,7 @@ void main() {
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: goldenTheme(),
+      theme: goldenTheme(brightness: brightness),
       builder: (context, child) =>
           MotionPreferenceScope(preference: motion, child: child!),
       home: Scaffold(body: home),
@@ -166,4 +168,63 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
   }
+
+  testWidgets('Progress, empty state and celebration are readable in '
+      'Lavender Mist', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(412, 2020));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      app(
+        const ProgressScreen(),
+        api: FakeProgressApi({ProgressPeriod.thisWeek: sampleReport()}),
+        motion: MotionPreference.reduced,
+        brightness: Brightness.light,
+      ),
+    );
+    await settle(tester);
+    await expectReadableText(tester, reason: 'Progress tab');
+    await expectLater(
+      find.byType(Scaffold),
+      matchesGoldenFile('../../docs/light-theme/progress.png'),
+    );
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      app(
+        const ProgressScreen(),
+        api: FakeProgressApi({ProgressPeriod.thisWeek: emptyReport()}),
+        motion: MotionPreference.reduced,
+        brightness: Brightness.light,
+      ),
+    );
+    await settle(tester);
+    await expectReadableText(tester, reason: 'empty Progress');
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      app(
+        const ProgressScreen(),
+        api: FakeProgressApi({
+          ProgressPeriod.thisWeek: sampleReport(
+            milestones: [
+              ProgressMilestone(
+                key: 'weekly-goal-2026-10-05',
+                kind: MilestoneKind.weeklyGoal,
+                value: 5,
+                celebrated: false,
+              ),
+            ],
+          ),
+        }),
+        motion: MotionPreference.reduced,
+        brightness: Brightness.light,
+      ),
+    );
+    await settle(tester);
+    expect(find.byKey(const ValueKey('celebration-card')), findsOneWidget);
+    await expectReadableText(tester, reason: 'celebration');
+    await tester.tap(find.byKey(const ValueKey('celebration-continue')));
+    await settle(tester);
+    await tester.pumpWidget(const SizedBox());
+  });
 }

@@ -17,6 +17,7 @@ import 'package:pinne_flutter/ui/motion.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 
 class _SignedOut extends SignedInNotifier {
@@ -148,6 +149,7 @@ void main() {
     bool withSearchData = false,
     Brightness brightness = Brightness.dark,
     String? goldenPath,
+    bool golden = true,
   }) async {
     await tester.binding.setSurfaceSize(const Size(412, 915));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -162,12 +164,15 @@ void main() {
     for (var i = 0; i < 20; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile(
-        goldenPath ?? '../../docs/ui-fidelity/after-$name.png',
-      ),
-    );
+    if (brightness == Brightness.light) await expectReadableText(tester);
+    if (golden) {
+      await expectLater(
+        find.byType(Scaffold).first,
+        matchesGoldenFile(
+          goldenPath ?? '../../docs/ui-fidelity/after-$name.png',
+        ),
+      );
+    }
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
   }
@@ -240,6 +245,29 @@ void main() {
         ),
       ),
       'nav',
+    ),
+  );
+
+  testWidgets(
+    'Search results are readable in Lavender Mist',
+    (tester) => capture(
+      tester,
+      const SearchScreen(),
+      'search-light',
+      withSearchData: true,
+      brightness: Brightness.light,
+      golden: false,
+    ),
+  );
+
+  testWidgets(
+    'Collections are readable in Lavender Mist',
+    (tester) => capture(
+      tester,
+      const CollectionsScreen(),
+      'collections-light',
+      brightness: Brightness.light,
+      golden: false,
     ),
   );
 }

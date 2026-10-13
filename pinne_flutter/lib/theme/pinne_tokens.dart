@@ -67,6 +67,7 @@ class PinnePalette extends ThemeExtension<PinnePalette> {
     required this.muted,
     required this.ink,
     required this.violet,
+    required this.violetSurface,
     required this.lilac,
     required this.lilacTile,
     required this.onViolet,
@@ -102,6 +103,7 @@ class PinnePalette extends ThemeExtension<PinnePalette> {
     muted: PinneColors.muted,
     ink: PinneColors.ink,
     violet: PinneColors.violet,
+    violetSurface: PinneColors.violet,
     lilac: PinneColors.lilac,
     lilacTile: PinneColors.lilac,
     onViolet: PinneColors.text,
@@ -138,6 +140,7 @@ class PinnePalette extends ThemeExtension<PinnePalette> {
     muted: Color(0xFF5E5780),
     ink: Color(0xFF14102A),
     violet: Color(0xFF6B4CF5),
+    violetSurface: Color(0xFF5B3DE0),
     lilac: Color(0xFF5B3DE0),
     lilacTile: Color(0xFFD2C6FF),
     onViolet: Colors.white,
@@ -172,6 +175,11 @@ class PinnePalette extends ThemeExtension<PinnePalette> {
   final Color muted;
   final Color ink;
   final Color violet;
+
+  /// Violet for large fills that carry [onViolet] secondary text and
+  /// translucent chips, such as the Progress hero card. Deeper than [violet]
+  /// in Lavender Mist so softened white text keeps 4.5:1.
+  final Color violetSurface;
   final Color lilac;
   final Color lilacTile;
   final Color onViolet;
@@ -209,6 +217,7 @@ class PinnePalette extends ThemeExtension<PinnePalette> {
     Color? muted,
     Color? ink,
     Color? violet,
+    Color? violetSurface,
     Color? lilac,
     Color? lilacTile,
     Color? onViolet,
@@ -242,6 +251,7 @@ class PinnePalette extends ThemeExtension<PinnePalette> {
     muted: muted ?? this.muted,
     ink: ink ?? this.ink,
     violet: violet ?? this.violet,
+    violetSurface: violetSurface ?? this.violetSurface,
     lilac: lilac ?? this.lilac,
     lilacTile: lilacTile ?? this.lilacTile,
     onViolet: onViolet ?? this.onViolet,
@@ -280,6 +290,7 @@ class PinnePalette extends ThemeExtension<PinnePalette> {
       muted: Color.lerp(muted, other.muted, t)!,
       ink: Color.lerp(ink, other.ink, t)!,
       violet: Color.lerp(violet, other.violet, t)!,
+      violetSurface: Color.lerp(violetSurface, other.violetSurface, t)!,
       lilac: Color.lerp(lilac, other.lilac, t)!,
       lilacTile: Color.lerp(lilacTile, other.lilacTile, t)!,
       onViolet: Color.lerp(onViolet, other.onViolet, t)!,

@@ -433,6 +433,12 @@ directions, not dated promises.
   Serverpod Cloud Starter deployment because they need a plan with durable
   future calls. A production deployment restores them with monitoring, retries
   and operational safeguards. Push notifications need the same.
+- **Production readiness review.** A review of the app's architecture,
+  security and data privacy, and of its policies: a privacy policy, terms of
+  service, data deletion and export, and store compliance for Google Play and
+  the App Store, so Pinne meets production requirements.
+- **Rebranding.** A refreshed brand identity before public launch: a review
+  of the name, plus the logo, icon set and store assets.
 - **Store releases.** Google Play and the Apple App Store, after compliance,
   privacy, security and release processes are in place. There is no Mac for
   iOS yet, so iOS builds will use a cloud macOS build service or a Mac.
