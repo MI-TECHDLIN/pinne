@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,10 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_capture/pinne_capture.dart';
 
 import '../../core/server_client.dart';
+import '../../shell/pill_nav_bar.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/glass_card.dart';
+import '../settings/profile_provider.dart';
 import 'capture_labels.dart';
 import 'capture_providers.dart';
+import 'save_celebration.dart';
 
 /// Compact entry from Today into the existing local-first manual capture UI.
 class CaptureEntryTile extends StatelessWidget {
@@ -25,15 +29,29 @@ class CaptureEntryTile extends StatelessWidget {
         key: const ValueKey('capture-entry'),
         onTap: () => showModalBottomSheet<void>(
           context: context,
+          // On the root navigator the sheet sits above the shell, so the
+          // floating nav can no longer paint over its fields.
+          useRootNavigator: true,
           isScrollControlled: true,
           useSafeArea: true,
           backgroundColor: Colors.transparent,
-          builder: (context) => Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: const _ManualCaptureSheet(),
-          ),
+          builder: (context) {
+            final media = MediaQuery.of(context);
+            // Float above the nav, or above the keyboard that hides it.
+            final bottom = math.max(
+              media.viewInsets.bottom,
+              FloatingPillNav.extentOf(media),
+            );
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                PinneSpacing.sm,
+                0,
+                PinneSpacing.sm,
+                bottom + PinneSpacing.sm,
+              ),
+              child: const _ManualCaptureSheet(),
+            );
+          },
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -85,9 +103,7 @@ class _ManualCaptureSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     color: PinneColors.midnightRaised,
-    borderRadius: const BorderRadius.vertical(
-      top: Radius.circular(PinneRadii.sheet),
-    ),
+    borderRadius: BorderRadius.circular(PinneRadii.sheet),
     clipBehavior: Clip.antiAlias,
     child: SingleChildScrollView(
       padding: const EdgeInsets.all(PinneSpacing.lg),
@@ -140,8 +156,10 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
     final store = ref.read(captureStoreProvider);
     if (store == null || _input.isEmpty) return;
     final link = _input.link;
+    var duplicate = false;
     try {
       final earlier = link == null ? null : store.findSaved(link);
+      duplicate = earlier != null;
       store.save(_input, intention: _why.text);
       final sync = ref.read(outboxSyncProvider);
       if (sync != null) unawaited(sync.drain());
@@ -159,6 +177,15 @@ class _PasteCaptureCardState extends ConsumerState<PasteCaptureCard> {
       _why.clear();
     } on Object {
       setState(() => _error = 'Could not save on this phone. Try again.');
+      return;
+    }
+    if (!duplicate) {
+      final avatar = ref.read(avatarRecipeProvider);
+      showSaveCelebration(
+        context,
+        seed: avatar.seed,
+        palette: avatar.palette,
+      );
     }
   }
 

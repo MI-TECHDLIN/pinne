@@ -8,9 +8,11 @@ import 'package:pinne_capture/pinne_capture.dart';
 import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/motion.dart';
+import '../settings/profile_provider.dart';
 import 'capture_labels.dart';
 import 'capture_providers.dart';
 import 'capture_store.dart';
+import 'save_celebration.dart';
 
 /// The compact "Saved to Pinne" sheet shown over the app that shared.
 ///
@@ -76,7 +78,15 @@ class _ShareSheetScreenState extends ConsumerState<ShareSheetScreen> {
       _failed = false;
     } on Object {
       _failed = true;
+      return;
     }
+    // A repeat already says "Already in Pinne"; only a new save celebrates.
+    if (_earlier != null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final avatar = ref.read(avatarRecipeProvider);
+      showSaveCelebration(context, seed: avatar.seed, palette: avatar.palette);
+    });
   }
 
   void _scheduleEdit() {
