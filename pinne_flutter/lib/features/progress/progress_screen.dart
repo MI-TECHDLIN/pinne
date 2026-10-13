@@ -221,7 +221,7 @@ List<ProgressCardData> progressCards(
           ? '${report.firstReviewedTodayCount} first looked at today. '
                 'Each save counts once.'
           : 'Each save counts once, however often you return.',
-      background: palette.violet,
+      background: palette.violetSurface,
       foreground: palette.onViolet,
     ),
     ProgressCardData(

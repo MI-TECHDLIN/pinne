@@ -68,14 +68,24 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
     final failures = <String>[];
-    for (final tab in ['today', 'collections', 'search', 'progress', 'settings']) {
+    for (final tab in [
+      'today',
+      'collections',
+      'search',
+      'progress',
+      'settings',
+    ]) {
       final key = find.byKey(ValueKey('nav-$tab'));
       if (key.evaluate().isNotEmpty) {
         await tester.tap(key);
         await tester.pumpAndSettle();
       }
-      failures.add('[$tab] n=${find.byType(RichText).evaluate().length} texts=${find.byType(Text).evaluate().map((e) => (e.widget as Text).data).take(8).toList()}');
-      failures.add('[$tab] ${(await findContrastFailures(tester)).join('\n  ')}');
+      failures.add(
+        '[$tab] n=${find.byType(RichText).evaluate().length} texts=${find.byType(Text).evaluate().map((e) => (e.widget as Text).data).take(8).toList()}',
+      );
+      failures.add(
+        '[$tab] ${(await findContrastFailures(tester)).join('\n  ')}',
+      );
     }
     // ignore: avoid_print
     print(failures.join('\n'));

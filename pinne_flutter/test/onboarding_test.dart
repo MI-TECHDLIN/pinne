@@ -9,6 +9,7 @@ import 'package:pinne_flutter/router.dart';
 import 'package:pinne_flutter/ui/motion.dart';
 import 'package:pinne_flutter/ui/ribbon_spirit/ribbon_cutout.dart';
 
+import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 
 void main() {
@@ -245,6 +246,7 @@ void main() {
     expect(cutout, findsOneWidget);
     expect(tester.renderObject<RenderImage>(image).image, isNotNull);
 
+    await expectReadableText(tester);
     await expectLater(
       find.byType(Scaffold),
       matchesGoldenFile('../../docs/light-theme/onboarding.png'),

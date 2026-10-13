@@ -9,6 +9,7 @@ import 'package:pinne_flutter/features/settings/profile_screen.dart';
 import 'package:pinne_flutter/theme/pinne_theme.dart';
 
 import 'progress/fake_progress_api.dart';
+import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 import 'support/test_account.dart';
 
@@ -158,6 +159,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await expectReadableText(tester);
     await expectLater(
       find.byType(Scaffold),
       matchesGoldenFile('../../docs/light-theme/profile.png'),

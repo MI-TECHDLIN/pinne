@@ -15,6 +15,7 @@ import 'package:pinne_flutter/theme/pinne_theme.dart';
 import 'package:pinne_flutter/ui/pinne_loading.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import '../support/contrast.dart';
 import '../support/golden_theme.dart';
 import 'fake_capture_server.dart';
 
@@ -220,6 +221,7 @@ void main() {
 
     await show(tester, api, light: true);
 
+    await expectReadableText(tester);
     await expectLater(
       find.byType(Scaffold),
       matchesGoldenFile('../../../docs/light-theme/saved-ai-suggestions.png'),

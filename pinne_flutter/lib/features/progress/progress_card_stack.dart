@@ -441,6 +441,20 @@ class _Dots extends StatelessWidget {
   );
 }
 
+/// Softened [foreground] for secondary text on a hero card. In Lavender Mist
+/// white text on a dark card keeps at least 85% opacity so it stays above
+/// 4.5:1; dark mode keeps its original softening.
+Color Function(double alpha) _softForeground(
+  BuildContext context,
+  Color foreground, {
+  required bool onDark,
+}) {
+  final floor = onDark && Theme.of(context).brightness == Brightness.light
+      ? 0.85
+      : 0.0;
+  return (alpha) => foreground.withValues(alpha: alpha < floor ? floor : alpha);
+}
+
 /// The face of one hero card.
 class ProgressCardFace extends StatelessWidget {
   const ProgressCardFace({
@@ -459,6 +473,7 @@ class ProgressCardFace extends StatelessWidget {
     final theme = Theme.of(context);
     final fg = card.foreground;
     final dark = card.background.computeLuminance() < 0.2;
+    final soft = _softForeground(context, fg, onDark: dark);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: card.background,
@@ -516,7 +531,7 @@ class ProgressCardFace extends StatelessWidget {
                 Text(
                   '${index + 1}/$total',
                   style: TextStyle(
-                    color: fg.withValues(alpha: 0.6),
+                    color: soft(0.6),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -546,7 +561,7 @@ class ProgressCardFace extends StatelessWidget {
                     Text(
                       card.unit!,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: fg.withValues(alpha: 0.8),
+                        color: soft(0.8),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -560,7 +575,7 @@ class ProgressCardFace extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: fg.withValues(alpha: 0.78),
+                color: soft(0.78),
                 fontSize: 13,
                 height: 1.35,
               ),
@@ -571,6 +586,7 @@ class ProgressCardFace extends StatelessWidget {
                 bars: card.dayBars!,
                 letters: card.dayLetters,
                 foreground: fg,
+                soft: soft,
               ),
             ],
           ],
@@ -584,12 +600,14 @@ class _MiniDayBars extends StatelessWidget {
   const _MiniDayBars({
     required this.bars,
     required this.foreground,
+    required this.soft,
     this.letters,
   });
 
   final List<bool?> bars;
   final List<String>? letters;
   final Color foreground;
+  final Color Function(double alpha) soft;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -622,7 +640,7 @@ class _MiniDayBars extends StatelessWidget {
                 Text(
                   letters![i],
                   style: TextStyle(
-                    color: foreground.withValues(alpha: 0.6),
+                    color: soft(0.6),
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                   ),

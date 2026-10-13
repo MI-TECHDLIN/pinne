@@ -12,6 +12,7 @@ import 'package:pinne_flutter/theme/theme_mode.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'capture/fake_capture_server.dart';
+import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 
 class _SignedOut extends SignedInNotifier {
@@ -108,6 +109,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('nav-settings')));
     await tester.pumpAndSettle();
 
+    await expectReadableText(tester);
     await expectLater(
       find.byType(Scaffold).first,
       matchesGoldenFile('../../docs/light-theme/settings.png'),

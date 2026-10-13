@@ -17,6 +17,7 @@ import 'package:pinne_flutter/ui/motion.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 
 class _SignedOut extends SignedInNotifier {
@@ -162,6 +163,7 @@ void main() {
     for (var i = 0; i < 20; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
+    if (brightness == Brightness.light) await expectReadableText(tester);
     await expectLater(
       find.byType(Scaffold).first,
       matchesGoldenFile(
