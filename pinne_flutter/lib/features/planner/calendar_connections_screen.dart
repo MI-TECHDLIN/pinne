@@ -116,17 +116,60 @@ class _PhoneCard extends ConsumerWidget {
             style: TextStyle(color: context.pinne.muted, fontSize: 13),
           ),
           if (state.deviceSupported &&
-              access != DeviceCalendarAccess.granted) ...[
+              (access == DeviceCalendarAccess.notAsked ||
+                  access == DeviceCalendarAccess.writeOnly)) ...[
             const SizedBox(height: PinneSpacing.md),
             FilledButton(
               onPressed: controller.connectPhone,
-              child: const Text('Allow calendar access'),
+              child: Text(
+                access == DeviceCalendarAccess.writeOnly
+                    ? 'Allow full calendar access'
+                    : 'Allow calendar access',
+              ),
+            ),
+          ],
+          if (state.deviceSupported &&
+              access == DeviceCalendarAccess.denied) ...[
+            const SizedBox(height: PinneSpacing.sm),
+            const Text(
+              'Open Android settings and turn on Calendar permission for '
+              'Pinne.',
+            ),
+            const SizedBox(height: PinneSpacing.sm),
+            FilledButton(
+              onPressed: controller.openPhoneSettings,
+              child: const Text('Open Android settings'),
+            ),
+            TextButton(
+              onPressed: controller.refreshPhoneCalendars,
+              child: const Text('Check access again'),
+            ),
+          ],
+          if (state.deviceSupported &&
+              access == DeviceCalendarAccess.granted &&
+              phone == null) ...[
+            const SizedBox(height: PinneSpacing.md),
+            const Text(
+              'Android could not load your calendars. Open your phone\'s '
+              'Calendar app and make sure its calendars are visible.',
+            ),
+            TextButton(
+              onPressed: controller.refreshPhoneCalendars,
+              child: const Text('Refresh calendars'),
             ),
           ],
           if (phone != null && access == DeviceCalendarAccess.granted) ...[
             const SizedBox(height: PinneSpacing.md),
-            if (phone.selections.isEmpty)
-              const Text('No calendars were found on this phone.'),
+            if (phone.selections.isEmpty) ...[
+              const Text(
+                'No calendars were found. Add or sync a calendar in your '
+                'phone\'s Calendar app, then refresh here.',
+              ),
+              TextButton(
+                onPressed: controller.refreshPhoneCalendars,
+                child: const Text('Refresh calendars'),
+              ),
+            ],
             for (final selection in phone.selections)
               _CalendarRow(
                 selection: selection,

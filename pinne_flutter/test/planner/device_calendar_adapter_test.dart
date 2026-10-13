@@ -205,6 +205,29 @@ void main() {
       timezone: 'Europe/London',
     );
 
+    test('refuses a calendar that became read-only before writing', () async {
+      phone = FakeDeviceCalendar(
+        calendars: const [
+          AdapterCalendar(id: '2', name: 'Family', readOnly: true),
+        ],
+      );
+      adapter = AndroidDeviceCalendarAdapter(phone, clock: () => checkedAt);
+
+      await expectLater(
+        adapter.createSessionEvent(draft),
+        throwsA(
+          isA<CalendarCapabilityException>()
+              .having(
+                (e) => e.failure,
+                'failure',
+                CapabilityFailure.readOnlyCalendar,
+              )
+              .having((e) => e.message, 'message', contains('writable')),
+        ),
+      );
+      expect(phone.creates, 0);
+    });
+
     test('stores the session marker in the event', () async {
       final ref = await adapter.createSessionEvent(draft);
       final event = await phone.event(ref.eventId);

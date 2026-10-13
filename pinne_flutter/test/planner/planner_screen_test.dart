@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pinne_calendar/pinne_calendar.dart' show AdapterCalendar;
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/planner/calendar_connections_screen.dart';
@@ -23,6 +24,13 @@ class _SignedIn extends SignedInNotifier {
 class _Reduced extends MotionPreferenceNotifier {
   @override
   MotionPreference build() => MotionPreference.reduced;
+}
+
+class _SwitchingAccount extends AccountIdNotifier {
+  @override
+  String? build() => 'account-a';
+
+  void switchTo(String accountId) => state = accountId;
 }
 
 void main() {
@@ -102,6 +110,35 @@ void main() {
     expect(find.textContaining('Adding to Family'), findsOneWidget);
   });
 
+  test(
+    'Planner reloads its server state when the active account changes',
+    () async {
+      final deviceId = const Uuid().v4obj();
+      final container = ProviderContainer(
+        overrides: [
+          accountIdProvider.overrideWith(_SwitchingAccount.new),
+          plannerApiProvider.overrideWithValue(server),
+          deviceCalendarApiProvider.overrideWithValue(phone),
+          deviceIdProvider.overrideWith((ref) async => deviceId),
+          deviceTimezoneProvider.overrideWith((ref) async => 'UTC'),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(plannerProvider.future);
+      final accountB = const Uuid().v4obj();
+      server.prefs = server.prefs.copyWith(ownerId: accountB);
+      (container.read(accountIdProvider.notifier) as _SwitchingAccount)
+          .switchTo(
+            'account-b',
+          );
+
+      final reloaded = await container.read(plannerProvider.future);
+      expect(reloaded.preferences.ownerId, accountB);
+      expect(server.preferencesRequests, 2);
+    },
+  );
+
   testWidgets('unknown availability cannot be accepted as checked', (
     tester,
   ) async {
@@ -144,6 +181,80 @@ void main() {
     expect(find.text('Accept plan'), findsNothing);
   });
 
+  testWidgets('calendar provider failure stays local and explains the fix', (
+    tester,
+  ) async {
+    await pump(tester, const PlannerScreen());
+    phone.eventsError = StateError('calendar provider stopped');
+
+    await tester.tap(find.text('Plan my week'));
+    await tester.pumpAndSettle();
+
+    expect(server.proposeRequests, hasLength(1));
+    expect(
+      server.proposeRequests.single.availability.every((a) => !a.readable),
+      isTrue,
+    );
+    expect(
+      find.textContaining('Open your phone\'s Calendar app'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Could not reach Pinne'), findsNothing);
+  });
+
+  testWidgets('calendar list failure does not take down Planner', (
+    tester,
+  ) async {
+    phone.calendarsError = StateError('calendar provider stopped');
+
+    await pump(tester, const PlannerScreen());
+
+    expect(find.text('Plan my week'), findsOneWidget);
+    expect(
+      find.textContaining('Open your phone\'s Calendar app'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Could not load your planner'), findsNothing);
+  });
+
+  testWidgets('a calendar that became read-only explains how to recover', (
+    tester,
+  ) async {
+    phone = FakeDeviceCalendar(
+      calendars: const [
+        AdapterCalendar(id: '1', name: 'Work', readOnly: false),
+        AdapterCalendar(id: '2', name: 'Family', readOnly: true),
+      ],
+    );
+    final start = DateTime.now().toUtc().add(const Duration(hours: 2));
+    server.commitWrites = [
+      CalendarWrite(
+        linkId: const Uuid().v4obj(),
+        action: CalendarWriteAction.create,
+        sessionId: const Uuid().v4obj(),
+        eventUid: 'pinne-read-only',
+        externalCalendarId: '2',
+        startAt: start,
+        endAt: start.add(const Duration(minutes: 15)),
+        timezone: 'UTC',
+        title: 'Pinne review',
+        notes: 'Review time.',
+        sessionRevision: 1,
+      ),
+    ];
+
+    await pump(tester, const PlannerScreen());
+    await tester.tap(find.text('Plan my week'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Accept plan'));
+    await tester.pumpAndSettle();
+
+    expect(server.reported.single.outcome, CalendarWriteOutcome.failed);
+    expect(find.textContaining('is read-only'), findsOneWidget);
+    expect(find.textContaining('writable calendar'), findsOneWidget);
+    expect(phone.creates, 0);
+  });
+
   testWidgets('a proposal exports as an .ics file through the share sheet', (
     tester,
   ) async {
@@ -167,5 +278,37 @@ void main() {
     expect(find.text('Apple Calendar'), findsNothing);
     expect(find.text('Calendar file (.ics)'), findsNothing);
     expect(find.text('Not configured'), findsNothing);
+    expect(server.routeRequests, 0);
+  });
+
+  testWidgets('permanently denied access opens Android settings', (
+    tester,
+  ) async {
+    phone.currentAccess = DeviceCalendarAccess.denied;
+    await pump(tester, const CalendarConnectionsScreen());
+
+    expect(find.text('Open Android settings'), findsOneWidget);
+    expect(
+      find.textContaining('turn on Calendar permission'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Open Android settings'));
+    await tester.pumpAndSettle();
+
+    expect(phone.settingsOpens, 1);
+    expect(phone.permissionRequests, 0);
+  });
+
+  testWidgets('empty phone calendar list gives a recovery action', (
+    tester,
+  ) async {
+    phone = FakeDeviceCalendar(calendars: const []);
+    await pump(tester, const CalendarConnectionsScreen());
+
+    expect(
+      find.textContaining('Add or sync a calendar in your phone'),
+      findsOneWidget,
+    );
+    expect(find.text('Refresh calendars'), findsOneWidget);
   });
 }
