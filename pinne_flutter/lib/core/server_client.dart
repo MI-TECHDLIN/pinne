@@ -99,6 +99,11 @@ final signedInProvider = NotifierProvider<SignedInNotifier, bool>(
   SignedInNotifier.new,
 );
 
+/// Device-only account data that must not survive an explicit sign-out.
+final signOutCleanupProvider = Provider<Future<void> Function()>(
+  (ref) => () async {},
+);
+
 class SignedInNotifier extends Notifier<bool> {
   @override
   bool build() {
@@ -109,5 +114,8 @@ class SignedInNotifier extends Notifier<bool> {
     return auth.isAuthenticated;
   }
 
-  Future<void> signOut() => ref.read(clientProvider).auth.signOutDevice();
+  Future<void> signOut() async {
+    await ref.read(clientProvider).auth.signOutDevice();
+    await ref.read(signOutCleanupProvider)();
+  }
 }

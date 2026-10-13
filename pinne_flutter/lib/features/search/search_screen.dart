@@ -12,6 +12,7 @@ import '../../ui/item_preview.dart';
 import '../../ui/pinne_loading.dart';
 import '../settings/profile_provider.dart';
 import '../examples/example_saves.dart';
+import 'search_history.dart';
 import 'search_providers.dart';
 import '../../ui/feedback/error_state.dart';
 
@@ -29,9 +30,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(
-      text: ref.read(searchQueryProvider),
-    );
+    _controller = TextEditingController(text: ref.read(searchQueryProvider));
   }
 
   @override
@@ -44,14 +43,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _queryChanged(String value) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
-      ref.read(searchQueryProvider.notifier).set(value);
+      _runSearch(value);
     });
+  }
+
+  void _runSearch(String value) {
+    ref.read(searchQueryProvider.notifier).set(value);
+    ref.read(searchHistoryProvider.notifier).add(value);
+  }
+
+  void _repeatSearch(String value) {
+    _debounce?.cancel();
+    _controller.text = value;
+    _controller.selection = TextSelection.collapsed(offset: value.length);
+    _runSearch(value);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final query = ref.watch(searchQueryProvider);
     final page = ref.watch(searchPageProvider);
+    final history = ref.watch(searchHistoryProvider);
     final avatar = ref.watch(avatarRecipeProvider);
     return PinnePage(
       headline: 'Remember it',
@@ -62,6 +75,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           key: const ValueKey('search-field'),
           controller: _controller,
           onChanged: _queryChanged,
+          onSubmitted: (value) {
+            _debounce?.cancel();
+            _runSearch(value);
+          },
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
             hintText: 'desktop sidebar from X',
@@ -81,19 +98,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             filled: true,
             fillColor: PinneColors.glass,
             border: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(PinneRadii.chip),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(PinneRadii.chip)),
               borderSide: BorderSide(color: PinneColors.line),
             ),
             enabledBorder: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(PinneRadii.chip),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(PinneRadii.chip)),
               borderSide: BorderSide(color: PinneColors.line),
             ),
           ),
         ),
+        if (query.isEmpty && history.isNotEmpty) ...[
+          const SizedBox(height: PinneSpacing.md),
+          _RecentSearches(
+            searches: history,
+            onSearch: _repeatSearch,
+            onRemove: ref.read(searchHistoryProvider.notifier).remove,
+            onClear: () => _confirmClearHistory(context),
+          ),
+        ],
         const SizedBox(height: PinneSpacing.md),
         const _FilterChips(),
         const SizedBox(height: PinneSpacing.lg),
@@ -159,6 +181,89 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (uri == null) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
+
+  Future<void> _confirmClearHistory(BuildContext context) async {
+    final clear = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear recent searches?'),
+        content: const Text('This removes search history from this device.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            key: const ValueKey('confirm-clear-search-history'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear all'),
+          ),
+        ],
+      ),
+    );
+    if (clear == true) {
+      await ref.read(searchHistoryProvider.notifier).clear();
+    }
+  }
+}
+
+class _RecentSearches extends StatelessWidget {
+  const _RecentSearches({
+    required this.searches,
+    required this.onSearch,
+    required this.onRemove,
+    required this.onClear,
+  });
+
+  final List<String> searches;
+  final ValueChanged<String> onSearch;
+  final ValueChanged<String> onRemove;
+  final Future<void> Function() onClear;
+
+  @override
+  Widget build(BuildContext context) => GlassCard(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Recent searches',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            TextButton(
+              key: const ValueKey('clear-search-history'),
+              onPressed: onClear,
+              child: const Text('Clear all'),
+            ),
+          ],
+        ),
+        const Text(
+          'Stored only on this device.',
+          style: TextStyle(color: PinneColors.muted, fontSize: 12),
+        ),
+        const SizedBox(height: PinneSpacing.xs),
+        for (final search in searches)
+          Material(
+            type: MaterialType.transparency,
+            child: ListTile(
+              key: ValueKey('recent-search-$search'),
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.history_rounded),
+              title: Text(search),
+              onTap: () => onSearch(search),
+              trailing: IconButton(
+                tooltip: 'Remove $search from recent searches',
+                onPressed: () => onRemove(search),
+                icon: const Icon(Icons.close_rounded),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 class _SearchResultsSkeleton extends StatelessWidget {
@@ -369,9 +474,9 @@ class SearchResultCard extends StatelessWidget {
                 const SizedBox(height: PinneSpacing.sm),
                 Text(
                   item.title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: PinneColors.ink,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(color: PinneColors.ink),
                 ),
                 const SizedBox(height: PinneSpacing.sm),
                 Text(

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/search/search_providers.dart';
+import 'package:pinne_flutter/features/search/search_history.dart';
 import 'package:pinne_flutter/features/search/search_screen.dart';
 import 'package:pinne_flutter/features/today/today_screen.dart';
 import 'package:pinne_flutter/theme/pinne_theme.dart';
@@ -16,12 +17,8 @@ class _SignedOut extends SignedInNotifier {
 }
 
 void main() {
-  final ownerId = UuidValue.fromString(
-    '00000000-0000-4000-8000-000000000001',
-  );
-  final itemId = UuidValue.fromString(
-    '00000000-0000-4000-8000-000000000002',
-  );
+  final ownerId = UuidValue.fromString('00000000-0000-4000-8000-000000000001');
+  final itemId = UuidValue.fromString('00000000-0000-4000-8000-000000000002');
   final item = Item(
     id: itemId,
     ownerId: ownerId,
@@ -133,5 +130,53 @@ void main() {
     expect(container.read(searchQueryProvider), isEmpty);
     await tester.pump(const Duration(milliseconds: 2));
     expect(container.read(searchQueryProvider), 'desktop sidebar from X');
+  });
+
+  testWidgets('recent searches can be repeated, removed, and cleared', (
+    tester,
+  ) async {
+    final store = MemorySearchHistoryStore(['Newest search', 'Older search']);
+    final container = ProviderContainer(
+      overrides: [
+        signedInProvider.overrideWith(_SignedOut.new),
+        searchHistoryStoreProvider.overrideWithValue(store),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: pinneDarkTheme(),
+          home: const Scaffold(body: SearchScreen()),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Recent searches'), findsOneWidget);
+    expect(find.text('Stored only on this device.'), findsOneWidget);
+    await tester.tap(find.text('Older search'));
+    await tester.pump();
+    expect(container.read(searchQueryProvider), 'Older search');
+    expect(container.read(searchHistoryProvider).first, 'Older search');
+
+    await tester.tap(find.byTooltip('Clear search'));
+    await tester.pump();
+    await tester.tap(
+      find.byTooltip('Remove Older search from recent searches'),
+    );
+    await tester.pump();
+    expect(find.text('Older search'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('clear-search-history')));
+    await tester.pumpAndSettle();
+    expect(find.text('Clear recent searches?'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const ValueKey('confirm-clear-search-history')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Recent searches'), findsNothing);
+    expect(store.searches, isEmpty);
   });
 }
