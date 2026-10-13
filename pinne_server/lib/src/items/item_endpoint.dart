@@ -1,4 +1,5 @@
 import '../ai/ai_organization_service.dart';
+import '../ai/ai_provider_status.dart';
 import '../auth/owner.dart';
 import '../generated/protocol.dart';
 import '../generated/serverpod.dart';
@@ -186,8 +187,11 @@ class ItemEndpoint extends Endpoint {
           ownerId: ownerId,
         );
       }
-    } catch (_) {
+    } catch (error) {
       // The explicit reprocess endpoint can enqueue it again later.
+      AiProviderStatus.recordTaskError(
+        'could not queue organizing (${error.runtimeType})',
+      );
     }
   }
 

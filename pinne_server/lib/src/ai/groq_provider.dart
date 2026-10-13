@@ -72,7 +72,11 @@ class GroqProvider implements AiProvider {
       throw GroqRateLimitException(retryAfter: response.retryAfter);
     }
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw GroqException('Groq returned HTTP ${response.statusCode}.');
+      final code = _errorCode(response.body);
+      throw GroqException(
+        'Groq returned HTTP ${response.statusCode}'
+        '${code == null ? '' : ' ($code)'}.',
+      );
     }
     final text = _responseText(jsonDecode(response.body));
     return AiOutputValidator.parseJson(
@@ -94,12 +98,32 @@ class GroqProvider implements AiProvider {
       throw const FormatException('Groq response has no choices.');
     }
     final choice = choices.first;
+    if (choice is Map && choice['finish_reason'] == 'length') {
+      throw const GroqException('Groq output hit the token limit.');
+    }
     final message = choice is Map ? choice['message'] : null;
     final content = message is Map ? message['content'] : null;
     if (content is! String || content.isEmpty) {
       throw const FormatException('Groq response has no model output text.');
     }
     return content;
+  }
+
+  /// Groq's machine-readable error code, such as `invalid_api_key` or
+  /// `json_validate_failed`. Only a bare identifier is kept: the error
+  /// message and any failed generation can echo the request.
+  static String? _errorCode(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      final error = decoded is Map ? decoded['error'] : null;
+      final code = error is Map ? (error['code'] ?? error['type']) : null;
+      if (code is String && RegExp(r'^[a-z0-9_]{1,48}$').hasMatch(code)) {
+        return code;
+      }
+    } on FormatException {
+      // A proxy or gateway page instead of Groq JSON.
+    }
+    return null;
   }
 }
 

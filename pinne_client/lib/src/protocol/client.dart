@@ -638,6 +638,15 @@ class EndpointHealth extends _isc.EndpointRef {
     {},
   );
 
+  /// The configured AI provider and its last outcome in this process, such
+  /// as `groq: last call failed at <time>: Groq returned HTTP 401
+  /// (invalid_api_key).` Holds no key and no saved-item content.
+  _ida.Future<String> aiProviderStatus() => caller.callServerEndpoint<String>(
+    'health',
+    'aiProviderStatus',
+    {},
+  );
+
   _ida.Future<_ibqesezf.ServerHealth> check() =>
       caller.callServerEndpoint<_ibqesezf.ServerHealth>(
         'health',

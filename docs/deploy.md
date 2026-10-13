@@ -303,11 +303,15 @@ connection, not the laptop's local network.
   Growth, confirm preview metadata appears after processing; on Starter,
   expect "Preview not available. The link is saved."
 - Confirm AI suggestions (collection, tags, a summary) appear on the saved card
-  and can be accepted or dismissed. Rules alone can also suggest a collection
-  and tags, so this does not prove Groq ran: the server log prints
+  and can be accepted or dismissed. Rules alone also suggest a site tag and
+  quote the preview description as a summary, so this does not prove Groq
+  ran. Check it with `curl -X POST <api-url>/health/aiProviderStatus`
+  (`"groq: last call succeeded at ..."`). `serverpod cloud log` prints
   `AI organizing provider: groq` and `Future calls: enabled|disabled` at
-  startup and a warning with the failure class or HTTP status whenever a Groq
-  call falls back to rules; Insights also shows the stored task provider.
+  startup, and `AI organizing: groq failed, organized with rules instead:
+  <reason>` (class, HTTP status and Groq error code only) whenever a call
+  falls back to rules. Production keeps session logs off the console, so
+  only these stderr lines reach `serverpod cloud log`.
 - The new save enters the Today review queue about 24 hours later; it is not
   due during the same session.
 - Open Planner, provide device-calendar permission only if desired, create a
