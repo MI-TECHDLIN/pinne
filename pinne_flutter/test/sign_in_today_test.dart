@@ -268,10 +268,7 @@ void _expectSignedInToday(
   expect(find.byType(TodayScreen), findsOneWidget);
   expect(_shownName(tester), expectedName);
   expect(find.text('Guest'), findsNothing);
-  expect(
-    find.byKey(const ValueKey('today-account-badge-email')),
-    findsOneWidget,
-  );
+  expect(find.byKey(const ValueKey('today-account-badge-email')), findsNothing);
   expect(find.textContaining('Guest example'), findsNothing);
   // A brand-new account is offered examples to load, never shown the
   // guest's loaded ones.
@@ -295,7 +292,7 @@ void main() {
     expect(_shownName(tester), 'Guest');
     expect(
       find.byKey(const ValueKey('today-account-badge-guest')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(find.textContaining('Guest example'), findsWidgets);
     // The guest's dismissal must not hide the offer from the next account.
@@ -395,7 +392,7 @@ void main() {
     expect(_shownName(tester), 'River');
     expect(
       find.byKey(const ValueKey('today-account-badge-email')),
-      findsOneWidget,
+      findsNothing,
     );
   });
 }
