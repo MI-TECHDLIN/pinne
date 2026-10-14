@@ -18,10 +18,12 @@ class PinneEmailAuthFlow extends StatelessWidget {
   const PinneEmailAuthFlow({
     super.key,
     required this.controller,
+    required this.registrationNameController,
     this.allowSignUp = true,
   });
 
   final EmailAuthController controller;
+  final TextEditingController registrationNameController;
   final bool allowSignUp;
 
   @override
@@ -38,22 +40,28 @@ class PinneEmailAuthFlow extends StatelessWidget {
         ),
         EmailFlowScreen.startRegistration => _StartRegistrationForm(
           controller: controller,
+          nameController: registrationNameController,
         ),
         EmailFlowScreen.verifyRegistration => _VerificationForm(
           key: const ValueKey('verify-registration'),
           controller: controller,
           title: texts.verifyAccountTitle,
           onCompleted: controller.verifyRegistrationCode,
+          back: _LinkButton(
+            label: 'Change email',
+            onPressed: () =>
+                controller.navigateTo(EmailFlowScreen.startRegistration),
+          ),
         ),
         EmailFlowScreen.completeRegistration => _SetPasswordForm(
           controller: controller,
           title: texts.setAccountPasswordTitle,
           label: texts.passwordLabel,
-          actionLabel: texts.signUp,
+          actionLabel: 'Create account',
           busyLabel: 'Creating your account',
           onAction: controller.finishRegistration,
           back: _LinkButton(
-            label: texts.backToSignUp,
+            label: 'Use a different email',
             onPressed: () =>
                 controller.navigateTo(EmailFlowScreen.startRegistration),
           ),
@@ -66,6 +74,7 @@ class PinneEmailAuthFlow extends StatelessWidget {
           controller: controller,
           title: texts.verifyResetCodeTitle,
           onCompleted: controller.verifyPasswordResetCode,
+          back: _BackToSignIn(controller: controller),
         ),
         EmailFlowScreen.completePasswordReset => _SetPasswordForm(
           controller: controller,
@@ -127,7 +136,7 @@ class _LoginForm extends StatelessWidget {
         if (allowSignUp)
           _SwitchPrompt(
             prompt: texts.dontHaveAnAccount,
-            label: texts.signUp,
+            label: 'Create an account',
             onPressed: () =>
                 controller.navigateTo(EmailFlowScreen.startRegistration),
           ),
@@ -137,9 +146,13 @@ class _LoginForm extends StatelessWidget {
 }
 
 class _StartRegistrationForm extends StatelessWidget {
-  const _StartRegistrationForm({required this.controller});
+  const _StartRegistrationForm({
+    required this.controller,
+    required this.nameController,
+  });
 
   final EmailAuthController controller;
+  final TextEditingController nameController;
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +161,18 @@ class _StartRegistrationForm extends StatelessWidget {
       title: texts.signUpTitle,
       children: [
         _EmailField(controller: controller),
+        const SizedBox(height: PinneSpacing.sm),
+        TextField(
+          key: const ValueKey('email-sign-up-name'),
+          controller: nameController,
+          enabled: !controller.isLoading,
+          textCapitalization: TextCapitalization.words,
+          autofillHints: const [AutofillHints.name],
+          inputFormatters: [LengthLimitingTextInputFormatter(40)],
+          decoration: _fieldDecoration('What should we call you?').copyWith(
+            helperText: 'Optional · 40 characters maximum',
+          ),
+        ),
         const SizedBox(height: PinneSpacing.md),
         _BusyButton(
           buttonKey: const ValueKey('email-sign-up-submit'),
@@ -212,11 +237,13 @@ class _VerificationForm extends StatefulWidget {
     required this.controller,
     required this.title,
     required this.onCompleted,
+    required this.back,
   });
 
   final EmailAuthController controller;
   final String title;
   final Future<void> Function() onCompleted;
+  final Widget back;
 
   static const codeLength = 8;
   static const resendAfter = Duration(minutes: 1);
@@ -322,21 +349,19 @@ class _VerificationFormState extends State<_VerificationForm> {
                 )
               : _LinkButton(
                   key: const ValueKey('email-resend-code'),
-                  label: _wait > 0
-                      ? 'Send a new code in ${_wait}s'
-                      : "Didn't receive it? Send a new code",
+                  label: _wait > 0 ? 'Resend code in ${_wait}s' : 'Resend code',
                   onPressed: _wait > 0 || busy ? null : _resend,
                 ),
         ),
         const SizedBox(height: PinneSpacing.sm),
         _BusyButton(
           buttonKey: const ValueKey('email-verify-submit'),
-          label: texts.verify,
+          label: 'Verify code',
           busyLabel: 'Checking your code',
           isLoading: busy,
           onPressed: busy ? null : _submit,
         ),
-        _BackToSignIn(controller: controller),
+        widget.back,
       ],
     );
   }
@@ -360,6 +385,11 @@ class _SetPasswordForm extends StatelessWidget {
   final String busyLabel;
   final Future<void> Function() onAction;
   final Widget back;
+
+  void _submit() {
+    if (controller.isLoading) return;
+    unawaited(onAction());
+  }
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -389,9 +419,7 @@ class _SetPasswordForm extends StatelessWidget {
             label: actionLabel,
             busyLabel: busyLabel,
             isLoading: controller.isLoading,
-            onPressed: valid && !controller.isLoading
-                ? () => unawaited(onAction())
-                : null,
+            onPressed: valid && !controller.isLoading ? _submit : null,
           ),
           back,
         ],

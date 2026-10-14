@@ -34,10 +34,17 @@ void main() {
     'Given SMTP that production cannot reach',
     rollbackDatabase: RollbackDatabase.disabled,
     (sessionBuilder, endpoints) {
+      setUp(() {
+        smtp.failure = const SocketException('Connection timed out');
+        smtp.lastCode.clear();
+        cloud.failure = null;
+        cloud.lastCode.clear();
+        log.clear();
+      });
+
       test(
         'sign-up finishes with the code sent through the Cloud fallback',
         () async {
-          smtp.failure = const SocketException('Connection timed out');
           const email = 'new-reader@example.com';
 
           final requestId = await endpoints.emailIdp.startRegistration(
@@ -64,7 +71,6 @@ void main() {
       test(
         'when every route fails the app gets a reason and can retry',
         () async {
-          smtp.failure = const SocketException('Connection timed out');
           cloud.failure = const HttpException('503 from email service');
           const email = 'unlucky-reader@example.com';
 
@@ -90,6 +96,197 @@ void main() {
             email: email,
           );
           expect(cloud.lastCode[email], isNotNull);
+        },
+      );
+
+      test(
+        'password policy failure preserves the verified request for retry',
+        () async {
+          const email = 'password-retry@example.com';
+          final requestId = await endpoints.emailIdp.startRegistration(
+            sessionBuilder,
+            email: email,
+          );
+          final token = await endpoints.emailIdp.verifyRegistrationCode(
+            sessionBuilder,
+            accountRequestId: requestId,
+            verificationCode: cloud.lastCode[email]!,
+          );
+
+          await expectLater(
+            endpoints.emailIdp.finishRegistration(
+              sessionBuilder,
+              registrationToken: token,
+              password: 'Correct-horse-1! ',
+            ),
+            throwsA(
+              isA<EmailAccountRequestException>().having(
+                (e) => e.reason,
+                'reason',
+                EmailAccountRequestExceptionReason.policyViolation,
+              ),
+            ),
+          );
+
+          final auth = await endpoints.emailIdp.finishRegistration(
+            sessionBuilder,
+            registrationToken: token,
+            password: 'Correct-horse-1!',
+          );
+          expect(auth.authUserId, isNotNull);
+        },
+      );
+
+      test(
+        'a second registration makes the earlier emailed code stale',
+        () async {
+          const email = 'second-request@example.com';
+          final firstRequest = await endpoints.emailIdp.startRegistration(
+            sessionBuilder,
+            email: email,
+          );
+          final firstCode = cloud.lastCode[email]!;
+          final secondRequest = await endpoints.emailIdp.startRegistration(
+            sessionBuilder,
+            email: email,
+          );
+
+          await expectLater(
+            endpoints.emailIdp.verifyRegistrationCode(
+              sessionBuilder,
+              accountRequestId: firstRequest,
+              verificationCode: firstCode,
+            ),
+            throwsA(
+              isA<EmailAccountRequestException>().having(
+                (e) => e.reason,
+                'reason',
+                EmailAccountRequestExceptionReason.invalid,
+              ),
+            ),
+          );
+          final token = await endpoints.emailIdp.verifyRegistrationCode(
+            sessionBuilder,
+            accountRequestId: secondRequest,
+            verificationCode: cloud.lastCode[email]!,
+          );
+          expect(token, isNotEmpty);
+        },
+      );
+
+      test(
+        'the registration request expires 15 minutes after code send',
+        () async {
+          const email = 'late-code@example.com';
+          final requestId = await endpoints.emailIdp.startRegistration(
+            sessionBuilder,
+            email: email,
+          );
+          final session = sessionBuilder.build();
+          final request = await EmailAccountRequest.db.findById(
+            session,
+            requestId,
+          );
+          await EmailAccountRequest.db.updateRow(
+            session,
+            request!.copyWith(
+              createdAt: DateTime.now().subtract(const Duration(minutes: 16)),
+            ),
+          );
+
+          await expectLater(
+            endpoints.emailIdp.verifyRegistrationCode(
+              sessionBuilder,
+              accountRequestId: requestId,
+              verificationCode: cloud.lastCode[email]!,
+            ),
+            throwsA(
+              isA<EmailAccountRequestException>().having(
+                (e) => e.reason,
+                'reason',
+                EmailAccountRequestExceptionReason.expired,
+              ),
+            ),
+          );
+        },
+      );
+
+      test(
+        'the verified finish token expires with the original request',
+        () async {
+          const email = 'late-password@example.com';
+          final requestId = await endpoints.emailIdp.startRegistration(
+            sessionBuilder,
+            email: email,
+          );
+          final token = await endpoints.emailIdp.verifyRegistrationCode(
+            sessionBuilder,
+            accountRequestId: requestId,
+            verificationCode: cloud.lastCode[email]!,
+          );
+          final session = sessionBuilder.build();
+          final request = await EmailAccountRequest.db.findById(
+            session,
+            requestId,
+          );
+          await EmailAccountRequest.db.updateRow(
+            session,
+            request!.copyWith(
+              createdAt: DateTime.now().subtract(const Duration(minutes: 16)),
+            ),
+          );
+
+          await expectLater(
+            endpoints.emailIdp.finishRegistration(
+              sessionBuilder,
+              registrationToken: token,
+              password: 'Correct-horse-1!',
+            ),
+            throwsA(
+              isA<EmailAccountRequestException>().having(
+                (e) => e.reason,
+                'reason',
+                EmailAccountRequestExceptionReason.expired,
+              ),
+            ),
+          );
+        },
+      );
+
+      test(
+        'the finish token cannot be retried after success',
+        () async {
+          const email = 'double-submit@example.com';
+          final requestId = await endpoints.emailIdp.startRegistration(
+            sessionBuilder,
+            email: email,
+          );
+          final token = await endpoints.emailIdp.verifyRegistrationCode(
+            sessionBuilder,
+            accountRequestId: requestId,
+            verificationCode: cloud.lastCode[email]!,
+          );
+
+          final auth = await endpoints.emailIdp.finishRegistration(
+            sessionBuilder,
+            registrationToken: token,
+            password: 'Correct-horse-1!',
+          );
+          expect(auth.authUserId, isNotNull);
+          await expectLater(
+            endpoints.emailIdp.finishRegistration(
+              sessionBuilder,
+              registrationToken: token,
+              password: 'Correct-horse-1!',
+            ),
+            throwsA(
+              isA<EmailAccountRequestException>().having(
+                (e) => e.reason,
+                'reason',
+                EmailAccountRequestExceptionReason.invalid,
+              ),
+            ),
+          );
         },
       );
     },

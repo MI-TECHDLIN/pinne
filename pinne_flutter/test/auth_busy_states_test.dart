@@ -24,11 +24,15 @@ const _uuid = '0199e0f6-6d39-7c1a-9d43-7c6b2a8f1e10';
 /// stays on screen long enough to inspect.
 class _Server {
   final _pending = <String, Completer<http.Response>>{};
+  final calls = <String>[];
 
   late final client = Client(
     'http://localhost:8080/',
     httpClientOverride: MockClient(
-      (request) => (_pending[request.url.path] = Completer()).future,
+      (request) {
+        calls.add(request.url.path);
+        return (_pending[request.url.path] = Completer()).future;
+      },
     ),
   )..authSessionManager = FlutterAuthSessionManager();
 
@@ -145,6 +149,9 @@ void main() {
     server.answer('/emailIdp/startRegistration', _uuid);
     await tester.pumpAndSettle();
     expect(find.text('Verify account'), findsOneWidget);
+    expect(find.text('Verify code'), findsOneWidget);
+    expect(find.textContaining('Resend code in'), findsOneWidget);
+    expect(find.text('Change email'), findsOneWidget);
     await expectReadableText(tester, reason: 'verify code');
     await tester.enterText(
       find.byKey(const ValueKey('email-verification-code')),
@@ -154,11 +161,28 @@ void main() {
 
     server.answer('/emailIdp/verifyRegistrationCode', 'token');
     await tester.pumpAndSettle();
+    await type(tester, 'email-new-password', 'Correct-horse-battery-1! ');
+    expect(find.text('Does not start or end with a space'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const ValueKey('email-password-submit')),
+          )
+          .onPressed,
+      isNull,
+    );
     await type(tester, 'email-new-password', 'Correct-horse-battery-1!');
     await expectReadableText(tester, reason: 'set password');
+    expect(find.text('Create account'), findsOneWidget);
+    expect(find.text('Use a different email'), findsOneWidget);
+    await tap(tester, 'email-password-submit');
     await tap(tester, 'email-password-submit');
     await _expectBranded(tester, 'finish registration');
     expect(server._pending.keys, ['/emailIdp/finishRegistration']);
+    expect(
+      server.calls.where((path) => path == '/emailIdp/finishRegistration'),
+      hasLength(1),
+    );
     await server.finish(tester);
   });
 
