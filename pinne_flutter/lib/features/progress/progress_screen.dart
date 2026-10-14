@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
 import '../../shell/pinne_page.dart';
+import '../../core/library_revision.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../../ui/pinne_loading.dart';
@@ -106,7 +107,7 @@ class _ProgressLoadingSkeleton extends StatelessWidget {
       SizedBox(height: PinneSpacing.md),
       PinneCardSkeleton(height: 116, label: 'Loading progress summary'),
       SizedBox(height: PinneSpacing.md),
-      PinneCardSkeleton(height: 132, label: 'Loading weekly goal'),
+      PinneCardSkeleton(height: 132, label: 'Loading streak goal'),
     ],
   );
 }
@@ -181,8 +182,8 @@ class ProgressBody extends ConsumerWidget {
         const SizedBox(height: PinneSpacing.md),
         ReviewRateCard(report: report),
         const SizedBox(height: PinneSpacing.md),
-        WeeklyGoalCard(
-          goal: report.weeklyGoal,
+        StreakGoalCard(
+          goal: report.streakGoal,
           streakDays: report.currentStreakDays,
           onEdit: onEditGoal,
         ),
@@ -208,7 +209,7 @@ List<ProgressCardData> progressCards(
   PinnePalette palette,
 ) {
   final phrase = periodPhrase(report.period);
-  final goal = report.weeklyGoal;
+  final goal = report.streakGoal;
   String saves(int n) => n == 1 ? 'save' : 'saves';
   return [
     ProgressCardData(
@@ -252,20 +253,24 @@ List<ProgressCardData> progressCards(
     ),
     ProgressCardData(
       id: 'days',
-      label: 'Review days this week',
+      label: 'Review rhythm',
       icon: Icons.calendar_today_rounded,
       value: goal.reviewDayCount,
-      unit: 'of ${goal.goalDays}',
+      unit: 'of ${goal.periodDays} days',
       caption: goal.reached
-          ? 'Weekly goal reached.'
-          : 'Any day with a review counts.',
+          ? 'Goal reached: ${goal.reviewDaysGoal} review days.'
+          : 'Target: ${goal.reviewDaysGoal} review days.',
       background: palette.cardRaised,
       foreground: palette.text,
-      dayBars: [
-        for (final day in goal.days)
-          day.isFuture ? null : day.reviewedCount > 0,
-      ],
-      dayLetters: [for (final day in goal.days) weekdayLetter(day.date)],
+      dayBars: goal.periodDays == 7
+          ? [
+              for (final day in goal.days)
+                day.isFuture ? null : day.reviewedCount > 0,
+            ]
+          : null,
+      dayLetters: goal.periodDays == 7
+          ? [for (final day in goal.days) weekdayLetter(day.date)]
+          : null,
     ),
     if (report.appliedCount > 0)
       ProgressCardData(
@@ -376,7 +381,7 @@ Future<void> showGoalSettings(BuildContext context) =>
       builder: (context) => const GoalSettingsSheet(),
     );
 
-/// The weekly goal and the opt-in daily streak.
+/// The owner's review-day period and opt-in daily streak.
 class GoalSettingsSheet extends ConsumerStatefulWidget {
   const GoalSettingsSheet({super.key});
 
@@ -386,6 +391,8 @@ class GoalSettingsSheet extends ConsumerStatefulWidget {
 
 class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
   int? _goal;
+  StreakGoalPeriod? _period;
+  int? _customDays;
   bool? _streak;
   bool _saving = false;
   String? _error;
@@ -402,9 +409,12 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
             ProgressSettingsDraft(
               streakEnabled: _streak ?? current.streakEnabled,
               weeklyGoalDays: _goal ?? current.weeklyGoalDays,
+              goalPeriod: _period ?? current.goalPeriod,
+              customGoalDays: _customDays ?? current.customGoalDays,
             ),
           );
       ref
+        ..read(libraryRevisionProvider.notifier).bump()
         ..invalidate(progressSettingsProvider)
         ..invalidate(progressReportProvider);
       if (mounted) Navigator.of(context).pop();
@@ -427,7 +437,7 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
       return settings.hasError || !settings.isLoading
           ? const SizedBox(
               height: 180,
-              child: Center(child: Text('Sign in to set a weekly goal.')),
+              child: Center(child: Text('Sign in to set a streak goal.')),
             )
           : const SafeArea(
               child: Padding(
@@ -439,7 +449,14 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
               ),
             );
     }
-    final goal = _goal ?? current.weeklyGoalDays;
+    final period = _period ?? current.goalPeriod;
+    final customDays = _customDays ?? current.customGoalDays;
+    final periodDays = switch (period) {
+      StreakGoalPeriod.thisWeek => 7,
+      StreakGoalPeriod.thisMonth => 30,
+      StreakGoalPeriod.custom => customDays,
+    };
+    final goal = (_goal ?? current.weeklyGoalDays).clamp(1, periodDays);
     final streak = _streak ?? current.streakEnabled;
     return SafeArea(
       child: Padding(
@@ -448,14 +465,69 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Weekly goal', style: theme.textTheme.titleLarge),
+            Text('Your streak goal', style: theme.textTheme.titleLarge),
             const SizedBox(height: PinneSpacing.xs),
             Text(
-              'Days a week with at least one review. Missing a day never '
-              'takes anything away.',
+              'Choose the rhythm that fits you. Any day with at least one '
+              'review counts.',
               style: TextStyle(color: context.pinne.muted),
             ),
             const SizedBox(height: PinneSpacing.md),
+            SegmentedButton<StreakGoalPeriod>(
+              key: const ValueKey('goal-period'),
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(
+                  value: StreakGoalPeriod.thisWeek,
+                  label: Text('This week'),
+                ),
+                ButtonSegment(
+                  value: StreakGoalPeriod.thisMonth,
+                  label: Text('This month'),
+                ),
+                ButtonSegment(
+                  value: StreakGoalPeriod.custom,
+                  label: Text('Custom'),
+                ),
+              ],
+              selected: {period},
+              onSelectionChanged: (value) => setState(() {
+                _period = value.single;
+                final max = switch (_period!) {
+                  StreakGoalPeriod.thisWeek => 7,
+                  StreakGoalPeriod.thisMonth => 30,
+                  StreakGoalPeriod.custom => customDays,
+                };
+                if ((_goal ?? current.weeklyGoalDays) > max) _goal = max;
+              }),
+            ),
+            if (period == StreakGoalPeriod.custom) ...[
+              const SizedBox(height: PinneSpacing.md),
+              TextFormField(
+                key: ValueKey('custom-goal-days-$customDays'),
+                initialValue: '$customDays',
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Streak length in days',
+                  helperText: 'Choose 3 to 365 days.',
+                ),
+                onChanged: (value) {
+                  final parsed = int.tryParse(value);
+                  if (parsed != null && parsed >= 3 && parsed <= 365) {
+                    _customDays = parsed;
+                    if ((_goal ?? current.weeklyGoalDays) > parsed) {
+                      _goal = parsed;
+                    }
+                  }
+                },
+              ),
+            ],
+            const SizedBox(height: PinneSpacing.md),
+            Text(
+              'Review days to reach the goal',
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: PinneSpacing.sm),
             Row(
               children: [
                 IconButton.filledTonal(
@@ -476,7 +548,7 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
                 IconButton.filledTonal(
                   key: const ValueKey('goal-plus'),
                   tooltip: 'More days',
-                  onPressed: goal < 7
+                  onPressed: goal < periodDays
                       ? () => setState(() => _goal = goal + 1)
                       : null,
                   icon: const Icon(Icons.add_rounded),
@@ -488,7 +560,11 @@ class _GoalSettingsSheetState extends ConsumerState<GoalSettingsSheet> {
               key: const ValueKey('streak-switch'),
               contentPadding: EdgeInsets.zero,
               title: const Text('Show a daily streak'),
-              subtitle: const Text('Off unless you want it.'),
+              subtitle: Text(
+                period == StreakGoalPeriod.custom
+                    ? 'Progress can read “Day 18 of your $periodDays-day streak.”'
+                    : 'Keep your current run visible in Progress.',
+              ),
               value: streak,
               onChanged: (value) => setState(() => _streak = value),
             ),

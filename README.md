@@ -19,7 +19,7 @@ remember *why* we saved something or bring it back when it would help.
 
 Pinne is for anyone whose saved posts have become a graveyard. Share a link
 from X, YouTube or the web into one place, jot a line on why it mattered, and
-Pinne brings it back about a day later, one calm review at a time. A small
+Pinne brings it back when you choose, one calm review at a time. A small
 character, the Ribbon Spirit, keeps you company and keeps the progress honest.
 
 <p align="center">
@@ -84,7 +84,7 @@ flowchart LR
   A["Share or paste<br/>from any app"] --> B["Saved on your phone<br/>works offline"]
   B --> C["Synced<br/>retries are safe"]
   C --> D["Organized<br/>suggestions you accept<br/>or dismiss"]
-  D --> E["Comes back<br/>about 24 hours later"]
+  D --> E["Comes back<br/>after the rhythm you chose"]
   E --> F["Reviewed<br/>or snoozed"]
   F --> G["Honest progress"]
 ```
@@ -98,17 +98,26 @@ never moves the numbers.
 - **One home for everything you save.** Share from any app, or paste a link or
   jot a note. It lands in one list, even offline.
 - **Your reason, saved with it.** "Why did you save this?" stays attached.
-- **It comes back at the right time.** About a day later, in a queue sized to
-  5, 10 or 20 minutes, with *Remind me later* when now is not the moment.
+- **It comes back at the right time.** Choose **Bring saves back after** one
+  hour, one day, three days or one week. New and still-unreviewed saves follow
+  that rhythm, in a queue sized to 5, 10 or 20 minutes, with *Remind me later*
+  when now is not the moment.
+- **Collections that are yours.** Create a collection with its own name,
+  colour and description, edit it whenever you like, and search your saves by
+  collection.
 - **Find it by what you remember.** Search by the way you would describe it to
   a friend, filter by source, type or collection.
-- **AI you control.** Collections, tags and summaries are suggestions that
-  wait for your accept or dismiss, and never overwrite your choices. Without
-  AI, plain rules take over.
+- **AI you control.** Pinne checks your existing collections first. It only
+  proposes a new one when nothing is related, tells you why, and waits for
+  your accept or dismiss. Accepted updates appear everywhere straight away;
+  without AI, plain rules take over.
+- **The original is one tap away.** Tap a saved card to open the post, video
+  or article in its original app.
 - **Plan time for it.** The Planner finds free time in your phone calendar and
   schedules sessions only when you accept.
-- **Honest progress.** Review rate, weekly goal and milestones come only from
-  real reviews.
+- **Honest progress, at your pace.** Review rate and milestones come only from
+  real reviews. Set a goal for this week, this month or a custom 3–365-day
+  streak, including how many review days feel right for you.
 - **Private by design.** Every row belongs to one owner, and previews are
   fetched through a guarded, plain-text-only path.
 
@@ -118,7 +127,7 @@ never moves the numbers.
 | --- | --- | --- |
 | Where it lives | One pile per app: Instagram Saved, X Bookmarks, YouTube Watch later, Reddit Saved | One home across apps |
 | Why you saved it | The built-in features do not mention a note | Your reason is saved with it |
-| Coming back | A list you must remember to open | Comes back about a day later, sized to your time |
+| Coming back | A list you must remember to open | Comes back after the rhythm you choose, sized to your time |
 | Progress | Saving feels like progress | Only real reviews count |
 | AI | None, or it decides for you | Suggestions you accept or dismiss |
 
@@ -366,8 +375,8 @@ only. Items in sessions are your active, unreviewed saves for now
 
 The Progress tab shows honest numbers for a save cohort (this week, last
 week or this month): a deck of tilted metric cards you can flick through,
-saved/reviewed/upcoming pills, the review rate with its trend, the weekly
-goal, per-collection rates and review days. New milestones get a one-time
+saved/reviewed/upcoming pills, the review rate with its trend, your chosen
+week, month or custom streak goal, per-collection rates and review days. New milestones get a one-time
 celebration with the Ribbon Spirit. Formulas, screenshots and how to
 re-render them: [`docs/progress/`](docs/progress/README.md).
 

@@ -120,7 +120,8 @@ import 'progress/progress_query.dart' as _iox5xpz3;
 import 'progress/progress_report.dart' as _i5135299;
 import 'progress/progress_settings.dart' as _if1vui5d;
 import 'progress/progress_settings_draft.dart' as _i19ehhj8;
-import 'progress/weekly_goal_progress.dart' as _icoz9lvv;
+import 'progress/streak_goal_period.dart' as _iq39pfaw;
+import 'progress/streak_goal_progress.dart' as _ibo6u0lk;
 import 'reminders/reminder_rule.dart' as _i6ljcdoh;
 import 'reminders/reminder_settings.dart' as _i0v594yd;
 import 'reminders/reminder_settings_draft.dart' as _i2m53qgo;
@@ -222,7 +223,8 @@ export 'progress/progress_query.dart';
 export 'progress/progress_report.dart';
 export 'progress/progress_settings.dart';
 export 'progress/progress_settings_draft.dart';
-export 'progress/weekly_goal_progress.dart';
+export 'progress/streak_goal_period.dart';
+export 'progress/streak_goal_progress.dart';
 export 'reminders/reminder_rule.dart';
 export 'reminders/reminder_settings.dart';
 export 'reminders/reminder_settings_draft.dart';
@@ -2400,6 +2402,20 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'int',
           columnDefault: '3',
         ),
+        _isp.ColumnDefinition(
+          name: 'goalPeriod',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:StreakGoalPeriod',
+          columnDefault: '\'thisWeek\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'customGoalDays',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '7',
+        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
@@ -3620,8 +3636,11 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _i19ehhj8.ProgressSettingsDraft) {
       return _i19ehhj8.ProgressSettingsDraft.fromJson(data) as T;
     }
-    if (t == _icoz9lvv.WeeklyGoalProgress) {
-      return _icoz9lvv.WeeklyGoalProgress.fromJson(data) as T;
+    if (t == _iq39pfaw.StreakGoalPeriod) {
+      return _iq39pfaw.StreakGoalPeriod.fromJson(data) as T;
+    }
+    if (t == _ibo6u0lk.StreakGoalProgress) {
+      return _ibo6u0lk.StreakGoalProgress.fromJson(data) as T;
     }
     if (t == _i6ljcdoh.ReminderRule) {
       return _i6ljcdoh.ReminderRule.fromJson(data) as T;
@@ -4025,8 +4044,12 @@ class Protocol extends _is.DatabaseSerializationManager {
               : null)
           as T;
     }
-    if (t == _is.getType<_icoz9lvv.WeeklyGoalProgress?>()) {
-      return (data != null ? _icoz9lvv.WeeklyGoalProgress.fromJson(data) : null)
+    if (t == _is.getType<_iq39pfaw.StreakGoalPeriod?>()) {
+      return (data != null ? _iq39pfaw.StreakGoalPeriod.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ibo6u0lk.StreakGoalProgress?>()) {
+      return (data != null ? _ibo6u0lk.StreakGoalProgress.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_i6ljcdoh.ReminderRule?>()) {
@@ -4388,7 +4411,8 @@ class Protocol extends _is.DatabaseSerializationManager {
       _i5135299.ProgressReport => 'ProgressReport',
       _if1vui5d.ProgressSettings => 'ProgressSettings',
       _i19ehhj8.ProgressSettingsDraft => 'ProgressSettingsDraft',
-      _icoz9lvv.WeeklyGoalProgress => 'WeeklyGoalProgress',
+      _iq39pfaw.StreakGoalPeriod => 'StreakGoalPeriod',
+      _ibo6u0lk.StreakGoalProgress => 'StreakGoalProgress',
       _i6ljcdoh.ReminderRule => 'ReminderRule',
       _i0v594yd.ReminderSettings => 'ReminderSettings',
       _i2m53qgo.ReminderSettingsDraft => 'ReminderSettingsDraft',
@@ -4589,8 +4613,10 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'ProgressSettings';
       case _i19ehhj8.ProgressSettingsDraft():
         return 'ProgressSettingsDraft';
-      case _icoz9lvv.WeeklyGoalProgress():
-        return 'WeeklyGoalProgress';
+      case _iq39pfaw.StreakGoalPeriod():
+        return 'StreakGoalPeriod';
+      case _ibo6u0lk.StreakGoalProgress():
+        return 'StreakGoalProgress';
       case _i6ljcdoh.ReminderRule():
         return 'ReminderRule';
       case _i0v594yd.ReminderSettings():
@@ -4910,8 +4936,11 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'ProgressSettingsDraft') {
       return deserialize<_i19ehhj8.ProgressSettingsDraft>(data['data']);
     }
-    if (dataClassName == 'WeeklyGoalProgress') {
-      return deserialize<_icoz9lvv.WeeklyGoalProgress>(data['data']);
+    if (dataClassName == 'StreakGoalPeriod') {
+      return deserialize<_iq39pfaw.StreakGoalPeriod>(data['data']);
+    }
+    if (dataClassName == 'StreakGoalProgress') {
+      return deserialize<_ibo6u0lk.StreakGoalProgress>(data['data']);
     }
     if (dataClassName == 'ReminderRule') {
       return deserialize<_i6ljcdoh.ReminderRule>(data['data']);

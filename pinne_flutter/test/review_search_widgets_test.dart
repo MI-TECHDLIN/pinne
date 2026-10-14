@@ -72,6 +72,23 @@ void main() {
     expect(calls, ['reviewed', 'snoozed', 'archived', 'opened']);
   });
 
+  testWidgets('Today says when the next save comes back', (tester) async {
+    await tester.pumpWidget(
+      themed(
+        TodaySpiritCard(
+          due: false,
+          seed: 42,
+          palette: 0,
+          animate: false,
+          now: DateTime.utc(2026, 10, 14, 9),
+          nextDueAt: DateTime.utc(2026, 10, 14, 12),
+        ),
+      ),
+    );
+
+    expect(find.text('Your next save comes back in 3 h.'), findsOneWidget);
+  });
+
   testWidgets('Search result explains the match and opens', (tester) async {
     var opened = false;
     await tester.pumpWidget(

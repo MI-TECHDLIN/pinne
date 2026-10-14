@@ -14,6 +14,7 @@ import '../tour/tour_controller.dart';
 import 'account_kind_provider.dart';
 import 'ai_settings_provider.dart';
 import 'profile_card.dart';
+import 'reminder_settings_provider.dart';
 import '../../ui/feedback/toast.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -23,11 +24,13 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PinnePage(
       headline: 'Settings',
-      subtitle: 'Reminders, AI and privacy controls will live here.',
+      subtitle: 'Choose your rhythm, appearance and privacy controls.',
       children: [
         const ProfileCard(),
         const SizedBox(height: PinneSpacing.md),
         const _AccountCard(),
+        const SizedBox(height: PinneSpacing.md),
+        const ReviewRhythmCard(),
         const SizedBox(height: PinneSpacing.md),
         const _AppearanceCard(),
         const SizedBox(height: PinneSpacing.md),
@@ -42,6 +45,82 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('Ribbon studio'),
           ),
       ],
+    );
+  }
+}
+
+class ReviewRhythmCard extends ConsumerWidget {
+  const ReviewRhythmCard({super.key});
+
+  static const choices = <(int, String)>[
+    (1, '1 hour'),
+    (24, '1 day'),
+    (72, '3 days'),
+    (168, '1 week'),
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(reminderSettingsProvider);
+    final settings = state.value;
+    final theme = Theme.of(context);
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Review rhythm', style: theme.textTheme.titleMedium),
+          const SizedBox(height: PinneSpacing.xs),
+          Text(
+            'New saves return to Today after this time.',
+            style: TextStyle(color: context.pinne.muted),
+          ),
+          const SizedBox(height: PinneSpacing.md),
+          Text('Bring saves back after', style: theme.textTheme.titleSmall),
+          const SizedBox(height: PinneSpacing.sm),
+          Wrap(
+            spacing: PinneSpacing.sm,
+            runSpacing: PinneSpacing.sm,
+            children: [
+              for (final (hours, label) in choices)
+                ChoiceChip(
+                  key: ValueKey('review-delay-$hours'),
+                  label: Text(label),
+                  selected: settings?.delayHours == hours,
+                  onSelected: settings == null || state.isLoading
+                      ? null
+                      : (_) async {
+                          try {
+                            await ref
+                                .read(reminderSettingsProvider.notifier)
+                                .setDelayHours(hours);
+                          } catch (error) {
+                            if (context.mounted) {
+                              showErrorToast(
+                                context,
+                                error,
+                                'Could not update your review rhythm',
+                              );
+                            }
+                          }
+                        },
+                ),
+            ],
+          ),
+          if (settings == null) ...[
+            const SizedBox(height: PinneSpacing.sm),
+            Text(
+              state.hasError
+                  ? 'Could not load your review rhythm.'
+                  : state.isLoading
+                  ? 'Loading your review rhythm…'
+                  : 'Sign in to choose your review rhythm.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: context.pinne.muted,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

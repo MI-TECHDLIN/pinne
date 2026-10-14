@@ -71,6 +71,56 @@ void main() {
       );
     });
 
+    test('delay changes recompute unreviewed due times per owner', () async {
+      final now = DateTime.utc(2026, 10, 6, 12);
+      final item = await endpoints.item.create(
+        alice,
+        ItemDraft(
+          title: 'Fresh save',
+          savedAt: now.subtract(const Duration(hours: 2)),
+        ),
+      );
+      final session = alice.build();
+      addTearDown(session.close);
+      const service = ReviewQueueService();
+
+      var queue = await service.build(
+        session,
+        ownerId: item.ownerId,
+        timeBudgetMinutes: 10,
+        now: now,
+      );
+      expect(queue.entries, isEmpty);
+      expect(queue.nextDueAt, item.savedAt.add(const Duration(hours: 24)));
+
+      final current = await endpoints.reviewQueue.settings(alice);
+      await endpoints.reviewQueue.updateSettings(
+        alice,
+        _settingsDraft(current, delayHours: 1),
+      );
+      queue = await service.build(
+        session,
+        ownerId: item.ownerId,
+        timeBudgetMinutes: 10,
+        now: now,
+      );
+      expect(queue.entries.single.item.id, item.id);
+
+      await endpoints.reviewQueue.updateSettings(
+        alice,
+        _settingsDraft(current, delayHours: 168),
+      );
+      queue = await service.build(
+        session,
+        ownerId: item.ownerId,
+        timeBudgetMinutes: 10,
+        now: now,
+      );
+      expect(queue.entries, isEmpty);
+      expect(queue.nextDueAt, item.savedAt.add(const Duration(hours: 168)));
+      expect((await endpoints.reviewQueue.settings(bob)).delayHours, 24);
+    });
+
     test(
       'collection delay overrides account delay and pause excludes',
       () async {
@@ -190,3 +240,18 @@ void main() {
     );
   });
 }
+
+ReminderSettingsDraft _settingsDraft(
+  ReminderSettings settings, {
+  required int delayHours,
+}) => ReminderSettingsDraft(
+  delayHours: delayHours,
+  timezone: settings.timezone,
+  timezoneOffsetMinutes: settings.timezoneOffsetMinutes,
+  quietStartMinute: settings.quietStartMinute,
+  quietEndMinute: settings.quietEndMinute,
+  dailyCap: settings.dailyCap,
+  remindersPaused: settings.remindersPaused,
+  queueLimit: settings.queueLimit,
+  dismissCooldownMinutes: settings.dismissCooldownMinutes,
+);

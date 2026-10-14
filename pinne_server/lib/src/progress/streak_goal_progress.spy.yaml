@@ -1,0 +1,14 @@
+### Review-day progress inside the owner's chosen streak-goal window.
+class: StreakGoalProgress
+fields:
+  period: StreakGoalPeriod
+  ### The number of calendar days in this goal window.
+  periodDays: int
+  ### First local date in the current window, yyyy-MM-dd.
+  periodStartDate: String
+  ### Distinct review days needed to complete the goal.
+  reviewDaysGoal: int
+  reviewDayCount: int
+  reached: bool
+  ### Calendar days in the current window, oldest first.
+  days: List<ProgressDay>

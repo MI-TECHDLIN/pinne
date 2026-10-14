@@ -372,16 +372,16 @@ class RateTrendPainter extends CustomPainter {
       oldDelegate.labelStyle != labelStyle;
 }
 
-/// This week's goal as tall day tiles with check marks.
-class WeeklyGoalCard extends StatelessWidget {
-  const WeeklyGoalCard({
+/// The chosen review-goal window and the optional daily streak.
+class StreakGoalCard extends StatelessWidget {
+  const StreakGoalCard({
     super.key,
     required this.goal,
     this.streakDays,
     this.onEdit,
   });
 
-  final WeeklyGoalProgress goal;
+  final StreakGoalProgress goal;
   final int? streakDays;
   final VoidCallback? onEdit;
 
@@ -395,7 +395,10 @@ class WeeklyGoalCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Weekly goal', style: theme.textTheme.titleMedium),
+                child: Text(
+                  _goalTitle(goal),
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
               if (onEdit != null)
                 TextButton(
@@ -406,21 +409,30 @@ class WeeklyGoalCard extends StatelessWidget {
             ],
           ),
           Text(
-            goal.reached
-                ? 'Reached: ${goal.reviewDayCount} review days this week.'
-                : '${goal.reviewDayCount} of ${goal.goalDays} review days '
-                      'this week.',
+            '${goal.reviewDayCount} of ${goal.periodDays} days included a '
+            'review. Target: ${goal.reviewDaysGoal}.',
             style: TextStyle(color: context.pinne.muted),
           ),
           const SizedBox(height: PinneSpacing.md),
-          Row(
-            children: [
-              for (final (i, day) in goal.days.indexed) ...[
-                if (i > 0) const SizedBox(width: 6),
-                Expanded(child: _GoalTile(day: day)),
+          if (goal.periodDays == 7)
+            Row(
+              children: [
+                for (final (i, day) in goal.days.indexed) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  Expanded(child: _GoalTile(day: day)),
+                ],
               ],
-            ],
-          ),
+            )
+          else
+            ClipRRect(
+              borderRadius: BorderRadius.circular(PinneRadii.chip),
+              child: LinearProgressIndicator(
+                minHeight: 10,
+                value: (goal.reviewDayCount / goal.periodDays).clamp(0, 1),
+                color: context.pinne.violet,
+                backgroundColor: context.pinne.line,
+              ),
+            ),
           if (goal.reached || streakDays != null) ...[
             const SizedBox(height: PinneSpacing.md),
             Wrap(
@@ -435,7 +447,9 @@ class WeeklyGoalCard extends StatelessWidget {
                 if (streakDays != null)
                   _Badge(
                     icon: Icons.local_fire_department_rounded,
-                    label: streakDays == 1
+                    label: goal.period == StreakGoalPeriod.custom
+                        ? 'Day $streakDays of your ${goal.periodDays}-day streak'
+                        : streakDays == 1
                         ? '1-day streak'
                         : '$streakDays-day streak',
                   ),
@@ -447,6 +461,12 @@ class WeeklyGoalCard extends StatelessWidget {
     );
   }
 }
+
+String _goalTitle(StreakGoalProgress goal) => switch (goal.period) {
+  StreakGoalPeriod.thisWeek => 'This week',
+  StreakGoalPeriod.thisMonth => 'This month',
+  StreakGoalPeriod.custom => '${goal.periodDays}-day goal',
+};
 
 class _GoalTile extends StatelessWidget {
   const _GoalTile({required this.day});

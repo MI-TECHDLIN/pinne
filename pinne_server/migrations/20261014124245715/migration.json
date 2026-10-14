@@ -1,0 +1,43 @@
+{
+  "__className__": "serverpod.DatabaseMigration",
+  "actions": [
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "alterTable",
+      "alterTable": {
+        "__className__": "serverpod.TableMigration",
+        "name": "progress_settings",
+        "schema": "public",
+        "addColumns": [
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "goalPeriod",
+            "fieldName": "goalPeriod",
+            "columnType": 0,
+            "isNullable": false,
+            "columnDefault": "'thisWeek'",
+            "dartType": "protocol:StreakGoalPeriod"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "customGoalDays",
+            "fieldName": "customGoalDays",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "7",
+            "dartType": "int"
+          }
+        ],
+        "deleteColumns": [],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [],
+        "warnings": []
+      }
+    }
+  ],
+  "warnings": [],
+  "migrationApiVersion": 1
+}

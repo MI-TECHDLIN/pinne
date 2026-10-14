@@ -21,6 +21,7 @@ abstract class ReviewQueueResult
     required this.timeBudgetMinutes,
     int? eligibleCount,
     this.latestDueAt,
+    this.nextDueAt,
     this.digestText,
   }) : eligibleCount = eligibleCount ?? 0;
 
@@ -29,6 +30,7 @@ abstract class ReviewQueueResult
     required int timeBudgetMinutes,
     int? eligibleCount,
     DateTime? latestDueAt,
+    DateTime? nextDueAt,
     String? digestText,
   }) = _ReviewQueueResultImpl;
 
@@ -45,6 +47,9 @@ abstract class ReviewQueueResult
           : _isc.DateTimeJsonExtension.fromJson(
               jsonSerialization['latestDueAt'],
             ),
+      nextDueAt: jsonSerialization['nextDueAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['nextDueAt']),
       digestText: jsonSerialization['digestText'] as String?,
     );
   }
@@ -60,6 +65,9 @@ abstract class ReviewQueueResult
   /// nothing new became due.
   DateTime? latestDueAt;
 
+  /// Earliest future eligibility instant after all owner-scoped rules.
+  DateTime? nextDueAt;
+
   String? digestText;
 
   /// Returns a shallow copy of this [ReviewQueueResult]
@@ -70,6 +78,7 @@ abstract class ReviewQueueResult
     int? timeBudgetMinutes,
     int? eligibleCount,
     DateTime? latestDueAt,
+    DateTime? nextDueAt,
     String? digestText,
   });
   @override
@@ -80,6 +89,7 @@ abstract class ReviewQueueResult
       'timeBudgetMinutes': timeBudgetMinutes,
       'eligibleCount': eligibleCount,
       if (latestDueAt != null) 'latestDueAt': latestDueAt?.toJson(),
+      if (nextDueAt != null) 'nextDueAt': nextDueAt?.toJson(),
       if (digestText != null) 'digestText': digestText,
     };
   }
@@ -92,6 +102,7 @@ abstract class ReviewQueueResult
       'timeBudgetMinutes': timeBudgetMinutes,
       'eligibleCount': eligibleCount,
       if (latestDueAt != null) 'latestDueAt': latestDueAt?.toJson(),
+      if (nextDueAt != null) 'nextDueAt': nextDueAt?.toJson(),
       if (digestText != null) 'digestText': digestText,
     };
   }
@@ -110,12 +121,14 @@ class _ReviewQueueResultImpl extends ReviewQueueResult {
     required int timeBudgetMinutes,
     int? eligibleCount,
     DateTime? latestDueAt,
+    DateTime? nextDueAt,
     String? digestText,
   }) : super._(
          entries: entries,
          timeBudgetMinutes: timeBudgetMinutes,
          eligibleCount: eligibleCount,
          latestDueAt: latestDueAt,
+         nextDueAt: nextDueAt,
          digestText: digestText,
        );
 
@@ -128,6 +141,7 @@ class _ReviewQueueResultImpl extends ReviewQueueResult {
     int? timeBudgetMinutes,
     int? eligibleCount,
     Object? latestDueAt = _Undefined,
+    Object? nextDueAt = _Undefined,
     Object? digestText = _Undefined,
   }) {
     return ReviewQueueResult(
@@ -135,6 +149,7 @@ class _ReviewQueueResultImpl extends ReviewQueueResult {
       timeBudgetMinutes: timeBudgetMinutes ?? this.timeBudgetMinutes,
       eligibleCount: eligibleCount ?? this.eligibleCount,
       latestDueAt: latestDueAt is DateTime? ? latestDueAt : this.latestDueAt,
+      nextDueAt: nextDueAt is DateTime? ? nextDueAt : this.nextDueAt,
       digestText: digestText is String? ? digestText : this.digestText,
     );
   }

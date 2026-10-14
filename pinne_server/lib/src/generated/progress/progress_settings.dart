@@ -11,6 +11,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _is;
+import '../progress/streak_goal_period.dart' as _iln0fvkl;
 
 /// The owner's progress preferences. Streaks are opt-in.
 abstract class ProgressSettings
@@ -20,14 +21,20 @@ abstract class ProgressSettings
     required this.ownerId,
     bool? streakEnabled,
     int? weeklyGoalDays,
+    _iln0fvkl.StreakGoalPeriod? goalPeriod,
+    int? customGoalDays,
   }) : streakEnabled = streakEnabled ?? false,
-       weeklyGoalDays = weeklyGoalDays ?? 3;
+       weeklyGoalDays = weeklyGoalDays ?? 3,
+       goalPeriod = goalPeriod ?? _iln0fvkl.StreakGoalPeriod.thisWeek,
+       customGoalDays = customGoalDays ?? 7;
 
   factory ProgressSettings({
     _is.UuidValue? id,
     required _is.UuidValue ownerId,
     bool? streakEnabled,
     int? weeklyGoalDays,
+    _iln0fvkl.StreakGoalPeriod? goalPeriod,
+    int? customGoalDays,
   }) = _ProgressSettingsImpl;
 
   factory ProgressSettings.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -42,6 +49,12 @@ abstract class ProgressSettings
           ? null
           : _is.BoolJsonExtension.fromJson(jsonSerialization['streakEnabled']),
       weeklyGoalDays: jsonSerialization['weeklyGoalDays'] as int?,
+      goalPeriod: jsonSerialization['goalPeriod'] == null
+          ? null
+          : _iln0fvkl.StreakGoalPeriod.fromJson(
+              (jsonSerialization['goalPeriod'] as String),
+            ),
+      customGoalDays: jsonSerialization['customGoalDays'] as int?,
     );
   }
 
@@ -56,8 +69,14 @@ abstract class ProgressSettings
 
   bool streakEnabled;
 
-  /// Distinct review days per week that count as the weekly goal.
+  /// Distinct review days in the chosen period that complete the goal.
+  /// The legacy field name preserves existing users' saved default.
   int weeklyGoalDays;
+
+  _iln0fvkl.StreakGoalPeriod goalPeriod;
+
+  /// Used only when goalPeriod is custom.
+  int customGoalDays;
 
   @override
   _is.Table<_is.UuidValue?> get table => t;
@@ -70,6 +89,8 @@ abstract class ProgressSettings
     _is.UuidValue? ownerId,
     bool? streakEnabled,
     int? weeklyGoalDays,
+    _iln0fvkl.StreakGoalPeriod? goalPeriod,
+    int? customGoalDays,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -79,6 +100,8 @@ abstract class ProgressSettings
       'ownerId': ownerId.toJson(),
       'streakEnabled': streakEnabled,
       'weeklyGoalDays': weeklyGoalDays,
+      'goalPeriod': goalPeriod.toJson(),
+      'customGoalDays': customGoalDays,
     };
   }
 
@@ -90,6 +113,8 @@ abstract class ProgressSettings
       'ownerId': ownerId.toJson(),
       'streakEnabled': streakEnabled,
       'weeklyGoalDays': weeklyGoalDays,
+      'goalPeriod': goalPeriod.toJson(),
+      'customGoalDays': customGoalDays,
     };
   }
 
@@ -129,11 +154,15 @@ class _ProgressSettingsImpl extends ProgressSettings {
     required _is.UuidValue ownerId,
     bool? streakEnabled,
     int? weeklyGoalDays,
+    _iln0fvkl.StreakGoalPeriod? goalPeriod,
+    int? customGoalDays,
   }) : super._(
          id: id,
          ownerId: ownerId,
          streakEnabled: streakEnabled,
          weeklyGoalDays: weeklyGoalDays,
+         goalPeriod: goalPeriod,
+         customGoalDays: customGoalDays,
        );
 
   /// Returns a shallow copy of this [ProgressSettings]
@@ -145,12 +174,16 @@ class _ProgressSettingsImpl extends ProgressSettings {
     _is.UuidValue? ownerId,
     bool? streakEnabled,
     int? weeklyGoalDays,
+    _iln0fvkl.StreakGoalPeriod? goalPeriod,
+    int? customGoalDays,
   }) {
     return ProgressSettings(
       id: id is _is.UuidValue? ? id : this.id,
       ownerId: ownerId ?? this.ownerId,
       streakEnabled: streakEnabled ?? this.streakEnabled,
       weeklyGoalDays: weeklyGoalDays ?? this.weeklyGoalDays,
+      goalPeriod: goalPeriod ?? this.goalPeriod,
+      customGoalDays: customGoalDays ?? this.customGoalDays,
     );
   }
 }
@@ -174,6 +207,17 @@ class ProgressSettingsUpdateTable
     table.weeklyGoalDays,
     value,
   );
+
+  _is.ColumnValue<_iln0fvkl.StreakGoalPeriod, _iln0fvkl.StreakGoalPeriod>
+  goalPeriod(_iln0fvkl.StreakGoalPeriod value) => _is.ColumnValue(
+    table.goalPeriod,
+    value,
+  );
+
+  _is.ColumnValue<int, int> customGoalDays(int value) => _is.ColumnValue(
+    table.customGoalDays,
+    value,
+  );
 }
 
 class ProgressSettingsTable extends _is.Table<_is.UuidValue?> {
@@ -194,6 +238,17 @@ class ProgressSettingsTable extends _is.Table<_is.UuidValue?> {
       this,
       hasDefault: true,
     );
+    goalPeriod = _is.ColumnEnum(
+      'goalPeriod',
+      this,
+      _is.EnumSerialization.byName,
+      hasDefault: true,
+    );
+    customGoalDays = _is.ColumnInt(
+      'customGoalDays',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final ProgressSettingsUpdateTable updateTable;
@@ -202,8 +257,14 @@ class ProgressSettingsTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnBool streakEnabled;
 
-  /// Distinct review days per week that count as the weekly goal.
+  /// Distinct review days in the chosen period that complete the goal.
+  /// The legacy field name preserves existing users' saved default.
   late final _is.ColumnInt weeklyGoalDays;
+
+  late final _is.ColumnEnum<_iln0fvkl.StreakGoalPeriod> goalPeriod;
+
+  /// Used only when goalPeriod is custom.
+  late final _is.ColumnInt customGoalDays;
 
   @override
   List<_is.Column> get columns => [
@@ -211,6 +272,8 @@ class ProgressSettingsTable extends _is.Table<_is.UuidValue?> {
     ownerId,
     streakEnabled,
     weeklyGoalDays,
+    goalPeriod,
+    customGoalDays,
   ];
 }
 

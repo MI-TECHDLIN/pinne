@@ -2,3 +2,5 @@ class: ProgressSettingsDraft
 fields:
   streakEnabled: bool
   weeklyGoalDays: int
+  goalPeriod: StreakGoalPeriod
+  customGoalDays: int

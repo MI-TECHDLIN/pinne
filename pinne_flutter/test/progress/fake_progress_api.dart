@@ -13,6 +13,8 @@ class FakeProgressApi implements ProgressApi {
     ownerId: owner,
     streakEnabled: false,
     weeklyGoalDays: 3,
+    goalPeriod: StreakGoalPeriod.thisWeek,
+    customGoalDays: 7,
   );
 
   static final owner = UuidValue.fromString(
@@ -36,6 +38,8 @@ class FakeProgressApi implements ProgressApi {
       settingsValue = settingsValue.copyWith(
         streakEnabled: draft.streakEnabled,
         weeklyGoalDays: draft.weeklyGoalDays,
+        goalPeriod: draft.goalPeriod,
+        customGoalDays: draft.customGoalDays,
       );
 }
 
@@ -125,9 +129,11 @@ ProgressReport sampleReport({
         reviewRate: 2 / 3,
       ),
     ],
-    weeklyGoal: WeeklyGoalProgress(
-      weekStartDate: '2026-10-05',
-      goalDays: 5,
+    streakGoal: StreakGoalProgress(
+      period: StreakGoalPeriod.thisWeek,
+      periodDays: 7,
+      periodStartDate: '2026-10-05',
+      reviewDaysGoal: 5,
       reviewDayCount: 3,
       reached: false,
       days: week,
