@@ -103,7 +103,7 @@ void main() {
       );
       expect(
         titleOf(EmailAccountRequestExceptionReason.invalid),
-        'That code did not match',
+        'That code is not active',
       );
       expect(
         titleOf(EmailAccountRequestExceptionReason.expired),
@@ -115,7 +115,7 @@ void main() {
             reason: EmailAccountRequestExceptionReason.policyViolation,
           ),
         ).hint,
-        contains('at least 8 characters'),
+        contains('cannot start or end with a space'),
       );
       expect(
         titleOf(EmailAccountRequestExceptionReason.tooManyAttempts),

@@ -222,20 +222,20 @@ FriendlyError? _emailFlowError(Object? error) {
   );
   const codeMismatch = FriendlyError(
     cause: ErrorCause.rejected,
-    title: 'That code did not match',
-    message: 'Check the code in your latest Pinne email and try again.',
-    hint: 'Check the code in your latest Pinne email and try again.',
+    title: 'That code is not active',
+    message:
+        'Check the latest Pinne email, or resend the code. If you already '
+        'created this account, sign in instead.',
+    hint: 'Use the latest code, resend it, or sign in instead.',
   );
   const codeExpired = FriendlyError(
     cause: ErrorCause.rejected,
     title: 'That code has expired',
-    message: 'Codes last 15 minutes. Go back and request a new one.',
-    hint: 'Go back and request a new code.',
+    message: 'Codes last 15 minutes. Resend the code and try again.',
+    hint: 'Resend the code and try again.',
     canRetry: false,
   );
-  const passwordRule =
-      'Use a password of at least 8 characters, with no space at the start '
-      'or end.';
+  const passwordRule = 'Passwords cannot start or end with a space.';
   return switch (error) {
     EmailAccountRequestException(:final reason) => switch (reason) {
       EmailAccountRequestExceptionReason.unknown => sendFailed,
@@ -243,9 +243,9 @@ FriendlyError? _emailFlowError(Object? error) {
       EmailAccountRequestExceptionReason.expired => codeExpired,
       EmailAccountRequestExceptionReason.policyViolation => const FriendlyError(
         cause: ErrorCause.rejected,
-        title: 'Check your email and password',
-        message: 'Use a valid email address. $passwordRule',
-        hint: 'Use a valid email address. $passwordRule',
+        title: 'Check the password spacing',
+        message: passwordRule,
+        hint: passwordRule,
         canRetry: false,
       ),
       EmailAccountRequestExceptionReason.tooManyAttempts => null,

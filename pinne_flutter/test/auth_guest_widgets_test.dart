@@ -197,6 +197,6 @@ void main() {
       findsNothing,
     );
     expect(find.text('Forgot password?'), findsOneWidget);
-    expect(find.text('Sign up'), findsOneWidget);
+    expect(find.text('Create an account'), findsOneWidget);
   });
 }

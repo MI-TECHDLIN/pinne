@@ -34,6 +34,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       startScreen: widget.createAccount
           ? EmailFlowScreen.startRegistration
           : EmailFlowScreen.login,
+      passwordRequirements: [
+        ...PasswordRequirement.defaultRequirements,
+        PasswordRequirement(
+          description: 'Does not start or end with a space',
+          validator: (password) => password.trim() == password,
+        ),
+      ],
       onAuthenticated: _closeAfterAuthentication,
       onError: _showSignInError,
     );
