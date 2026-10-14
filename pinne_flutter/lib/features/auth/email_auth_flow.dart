@@ -18,10 +18,12 @@ class PinneEmailAuthFlow extends StatelessWidget {
   const PinneEmailAuthFlow({
     super.key,
     required this.controller,
+    required this.registrationNameController,
     this.allowSignUp = true,
   });
 
   final EmailAuthController controller;
+  final TextEditingController registrationNameController;
   final bool allowSignUp;
 
   @override
@@ -38,6 +40,7 @@ class PinneEmailAuthFlow extends StatelessWidget {
         ),
         EmailFlowScreen.startRegistration => _StartRegistrationForm(
           controller: controller,
+          nameController: registrationNameController,
         ),
         EmailFlowScreen.verifyRegistration => _VerificationForm(
           key: const ValueKey('verify-registration'),
@@ -143,9 +146,13 @@ class _LoginForm extends StatelessWidget {
 }
 
 class _StartRegistrationForm extends StatelessWidget {
-  const _StartRegistrationForm({required this.controller});
+  const _StartRegistrationForm({
+    required this.controller,
+    required this.nameController,
+  });
 
   final EmailAuthController controller;
+  final TextEditingController nameController;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +161,18 @@ class _StartRegistrationForm extends StatelessWidget {
       title: texts.signUpTitle,
       children: [
         _EmailField(controller: controller),
+        const SizedBox(height: PinneSpacing.sm),
+        TextField(
+          key: const ValueKey('email-sign-up-name'),
+          controller: nameController,
+          enabled: !controller.isLoading,
+          textCapitalization: TextCapitalization.words,
+          autofillHints: const [AutofillHints.name],
+          inputFormatters: [LengthLimitingTextInputFormatter(40)],
+          decoration: _fieldDecoration('What should we call you?').copyWith(
+            helperText: 'Optional · 40 characters maximum',
+          ),
+        ),
         const SizedBox(height: PinneSpacing.md),
         _BusyButton(
           buttonKey: const ValueKey('email-sign-up-submit'),

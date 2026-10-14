@@ -36,7 +36,7 @@ class _User {
   final UuidValue id;
   final String token;
   final String? email;
-  final String? displayName;
+  String? displayName;
   final List<String> items;
   final int exampleCount;
 
@@ -142,6 +142,16 @@ class _FakeServer {
                 avatarSeed: 42,
                 avatarPalette: 1,
               ).toJson();
+      case '/profile/upsert':
+        final parameters = jsonDecode(request.body) as Map<String, dynamic>;
+        final draft = parameters['draft'] as Map<String, dynamic>;
+        user!.displayName = draft['displayName'] as String;
+        body = PinneProfile(
+          ownerId: user.id,
+          displayName: user.displayName!,
+          avatarSeed: draft['avatarSeed'] as int,
+          avatarPalette: draft['avatarPalette'] as int,
+        ).toJson();
       case '/reviewQueue/get':
         body = ReviewQueueResult(
           entries: [
@@ -250,9 +260,13 @@ Future<void> _type(WidgetTester tester, String key, String text) async {
   await tester.pumpAndSettle();
 }
 
-void _expectSignedInToday(WidgetTester tester, _FakeServer server) {
+void _expectSignedInToday(
+  WidgetTester tester,
+  _FakeServer server, {
+  String expectedName = 'river.reader',
+}) {
   expect(find.byType(TodayScreen), findsOneWidget);
-  expect(_shownName(tester), 'river.reader');
+  expect(_shownName(tester), expectedName);
   expect(find.text('Guest'), findsNothing);
   expect(
     find.byKey(const ValueKey('today-account-badge-email')),
@@ -268,7 +282,10 @@ void _expectSignedInToday(WidgetTester tester, _FakeServer server) {
 
 void main() {
   setUp(
-    () => VisibilityDetectorController.instance.updateInterval = Duration.zero,
+    () {
+      VisibilityDetectorController.instance.updateInterval = Duration.zero;
+      _reader.displayName = null;
+    },
   );
 
   testWidgets('guest -> Profile -> Sign in -> Today shows the new account', (
@@ -298,7 +315,9 @@ void main() {
     _expectSignedInToday(tester, server);
   });
 
-  testWidgets('guest -> Create account -> verify -> Today', (tester) async {
+  testWidgets('sign-up without a name uses the email local-part', (
+    tester,
+  ) async {
     final (server, _) = await _pumpApp(tester, signedIn: _guest);
 
     await _tapKey(tester, 'today-profile');
@@ -317,6 +336,31 @@ void main() {
     await tester.pumpAndSettle();
 
     _expectSignedInToday(tester, server);
+  });
+
+  testWidgets('sign-up saves a trimmed name before Today opens', (
+    tester,
+  ) async {
+    final (server, _) = await _pumpApp(tester, signedIn: _guest);
+
+    await _tapKey(tester, 'today-profile');
+    await _tapKey(tester, 'profile-create-account');
+    await _type(tester, 'email-auth-email', _reader.email!);
+    await _type(tester, 'email-sign-up-name', '  River  ');
+    await _tapKey(tester, 'email-sign-up-submit');
+    await tester.enterText(
+      find.byKey(const ValueKey('email-verification-code')),
+      '12345678',
+    );
+    await tester.pumpAndSettle();
+    await _type(tester, 'email-new-password', 'Correct-horse-battery-1!');
+    await _tapKey(tester, 'email-password-submit');
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+
+    _expectSignedInToday(tester, server, expectedName: 'River');
+    expect(server.calls, contains('/profile/upsert'));
   });
 
   testWidgets('cold start already signed in shows the account', (

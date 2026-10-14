@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinne_client/pinne_client.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../../core/server_client.dart';
@@ -10,6 +13,8 @@ import '../../theme/pinne_tokens.dart';
 import '../../ui/feedback/friendly_error.dart';
 import '../../ui/feedback/toast.dart';
 import '../../ui/pinne_loading.dart';
+import '../../ui/ribbon_spirit/ribbon_recipe.dart';
+import '../settings/profile_provider.dart';
 import 'email_auth_flow.dart';
 
 /// Guest-first sign-in, with email and optional Google for durable accounts.
@@ -25,6 +30,7 @@ class SignInScreen extends ConsumerStatefulWidget {
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   bool _guestLoading = false;
   late final EmailAuthController _emailController;
+  final _registrationNameController = TextEditingController();
 
   @override
   void initState() {
@@ -41,7 +47,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           validator: (password) => password.trim() == password,
         ),
       ],
-      onAuthenticated: _closeAfterAuthentication,
+      onAuthenticated: _onEmailAuthenticated,
       onError: _showSignInError,
     );
   }
@@ -49,6 +55,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   @override
   void dispose() {
     _emailController.dispose();
+    _registrationNameController.dispose();
     super.dispose();
   }
 
@@ -142,6 +149,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       children: [
                         PinneEmailAuthFlow(
                           controller: _emailController,
+                          registrationNameController:
+                              _registrationNameController,
                           allowSignUp: emailAvailable,
                         ),
                         if (googleSignInConfigured) ...[
@@ -172,6 +181,43 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     } else {
       context.go(Routes.today);
     }
+  }
+
+  void _onEmailAuthenticated() {
+    unawaited(_saveRegistrationNameAndClose());
+  }
+
+  Future<void> _saveRegistrationNameAndClose() async {
+    final isNewAccount =
+        _emailController.currentScreen == EmailFlowScreen.completeRegistration;
+    final displayName = _registrationNameController.text.trim();
+    if (isNewAccount && displayName.isNotEmpty) {
+      final client = ref.read(clientProvider);
+      final accountId = client.auth.authInfo?.authUserId.toString();
+      if (accountId != null) {
+        try {
+          await client.profile.upsert(
+            ProfileDraft(
+              displayName: displayName,
+              avatarSeed: RibbonRecipe.seedForUser(accountId),
+              avatarPalette: 0,
+            ),
+          );
+          ref.invalidate(profileProvider);
+          ref.invalidate(accountIdentityProvider);
+        } catch (_) {
+          if (mounted) {
+            showPinneToast(
+              context,
+              'Your account was created, but the name was not saved. Add it '
+              'from Profile.',
+              kind: ToastKind.error,
+            );
+          }
+        }
+      }
+    }
+    if (mounted) _closeAfterAuthentication();
   }
 
   void _showSignInError(Object error) {
