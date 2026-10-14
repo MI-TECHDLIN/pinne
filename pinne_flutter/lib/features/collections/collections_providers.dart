@@ -171,3 +171,6 @@ int defaultCollectionPalette(Iterable<CollectionTileData> collections) {
 
 /// A fresh mesh layout for a new collection's cover.
 int newCoverSeed([Random? random]) => (random ?? Random()).nextInt(0x7fffffff);
+
+/// Where new cover seeds come from; tests pin it so goldens are stable.
+final coverSeedProvider = Provider<int Function()>((ref) => newCoverSeed);

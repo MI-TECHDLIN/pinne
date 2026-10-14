@@ -120,6 +120,7 @@ void main() {
             yield const <Item>[];
           }),
           collectionsApiProvider.overrideWithValue(api),
+          coverSeedProvider.overrideWithValue(() => 4242),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

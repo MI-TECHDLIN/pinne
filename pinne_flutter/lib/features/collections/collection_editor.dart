@@ -51,7 +51,8 @@ class _CollectionEditorSheetState extends ConsumerState<CollectionEditorSheet> {
     text: widget.editing?.description,
   );
   late int _palette = widget.editing?.paletteIndex ?? widget.defaultPalette;
-  late final int _seed = widget.editing?.coverSeed ?? newCoverSeed();
+  late final int _seed =
+      widget.editing?.coverSeed ?? ref.read(coverSeedProvider)();
   String? _error;
   var _busy = false;
 
