@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
@@ -77,6 +78,7 @@ final collectionsProvider =
     FutureProvider.autoDispose<List<CollectionTileData>>(
       (ref) async {
         if (ref.watch(accountIdProvider) == null) return _sampleCollections;
+        ref.watch(libraryRevisionProvider);
         final collections = await ref.watch(clientProvider).collection.list();
         if (collections.isEmpty) return _sampleCollections;
         return collections.map(CollectionTileData.fromCollection).toList();

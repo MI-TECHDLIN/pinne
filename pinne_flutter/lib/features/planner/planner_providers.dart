@@ -7,6 +7,7 @@ import 'package:pinne_calendar/pinne_calendar.dart' as cal;
 import 'package:pinne_client/pinne_client.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 import 'calendar_write_runner.dart';
 import 'device_calendar_adapter.dart';
@@ -514,6 +515,7 @@ class PlannerController extends AsyncNotifier<PlannerState> {
                 : null),
       ),
     );
+    ref.read(libraryRevisionProvider.notifier).bump();
   });
 
   /// Moves a scheduled session to [startAt] after a fresh availability read.
@@ -536,6 +538,7 @@ class PlannerController extends AsyncNotifier<PlannerState> {
         notice: () => write.problem,
       ),
     );
+    ref.read(libraryRevisionProvider.notifier).bump();
   });
 
   Future<void> cancel(SessionView view) => _guard(() async {
@@ -551,6 +554,7 @@ class PlannerController extends AsyncNotifier<PlannerState> {
         notice: () => write.problem,
       ),
     );
+    ref.read(libraryRevisionProvider.notifier).bump();
   });
 
   /// Exports sessions as an `.ics` file through the share sheet.

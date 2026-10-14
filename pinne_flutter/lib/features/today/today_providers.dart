@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 import '../planner/planner_providers.dart';
 import '../progress/progress_providers.dart';
@@ -20,6 +21,7 @@ final todayOverviewProvider = FutureProvider.autoDispose<TodayOverview>((
   ref,
 ) async {
   if (ref.watch(accountIdProvider) == null) return const TodayOverview();
+  ref.watch(libraryRevisionProvider);
   final now = ref.watch(todayClockProvider);
   final progressFuture = ref
       .watch(progressApiProvider)
@@ -64,6 +66,7 @@ final todayQueueProvider = FutureProvider.autoDispose<ReviewQueueResult>((
   ref,
 ) async {
   final budget = ref.watch(reviewBudgetProvider);
+  ref.watch(libraryRevisionProvider);
   if (ref.watch(accountIdProvider) == null) {
     return ReviewQueueResult(entries: [], timeBudgetMinutes: budget);
   }
@@ -101,9 +104,7 @@ class TodayServerActions implements TodayActionGateway {
   @override
   Future<ReviewEventReceipt> reviewed(Item item) async {
     final receipt = await _record(item, ReviewEventType.reviewed);
-    ref
-      ..invalidate(todayQueueProvider)
-      ..invalidate(progressReportProvider);
+    ref.read(libraryRevisionProvider.notifier).bump();
     return receipt;
   }
 
@@ -114,9 +115,7 @@ class TodayServerActions implements TodayActionGateway {
       ReviewEventType.undo,
       compensatesEventId: eventId,
     );
-    ref
-      ..invalidate(todayQueueProvider)
-      ..invalidate(progressReportProvider);
+    ref.read(libraryRevisionProvider.notifier).bump();
     return receipt;
   }
 
@@ -125,13 +124,13 @@ class TodayServerActions implements TodayActionGateway {
     await ref
         .read(reviewQueueEndpointProvider)
         .snooze(item.id!, DateTime.now().toUtc().add(const Duration(days: 1)));
-    ref.invalidate(todayQueueProvider);
+    ref.read(libraryRevisionProvider.notifier).bump();
   }
 
   @override
   Future<void> archive(Item item) async {
     await ref.read(reviewQueueEndpointProvider).archive(item.id!);
-    ref.invalidate(todayQueueProvider);
+    ref.read(libraryRevisionProvider.notifier).bump();
   }
 
   @override
@@ -140,7 +139,7 @@ class TodayServerActions implements TodayActionGateway {
     if (uri == null) return;
     await _record(item, ReviewEventType.opened);
     await ref.read(openExternalUrlProvider)(uri);
-    ref.invalidate(todayQueueProvider);
+    ref.read(libraryRevisionProvider.notifier).bump();
   }
 
   Future<ReviewEventReceipt> _record(
