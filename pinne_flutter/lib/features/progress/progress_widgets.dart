@@ -547,9 +547,12 @@ class _Badge extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: context.pinne.lilac),
         const SizedBox(width: 6),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        Flexible(
+          child: Text(
+            label,
+            softWrap: true,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     ),

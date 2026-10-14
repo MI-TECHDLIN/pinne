@@ -157,9 +157,13 @@ class _StatsCard extends StatelessWidget {
         color: context.pinne.mint,
       ),
       (
-        label: 'Review goal',
+        label: switch (report.streakGoal.period) {
+          StreakGoalPeriod.thisWeek => 'Weekly goal',
+          StreakGoalPeriod.thisMonth => 'Monthly goal',
+          StreakGoalPeriod.custom => 'Review goal',
+        },
         value:
-            '${report.streakGoal.reviewDayCount}/${report.streakGoal.periodDays} days',
+            '${report.streakGoal.reviewDayCount}/${report.streakGoal.reviewDaysGoal} days',
         color: context.pinne.sky,
       ),
       if (report.streakEnabled)
