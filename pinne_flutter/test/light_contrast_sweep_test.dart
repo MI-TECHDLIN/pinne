@@ -6,6 +6,7 @@ import 'package:pinne_flutter/core/motion.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
+import 'package:pinne_flutter/features/collections/collections_screen.dart';
 import 'package:pinne_flutter/features/onboarding/onboarding_store.dart';
 import 'package:pinne_flutter/features/search/search_history.dart';
 import 'package:pinne_flutter/features/today/today_greeting.dart';
@@ -15,6 +16,7 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'capture/fake_capture_server.dart';
+import 'support/collections_fixture.dart';
 import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 
@@ -61,6 +63,18 @@ void main() {
       tourStoreProvider.overrideWithValue(MemoryTourStore(seen: toured)),
       greetingClockProvider.overrideWithValue(() => DateTime(2026, 10, 7, 9)),
       greetingIndexPickerProvider.overrideWithValue((_) => 0),
+      collectionsProvider.overrideWith((ref) async => fixtureTiles),
+      collectionItemsProvider.overrideWith(
+        (ref, id) async => [
+          fixtureItem(1, 'Fintech dashboard concept', site: 'Dribbble'),
+          fixtureItem(
+            2,
+            'Meditation app onboarding screens',
+            site: 'Dribbble',
+            summary: 'Calm onboarding with one clear action per screen.',
+          ),
+        ],
+      ),
     ],
     child: const PinneApp(),
   );

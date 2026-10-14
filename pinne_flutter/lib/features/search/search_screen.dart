@@ -11,6 +11,7 @@ import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../../ui/item_preview.dart';
 import '../../ui/pinne_loading.dart';
 import '../settings/profile_provider.dart';
+import '../collections/collections_screen.dart';
 import '../examples/example_saves.dart';
 import 'search_history.dart';
 import 'search_providers.dart';
@@ -119,6 +120,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const SizedBox(height: PinneSpacing.md),
         const _FilterChips(),
         const SizedBox(height: PinneSpacing.lg),
+        _CollectionMatches(query: query),
         page.when(
           loading: () => const _SearchResultsSkeleton(),
           error: (error, _) => PinneErrorCard(
@@ -568,3 +570,40 @@ String _source(SourcePlatform source) => switch (source) {
 
 String _words(String value) =>
     '${value[0].toUpperCase()}${value.substring(1).replaceAll('_', ' ')}';
+
+/// The owner's collections whose name or description match the query, above
+/// the matching saves.
+class _CollectionMatches extends ConsumerWidget {
+  const _CollectionMatches({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (query.trim().isEmpty) return const SizedBox.shrink();
+    final collections = ref.watch(collectionsProvider).asData?.value;
+    final matches = [
+      for (final collection in collections ?? const <CollectionTileData>[])
+        if (collection.matches(query)) collection,
+    ];
+    if (matches.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey('search-collections'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          matches.length == 1 ? 'Collection' : 'Collections',
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(color: context.pinne.muted),
+        ),
+        const SizedBox(height: PinneSpacing.sm),
+        for (final collection in matches.take(5)) ...[
+          CollectionResultTile(item: collection),
+          const SizedBox(height: PinneSpacing.sm),
+        ],
+        const SizedBox(height: PinneSpacing.md),
+      ],
+    );
+  }
+}

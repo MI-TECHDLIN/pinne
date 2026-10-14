@@ -7,6 +7,7 @@ import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/glass_card.dart';
 import '../../ui/pinne_loading.dart';
+import '../settings/account_kind_provider.dart';
 import '../../ui/feedback/toast.dart';
 
 final exampleSavesStatusProvider =
@@ -66,6 +67,11 @@ class _ExampleSavesCardState extends ConsumerState<ExampleSavesCard> {
       return const SizedBox.shrink();
     }
     final loaded = value.exampleItemCount > 0;
+    // Only a guest trying Pinne out is offered examples. A real account
+    // starts with its own saves; one that loaded examples earlier can still
+    // remove them.
+    final kind = ref.watch(accountKindProvider).asData?.value;
+    if (!loaded && kind != AccountKind.guest) return const SizedBox.shrink();
     return GlassCard(
       key: const ValueKey('example-saves-card'),
       child: Column(

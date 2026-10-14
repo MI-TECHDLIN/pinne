@@ -8,11 +8,16 @@ class AiSuggestionChipData {
     required this.label,
     this.uncertain = false,
     this.maxLines = 1,
+    this.detail,
   });
 
   final String id;
   final String label;
   final bool uncertain;
+
+  /// Why it was suggested, shown under the label, such as which of the
+  /// owner's collections it matched.
+  final String? detail;
 
   /// Lines before the label ellipsizes. Null wraps the whole label, as a
   /// summary must: the user is accepting exactly that text.
@@ -47,12 +52,14 @@ class AiSuggestionChips extends StatelessWidget {
   Widget _chip(BuildContext context, AiSuggestionChipData suggestion) {
     // A pill only suits one line; wrapped text gets a tile's corners so it
     // never runs into the curve.
-    final multiline = suggestion.maxLines != 1;
+    final detail = suggestion.detail;
+    final multiline = suggestion.maxLines != 1 || detail != null;
     return Semantics(
       container: true,
       label:
           'AI suggestion: ${suggestion.label}'
-          '${suggestion.uncertain ? ', uncertain' : ''}',
+          '${suggestion.uncertain ? ', uncertain' : ''}'
+          '${detail == null ? '' : '. $detail'}',
       child: Container(
         key: ValueKey('ai-suggestion-${suggestion.id}'),
         padding: EdgeInsets.only(
@@ -71,13 +78,29 @@ class AiSuggestionChips extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(
-              child: Text(
-                suggestion.label,
-                key: ValueKey('ai-suggestion-text-${suggestion.id}'),
-                maxLines: suggestion.maxLines,
-                overflow: suggestion.maxLines == null
-                    ? null
-                    : TextOverflow.ellipsis,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    suggestion.label,
+                    key: ValueKey('ai-suggestion-text-${suggestion.id}'),
+                    maxLines: suggestion.maxLines,
+                    overflow: suggestion.maxLines == null
+                        ? null
+                        : TextOverflow.ellipsis,
+                  ),
+                  if (detail != null)
+                    Text(
+                      detail,
+                      key: ValueKey('ai-suggestion-detail-${suggestion.id}'),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: context.pinne.muted,
+                      ),
+                    ),
+                ],
               ),
             ),
             if (suggestion.uncertain)

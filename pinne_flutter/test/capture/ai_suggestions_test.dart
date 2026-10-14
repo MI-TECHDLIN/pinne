@@ -115,6 +115,7 @@ void main() {
     String? value,
     UuidValue? collectionId,
     bool uncertain = false,
+    String rationale = 'Matches the title.',
   }) => AiSuggestion(
     id: const Uuid().v4obj(),
     ownerId: ownerId,
@@ -122,7 +123,7 @@ void main() {
     kind: kind,
     value: value,
     collectionId: collectionId,
-    rationale: 'Matches the title.',
+    rationale: rationale,
     uncertain: uncertain,
   );
 
@@ -238,7 +239,11 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final api = _FakeAiSuggestions([]);
     api.suggestions.addAll([
-      suggestion(AiSuggestionKind.collection, collectionId: api.work),
+      suggestion(
+        AiSuggestionKind.collection,
+        collectionId: api.work,
+        rationale: "Matches your 'Work' saves: both mention layout.",
+      ),
       suggestion(AiSuggestionKind.tag, value: 'design', uncertain: true),
       suggestion(
         AiSuggestionKind.summary,
