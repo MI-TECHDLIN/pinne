@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/open_original.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
@@ -177,11 +177,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Future<void> _open(Item item) async {
-    final uri = item.url == null ? null : Uri.tryParse(item.url!);
-    if (uri == null) return;
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
+  Future<void> _open(Item item) => openOriginal(context, ref, item.url);
 
   Future<void> _confirmClearHistory(BuildContext context) async {
     final clear = await showDialog<bool>(

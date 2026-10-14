@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_capture/pinne_capture.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/open_original.dart';
 import '../../core/server_client.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
@@ -142,114 +143,133 @@ class SavedCard extends ConsumerWidget {
     final note = capture.noteText;
     final intention = capture.intention;
     final preview = item;
+    final openUrl = url ?? preview?.url;
+    final canOpen =
+        openUrl != null && Uri.tryParse(openUrl.trim())?.hasScheme == true;
     return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          key: const ValueKey('saved-card-open'),
+          excludeFromSemantics: true,
+          onTap: canOpen ? () => openOriginal(context, ref, openUrl) : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SourceBadge(source: capture.source),
-              const SizedBox(width: PinneSpacing.sm),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: SyncStatusLabel(capture: capture, signedIn: signedIn),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: PinneSpacing.sm),
-          if (preview != null) ...[
-            PreviewThumbnail(item: preview),
-            const SizedBox(height: PinneSpacing.sm),
-          ],
-          Text(
-            preview?.title ?? capture.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleMedium,
-          ),
-          if (preview != null) ...[
-            PreviewByline(item: preview),
-            if (preview.durationSeconds case final seconds?)
-              Padding(
-                padding: const EdgeInsets.only(top: PinneSpacing.xs),
-                child: DurationChip(seconds: seconds),
-              ),
-          ],
-          if (url != null)
-            Text(
-              readableUrl(url),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: context.pinne.muted,
-              ),
-            )
-          else if (note != null && note.trim() != capture.title)
-            Text(
-              note,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: context.pinne.muted,
-              ),
-            ),
-          if (preview?.summary case final summary?) ...[
-            const SizedBox(height: PinneSpacing.xs),
-            Text(
-              summary,
-              key: const ValueKey('saved-summary'),
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
-          if (intention != null) ...[
-            const SizedBox(height: PinneSpacing.sm),
-            Text(
-              'Your note: “$intention”',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: context.pinne.lilac,
-              ),
-            ),
-          ],
-          if (preview?.id case final itemId? when signedIn)
-            SavedItemAiSuggestions(
-              itemId: itemId,
-              revision: preview?.revision,
-            ),
-          if (capture.syncState == CaptureSyncState.failed) ...[
-            const SizedBox(height: PinneSpacing.xs),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    capture.lastError ?? 'The server did not accept it.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: context.pinne.muted,
+              Row(
+                children: [
+                  SourceBadge(source: capture.source),
+                  const SizedBox(width: PinneSpacing.sm),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: SyncStatusLabel(
+                        capture: capture,
+                        signedIn: signedIn,
+                      ),
                     ),
                   ),
+                  if (canOpen)
+                    IconButton(
+                      key: const ValueKey('saved-open-original'),
+                      tooltip: 'Open original',
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.open_in_new_rounded, size: 20),
+                      onPressed: () => openOriginal(context, ref, openUrl),
+                    ),
+                ],
+              ),
+              const SizedBox(height: PinneSpacing.sm),
+              if (preview != null) ...[
+                PreviewThumbnail(item: preview),
+                const SizedBox(height: PinneSpacing.sm),
+              ],
+              Text(
+                preview?.title ?? capture.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium,
+              ),
+              if (preview != null) ...[
+                PreviewByline(item: preview),
+                if (preview.durationSeconds case final seconds?)
+                  Padding(
+                    padding: const EdgeInsets.only(top: PinneSpacing.xs),
+                    child: DurationChip(seconds: seconds),
+                  ),
+              ],
+              if (url != null)
+                Text(
+                  readableUrl(url),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: context.pinne.muted,
+                  ),
+                )
+              else if (note != null && note.trim() != capture.title)
+                Text(
+                  note,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: context.pinne.muted,
+                  ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    final accountId = ref.read(accountIdProvider);
-                    if (accountId == null) return;
-                    ref
-                        .read(captureStoreProvider)
-                        ?.retry(
-                          capture.clientItemId,
-                          accountId: accountId,
-                        );
-                    final sync = ref.read(outboxSyncProvider);
-                    if (sync != null) unawaited(sync.drain());
-                  },
-                  child: const Text('Try again'),
+              if (preview?.summary case final summary?) ...[
+                const SizedBox(height: PinneSpacing.xs),
+                Text(
+                  summary,
+                  key: const ValueKey('saved-summary'),
+                  style: theme.textTheme.bodySmall,
                 ),
               ],
-            ),
-          ],
-        ],
+              if (intention != null) ...[
+                const SizedBox(height: PinneSpacing.sm),
+                Text(
+                  'Your note: “$intention”',
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: context.pinne.lilac,
+                  ),
+                ),
+              ],
+              if (preview?.id case final itemId? when signedIn)
+                SavedItemAiSuggestions(
+                  itemId: itemId,
+                  revision: preview?.revision,
+                ),
+              if (capture.syncState == CaptureSyncState.failed) ...[
+                const SizedBox(height: PinneSpacing.xs),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        capture.lastError ?? 'The server did not accept it.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: context.pinne.muted,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        final accountId = ref.read(accountIdProvider);
+                        if (accountId == null) return;
+                        ref
+                            .read(captureStoreProvider)
+                            ?.retry(capture.clientItemId, accountId: accountId);
+                        final sync = ref.read(outboxSyncProvider);
+                        if (sync != null) unawaited(sync.drain());
+                      },
+                      child: const Text('Try again'),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
