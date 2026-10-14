@@ -200,8 +200,6 @@ class SavedCard extends ConsumerWidget {
             Text(
               summary,
               key: const ValueKey('saved-summary'),
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall,
             ),
           ],
@@ -217,7 +215,10 @@ class SavedCard extends ConsumerWidget {
             ),
           ],
           if (preview?.id case final itemId? when signedIn)
-            SavedItemAiSuggestions(itemId: itemId),
+            SavedItemAiSuggestions(
+              itemId: itemId,
+              revision: preview?.revision,
+            ),
           if (capture.syncState == CaptureSyncState.failed) ...[
             const SizedBox(height: PinneSpacing.xs),
             Row(

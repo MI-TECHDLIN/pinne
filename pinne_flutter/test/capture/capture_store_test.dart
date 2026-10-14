@@ -222,6 +222,24 @@ void main() {
       expect(jsonEncode(frozen.toJson()), jsonEncode(draft.toJson()));
     });
 
+    test('a note that only repeats the shared link is not kept', () {
+      const shared = 'https://youtu.be/BMMcmmnjrM8?si=9DPCHgF2Gxoo0hMf';
+      final saved = store.save(parseCaptureInput(shared), hold: true);
+      store.editHeld(saved.clientItemId, title: saved.title, intention: shared);
+      expect(store.capture(saved.clientItemId)!.intention, isNull);
+      store.release(saved.clientItemId);
+      expect(
+        store.dueOperations(DateTime.now()).single.draft.intention,
+        isNull,
+      );
+
+      final pasted = store.save(
+        parseCaptureInput('https://example.com/a'),
+        intention: 'https://example.com/a',
+      );
+      expect(pasted.intention, isNull);
+    });
+
     test('clearing the title falls back to the derived one', () {
       final saved = store.save(
         parseCaptureInput('https://example.com/post'),
