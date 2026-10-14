@@ -21,11 +21,14 @@ class ProgressService {
   static const reviewCountMilestones = [10, 25, 50, 100];
 
   static const maxCustomDays = 366;
+  static const maxStreakGoalDays = 365;
   static const defaultWeeklyGoalDays = 3;
 
   static final _milestoneKey = RegExp(
     r'^(first-review|reviews-\d{1,5}|'
-    r'(weekly-goal|queue-cleared)-\d{4}-\d{2}-\d{2})$',
+    r'(weekly-goal|queue-cleared)-\d{4}-\d{2}-\d{2}|'
+    r'streak-goal-(week-\d{4}-\d{2}-\d{2}|'
+    r'month-\d{4}-\d{2}|custom-\d{1,3}-\d{1,3}))$',
   );
 
   Future<ProgressReport> report(
@@ -111,11 +114,11 @@ class ProgressService {
       for (final day in days) ...?reviewedOn[day.date],
     };
 
-    final weekly = _weeklyGoal(
+    final streakGoal = _streakGoal(
       today,
       todayKey,
       reviewedOn,
-      settings.weeklyGoalDays,
+      settings,
     );
     final streak = settings.streakEnabled ? _streak(today, reviewedOn) : null;
 
@@ -132,7 +135,7 @@ class ProgressService {
       todayKey: todayKey,
       totalReviewed: firstReviewDate.length,
       reviewedToday: reviewedOn[todayKey]?.length ?? 0,
-      weekly: weekly,
+      streakGoal: streakGoal,
     );
 
     return ProgressReport(
@@ -153,7 +156,7 @@ class ProgressService {
       days: days,
       bestDayDate: best?.date,
       collections: collections,
-      weeklyGoal: weekly,
+      streakGoal: streakGoal,
       streakEnabled: settings.streakEnabled,
       currentStreakDays: streak,
       milestones: milestones,
@@ -208,37 +211,60 @@ ON CONFLICT ("ownerId", "milestoneKey") DO NOTHING
     UuidValue ownerId,
     ProgressSettingsDraft draft,
   ) async {
-    if (draft.weeklyGoalDays < 1 || draft.weeklyGoalDays > 7) {
-      throw ValidationException(message: 'Choose a goal of 1 to 7 days.');
+    if (draft.customGoalDays < 3 || draft.customGoalDays > maxStreakGoalDays) {
+      throw ValidationException(
+        message: 'Choose a custom goal of 3 to 365 days.',
+      );
+    }
+    final periodDays = switch (draft.goalPeriod) {
+      StreakGoalPeriod.thisWeek => 7,
+      StreakGoalPeriod.thisMonth => 30,
+      StreakGoalPeriod.custom => draft.customGoalDays,
+    };
+    if (draft.weeklyGoalDays < 1 || draft.weeklyGoalDays > periodDays) {
+      throw ValidationException(
+        message: 'Review days must fit inside the chosen period.',
+      );
     }
     await session.db.unsafeExecute(
       '''
-INSERT INTO "progress_settings" ("ownerId", "streakEnabled", "weeklyGoalDays")
-VALUES (CAST(\$1 AS uuid), \$2, \$3)
+INSERT INTO "progress_settings" ("ownerId", "streakEnabled", "weeklyGoalDays", "goalPeriod", "customGoalDays")
+VALUES (CAST(\$1 AS uuid), \$2, \$3, \$4, \$5)
 ON CONFLICT ("ownerId") DO UPDATE
 SET "streakEnabled" = EXCLUDED."streakEnabled",
-    "weeklyGoalDays" = EXCLUDED."weeklyGoalDays"
+    "weeklyGoalDays" = EXCLUDED."weeklyGoalDays",
+    "goalPeriod" = EXCLUDED."goalPeriod",
+    "customGoalDays" = EXCLUDED."customGoalDays"
 ''',
       parameters: QueryParameters.positional([
         ownerId.toString(),
         draft.streakEnabled,
         draft.weeklyGoalDays,
+        draft.goalPeriod.name,
+        draft.customGoalDays,
       ]),
     );
     return getSettings(session, ownerId);
   }
 
-  WeeklyGoalProgress _weeklyGoal(
+  StreakGoalProgress _streakGoal(
     DateTime today,
     String todayKey,
     Map<String, Set<UuidValue>> reviewedOn,
-    int goalDays,
+    ProgressSettings settings,
   ) {
-    final monday = _addDays(today, 1 - today.weekday);
+    final periodDays = switch (settings.goalPeriod) {
+      StreakGoalPeriod.thisWeek => 7,
+      StreakGoalPeriod.thisMonth => 30,
+      StreakGoalPeriod.custom => settings.customGoalDays,
+    };
+    final start = settings.goalPeriod == StreakGoalPeriod.thisWeek
+        ? _addDays(today, 1 - today.weekday)
+        : _addDays(today, 1 - periodDays);
     final days = [
-      for (var i = 0; i < 7; i++)
+      for (var i = 0; i < periodDays; i++)
         () {
-          final key = _key(_addDays(monday, i));
+          final key = _key(_addDays(start, i));
           final future = key.compareTo(todayKey) > 0;
           return ProgressDay(
             date: key,
@@ -249,11 +275,13 @@ SET "streakEnabled" = EXCLUDED."streakEnabled",
         }(),
     ];
     final count = days.where((day) => day.reviewedCount > 0).length;
-    return WeeklyGoalProgress(
-      weekStartDate: _key(monday),
-      goalDays: goalDays,
+    return StreakGoalProgress(
+      period: settings.goalPeriod,
+      periodDays: periodDays,
+      periodStartDate: _key(start),
+      reviewDaysGoal: settings.weeklyGoalDays,
       reviewDayCount: count,
-      reached: count >= goalDays,
+      reached: count >= settings.weeklyGoalDays,
       days: days,
     );
   }
@@ -319,18 +347,18 @@ SET "streakEnabled" = EXCLUDED."streakEnabled",
     required String todayKey,
     required int totalReviewed,
     required int reviewedToday,
-    required WeeklyGoalProgress weekly,
+    required StreakGoalProgress streakGoal,
   }) async {
     final reached = <(String, MilestoneKind, int)>[
       if (totalReviewed >= 1) ('first-review', MilestoneKind.firstReview, 1),
       for (final count in reviewCountMilestones)
         if (totalReviewed >= count)
           ('reviews-$count', MilestoneKind.reviewCount, count),
-      if (weekly.reached)
+      if (streakGoal.reached)
         (
-          'weekly-goal-${weekly.weekStartDate}',
-          MilestoneKind.weeklyGoal,
-          weekly.goalDays,
+          _streakGoalMilestoneKey(streakGoal, todayKey),
+          MilestoneKind.streakGoal,
+          streakGoal.reviewDaysGoal,
         ),
     ];
     if (reviewedToday > 0) {
@@ -372,6 +400,17 @@ SET "streakEnabled" = EXCLUDED."streakEnabled",
         ),
     ];
   }
+
+  String _streakGoalMilestoneKey(
+    StreakGoalProgress goal,
+    String todayKey,
+  ) => switch (goal.period) {
+    StreakGoalPeriod.thisWeek => 'streak-goal-week-${goal.periodStartDate}',
+    StreakGoalPeriod.thisMonth =>
+      'streak-goal-month-${todayKey.substring(0, 7)}',
+    StreakGoalPeriod.custom =>
+      'streak-goal-custom-${goal.periodDays}-${goal.reviewDaysGoal}',
+  };
 
   static (DateTime, DateTime) _range(ProgressQuery query, DateTime today) {
     switch (query.period) {

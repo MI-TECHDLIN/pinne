@@ -72,6 +72,7 @@ class ReviewQueueService {
     }
 
     final candidates = <ReviewQueueEntry>[];
+    DateTime? nextDueAt;
     for (final item in items) {
       if (progressByItem[item.id]?.firstReviewedAt != null) continue;
       final control = controlByItem[item.id];
@@ -100,7 +101,12 @@ class ReviewQueueService {
       if (control?.snoozedUntil case final snoozed?) {
         if (snoozed.isAfter(dueAt)) dueAt = snoozed.toUtc();
       }
-      if (dueAt.isAfter(at)) continue;
+      if (dueAt.isAfter(at)) {
+        if (nextDueAt == null || dueAt.isBefore(nextDueAt)) {
+          nextDueAt = dueAt;
+        }
+        continue;
+      }
       final estimate = estimateMinutes(item.contentType);
       candidates.add(
         ReviewQueueEntry(
@@ -152,6 +158,7 @@ class ReviewQueueService {
             (latest, dueAt) =>
                 latest == null || dueAt.isAfter(latest) ? dueAt : latest,
           ),
+      nextDueAt: nextDueAt,
       digestText: latestDigest?.body,
     );
   }

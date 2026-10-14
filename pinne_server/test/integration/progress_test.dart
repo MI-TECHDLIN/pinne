@@ -141,8 +141,8 @@ void main() {
         expect(wednesday.isToday, isTrue);
         expect(thisWeek.days[3].isFuture, isTrue);
         expect(thisWeek.bestDayDate, '2026-10-07');
-        expect(thisWeek.weeklyGoal.reviewDayCount, 2);
-        expect(thisWeek.weeklyGoal.days.map((d) => d.reviewedCount > 0), [
+        expect(thisWeek.streakGoal.reviewDayCount, 2);
+        expect(thisWeek.streakGoal.days.map((d) => d.reviewedCount > 0), [
           false,
           true,
           true,
@@ -423,22 +423,27 @@ void main() {
         var progress = await report(alice, ProgressPeriod.thisWeek, now);
         expect(progress.streakEnabled, isFalse);
         expect(progress.currentStreakDays, isNull);
-        expect(progress.weeklyGoal.goalDays, 3);
-        expect(progress.weeklyGoal.reviewDayCount, 2);
-        expect(progress.weeklyGoal.reached, isFalse);
+        expect(progress.streakGoal.reviewDaysGoal, 3);
+        expect(progress.streakGoal.reviewDayCount, 2);
+        expect(progress.streakGoal.reached, isFalse);
         expect(progress.days[1].reviewedCount, 2);
 
         await endpoints.progress.updateSettings(
           alice,
-          ProgressSettingsDraft(streakEnabled: true, weeklyGoalDays: 2),
+          ProgressSettingsDraft(
+            streakEnabled: true,
+            weeklyGoalDays: 2,
+            goalPeriod: StreakGoalPeriod.thisWeek,
+            customGoalDays: 7,
+          ),
         );
         progress = await report(alice, ProgressPeriod.thisWeek, now);
         // Today is still open, so the streak runs Sunday to Tuesday.
         expect(progress.currentStreakDays, 3);
-        expect(progress.weeklyGoal.reached, isTrue);
+        expect(progress.streakGoal.reached, isTrue);
         expect(
           progress.milestones.map((m) => m.key),
-          contains('weekly-goal-2026-10-05'),
+          contains('streak-goal-week-2026-10-05'),
         );
 
         final lastWeek = await report(alice, ProgressPeriod.lastWeek, now);
@@ -447,11 +452,61 @@ void main() {
         await expectLater(
           endpoints.progress.updateSettings(
             alice,
-            ProgressSettingsDraft(streakEnabled: true, weeklyGoalDays: 8),
+            ProgressSettingsDraft(
+              streakEnabled: true,
+              weeklyGoalDays: 8,
+              goalPeriod: StreakGoalPeriod.thisWeek,
+              customGoalDays: 7,
+            ),
           ),
           throwsA(isA<ValidationException>()),
         );
       });
+
+      test(
+        'week, month and custom streak goals persist and calculate',
+        () async {
+          final item = await save(
+            alice,
+            'Goal item',
+            DateTime.utc(2026, 10, 1, 9),
+          );
+          await record(
+            alice,
+            item,
+            ReviewEventType.reviewed,
+            DateTime.utc(2026, 10, 6, 9),
+          );
+
+          for (final (period, customDays, expectedDays) in [
+            (StreakGoalPeriod.thisWeek, 7, 7),
+            (StreakGoalPeriod.thisMonth, 7, 30),
+            (StreakGoalPeriod.custom, 60, 60),
+          ]) {
+            final saved = await endpoints.progress.updateSettings(
+              alice,
+              ProgressSettingsDraft(
+                streakEnabled: true,
+                weeklyGoalDays: 1,
+                goalPeriod: period,
+                customGoalDays: customDays,
+              ),
+            );
+            expect(saved.goalPeriod, period);
+            expect(saved.customGoalDays, customDays);
+            final progress = await report(alice, ProgressPeriod.thisWeek, now);
+            expect(progress.streakGoal.period, period);
+            expect(progress.streakGoal.periodDays, expectedDays);
+            expect(progress.streakGoal.days, hasLength(expectedDays));
+            expect(progress.streakGoal.reviewDayCount, 1);
+            expect(progress.streakGoal.reached, isTrue);
+          }
+
+          final theirs = await endpoints.progress.settings(bob);
+          expect(theirs.goalPeriod, StreakGoalPeriod.thisWeek);
+          expect(theirs.customGoalDays, 7);
+        },
+      );
 
       test('milestones celebrate once and stay reached', () async {
         final items = [
@@ -526,7 +581,12 @@ void main() {
         );
         await endpoints.progress.updateSettings(
           alice,
-          ProgressSettingsDraft(streakEnabled: true, weeklyGoalDays: 1),
+          ProgressSettingsDraft(
+            streakEnabled: true,
+            weeklyGoalDays: 1,
+            goalPeriod: StreakGoalPeriod.thisWeek,
+            customGoalDays: 7,
+          ),
         );
         await endpoints.progress.markCelebrated(bob, ['first-review']);
 

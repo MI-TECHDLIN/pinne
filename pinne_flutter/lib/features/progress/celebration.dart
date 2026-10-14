@@ -43,6 +43,12 @@ class CelebrationCopy {
           unit: milestone.value == 1 ? 'review day' : 'review days',
           line: 'You made time for what you saved this week.',
         ),
+        MilestoneKind.streakGoal => CelebrationCopy(
+          number: milestone.value,
+          title: 'Streak goal reached',
+          unit: milestone.value == 1 ? 'review day' : 'review days',
+          line: 'You found a rhythm that works for you. Keep it yours.',
+        ),
         MilestoneKind.queueCleared => CelebrationCopy(
           number: milestone.value,
           title: 'Queue cleared',
@@ -67,6 +73,7 @@ class CelebrationCopy {
 int _rank(ProgressMilestone milestone) => switch (milestone.kind) {
   MilestoneKind.reviewCount => 1000 + milestone.value,
   MilestoneKind.weeklyGoal => 300,
+  MilestoneKind.streakGoal => 300,
   MilestoneKind.firstReview => 200,
   MilestoneKind.queueCleared => 100,
 };

@@ -16,6 +16,7 @@ enum MilestoneKind implements _isc.SerializableModel {
   firstReview,
   reviewCount,
   weeklyGoal,
+  streakGoal,
   queueCleared;
 
   static MilestoneKind fromJson(String name) {
@@ -26,6 +27,8 @@ enum MilestoneKind implements _isc.SerializableModel {
         return MilestoneKind.reviewCount;
       case 'weeklyGoal':
         return MilestoneKind.weeklyGoal;
+      case 'streakGoal':
+        return MilestoneKind.streakGoal;
       case 'queueCleared':
         return MilestoneKind.queueCleared;
       default:

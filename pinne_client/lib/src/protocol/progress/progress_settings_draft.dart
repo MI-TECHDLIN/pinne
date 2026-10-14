@@ -11,17 +11,22 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import '../progress/streak_goal_period.dart' as _iln0fvkl;
 
 abstract class ProgressSettingsDraft
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   ProgressSettingsDraft._({
     required this.streakEnabled,
     required this.weeklyGoalDays,
+    required this.goalPeriod,
+    required this.customGoalDays,
   });
 
   factory ProgressSettingsDraft({
     required bool streakEnabled,
     required int weeklyGoalDays,
+    required _iln0fvkl.StreakGoalPeriod goalPeriod,
+    required int customGoalDays,
   }) = _ProgressSettingsDraftImpl;
 
   factory ProgressSettingsDraft.fromJson(
@@ -32,6 +37,10 @@ abstract class ProgressSettingsDraft
         jsonSerialization['streakEnabled'],
       ),
       weeklyGoalDays: jsonSerialization['weeklyGoalDays'] as int,
+      goalPeriod: _iln0fvkl.StreakGoalPeriod.fromJson(
+        (jsonSerialization['goalPeriod'] as String),
+      ),
+      customGoalDays: jsonSerialization['customGoalDays'] as int,
     );
   }
 
@@ -39,12 +48,18 @@ abstract class ProgressSettingsDraft
 
   int weeklyGoalDays;
 
+  _iln0fvkl.StreakGoalPeriod goalPeriod;
+
+  int customGoalDays;
+
   /// Returns a shallow copy of this [ProgressSettingsDraft]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   ProgressSettingsDraft copyWith({
     bool? streakEnabled,
     int? weeklyGoalDays,
+    _iln0fvkl.StreakGoalPeriod? goalPeriod,
+    int? customGoalDays,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -52,6 +67,8 @@ abstract class ProgressSettingsDraft
       '__className__': 'ProgressSettingsDraft',
       'streakEnabled': streakEnabled,
       'weeklyGoalDays': weeklyGoalDays,
+      'goalPeriod': goalPeriod.toJson(),
+      'customGoalDays': customGoalDays,
     };
   }
 
@@ -61,6 +78,8 @@ abstract class ProgressSettingsDraft
       '__className__': 'ProgressSettingsDraft',
       'streakEnabled': streakEnabled,
       'weeklyGoalDays': weeklyGoalDays,
+      'goalPeriod': goalPeriod.toJson(),
+      'customGoalDays': customGoalDays,
     };
   }
 
@@ -74,9 +93,13 @@ class _ProgressSettingsDraftImpl extends ProgressSettingsDraft {
   _ProgressSettingsDraftImpl({
     required bool streakEnabled,
     required int weeklyGoalDays,
+    required _iln0fvkl.StreakGoalPeriod goalPeriod,
+    required int customGoalDays,
   }) : super._(
          streakEnabled: streakEnabled,
          weeklyGoalDays: weeklyGoalDays,
+         goalPeriod: goalPeriod,
+         customGoalDays: customGoalDays,
        );
 
   /// Returns a shallow copy of this [ProgressSettingsDraft]
@@ -86,10 +109,14 @@ class _ProgressSettingsDraftImpl extends ProgressSettingsDraft {
   ProgressSettingsDraft copyWith({
     bool? streakEnabled,
     int? weeklyGoalDays,
+    _iln0fvkl.StreakGoalPeriod? goalPeriod,
+    int? customGoalDays,
   }) {
     return ProgressSettingsDraft(
       streakEnabled: streakEnabled ?? this.streakEnabled,
       weeklyGoalDays: weeklyGoalDays ?? this.weeklyGoalDays,
+      goalPeriod: goalPeriod ?? this.goalPeriod,
+      customGoalDays: customGoalDays ?? this.customGoalDays,
     );
   }
 }

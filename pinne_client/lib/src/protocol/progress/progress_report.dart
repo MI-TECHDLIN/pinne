@@ -16,7 +16,7 @@ import '../progress/collection_progress.dart' as _i1jt95qi;
 import '../progress/progress_day.dart' as _invmshpc;
 import '../progress/progress_milestone.dart' as _ikqw46tl;
 import '../progress/progress_period.dart' as _ibqwo0mh;
-import '../progress/weekly_goal_progress.dart' as _i8cu4i77;
+import '../progress/streak_goal_progress.dart' as _ijxjbk2j;
 
 /// Honest progress for one save cohort: the items saved from `startDate`
 /// (inclusive) to `endDate` (exclusive), local to the query's offset.
@@ -39,7 +39,7 @@ abstract class ProgressReport
     required this.days,
     this.bestDayDate,
     required this.collections,
-    required this.weeklyGoal,
+    required this.streakGoal,
     required this.streakEnabled,
     this.currentStreakDays,
     required this.milestones,
@@ -61,7 +61,7 @@ abstract class ProgressReport
     required List<_invmshpc.ProgressDay> days,
     String? bestDayDate,
     required List<_i1jt95qi.CollectionProgress> collections,
-    required _i8cu4i77.WeeklyGoalProgress weeklyGoal,
+    required _ijxjbk2j.StreakGoalProgress streakGoal,
     required bool streakEnabled,
     int? currentStreakDays,
     required List<_ikqw46tl.ProgressMilestone> milestones,
@@ -92,9 +92,9 @@ abstract class ProgressReport
           .deserialize<List<_i1jt95qi.CollectionProgress>>(
             jsonSerialization['collections'],
           ),
-      weeklyGoal: _iub9zyhg.Protocol()
-          .deserialize<_i8cu4i77.WeeklyGoalProgress>(
-            jsonSerialization['weeklyGoal'],
+      streakGoal: _iub9zyhg.Protocol()
+          .deserialize<_ijxjbk2j.StreakGoalProgress>(
+            jsonSerialization['streakGoal'],
           ),
       streakEnabled: _isc.BoolJsonExtension.fromJson(
         jsonSerialization['streakEnabled'],
@@ -146,7 +146,7 @@ abstract class ProgressReport
 
   List<_i1jt95qi.CollectionProgress> collections;
 
-  _i8cu4i77.WeeklyGoalProgress weeklyGoal;
+  _ijxjbk2j.StreakGoalProgress streakGoal;
 
   bool streakEnabled;
 
@@ -175,7 +175,7 @@ abstract class ProgressReport
     List<_invmshpc.ProgressDay>? days,
     String? bestDayDate,
     List<_i1jt95qi.CollectionProgress>? collections,
-    _i8cu4i77.WeeklyGoalProgress? weeklyGoal,
+    _ijxjbk2j.StreakGoalProgress? streakGoal,
     bool? streakEnabled,
     int? currentStreakDays,
     List<_ikqw46tl.ProgressMilestone>? milestones,
@@ -199,7 +199,7 @@ abstract class ProgressReport
       'days': days.toJson(valueToJson: (v) => v.toJson()),
       if (bestDayDate != null) 'bestDayDate': bestDayDate,
       'collections': collections.toJson(valueToJson: (v) => v.toJson()),
-      'weeklyGoal': weeklyGoal.toJson(),
+      'streakGoal': streakGoal.toJson(),
       'streakEnabled': streakEnabled,
       if (currentStreakDays != null) 'currentStreakDays': currentStreakDays,
       'milestones': milestones.toJson(valueToJson: (v) => v.toJson()),
@@ -227,7 +227,7 @@ abstract class ProgressReport
       'collections': collections.toJson(
         valueToJson: (v) => v.toJsonForProtocol(),
       ),
-      'weeklyGoal': weeklyGoal.toJsonForProtocol(),
+      'streakGoal': streakGoal.toJsonForProtocol(),
       'streakEnabled': streakEnabled,
       if (currentStreakDays != null) 'currentStreakDays': currentStreakDays,
       'milestones': milestones.toJson(
@@ -261,7 +261,7 @@ class _ProgressReportImpl extends ProgressReport {
     required List<_invmshpc.ProgressDay> days,
     String? bestDayDate,
     required List<_i1jt95qi.CollectionProgress> collections,
-    required _i8cu4i77.WeeklyGoalProgress weeklyGoal,
+    required _ijxjbk2j.StreakGoalProgress streakGoal,
     required bool streakEnabled,
     int? currentStreakDays,
     required List<_ikqw46tl.ProgressMilestone> milestones,
@@ -281,7 +281,7 @@ class _ProgressReportImpl extends ProgressReport {
          days: days,
          bestDayDate: bestDayDate,
          collections: collections,
-         weeklyGoal: weeklyGoal,
+         streakGoal: streakGoal,
          streakEnabled: streakEnabled,
          currentStreakDays: currentStreakDays,
          milestones: milestones,
@@ -307,7 +307,7 @@ class _ProgressReportImpl extends ProgressReport {
     List<_invmshpc.ProgressDay>? days,
     Object? bestDayDate = _Undefined,
     List<_i1jt95qi.CollectionProgress>? collections,
-    _i8cu4i77.WeeklyGoalProgress? weeklyGoal,
+    _ijxjbk2j.StreakGoalProgress? streakGoal,
     bool? streakEnabled,
     Object? currentStreakDays = _Undefined,
     List<_ikqw46tl.ProgressMilestone>? milestones,
@@ -331,7 +331,7 @@ class _ProgressReportImpl extends ProgressReport {
       bestDayDate: bestDayDate is String? ? bestDayDate : this.bestDayDate,
       collections:
           collections ?? this.collections.map((e0) => e0.copyWith()).toList(),
-      weeklyGoal: weeklyGoal ?? this.weeklyGoal.copyWith(),
+      streakGoal: streakGoal ?? this.streakGoal.copyWith(),
       streakEnabled: streakEnabled ?? this.streakEnabled,
       currentStreakDays: currentStreakDays is int?
           ? currentStreakDays

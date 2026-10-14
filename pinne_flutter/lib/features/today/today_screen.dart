@@ -105,6 +105,8 @@ class TodayScreen extends ConsumerWidget {
                           palette: avatar.palette,
                           entry: top,
                           digestText: data?.digestText,
+                          nextDueAt: data?.nextDueAt,
+                          now: now,
                           timeBudgetMinutes: budget,
                           onReviewed: top == null
                               ? null
@@ -468,6 +470,8 @@ class TodaySpiritCard extends StatelessWidget {
     this.animate = true,
     this.entry,
     this.digestText,
+    this.nextDueAt,
+    this.now,
     this.timeBudgetMinutes = 10,
     this.onReviewed,
     this.onRemindLater,
@@ -481,6 +485,8 @@ class TodaySpiritCard extends StatelessWidget {
   final bool animate;
   final ReviewQueueEntry? entry;
   final String? digestText;
+  final DateTime? nextDueAt;
+  final DateTime? now;
   final int timeBudgetMinutes;
   final VoidCallback? onReviewed;
   final VoidCallback? onRemindLater;
@@ -494,6 +500,8 @@ class TodaySpiritCard extends StatelessWidget {
         seed: seed,
         palette: palette,
         digestText: digestText,
+        nextDueAt: nextDueAt,
+        now: now,
       );
     }
     final item = entry!.item;
@@ -646,11 +654,15 @@ class _EmptyQueueCard extends StatelessWidget {
     required this.seed,
     required this.palette,
     this.digestText,
+    this.nextDueAt,
+    this.now,
   });
 
   final int seed;
   final int palette;
   final String? digestText;
+  final DateTime? nextDueAt;
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
@@ -689,7 +701,8 @@ class _EmptyQueueCard extends StatelessWidget {
               Text(
                 digestText?.trim().isNotEmpty == true
                     ? digestText!
-                    : 'Nothing is due. Your spirit is resting.',
+                    : _nextSaveCopy(nextDueAt, now) ??
+                          'Nothing is due. Your spirit is resting.',
                 style: TextStyle(
                   color: context.pinne.ink.withValues(alpha: 0.76),
                   height: 1.35,
@@ -712,6 +725,16 @@ class _EmptyQueueCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String? _nextSaveCopy(DateTime? nextDueAt, DateTime? now) {
+  if (nextDueAt == null || now == null) return null;
+  final minutes = nextDueAt.toUtc().difference(now.toUtc()).inMinutes;
+  if (minutes <= 0) return 'Your next save is almost ready.';
+  final hours = (minutes / 60).ceil();
+  if (hours < 24) return 'Your next save comes back in $hours h.';
+  final days = (hours / 24).ceil();
+  return 'Your next save comes back in $days ${days == 1 ? 'day' : 'days'}.';
 }
 
 class _WeekStrip extends StatelessWidget {

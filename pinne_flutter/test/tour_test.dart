@@ -162,6 +162,11 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('nav-settings')));
     await tester.pumpAndSettle();
 
+    await tester.dragUntilVisible(
+      find.byKey(const ValueKey('show-app-tour')),
+      find.byType(ListView).last,
+      const Offset(0, -300),
+    );
     await tester.tap(find.byKey(const ValueKey('show-app-tour')));
     await tester.pumpAndSettle();
     expect(_overlay, findsOneWidget);

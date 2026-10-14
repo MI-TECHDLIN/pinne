@@ -27,11 +27,13 @@ applied event; opens and undone events never count.
   an empty cohort.
 - **Reviewed this week** (hero card): distinct items, from any cohort, with a
   review during the period.
-- **Review days and weekly goal**: distinct local days with a review, from
-  each event's effective local date. The goal (1–7 days, default 3) and the
-  opt-in streak are `progress.settings` / `progress.updateSettings`.
-- **Milestones**: first review, 10/25/50/100 reviews, the weekly goal for
-  the current week, and a cleared review queue (today had a review and
+- **Review days and streak goal**: distinct local days with a review, from
+  each event's effective local date. The owner chooses this week (7 days),
+  this month (30 days), or a custom 3–365-day window, plus the number of
+  review days needed (existing owners keep the default of 3). The opt-in
+  daily streak and goal are `progress.settings` / `progress.updateSettings`.
+- **Milestones**: first review, 10/25/50/100 reviews, the chosen streak goal,
+  and a cleared review queue (today had a review and
   nothing is due, with reminders on). `progress.markCelebrated` stores seen
   keys in `celebration_seen`, so each one celebrates exactly once. The app
   marks them before showing the sheet, after Today's Reviewed or when

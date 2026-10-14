@@ -27,7 +27,7 @@ fields:
   ### The period day with the most reviews so far (earliest wins a tie).
   bestDayDate: String?
   collections: List<CollectionProgress>
-  weeklyGoal: WeeklyGoalProgress
+  streakGoal: StreakGoalProgress
   streakEnabled: bool
   ### Consecutive local review days up to today, or up to yesterday while
   ### today is still open. Null unless streaks are enabled.

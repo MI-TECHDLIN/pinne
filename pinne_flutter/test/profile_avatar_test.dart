@@ -6,6 +6,7 @@ import 'package:pinne_flutter/core/motion.dart';
 import 'package:pinne_flutter/features/settings/settings_screen.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/settings/profile_provider.dart';
+import 'package:pinne_flutter/features/settings/reminder_settings_provider.dart';
 import 'package:pinne_flutter/ui/ribbon_spirit/ribbon_spirit.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -47,6 +48,19 @@ class _ProfileEndpoint extends Fake implements EndpointProfile {
   }
 }
 
+class _ReminderEndpoint implements ReminderSettingsApi {
+  var value = ReminderSettings(
+    ownerId: UuidValue.fromString('00000000-0000-4000-8000-000000000001'),
+  );
+
+  @override
+  Future<ReminderSettings> settings() async => value;
+
+  @override
+  Future<ReminderSettings> updateSettings(ReminderSettingsDraft draft) async =>
+      value = value.copyWith(delayHours: draft.delayHours);
+}
+
 Widget _app(
   _ProfileEndpoint endpoint, {
   Brightness brightness = Brightness.dark,
@@ -54,6 +68,7 @@ Widget _app(
   overrides: [
     accountIdProvider.overrideWith(_Alice.new),
     profileEndpointProvider.overrideWithValue(endpoint),
+    reminderSettingsApiProvider.overrideWithValue(_ReminderEndpoint()),
     signedInProvider.overrideWith(_SignedIn.new),
     serverUrlProvider.overrideWithValue('http://localhost:8080/'),
   ],

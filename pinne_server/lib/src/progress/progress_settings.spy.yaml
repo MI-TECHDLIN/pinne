@@ -5,8 +5,12 @@ fields:
   id: UuidValue?, defaultPersist=random_v7
   ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
   streakEnabled: bool, default=false
-  ### Distinct review days per week that count as the weekly goal.
+  ### Distinct review days in the chosen period that complete the goal.
+  ### The legacy field name preserves existing users' saved default.
   weeklyGoalDays: int, default=3
+  goalPeriod: StreakGoalPeriod, default=thisWeek
+  ### Used only when goalPeriod is custom.
+  customGoalDays: int, default=7
 indexes:
   progress_settings_owner_idx:
     fields: ownerId

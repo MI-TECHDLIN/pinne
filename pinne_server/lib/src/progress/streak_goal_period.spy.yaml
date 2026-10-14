@@ -1,0 +1,7 @@
+### The window used for an owner's review-day and streak goal.
+enum: StreakGoalPeriod
+serialized: byName
+values:
+  - thisWeek
+  - thisMonth
+  - custom

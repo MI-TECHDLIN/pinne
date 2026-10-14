@@ -4,4 +4,5 @@ values:
   - firstReview
   - reviewCount
   - weeklyGoal
+  - streakGoal
   - queueCleared

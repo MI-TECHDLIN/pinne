@@ -125,8 +125,8 @@ void main() {
         ProgressPeriod.thisWeek: sampleReport(
           milestones: [
             ProgressMilestone(
-              key: 'weekly-goal-2026-10-05',
-              kind: MilestoneKind.weeklyGoal,
+              key: 'streak-goal-week-2026-10-05',
+              kind: MilestoneKind.streakGoal,
               value: 5,
               celebrated: false,
             ),
@@ -208,8 +208,8 @@ void main() {
           ProgressPeriod.thisWeek: sampleReport(
             milestones: [
               ProgressMilestone(
-                key: 'weekly-goal-2026-10-05',
-                kind: MilestoneKind.weeklyGoal,
+                key: 'streak-goal-week-2026-10-05',
+                kind: MilestoneKind.streakGoal,
                 value: 5,
                 celebrated: false,
               ),

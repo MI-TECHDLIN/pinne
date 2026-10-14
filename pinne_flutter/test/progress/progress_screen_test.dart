@@ -216,6 +216,39 @@ void main() {
       expect(find.text('67%'), findsWidgets);
     });
 
+    testWidgets('shows progress against a custom streak period', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(430, 2600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final base = sampleReport();
+      final report = base.copyWith(
+        streakGoal: base.streakGoal.copyWith(
+          period: StreakGoalPeriod.custom,
+          periodDays: 60,
+          periodStartDate: '2026-08-09',
+          reviewDaysGoal: 20,
+          reviewDayCount: 12,
+          reached: false,
+        ),
+        currentStreakDays: 18,
+      );
+      await tester.pumpWidget(
+        app(
+          const ProgressScreen(),
+          api: FakeProgressApi({ProgressPeriod.thisWeek: report}),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('60-day goal'), findsOneWidget);
+      expect(
+        find.text('12 of 60 days included a review. Target: 20.'),
+        findsOneWidget,
+      );
+      expect(find.text('Day 18 of your 60-day streak'), findsOneWidget);
+    });
+
     testWidgets('an empty account gets an encouraging, number-free state', (
       tester,
     ) async {
@@ -237,7 +270,9 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('the weekly goal sheet saves goal and streak', (tester) async {
+    testWidgets('the streak goal sheet saves period, length and review days', (
+      tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(430, 2600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       final api = FakeProgressApi({ProgressPeriod.thisWeek: sampleReport()});
@@ -246,6 +281,12 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('progress-goal-edit')));
       await tester.pumpAndSettle();
       expect(find.text('3 days'), findsOneWidget);
+      await tester.tap(find.text('Custom'));
+      await tester.pump();
+      await tester.enterText(
+        find.byKey(const ValueKey('custom-goal-days-7')),
+        '60',
+      );
       await tester.tap(find.byKey(const ValueKey('goal-plus')));
       await tester.tap(find.byKey(const ValueKey('streak-switch')));
       await tester.pump();
@@ -253,14 +294,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(api.settingsValue.weeklyGoalDays, 4);
       expect(api.settingsValue.streakEnabled, isTrue);
+      expect(api.settingsValue.goalPeriod, StreakGoalPeriod.custom);
+      expect(api.settingsValue.customGoalDays, 60);
       expect(find.byType(GoalSettingsSheet), findsNothing);
     });
   });
 
   group('celebration', () {
     final weeklyGoal = ProgressMilestone(
-      key: 'weekly-goal-2026-10-05',
-      kind: MilestoneKind.weeklyGoal,
+      key: 'streak-goal-week-2026-10-05',
+      kind: MilestoneKind.streakGoal,
       value: 5,
       celebrated: false,
     );
@@ -299,7 +342,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('celebration-card')), findsOneWidget);
-      expect(find.text('Weekly goal reached'), findsOneWidget);
+      expect(find.text('Streak goal reached'), findsOneWidget);
       expect(find.text('5'), findsWidgets);
       expect(find.text('review days'), findsOneWidget);
       expect(find.text('Also: Queue cleared'), findsOneWidget);
@@ -307,7 +350,7 @@ void main() {
       expect(find.byType(RibbonConfetti), findsNothing);
       expect(
         announcements,
-        contains(startsWith('Weekly goal reached: 5 review days.')),
+        contains(startsWith('Streak goal reached: 5 review days.')),
       );
       expect(api.celebrated.expand((keys) => keys).toSet(), {
         weeklyGoal.key,
