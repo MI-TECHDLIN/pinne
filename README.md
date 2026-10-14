@@ -31,8 +31,10 @@ character, the Ribbon Spirit, keeps you company and keeps the progress honest.
 
 **Quick links:**
 [Try it](#testing-instructions-for-judges) ·
-[Run locally](#run-it-locally) ·
-[Deploy](docs/deploy.md) ·
+[Setup](#setup-and-configuration) ·
+[Run locally](#run-locally) ·
+[Deploy](#deploy-to-serverpod-cloud) ·
+[Android APK](#build-the-android-apk) ·
 [Roadmap](#whats-next) ·
 [AI and data terms](docs/ai.md)
 
@@ -150,62 +152,251 @@ as a number about today's apps).
 | `pinne_calendar/` | Pure Dart calendar rules shared by server and app: busy intervals, the calendar adapter contract, the slot planner, `.ics` export |
 | `tool/setup_dev_secrets.sh` | Creates local secrets for development and tests |
 
-## Prerequisites
+## Setup and configuration
 
-- Flutter 3.47+ (Dart 3.13+)
-- Docker, for the development PostgreSQL
-- Serverpod CLI 4.x: `dart pub global activate serverpod_cli`, with
-  `~/.pub-cache/bin` on your `PATH`
+Everything needed to configure Pinne is listed here. Commands start at the
+repository root unless a step says otherwise. Never commit
+`pinne_server/config/passwords.yaml`, `pinne_server/.env`, OAuth JSON, or a
+keystore.
 
-## Run it locally
+### Prerequisites
 
-All commands start from the repo root.
+- Flutter **3.47.3**, the version pinned by CI (the package constraint is
+  Flutter 3.44.4+), with Dart **3.12.2+**.
+- Docker with Compose, for the local PostgreSQL 16 database.
+- Serverpod CLI **4.0.3**, matching the server packages:
+  `dart pub global activate serverpod_cli 4.0.3`. Put Dart's global executable
+  directory on `PATH`.
+- Android builds additionally need the Android SDK and Java 17. `adb` is
+  optional for installing an APK from the command line.
 
-1. **Install dependencies and create local secrets** (first time only):
+### Server passwords and secrets
+
+For local development, run `tool/setup_dev_secrets.sh`. It creates the
+git-ignored `pinne_server/config/passwords.yaml` from
+`pinne_server/config/passwords.yaml.example`, generates the required
+development/test values, and writes the matching `PINNE_DEV_DB_PASSWORD` to
+the git-ignored `pinne_server/.env`. It refuses to overwrite existing files
+unless passed `--force`. Any password can instead be supplied as
+`SERVERPOD_PASSWORD_<name>`.
+
+On Serverpod Cloud, use
+`serverpod cloud password set <name> "<VALUE>"`; Cloud injects the value for
+`Serverpod.getPassword(name)`. Do not set the Cloud-managed rows below.
+
+| Name | Required? | Used for / behavior when absent | Where to set |
+| --- | --- | --- | --- |
+| `database` | Yes locally; Cloud-managed | PostgreSQL authentication; the local value must equal `PINNE_DEV_DB_PASSWORD` | Generated in local `passwords.yaml`; supplied by Cloud |
+| `serviceSecret` | Yes in development; Cloud-managed | Serverpod service-to-service authentication | Generated in local `passwords.yaml`; supplied by Cloud |
+| `emailSecretHashPepper` | Yes | Hashes email verification secrets | Generated locally; supplied by Cloud |
+| `jwtHmacSha512PrivateKey` | Yes | Signs JWT access tokens | Generated locally; supplied by Cloud |
+| `jwtRefreshTokenHashPepper` | Yes | Hashes JWT refresh tokens | Generated locally; supplied by Cloud |
+| `groqApiKey` | No; required only for Groq organizing | Primary AI provider. Without it, Gemini is tried; without either key, deterministic rules organize saves | Local `passwords.yaml`; `serverpod cloud password set groqApiKey "<YOUR_GROQ_API_KEY>"` |
+| `geminiApiKey` | No | Secondary AI provider, used only when Groq is not configured. Without either key, deterministic rules are used | Local `passwords.yaml`; `serverpod cloud password set geminiApiKey "<YOUR_GEMINI_API_KEY>"` |
+| `googleClientSecret` | No | Google sign-in Web OAuth client JSON. When absent, the server disables Google sign-in | Local `passwords.yaml`; `serverpod cloud password set googleClientSecret "<YOUR_GOOGLE_OAUTH_WEB_CLIENT_JSON>"` |
+| `googleCalendarClientSecret` | No | Reserved for Google Calendar OAuth. The route reports “not configured” without it and “not built yet” with it; device calendars and `.ics` need no secret | Local `passwords.yaml`; `serverpod cloud password set googleCalendarClientSecret "<YOUR_GOOGLE_CALENDAR_OAUTH_JSON>"` |
+| `demoAccountEmail` | Only when seeding the demo account | Identifies and labels the private judge account; seeding fails if it or the password is absent | Local `passwords.yaml` or `PINNE_DEMO_ACCOUNT_EMAIL`; Cloud password of the same name |
+| `demoAccountPassword` | Only when seeding the demo account | Password for the private judge account; seeding fails if it or the email is absent | Local `passwords.yaml` or `PINNE_DEMO_ACCOUNT_PASSWORD`; Cloud password of the same name |
+| `smtpHost` | No; SMTP needs this and `smtpFromEmail` | Optional first route for production auth codes. If incomplete or delivery fails, the Cloud email route is tried | Local `passwords.yaml` or `PINNE_SMTP_HOST`; Cloud password of the same name |
+| `smtpPort` | No | SMTP port; defaults to `587`. Invalid values disable SMTP | Local `passwords.yaml` or `PINNE_SMTP_PORT`; Cloud password of the same name |
+| `smtpUsername` | No; pair with `smtpPassword` | SMTP authentication. Setting only one of the pair disables SMTP | Local `passwords.yaml` or `PINNE_SMTP_USERNAME`; Cloud password of the same name |
+| `smtpPassword` | No; pair with `smtpUsername` | SMTP authentication secret | Local `passwords.yaml` or `PINNE_SMTP_PASSWORD`; Cloud password of the same name |
+| `smtpFromEmail` | Required when SMTP is used | Sender address; SMTP is disabled without it | Local `passwords.yaml` or `PINNE_SMTP_FROM_EMAIL`; Cloud password of the same name |
+| `smtpFromName` | No | Sender name; defaults to `Pinne` | Local `passwords.yaml` or `PINNE_SMTP_FROM_NAME`; Cloud password of the same name |
+| `smtpSsl` | No | Set `true` for implicit TLS (usually port 465); otherwise STARTTLS is used | Local `passwords.yaml` or `PINNE_SMTP_SSL`; Cloud password of the same name |
+| `scloudAuthEmailKey` | Cloud-managed | Authorizes Serverpod Cloud's HTTPS email service. In staging/production, no SMTP and no Cloud key makes email registration/reset unavailable; guest sign-in still works | Automatically supplied by Serverpod Cloud on deploy |
+
+Development and tests print registration and reset codes to the server
+console, so SMTP is ignored in those modes. Serverpod Cloud can block SMTP
+(Gmail SMTP is known not to work there); its HTTPS email service is the
+reliable fallback.
+
+### Runtime variables and Flutter build defines
+
+| Name | Default / behavior | Where to set |
+| --- | --- | --- |
+| `PINNE_AI_ENABLED` | AI is enabled; set exactly `false` (case-insensitive) to force deterministic rules even when a provider key exists | Server process environment; on Cloud use `serverpod cloud variable set PINNE_AI_ENABLED "false"` |
+| `PINNE_SEED_DEMO_ON_START` | Off; `true` runs the idempotent demo seeder after startup | Server process environment; use only temporarily on Cloud, then unset it and redeploy |
+| `SERVER_URL` | Debug uses `assets/config.json` and then `http://localhost:8080/`; a release phone build uses `https://pinneapp.api.serverpod.space/`; hosted web derives the matching Cloud API host | Flutter `--dart-define=SERVER_URL=<URL>`; include the trailing slash |
+| `GOOGLE_CLIENT_ID` | Absent; the app hides Google sign-in | Flutter `--dart-define=GOOGLE_CLIENT_ID=<APP_CLIENT_ID>` |
+| `GOOGLE_SERVER_CLIENT_ID` | Absent; required with the app client ID for Google sign-in | Flutter `--dart-define=GOOGLE_SERVER_CLIENT_ID=<WEB_CLIENT_ID>` |
+
+The server also recognizes the `PINNE_SMTP_*` and `PINNE_DEMO_ACCOUNT_*`
+aliases shown in the password table. Google sign-in needs Android/iOS OAuth
+clients plus the server's Web client JSON. No other `--dart-define` is read by
+the product app.
+
+### Server and build configuration files
+
+- `pinne_server/config/development.yaml` exposes API/Insights/web on
+  `8080`/`8081`/`8082`, connects to PostgreSQL `pinne` on `localhost:8090`,
+  and enables persistent and console logs. Future calls use Serverpod's
+  enabled defaults.
+- `pinne_server/config/test.yaml` uses random ports and Serverpod's embedded
+  PostgreSQL at `.serverpod/test/pgdata`; tests need no Docker.
+- `pinne_server/config/staging.yaml` and
+  `pinne_server/config/production.yaml` contain self-hosting placeholders for
+  public hosts and TLS PostgreSQL. Serverpod Cloud overrides hosts, ports,
+  database, and logging. Both cap requests at 512 KiB; production enables
+  durable future calls and disables console session logs.
+- `pinne_server/config/generator.yaml` sends generated server code to
+  `lib/src/generated`, the client to `pinne_client`, and integration helpers to
+  `test/integration/test_tools`. Never edit generated output by hand.
+- `pinne_server/scloud.yaml` links project `pinneapp` and runs
+  `serverpod generate` plus `serverpod run flutter_build` before deployment.
+- `pinne_server/docker-compose.yaml` runs PostgreSQL 16 on port `8090` and
+  reads `PINNE_DEV_DB_PASSWORD` from `.env`. There is no Redis configuration.
+- `pinne_flutter/assets/config.json` is the debug fallback API URL.
+- `.github/workflows/ci.yml` pins Flutter 3.47.3 and Serverpod 4.0.3, generates
+  throwaway test secrets, and uses embedded PostgreSQL. CI requires no GitHub
+  Actions secrets.
+
+### Run locally
+
+1. Install dependencies and generate local secrets:
 
    ```bash
    flutter pub get
    tool/setup_dev_secrets.sh
    ```
 
-   This writes `pinne_server/config/passwords.yaml` and `pinne_server/.env`
-   with random values. Both files are git-ignored. The template, with every
-   key explained, is `pinne_server/config/passwords.yaml.example`.
-
-2. **Start the database:**
+2. Generate Serverpod code and start PostgreSQL:
 
    ```bash
-   cd pinne_server && docker compose up -d && cd ..
+   cd pinne_server
+   serverpod generate
+   docker compose up -d
    ```
 
-   PostgreSQL 16 listens on `localhost:8090`.
-
-3. **Run the server** and apply migrations:
+3. Apply the checked-in migrations and run the API:
 
    ```bash
-   cd pinne_server && dart run bin/main.dart --apply-migrations
+   dart run bin/main.dart --apply-migrations
    ```
 
-   The API is on `http://localhost:8080`. Check it with:
+   The API is at `http://localhost:8080/`. From another terminal, verify it:
 
    ```bash
    curl -X POST http://localhost:8080/health/check -d '{}'
    ```
 
-   `serverpod start` (from `pinne_server/`) does steps 2 and 3 for you and
-   adds hot reload, code generation on save, and launches the app.
+   Alternatively, run `serverpod start` inside `pinne_server`; it manages the
+   database, migrations, generation/hot reload, and the configured Flutter
+   companion app.
 
-4. **Run the app** in another terminal:
+4. Run Flutter from another terminal. Choose the URL for the target:
 
    ```bash
-   cd pinne_flutter && flutter run
+   cd pinne_flutter
+   flutter run -d chrome
+   flutter run --dart-define=SERVER_URL=http://10.0.2.2:8080/
    ```
 
-   The server URL comes from `--dart-define=SERVER_URL=...`, else `apiUrl` in
-   `pinne_flutter/assets/config.json`, else `http://localhost:8080/`. On a
-   physical phone use your computer's LAN address. Release builds for phones
-   without `SERVER_URL` use the hosted API,
-   `https://pinneapp.api.serverpod.space/`, instead of `config.json`.
+   The first command works for local web. The second is for the standard
+   Android emulator, where `10.0.2.2` reaches the host. For a physical phone,
+   replace it with the development computer's reachable LAN address; iOS
+   Simulator can use `http://localhost:8080/`.
+
+5. Optionally create or verify the empty local demo account configured by the
+   secrets script:
+
+   ```bash
+   cd pinne_server
+   dart run bin/main.dart --seed-demo
+   ```
+
+   The command is idempotent and creates no example saves.
+
+When a `table` model changes, run `serverpod generate`, then
+`serverpod create-migration`; inspect and commit the migration. Existing
+migrations are applied by `--apply-migrations` locally and automatically on
+Cloud deploy.
+
+### Deploy to Serverpod Cloud
+
+The live project is `pinneapp`; its API is
+<https://pinneapp.api.serverpod.space/>. The full operator runbook is
+[docs/deploy.md](docs/deploy.md).
+
+1. Install/sign in to the matching CLI and enter the server directory:
+
+   ```bash
+   dart pub global activate serverpod_cli 4.0.3
+   serverpod cloud auth login
+   cd pinne_server
+   ```
+
+2. This checkout is already linked by `scloud.yaml`. For a new fork/project,
+   run `serverpod cloud launch`, create/select the project, keep the managed
+   database enabled, and choose a plan. Launch writes the link and performs
+   the first deployment. Starter runs AI inline but has no durable future
+   calls; Growth or higher is required for background link previews, AI, and
+   the review digest.
+
+3. Set only the custom passwords you need, using the exact names in the table:
+
+   ```bash
+   serverpod cloud password set groqApiKey "<YOUR_GROQ_API_KEY>"
+   serverpod cloud password set demoAccountEmail "<JUDGE_DEMO_EMAIL>"
+   serverpod cloud password set demoAccountPassword "<JUDGE_DEMO_PASSWORD>"
+   serverpod cloud password list
+   ```
+
+   Add optional Gemini, Google, or SMTP values with the same command. Cloud
+   supplies database/auth secrets and `scloudAuthEmailKey`; do not replace
+   them. Cloud's email service handles signup/reset codes when SMTP is absent
+   or unreachable.
+
+4. Deploy:
+
+   ```bash
+   serverpod cloud deploy
+   serverpod cloud status deployment show
+   serverpod cloud status live
+   serverpod cloud log --since 10m
+   ```
+
+   The pre-deploy hooks generate protocol code and build Flutter web. Cloud
+   starts the new server with pending migrations applied; a failed migration
+   prevents that release from becoming live. Cloud overrides the placeholder
+   production hosts, ports, database connection, and logging settings.
+
+5. If the private demo account is required, set both demo passwords, then run
+   the one-off switch and remove it immediately after the log confirms success:
+
+   ```bash
+   serverpod cloud variable set PINNE_SEED_DEMO_ON_START "true"
+   serverpod cloud deploy --redeploy
+   serverpod cloud log --since 10m
+   serverpod cloud variable unset PINNE_SEED_DEMO_ON_START
+   serverpod cloud deploy --redeploy
+   ```
+
+### Build the Android APK
+
+The released judge build is available from
+<https://github.com/MI-TECHDLIN/pinne/releases> as the `pinne.apk` asset. To
+build it yourself:
+
+```bash
+cd pinne_flutter
+flutter pub get
+flutter build apk --release \
+  --dart-define=SERVER_URL=https://pinneapp.api.serverpod.space/
+```
+
+The output is `pinne_flutter/build/app/outputs/flutter-apk/app-release.apk`.
+Install it with `adb install -r build/app/outputs/flutter-apk/app-release.apk`
+or transfer and open it on a phone. The application ID is
+`com.mitechdlin.pinne`; the manifest requests internet and calendar access and
+registers `ShareActivity` for `text/plain` shares.
+
+For this hackathon, the release build deliberately uses Android's debug signing
+key so contributors can produce a sideloadable APK without a private keystore.
+It is not Play Store-ready. Before a store release, create and protect a
+private upload keystore and replace the release `signingConfig` in
+`pinne_flutter/android/app/build.gradle.kts`; never commit its password or the
+keystore.
 
 ## Sign-in
 
@@ -226,45 +417,11 @@ how every owned row and conflict is migrated
 Pinne therefore does not offer a fake “add email” upgrade: Settings explains
 the limitation until an audited merge of all owned Pinne tables is built.
 
-Email/password sign-in remains available and unchanged. In development and
-tests, registration and password-reset codes are printed in the server console.
-For staging or production, codes go through SMTP when it is configured in the
-git-ignored `pinne_server/config/passwords.yaml` (`smtpHost`, `smtpPort`,
-optional `smtpUsername`/`smtpPassword`, `smtpFromEmail`, `smtpFromName`,
-`smtpSsl`) or the matching `PINNE_SMTP_*` environment variables, and otherwise
-(or when SMTP fails) through the Serverpod Cloud email service, whose
-`scloudAuthEmailKey` Serverpod Cloud sets on deploy. Serverpod Cloud could not
-reach Gmail SMTP in production, so there the Cloud service is the working
-route. Each failed route is logged as `ERROR: Email delivery: ...` without the
-code or secrets. With no route at all the server logs a warning, rejects code
-requests instead of silently discarding them, and the app points new users to
-guest access.
-
-To create or verify the empty judge demo account idempotently, set
-`demoAccountEmail` and `demoAccountPassword` in the active secrets section (or
-`PINNE_DEMO_ACCOUNT_EMAIL` / `PINNE_DEMO_ACCOUNT_PASSWORD`) and run while the
-database port is available:
-
-```bash
-cd pinne_server
-dart run bin/main.dart --seed-demo
-```
-
-The command uses Serverpod's email-account admin API, creates no example saves,
-and prints whether it created the account or found it already present. Never
-commit the real judge credentials; supply them only in the submission form.
-
-Google sign-in is wired in but stays off until real credentials exist:
-
-1. Create OAuth clients in Google Cloud Console (a Web client for the server,
-   plus Android/iOS clients for the app).
-2. Paste the Web client JSON as `googleClientSecret` in
-   `pinne_server/config/passwords.yaml` (see the commented example there).
-3. Run the app with
-   `--dart-define=GOOGLE_CLIENT_ID=<app client id> --dart-define=GOOGLE_SERVER_CLIENT_ID=<web client id>`.
-
-Without these the server logs `Google sign-in is disabled` and the app hides
-the Google button. Never commit real credentials.
+Email/password sign-in remains available. Development and tests print codes to
+the server console; production delivery and all email, demo-account, and Google
+OAuth settings are listed in [Setup and configuration](#setup-and-configuration).
+With no production email route, the app directs new users to guest access.
+Never publish the judge demo credentials.
 
 ## Testing instructions for judges
 
