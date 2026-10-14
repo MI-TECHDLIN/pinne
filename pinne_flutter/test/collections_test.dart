@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/core/motion.dart';
+import 'package:pinne_flutter/core/open_original.dart';
 import 'package:pinne_flutter/core/server_client.dart';
 import 'package:pinne_flutter/features/capture/ai_suggestions.dart';
 import 'package:pinne_flutter/features/capture/capture_providers.dart';
@@ -389,6 +390,32 @@ void main() {
       api.summariesList.map((s) => s.collection.name),
       isNot(contains('Weeknight dinners')),
     );
+  });
+
+  testWidgets('tapping a save in a collection opens its original link', (
+    tester,
+  ) async {
+    final opened = <Uri>[];
+    final api = FakeCollectionsApi(fixtureSummaries);
+    api.file(fixtureId(0xc03), fixtureItem(1, 'Fluffy pancakes'));
+    await pump(
+      tester,
+      const CollectionsScreen(),
+      api: api,
+      overrides: [
+        openExternalUrlProvider.overrideWithValue((uri) async {
+          opened.add(uri);
+          return true;
+        }),
+      ],
+    );
+
+    await tester.tap(tileFor('Cooking'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fluffy pancakes'));
+    await tester.pumpAndSettle();
+
+    expect(opened, [Uri.parse('https://example.com/1')]);
   });
 
   // Regression: accepting "Collection: X" on a Saved card changed nothing on

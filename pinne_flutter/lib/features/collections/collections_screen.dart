@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/library_revision.dart';
+import '../../core/open_original.dart';
 import '../../core/server_client.dart';
 import '../../shell/pinne_page.dart';
 import '../../theme/pinne_tokens.dart';
@@ -634,7 +634,6 @@ class _CollectionItemRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final uri = item.url == null ? null : Uri.tryParse(item.url!);
     return GlassCard(
       key: ValueKey('collection-item-${item.id?.uuid}'),
       padding: const EdgeInsets.only(
@@ -646,9 +645,9 @@ class _CollectionItemRow extends ConsumerWidget {
         children: [
           Expanded(
             child: InkWell(
-              onTap: uri == null
+              onTap: item.url == null
                   ? null
-                  : () => launchUrl(uri, mode: LaunchMode.externalApplication),
+                  : () => openOriginal(context, ref, item.url),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
