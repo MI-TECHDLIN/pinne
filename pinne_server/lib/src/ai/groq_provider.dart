@@ -78,7 +78,13 @@ class GroqProvider implements AiProvider {
         '${code == null ? '' : ' ($code)'}.',
       );
     }
-    final text = _responseText(jsonDecode(response.body));
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } on FormatException {
+      throw const GroqException('Groq response body is not valid JSON.');
+    }
+    final text = _responseText(decoded);
     return AiOutputValidator.parseJson(
       text,
       allowedCollectionIds: allowedIds,
@@ -169,10 +175,22 @@ class IoGroqHttpClient implements GroqHttpClient {
     required String body,
   }) async {
     final request = await _client.postUrl(uri);
-    headers.forEach(request.headers.set);
-    request.write(body);
+    try {
+      headers.forEach(request.headers.set);
+    } on FormatException {
+      request.abort();
+      throw const GroqException(
+        'Groq request headers contain invalid characters.',
+      );
+    }
+    request.add(utf8.encode(body));
     final response = await request.close();
-    final responseBody = await utf8.decodeStream(response);
+    final String responseBody;
+    try {
+      responseBody = await utf8.decodeStream(response);
+    } on FormatException {
+      throw const GroqException('Groq response body is not valid UTF-8.');
+    }
     return GroqHttpResponse(
       statusCode: response.statusCode,
       body: responseBody,

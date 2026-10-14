@@ -337,6 +337,108 @@ void main() {
     },
   );
 
+  test('Groq HTTP transport sends Unicode metadata as UTF-8', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => server.close(force: true));
+    final received = Completer<Map<String, dynamic>>();
+    server.listen((request) async {
+      received.complete(
+        jsonDecode(await utf8.decoder.bind(request).join())
+            as Map<String, dynamic>,
+      );
+      request.response
+        ..headers.set(
+          HttpHeaders.contentTypeHeader,
+          'application/json; charset=utf-8',
+        )
+        ..write(
+          jsonEncode({
+            'choices': [
+              {
+                'message': {
+                  'content': jsonEncode({
+                    'collectionIds': <String>[],
+                    'tags': ['flutter'],
+                    'summary': 'A layout reference.',
+                    'rationale': 'Title and URL match.',
+                    'evidenceCoverage': 'metadata_only',
+                    'uncertain': false,
+                  }),
+                },
+              },
+            ],
+          }),
+        );
+      await request.response.close();
+    });
+    final httpClient = HttpClient();
+    addTearDown(() => httpClient.close(force: true));
+    final provider = GroqProvider(
+      apiKey: 'test-key',
+      httpClient: IoGroqHttpClient(httpClient),
+      endpoint: Uri.parse('http://${server.address.address}:${server.port}/'),
+    );
+    final result = await provider.organize(
+      evidence: const AiItemEvidence(
+        title: 'Flutter layouts \u2014 \u4f60\u597d',
+        sourcePlatform: 'web',
+      ),
+      collections: const [],
+    );
+    final sent = await received.future;
+    final messages = sent['messages'] as List;
+    final input = jsonDecode(messages.last['content'] as String);
+    expect(
+      input['input']['evidence']['title'],
+      'Flutter layouts \u2014 \u4f60\u597d',
+    );
+    expect(result.provider, 'groq');
+    expect(result.tags, ['flutter']);
+  });
+
+  test('Groq invalid key characters are reported without the key', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => server.close(force: true));
+    final httpClient = HttpClient();
+    addTearDown(() => httpClient.close(force: true));
+    await expectLater(
+      GroqProvider(
+        apiKey: 'test\u2014key',
+        httpClient: IoGroqHttpClient(httpClient),
+        endpoint: Uri.parse('http://${server.address.address}:${server.port}/'),
+      ).organize(evidence: evidence, collections: const []),
+      throwsA(
+        isA<GroqException>().having(
+          (error) => error.message,
+          'safe reason',
+          'Groq request headers contain invalid characters.',
+        ),
+      ),
+    );
+  });
+
+  test('Groq invalid response JSON is reported without its contents', () async {
+    final client = _FakeGroqHttpClient((uri, headers, body, timeout) async {
+      return const GroqHttpResponse(
+        statusCode: HttpStatus.ok,
+        body: 'private provider response',
+      );
+    });
+    await expectLater(
+      GroqProvider(apiKey: 'test-key', httpClient: client).organize(
+        evidence: evidence,
+        collections: const [],
+      ),
+      throwsA(
+        isA<GroqException>().having(
+          (error) => error.message,
+          'safe reason',
+          'Groq response body is not valid JSON.',
+        ),
+      ),
+    );
+  });
+
   test('Groq rejects schema-violating model output', () async {
     final client = _FakeGroqHttpClient((uri, headers, body, timeout) async {
       return GroqHttpResponse(
@@ -554,6 +656,18 @@ void main() {
     expect(
       describeAiFailure(const FormatException('{"secret": "body"}')),
       'malformed response',
+    );
+    expect(
+      describeAiFailure(
+        const FormatException('AI response has an unexpected shape.'),
+      ),
+      'malformed response (unexpected fields)',
+    );
+    expect(
+      describeAiFailure(
+        const FormatException('Groq response has no model output text.'),
+      ),
+      'malformed response (no Groq output text)',
     );
     expect(
       describeAiFailure(const SocketException('host unreachable')),

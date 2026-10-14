@@ -175,7 +175,21 @@ String describeAiFailure(Object error) => switch (error) {
   SocketException() ||
   HandshakeException() ||
   HttpException() => 'network error (${error.runtimeType})',
-  FormatException() => 'malformed response',
+  FormatException(:final message) => switch (message) {
+    'AI response is not valid JSON.' => 'malformed response (invalid JSON)',
+    'AI response has an unexpected shape.' =>
+      'malformed response (unexpected fields)',
+    'AI response contains invalid field types.' =>
+      'malformed response (invalid field types or evidence coverage)',
+    'AI response contains an invalid id.' =>
+      'malformed response (invalid collection id)',
+    'Groq response is not an object.' =>
+      'malformed response (Groq response is not an object)',
+    'Groq response has no choices.' => 'malformed response (no Groq choices)',
+    'Groq response has no model output text.' =>
+      'malformed response (no Groq output text)',
+    _ => 'malformed response',
+  },
   StateError() => 'not configured',
   _ => 'unexpected ${error.runtimeType}',
 };
