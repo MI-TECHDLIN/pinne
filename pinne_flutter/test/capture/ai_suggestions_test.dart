@@ -8,6 +8,7 @@ import 'package:pinne_capture/pinne_capture.dart';
 import 'package:pinne_client/pinne_client.dart';
 import 'package:pinne_flutter/core/motion.dart';
 import 'package:pinne_flutter/core/server_client.dart';
+import 'package:pinne_flutter/core/library_revision.dart';
 import 'package:pinne_flutter/features/capture/ai_suggestions.dart';
 import 'package:pinne_flutter/features/capture/capture_providers.dart';
 import 'package:pinne_flutter/features/capture/capture_store.dart';
@@ -376,6 +377,8 @@ void main() {
             accountIdProvider.overrideWith(_AccountId.new),
             aiSuggestionsApiProvider.overrideWithValue(api),
             savedItemsProvider.overrideWith((ref) async* {
+              // Like the real provider, follows library changes.
+              ref.watch(libraryRevisionProvider);
               yield [serverItem];
             }),
           ],
