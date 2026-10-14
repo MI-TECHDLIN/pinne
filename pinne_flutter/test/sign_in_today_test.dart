@@ -270,9 +270,9 @@ void _expectSignedInToday(
   expect(find.text('Guest'), findsNothing);
   expect(find.byKey(const ValueKey('today-account-badge-email')), findsNothing);
   expect(find.textContaining('Guest example'), findsNothing);
-  // A brand-new account is offered examples to load, never shown the
-  // guest's loaded ones.
-  expect(find.text('Load a few example saves to explore'), findsOneWidget);
+  // A real account is never shown the guest's loaded examples, and is not
+  // offered examples either: it starts with its own saves.
+  expect(find.text('Load a few example saves to explore'), findsNothing);
   expect(find.text('Explore with example saves'), findsNothing);
   expect(server.unexpected, isEmpty);
 }

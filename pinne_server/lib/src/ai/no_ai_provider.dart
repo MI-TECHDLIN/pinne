@@ -1,6 +1,7 @@
 import '../generated/protocol.dart';
 import 'ai_output_validator.dart';
 import 'ai_provider.dart';
+import 'collection_matcher.dart';
 
 /// Fully local, deterministic fallback. It never fetches a URL.
 ///
@@ -111,27 +112,16 @@ class NoAiProvider implements AiProvider {
       text.split(RegExp(r'[^a-z0-9]+')).where(_keywords.contains).toSet(),
     );
 
-    final haystack = [
-      evidence.title,
-      evidence.url,
-      evidence.intention,
-      evidence.notes,
-      evidence.description,
-      evidence.author,
-      evidence.siteName,
-      ...tags,
-    ].whereType<String>().join(' ').toLowerCase();
-    final collectionIds = collections
-        .where((collection) {
-          final needle = collection.name.trim().toLowerCase();
-          if (needle.isEmpty) return false;
-          final escaped = RegExp.escape(needle);
-          return RegExp(
-            '(^|[^a-z0-9])$escaped([^a-z0-9]|\$)',
-          ).hasMatch(haystack);
-        })
-        .map((collection) => collection.id)
-        .toList();
+    // The closest existing collection by name, description and contents;
+    // only when none is related, a new one named after the item's topic.
+    final match = CollectionMatcher.bestMatch(
+      evidence,
+      collections,
+      tags: tags,
+    );
+    final newCollectionName = match == null
+        ? CollectionMatcher.proposeName(evidence, tags: tags)
+        : null;
 
     // Extractive only: the page's own description, else the user's note.
     // The validator keeps at most two sentences.
@@ -149,13 +139,19 @@ class NoAiProvider implements AiProvider {
 
     return AiOutputValidator.sanitize(
       AiOrganizationResult(
-        collectionIds: collectionIds,
+        collectionIds: [?match?.collection.id],
+        newCollectionName: newCollectionName,
+        collectionReason: switch ((match, newCollectionName)) {
+          (final match?, _) => match.reason,
+          (_, final name?) => CollectionMatcher.newCollectionReason(name),
+          _ => null,
+        },
         tags: tags.toList(),
         summary: summary.isEmpty ? null : summary,
         rationale: [
-          collectionIds.isEmpty
+          match == null
               ? 'Matched source and URL metadata only.'
-              : 'Matched collection names and metadata keywords exactly.',
+              : 'Compared it with what your collections already hold.',
           if (summary.isNotEmpty) 'The summary quotes the saved text.',
         ].join(' '),
         evidenceCoverage: evidence.previewAvailable

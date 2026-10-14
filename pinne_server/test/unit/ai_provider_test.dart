@@ -266,7 +266,12 @@ void main() {
     expect(sentEvidence['notes'], 'Focus on constraints');
     expect(
       (inputData['collections'] as List).single,
-      {'id': owned.toString(), 'name': 'Flutter'},
+      {
+        'id': owned.toString(),
+        'name': 'Flutter',
+        'itemCount': 0,
+        'recentSaves': <Object?>[],
+      },
     );
   });
 

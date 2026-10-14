@@ -17,6 +17,7 @@ import 'package:pinne_flutter/ui/motion.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import 'support/collections_fixture.dart';
 import 'support/contrast.dart';
 import 'support/golden_theme.dart';
 
@@ -83,6 +84,8 @@ void main() {
       captureStoreProvider.overrideWithValue(
         CaptureStore(sqlite3.openInMemory()),
       ),
+      // The account's own collections; there are no sample collections.
+      collectionsProvider.overrideWith((ref) async => fixtureTiles),
       if (withTodayData) ...[
         todayClockProvider.overrideWithValue(DateTime(2026, 10, 7, 17, 30)),
         profileProvider.overrideWith(
@@ -267,7 +270,7 @@ void main() {
       const CollectionsScreen(),
       'collections-light',
       brightness: Brightness.light,
-      golden: false,
+      goldenPath: '../../docs/light-theme/collections.png',
     ),
   );
 }

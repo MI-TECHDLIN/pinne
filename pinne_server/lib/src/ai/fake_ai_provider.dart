@@ -8,6 +8,9 @@ class FakeAiProvider implements AiProvider {
   Object? error;
   int calls = 0;
 
+  /// What the last call was given, so tests can check the prompt input.
+  List<AiCollectionOption> lastCollections = const [];
+
   @override
   String get name => 'fake';
 
@@ -17,6 +20,7 @@ class FakeAiProvider implements AiProvider {
     required List<AiCollectionOption> collections,
   }) async {
     calls++;
+    lastCollections = collections;
     if (error case final error?) throw error;
     final value = result;
     if (value == null) throw StateError('FakeAiProvider.result was not set.');

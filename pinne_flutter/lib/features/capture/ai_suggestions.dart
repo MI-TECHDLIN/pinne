@@ -99,7 +99,11 @@ class AiSuggestionsNotifier extends AsyncNotifier<List<AiSuggestionChipData>> {
   Future<List<AiSuggestionChipData>> _load(AiSuggestionsApi api) async {
     final review = await api.review(itemId);
     final suggestions = review.suggestions;
-    final names = suggestions.any((s) => s.kind == AiSuggestionKind.collection)
+    final names =
+        suggestions.any(
+          (s) =>
+              s.kind == AiSuggestionKind.collection && s.collectionId != null,
+        )
         ? await api.collectionNames()
         : const <UuidValue, String>{};
     if (ref.mounted) _afterLoad(organizing: review.organizing);
@@ -112,6 +116,9 @@ class AiSuggestionsNotifier extends AsyncNotifier<List<AiSuggestionChipData>> {
               label: label,
               uncertain: suggestion.uncertain,
               maxLines: suggestion.kind == AiSuggestionKind.summary ? null : 1,
+              detail: suggestion.kind == AiSuggestionKind.collection
+                  ? _detail(suggestion.rationale)
+                  : null,
             ),
     ];
   }
@@ -145,9 +152,15 @@ class AiSuggestionsNotifier extends AsyncNotifier<List<AiSuggestionChipData>> {
   static String? _label(AiSuggestion s, Map<UuidValue, String> names) {
     if (s.id == null) return null;
     return switch (s.kind) {
-      AiSuggestionKind.collection => switch (names[s.collectionId]) {
-        final name? => 'Collection: $name',
-        null => null,
+      AiSuggestionKind.collection => switch ((s.collectionId, s.value)) {
+        // A collection to create: no collection matched the item.
+        (null, final proposed?) when proposed.trim().isNotEmpty =>
+          'New collection: ${proposed.trim()}',
+        (final id?, _) => switch (names[id]) {
+          final name? => 'Collection: $name',
+          null => null,
+        },
+        _ => null,
       },
       AiSuggestionKind.tag => switch (s.value?.trim()) {
         final tag? when tag.isNotEmpty => 'Tag: $tag',
@@ -158,6 +171,11 @@ class AiSuggestionsNotifier extends AsyncNotifier<List<AiSuggestionChipData>> {
         _ => null,
       },
     };
+  }
+
+  static String? _detail(String rationale) {
+    final text = rationale.trim();
+    return text.isEmpty ? null : text;
   }
 
   /// Applies a suggestion on the server, then refreshes what it changed.

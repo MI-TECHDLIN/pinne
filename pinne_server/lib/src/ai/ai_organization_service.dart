@@ -1,10 +1,12 @@
 import 'package:serverpod/serverpod.dart';
 
+import '../collections/collection_contents.dart';
 import '../generated/protocol.dart';
 import 'ai_output_validator.dart';
 import 'ai_provider.dart';
 import 'ai_provider_status.dart';
 import 'ai_provider_registry.dart';
+import 'collection_matcher.dart';
 import 'no_ai_provider.dart';
 
 class AiOrganizationService {
@@ -129,13 +131,17 @@ class AiOrganizationService {
       where: (t) => t.ownerId.equals(ownerId),
     );
     final userEnabled = preference?.enabled ?? true;
-    final collections = await Collection.db.find(
+    final options = await collectionOptions(
       session,
-      where: (t) => t.ownerId.equals(ownerId),
+      ownerId: ownerId,
+      itemId: itemId,
     );
-    final options = collections
-        .map((value) => AiCollectionOption(id: value.id!, name: value.name))
-        .toList();
+    final alreadyFiled =
+        await ItemCollection.db.count(
+          session,
+          where: (t) => t.ownerId.equals(ownerId) & t.itemId.equals(itemId),
+        ) >
+        0;
     final remote = remoteProviderOverride ?? AiProviderRegistry.remote;
     final canUseRemote = userEnabled && remote != null;
     final hasSlot = canUseRemote
@@ -171,6 +177,12 @@ class AiOrganizationService {
     if (remote != null && result.provider == remote.name) {
       AiProviderStatus.recordSuccess(remote.name);
     }
+    final choice = CollectionMatcher.settle(
+      evidence: evidence,
+      collections: options,
+      result: result,
+      alreadyFiled: alreadyFiled,
+    );
 
     await session.db.transaction((transaction) async {
       final latestTask = await AiOrganizeTask.db.findFirstRow(
@@ -184,13 +196,15 @@ class AiOrganizationService {
       }
       final now = _clock();
       final proposals = <AiSuggestion>[
-        for (final collectionId in result.collectionIds)
+        if (choice.collectionId != null || choice.newCollectionName != null)
           AiSuggestion(
             ownerId: ownerId,
             itemId: itemId,
             kind: AiSuggestionKind.collection,
-            collectionId: collectionId,
-            rationale: result.rationale,
+            // A null id with a name proposes a collection to create.
+            collectionId: choice.collectionId,
+            value: choice.newCollectionName,
+            rationale: choice.reason ?? result.rationale,
             evidenceCoverage: result.evidenceCoverage,
             uncertain: result.uncertain,
             createdAt: now,
@@ -327,11 +341,73 @@ class AiOrganizationService {
 
   static String _proposalKey(AiSuggestion suggestion) =>
       switch (suggestion.kind) {
-        AiSuggestionKind.collection => 'collection:${suggestion.collectionId}',
+        AiSuggestionKind.collection => switch (suggestion.collectionId) {
+          final id? => 'collection:$id',
+          null => 'collection:new:${collectionNameKey(suggestion.value ?? '')}',
+        },
         AiSuggestionKind.tag =>
           'tag:${AiOutputValidator.normalizeTag(suggestion.value ?? '')}',
         AiSuggestionKind.summary => 'summary:${suggestion.value?.trim()}',
       };
+
+  /// Caps for the collection profiles sent to a provider, so the prompt
+  /// stays small however many collections and saves an owner has.
+  static const maxProfiledCollections = 30;
+  static const maxProfileSaves = 60;
+  static const maxSamplesPerCollection = 10;
+
+  /// The owner's collections with a compact profile of their contents: the
+  /// titles, tags and summaries of their most recent saves, truncated. The
+  /// item being organized is never part of its own comparison.
+  Future<List<AiCollectionOption>> collectionOptions(
+    Session session, {
+    required UuidValue ownerId,
+    UuidValue? itemId,
+  }) async {
+    var contents = await loadCollectionContents(
+      session,
+      ownerId: ownerId,
+      perCollection: maxSamplesPerCollection,
+      excludeItemId: itemId,
+    );
+    if (contents.length > maxProfiledCollections) {
+      contents =
+          ([...contents]..sort((a, b) => b.itemCount.compareTo(a.itemCount)))
+              .take(maxProfiledCollections)
+              .toList();
+    }
+    final perCollection = contents.isEmpty
+        ? 0
+        : (maxProfileSaves ~/ contents.length).clamp(
+            2,
+            maxSamplesPerCollection,
+          );
+    return [
+      for (final entry in contents)
+        AiCollectionOption(
+          id: entry.collection.id!,
+          name: entry.collection.name,
+          description: _clip(entry.collection.description, 160),
+          itemCount: entry.itemCount,
+          samples: [
+            for (final item in entry.items.take(perCollection))
+              AiCollectionSample(
+                title: _clip(item.title, 80) ?? '',
+                tags: entry.tagsOf(item).take(4).toList(),
+                summary: _clip(item.summary ?? item.previewDescription, 120),
+              ),
+          ],
+        ),
+    ];
+  }
+
+  static String? _clip(String? value, int length) {
+    final clean = value?.trim().replaceAll(RegExp(r'\s+'), ' ') ?? '';
+    if (clean.isEmpty) return null;
+    return clean.length <= length
+        ? clean
+        : '${clean.substring(0, length - 1).trimRight()}…';
+  }
 
   Future<AiOrganizationResult> _organizeSafely(
     Session session,

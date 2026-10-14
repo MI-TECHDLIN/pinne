@@ -1,4 +1,5 @@
 import 'package:pinne_server/src/generated/protocol.dart';
+import 'package:serverpod/serverpod.dart' show UuidValue;
 import 'package:test/test.dart';
 
 import 'owner_fixtures.dart';
@@ -100,6 +101,133 @@ void main() {
         ),
         throwsA(isA<ValidationException>()),
       );
+    });
+
+    test('names are trimmed and unique per owner, ignoring case', () async {
+      final created = await endpoints.collection.create(
+        alice,
+        CollectionDraft(
+          name: '  UI   inspiration ',
+          description: '   ',
+          coverSeed: 1,
+          paletteIndex: 0,
+        ),
+      );
+      expect(created.name, 'UI inspiration');
+      expect(created.description, isNull);
+
+      await expectLater(
+        endpoints.collection.create(
+          alice,
+          CollectionDraft(
+            name: 'ui INSPIRATION',
+            coverSeed: 2,
+            paletteIndex: 1,
+          ),
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+      await expectLater(
+        endpoints.collection.create(
+          alice,
+          CollectionDraft(name: '   ', coverSeed: 2, paletteIndex: 1),
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+      // Another owner may use the same name.
+      final bobs = await endpoints.collection.create(
+        bob,
+        CollectionDraft(name: 'UI inspiration', coverSeed: 3, paletteIndex: 2),
+      );
+      expect(bobs.name, 'UI inspiration');
+    });
+
+    test('renaming onto another collection\'s name is refused, recolouring '
+        'and keeping the name is not', () async {
+      final design = await endpoints.collection.create(
+        alice,
+        CollectionDraft(name: 'Design', coverSeed: 1, paletteIndex: 0),
+      );
+      await endpoints.collection.create(
+        alice,
+        CollectionDraft(name: 'Recipes', coverSeed: 2, paletteIndex: 1),
+      );
+
+      await expectLater(
+        endpoints.collection.update(alice, design.copyWith(name: 'recipes')),
+        throwsA(isA<ValidationException>()),
+      );
+      final recoloured = await endpoints.collection.update(
+        alice,
+        design.copyWith(paletteIndex: 3, description: 'Screens I like'),
+      );
+      expect(recoloured.paletteIndex, 3);
+      expect(recoloured.name, 'Design');
+      expect(recoloured.description, 'Screens I like');
+    });
+
+    test('deleting a collection keeps its saves', () async {
+      final collection = await endpoints.collection.create(
+        alice,
+        CollectionDraft(name: 'Temporary', coverSeed: 1, paletteIndex: 0),
+      );
+      final ownerId = UuidValue.fromString(
+        alice.build().authenticated!.userIdentifier,
+      );
+      final item = await Item.db.insertRow(
+        alice.build(),
+        Item(ownerId: ownerId, title: 'Keep me'),
+      );
+      await ItemCollection.db.insertRow(
+        alice.build(),
+        ItemCollection(
+          ownerId: ownerId,
+          itemId: item.id!,
+          collectionId: collection.id!,
+        ),
+      );
+      expect(
+        (await endpoints.collection.summaries(alice)).single.itemCount,
+        1,
+      );
+
+      expect(await endpoints.collection.delete(alice, collection.id!), isTrue);
+
+      expect(await endpoints.item.get(alice, item.id!), isNotNull);
+      expect(await endpoints.collection.summaries(alice), isEmpty);
+    });
+
+    test('removing an item from a collection keeps the item', () async {
+      final collection = await endpoints.collection.create(
+        alice,
+        CollectionDraft(name: 'Reading', coverSeed: 1, paletteIndex: 0),
+      );
+      final ownerId = UuidValue.fromString(
+        alice.build().authenticated!.userIdentifier,
+      );
+      final item = await Item.db.insertRow(
+        alice.build(),
+        Item(ownerId: ownerId, title: 'An essay'),
+      );
+      await ItemCollection.db.insertRow(
+        alice.build(),
+        ItemCollection(
+          ownerId: ownerId,
+          itemId: item.id!,
+          collectionId: collection.id!,
+        ),
+      );
+
+      expect(
+        await endpoints.collection.removeItem(bob, collection.id!, item.id!),
+        isFalse,
+      );
+      expect(
+        await endpoints.collection.removeItem(alice, collection.id!, item.id!),
+        isTrue,
+      );
+      expect(await endpoints.collection.items(alice, collection.id!), isEmpty);
+      expect(await endpoints.item.get(alice, item.id!), isNotNull);
     });
   });
 }

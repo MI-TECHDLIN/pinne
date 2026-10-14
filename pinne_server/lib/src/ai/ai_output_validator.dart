@@ -11,6 +11,10 @@ abstract final class AiOutputValidator {
   static const maxTagLength = 32;
   static const maxSummaryLength = 360;
   static const maxRationaleLength = 240;
+  static const maxCollectionNameLength = 40;
+
+  /// One collection per item: the closest existing one, else one to create.
+  static const maxCollections = 1;
 
   /// Tags that say nothing about the item: model placeholders for missing
   /// evidence, and words that only describe the link's shape (a `youtu.be`
@@ -40,8 +44,23 @@ abstract final class AiOutputValidator {
     'https',
     'www',
   };
+  static const _placeholderCollections = {
+    'collection',
+    'new-collection',
+    'collections',
+    'saved',
+    'saves',
+    'inbox',
+    'not-sorted',
+    'unsorted',
+  };
+
+  /// Keys a response may leave out; they read as null.
+  static const _optionalKeys = {'newCollectionName', 'collectionReason'};
   static const _keys = {
     'collectionIds',
+    'newCollectionName',
+    'collectionReason',
     'tags',
     'summary',
     'rationale',
@@ -63,10 +82,12 @@ abstract final class AiOutputValidator {
     }
     if (decoded is! Map<String, dynamic> ||
         decoded.keys.any((key) => !_keys.contains(key)) ||
-        !_keys.every(decoded.containsKey)) {
+        !_keys.difference(_optionalKeys).every(decoded.containsKey)) {
       throw const FormatException('AI response has an unexpected shape.');
     }
     final ids = decoded['collectionIds'];
+    final newCollectionName = decoded['newCollectionName'];
+    final collectionReason = decoded['collectionReason'];
     final tags = decoded['tags'];
     final summary = decoded['summary'];
     final rationale = decoded['rationale'];
@@ -77,6 +98,8 @@ abstract final class AiOutputValidator {
         tags is! List ||
         tags.any((value) => value is! String) ||
         (summary != null && summary is! String) ||
+        (newCollectionName != null && newCollectionName is! String) ||
+        (collectionReason != null && collectionReason is! String) ||
         rationale is! String ||
         coverage != _coverageName(expectedCoverage) ||
         uncertain is! bool) {
@@ -96,6 +119,8 @@ abstract final class AiOutputValidator {
         collectionIds: parsedIds,
         tags: tags.cast<String>(),
         summary: summary as String?,
+        newCollectionName: newCollectionName as String?,
+        collectionReason: collectionReason as String?,
         rationale: rationale,
         evidenceCoverage: expectedCoverage,
         uncertain: uncertain,
@@ -118,6 +143,7 @@ abstract final class AiOutputValidator {
     for (final id in result.collectionIds) {
       final text = id.toString();
       if (allowed.contains(text) && seenIds.add(text)) ids.add(id);
+      if (ids.length == maxCollections) break;
     }
 
     final tags = <String>[];
@@ -132,8 +158,16 @@ abstract final class AiOutputValidator {
       if (tags.length == maxTags) break;
     }
     final summary = _capSummary(result.summary);
+    final reason = result.collectionReason?.trim() ?? '';
     return AiOrganizationResult(
       collectionIds: ids,
+      // An existing collection always wins over creating another.
+      newCollectionName: ids.isEmpty
+          ? cleanCollectionName(result.newCollectionName)
+          : null,
+      collectionReason: reason.isEmpty
+          ? null
+          : _cap(reason, maxRationaleLength),
       tags: tags,
       summary: summary,
       rationale: _cap(result.rationale.trim(), maxRationaleLength),
@@ -148,6 +182,25 @@ abstract final class AiOutputValidator {
     normalized = normalized.replaceAll(RegExp(r'[^a-z0-9]+'), '-');
     normalized = normalized.replaceAll(RegExp(r'^-+|-+$'), '');
     return _cap(normalized, maxTagLength).replaceAll(RegExp(r'-+$'), '');
+  }
+
+  /// A proposed collection name made safe to show and store: one line,
+  /// without quotes, at most [maxCollectionNameLength] characters. Null when
+  /// it is empty or a placeholder such as "Misc".
+  static String? cleanCollectionName(String? value) {
+    if (value == null) return null;
+    final clean = value
+        .replaceAll(RegExp(r'[\u0000-\u001f"“”]'), ' ')
+        .trim()
+        .replaceAll(RegExp(r'\s+'), ' ');
+    final key = normalizeTag(clean);
+    if (key.isEmpty ||
+        placeholderTags.contains(key) ||
+        _placeholderCollections.contains(key)) {
+      return null;
+    }
+    final capped = _cap(clean, maxCollectionNameLength);
+    return capped[0].toUpperCase() + capped.substring(1);
   }
 
   static String? _capSummary(String? value) {

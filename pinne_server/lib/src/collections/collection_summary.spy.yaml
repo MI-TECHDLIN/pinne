@@ -1,0 +1,8 @@
+### What a collection card shows: the collection, how many saves it holds,
+### the tags used most on them and the titles of the newest ones.
+class: CollectionSummary
+fields:
+  collection: Collection
+  itemCount: int
+  topTags: List<String>
+  recentTitles: List<String>

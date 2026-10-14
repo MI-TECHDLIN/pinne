@@ -31,6 +31,8 @@ import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
 import 'package:pinne_server/src/generated/collections/collection_draft.dart'
     as _imy5wtcu;
+import 'package:pinne_server/src/generated/collections/collection_summary.dart'
+    as _i1lg6bs8;
 import 'package:pinne_server/src/generated/examples/example_saves_status.dart'
     as _iaif5h49;
 import 'package:pinne_server/src/generated/future_calls.dart' as _ifh9pad3;
@@ -1391,6 +1393,102 @@ class _CollectionEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_is0jaro3.Collection?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i1lg6bs8.CollectionSummary>> summaries(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'collection',
+            method: 'summaries',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'collection',
+          methodName: 'summaries',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_i1lg6bs8.CollectionSummary>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_id0tr7gx.Item>> items(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue collectionId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'collection',
+            method: 'items',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'collection',
+          methodName: 'items',
+          parameters: _ist.testObjectToJson({'collectionId': collectionId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_id0tr7gx.Item>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<bool> removeItem(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue collectionId,
+    _is.UuidValue itemId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'collection',
+            method: 'removeItem',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'collection',
+          methodName: 'removeItem',
+          parameters: _ist.testObjectToJson({
+            'collectionId': collectionId,
+            'itemId': itemId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<bool>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
