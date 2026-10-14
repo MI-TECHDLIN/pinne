@@ -426,6 +426,10 @@ directions, not dated promises.
   quiet hours, a daily cap). Android comes first; iOS needs an APNs key from a
   paid Apple Developer account.
 - **A light theme, Lavender Mist,** alongside the dark violet one.
+- **Share with friends.** Share a single save or a whole collection with a
+  friend, to view or to build together, and see what friends are saving. An
+  optional, friendly leaderboard of review streaks would be open only to
+  friends who opt in. Privacy comes first: nothing is shared by default.
 - **Google Calendar and Apple Calendar.** Today the app uses calendars on the
   phone, and `.ics` export stays available. Direct connections return when
   they can be authenticated, synchronized, tested and described honestly.
