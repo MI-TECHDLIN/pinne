@@ -36,6 +36,9 @@ calendar:
 collection:
   - list:
   - get:
+  - summaries:
+  - items:
+  - removeItem:
   - create:
   - update:
   - delete:

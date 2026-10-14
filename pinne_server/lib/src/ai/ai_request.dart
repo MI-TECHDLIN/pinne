@@ -15,9 +15,19 @@ abstract final class AiRequest {
     List<AiCollectionOption> collections,
   ) => jsonEncode({
     'task':
-        'Suggest collections, up to five short tags, and an optional '
-        'factual summary of at most two sentences. Mark uncertain when '
-        'metadata is insufficient.',
+        'Organize one saved item. First compare it with every collection in '
+        'INPUT using the collection name, description and recentSaves '
+        '(titles, tags and summaries of what is already in it). If one is '
+        'related, return only its id in collectionIds and set '
+        'newCollectionName to null. Only when no collection is related, '
+        'return an empty collectionIds and propose newCollectionName: a '
+        'short topic of one to three words in title case, such as "Cooking" '
+        'or "UI inspiration", or null when the metadata says too little. '
+        'collectionReason is one short sentence on why, naming the '
+        "collection, such as \"Matches your 'UI inspiration' saves: similar "
+        'design references." Also suggest up to five short tags and an '
+        'optional factual summary of at most two sentences. Mark uncertain '
+        'when metadata is insufficient.',
     'input': {
       'evidence': evidence.toJson(),
       'collections': collections
@@ -46,6 +56,12 @@ abstract final class AiRequest {
         'type': 'array',
         'items': {'type': 'string'},
       },
+      'newCollectionName': {
+        'type': ['string', 'null'],
+      },
+      'collectionReason': {
+        'type': ['string', 'null'],
+      },
       'summary': {
         'type': ['string', 'null'],
       },
@@ -58,6 +74,8 @@ abstract final class AiRequest {
     },
     'required': [
       'collectionIds',
+      'newCollectionName',
+      'collectionReason',
       'tags',
       'summary',
       'rationale',

@@ -1,4 +1,8 @@
+import 'dart:math';
+
 import '../auth/owner.dart';
+import '../collections/collection_contents.dart';
+import '../collections/collection_endpoint.dart';
 import '../generated/protocol.dart';
 import '../generated/serverpod.dart';
 import 'ai_organization_service.dart';
@@ -10,10 +14,12 @@ class AiOrganizingEndpoint extends Endpoint {
   bool get requireLogin => true;
 
   static const groqDisclosure =
-      "When AI organizing is on, Pinne sends the saved item's title, URL, "
-      'source platform, your intention and notes, plus the names and IDs of '
-      'your collections and any stored preview description, author and site '
-      "name, to GroqCloud. It does not fetch the page. Groq says it does not "
+      "When AI organizing is on, Pinne sends GroqCloud the saved item's "
+      'title, URL, source platform, your intention and notes and any stored '
+      'preview description, author and site name, plus the names, '
+      'descriptions and IDs of your collections with the titles, tags and '
+      'summaries of a few recent saves in each, so it can pick a related '
+      'collection. It does not fetch the page. Groq says it does not '
       'train models on inputs or outputs unless the customer explicitly '
       'permits it. Requests are not retained by default, but Groq may '
       'temporarily log inputs and outputs for up to 30 days for reliability '
@@ -21,10 +27,12 @@ class AiOrganizingEndpoint extends Endpoint {
       'Turn this off to organize on this server with simple rules only.';
 
   static const geminiDisclosure =
-      "When AI organizing is on, Pinne sends the saved item's title, URL, "
-      'source platform, your intention and notes, plus the names and IDs of '
-      'your collections and any stored preview description, author and site '
-      "name, to Google's Gemini API. It does not fetch the page. On Gemini's "
+      "When AI organizing is on, Pinne sends Google's Gemini API the saved "
+      "item's title, URL, source platform, your intention and notes and any "
+      'stored preview description, author and site name, plus the names, '
+      'descriptions and IDs of your collections with the titles, tags and '
+      'summaries of a few recent saves in each, so it can pick a related '
+      "collection. It does not fetch the page. On Gemini's "
       'unpaid tier, Google may use prompts and responses to improve its '
       'products, and human reviewers may process them. Google says not to '
       'send sensitive, confidential or personal information. Different data '
@@ -131,26 +139,17 @@ class AiOrganizingEndpoint extends Endpoint {
     final suggestion = await _ownedSuggestion(session, suggestionId);
     if (suggestion.status != AiSuggestionStatus.pending) return suggestion;
     final item = await _ownedItem(session, suggestion.itemId);
+    UuidValue? acceptedCollectionId;
     switch (suggestion.kind) {
       case AiSuggestionKind.collection:
-        final collectionId = suggestion.collectionId;
-        final collection = collectionId == null
-            ? null
-            : await Collection.db.findFirstRow(
-                session,
-                where: (t) =>
-                    t.id.equals(collectionId) &
-                    t.ownerId.equals(session.ownerId),
-              );
-        if (collection == null) {
-          throw RecordNotFoundException(resource: 'collection');
-        }
+        final collection = await _suggestedCollection(session, suggestion);
+        acceptedCollectionId = collection.id;
         final existing = await ItemCollection.db.findFirstRow(
           session,
           where: (t) =>
               t.ownerId.equals(session.ownerId) &
               t.itemId.equals(item.id!) &
-              t.collectionId.equals(collectionId),
+              t.collectionId.equals(collection.id!),
         );
         if (existing == null) {
           await ItemCollection.db.insertRow(
@@ -158,7 +157,7 @@ class AiOrganizingEndpoint extends Endpoint {
             ItemCollection(
               ownerId: session.ownerId,
               itemId: item.id!,
-              collectionId: collectionId!,
+              collectionId: collection.id!,
               origin: AssignmentOrigin.ai,
             ),
           );
@@ -219,9 +218,67 @@ class AiOrganizingEndpoint extends Endpoint {
       session,
       suggestion.copyWith(
         status: AiSuggestionStatus.accepted,
+        collectionId: acceptedCollectionId ?? suggestion.collectionId,
         resolvedAt: DateTime.now().toUtc(),
       ),
     );
+  }
+
+  /// The owner's collection a suggestion names. A proposal for a new
+  /// collection creates it with an automatic cover, unless the owner
+  /// already has one by that name, which is used instead.
+  Future<Collection> _suggestedCollection(
+    Session session,
+    AiSuggestion suggestion,
+  ) async {
+    final owner = session.ownerId;
+    final collectionId = suggestion.collectionId;
+    if (collectionId != null) {
+      final collection = await Collection.db.findFirstRow(
+        session,
+        where: (t) => t.id.equals(collectionId) & t.ownerId.equals(owner),
+      );
+      if (collection == null) {
+        throw RecordNotFoundException(resource: 'collection');
+      }
+      return collection;
+    }
+    final name = AiOutputValidator.cleanCollectionName(suggestion.value);
+    if (name == null) {
+      throw ValidationException(
+        message: 'The suggested collection is invalid.',
+      );
+    }
+    return session.db.transaction((transaction) async {
+      // Accepting two proposals for one name at once creates it once.
+      await session.db.unsafeQuery(
+        'SELECT pg_advisory_xact_lock(hashtextextended(\$1, 1))',
+        parameters: QueryParameters.positional([owner.toString()]),
+        transaction: transaction,
+      );
+      final owned = await Collection.db.find(
+        session,
+        where: (t) => t.ownerId.equals(owner),
+        transaction: transaction,
+      );
+      final key = collectionNameKey(name);
+      for (final collection in owned) {
+        if (collectionNameKey(collection.name) == key) return collection;
+      }
+      return Collection.db.insertRow(
+        session,
+        Collection(
+          ownerId: owner,
+          name: name,
+          coverSeed: Random().nextInt(CollectionEndpoint.maxCoverSeed),
+          paletteIndex: leastUsedPalette(
+            owned,
+            CollectionEndpoint.allowedPaletteIndexes.length,
+          ),
+        ),
+        transaction: transaction,
+      );
+    });
   }
 
   Future<AiSuggestion> reject(

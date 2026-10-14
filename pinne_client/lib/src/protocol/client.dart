@@ -30,6 +30,8 @@ import 'package:pinne_client/src/protocol/collections/collection.dart'
     as _i9zrdvr8;
 import 'package:pinne_client/src/protocol/collections/collection_draft.dart'
     as _iqvt7ot6;
+import 'package:pinne_client/src/protocol/collections/collection_summary.dart'
+    as _icwp9emz;
 import 'package:pinne_client/src/protocol/examples/example_saves_status.dart'
     as _ii2eqorx;
 import 'package:pinne_client/src/protocol/health/server_health.dart'
@@ -558,7 +560,8 @@ class EndpointCalendar extends _isc.EndpointRef {
 }
 
 /// Owner-scoped CRUD for collections. A parent must belong to the same owner
-/// and must not make the tree cyclic.
+/// and must not make the tree cyclic. Names are trimmed and unique per owner,
+/// ignoring case.
 /// {@category Endpoint}
 class EndpointCollection extends _isc.EndpointRef {
   EndpointCollection(_isc.EndpointCaller caller) : super(caller);
@@ -580,6 +583,35 @@ class EndpointCollection extends _isc.EndpointRef {
         {'id': id},
       );
 
+  /// Every collection with what its card shows, sorted by name.
+  _ida.Future<List<_icwp9emz.CollectionSummary>> summaries() =>
+      caller.callServerEndpoint<List<_icwp9emz.CollectionSummary>>(
+        'collection',
+        'summaries',
+        {},
+      );
+
+  /// The saves in one of the owner's collections, newest first.
+  _ida.Future<List<_itiiwgx0.Item>> items(_isc.UuidValue collectionId) =>
+      caller.callServerEndpoint<List<_itiiwgx0.Item>>(
+        'collection',
+        'items',
+        {'collectionId': collectionId},
+      );
+
+  /// Takes an item out of a collection. The item itself stays saved.
+  _ida.Future<bool> removeItem(
+    _isc.UuidValue collectionId,
+    _isc.UuidValue itemId,
+  ) => caller.callServerEndpoint<bool>(
+    'collection',
+    'removeItem',
+    {
+      'collectionId': collectionId,
+      'itemId': itemId,
+    },
+  );
+
   _ida.Future<_i9zrdvr8.Collection> create(_iqvt7ot6.CollectionDraft draft) =>
       caller.callServerEndpoint<_i9zrdvr8.Collection>(
         'collection',
@@ -594,6 +626,7 @@ class EndpointCollection extends _isc.EndpointRef {
         {'collection': collection},
       );
 
+  /// Deletes the collection only. Its saves stay, just outside it.
   _ida.Future<bool> delete(_isc.UuidValue id) =>
       caller.callServerEndpoint<bool>(
         'collection',

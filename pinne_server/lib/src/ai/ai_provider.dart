@@ -46,13 +46,52 @@ class AiItemEvidence {
   };
 }
 
+/// One of the owner's collections as the organizer sees it: its name and
+/// description plus a compact profile of what is already saved in it, so a
+/// related item goes to an existing collection before a new one is proposed.
 class AiCollectionOption {
-  const AiCollectionOption({required this.id, required this.name});
+  const AiCollectionOption({
+    required this.id,
+    required this.name,
+    this.description,
+    this.itemCount = 0,
+    this.samples = const [],
+  });
 
   final UuidValue id;
   final String name;
+  final String? description;
+  final int itemCount;
 
-  Map<String, Object?> toJson() => {'id': id.toString(), 'name': name};
+  /// A few of its most recently added saves, already truncated.
+  final List<AiCollectionSample> samples;
+
+  Map<String, Object?> toJson() => {
+    'id': id.toString(),
+    'name': name,
+    if (description != null) 'description': description,
+    'itemCount': itemCount,
+    'recentSaves': [for (final sample in samples) sample.toJson()],
+  };
+}
+
+/// A save inside a collection, reduced to what tells its topic.
+class AiCollectionSample {
+  const AiCollectionSample({
+    required this.title,
+    this.tags = const [],
+    this.summary,
+  });
+
+  final String title;
+  final List<String> tags;
+  final String? summary;
+
+  Map<String, Object?> toJson() => {
+    'title': title,
+    if (tags.isNotEmpty) 'tags': tags,
+    if (summary != null) 'summary': summary,
+  };
 }
 
 class AiOrganizationResult {
@@ -64,9 +103,19 @@ class AiOrganizationResult {
     required this.uncertain,
     required this.provider,
     this.summary,
+    this.newCollectionName,
+    this.collectionReason,
   });
 
+  /// At most one existing collection the item belongs in.
   final List<UuidValue> collectionIds;
+
+  /// A collection to create, proposed only when no existing one is related.
+  final String? newCollectionName;
+
+  /// Why the item fits the chosen or proposed collection.
+  final String? collectionReason;
+
   final List<String> tags;
   final String? summary;
   final String rationale;

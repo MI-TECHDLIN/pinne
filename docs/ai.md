@@ -2,8 +2,31 @@
 
 Pinne organizes only metadata already saved with an item. It does not fetch the
 saved URL in this phase. The provider receives the title, URL, source platform,
-the user's intention and note, collection names and IDs, and any stored preview
-description, author, and site name.
+the user's intention and note, any stored preview description, author, and site
+name, and each collection's name, description, ID and a compact profile of its
+contents (`AiOrganizationService.collectionOptions`: titles, tags and
+summaries of its most recent saves, truncated, at most 30 collections and 60
+saves in all).
+
+## Collection matching
+
+Each item gets at most one collection suggestion. Before proposing a new
+collection, the provider compares the item with every existing collection's
+name, description and profile, and names the related one. Only when nothing is
+related does it propose `newCollectionName`; the Saved card shows that as
+"New collection: X", and accepting it creates the collection (automatic cover,
+the least-used palette) and files the item, or reuses an existing collection
+with that name in any letter case.
+
+Every result, remote or local, then passes `CollectionMatcher.settle`
+(`pinne_server/lib/src/ai/collection_matcher.dart`) before it is stored: an
+item already in a collection gets no collection suggestion, and a proposed new
+collection is replaced by an existing one with the same name or by the best
+related existing collection. Relatedness is a weighted word overlap: words of a
+collection's name count most, then its description and tags, then titles and
+summaries of its saves; platform words such as `youtube` count little. The
+suggestion's rationale says why, such as "Matches your 'UI inspiration'
+saves: both mention dribbble, dashboard".
 
 ## Provider selection
 
@@ -29,10 +52,11 @@ outcome in that server process.
 
 The local rules always tag a link with its site (`docs.flutter.dev` is
 `flutter`), add known keywords from the title, URL, intention, note and
-preview, suggest collections whose names appear in that text, and quote the
+preview, suggest the related collection (or a new one named after a known
+topic, such as "Cooking") with the same matcher, and quote the
 stored preview description (or a note's own text, at most two sentences) as
 the summary. They never invent a summary when no such text is stored. Rules
-are exact matches, so they never mark a suggestion "Maybe". Whatever the
+never mark a suggestion "Maybe". Whatever the
 provider, placeholder tags such as `unknown`, `none` or `short` (the shape of
 a `youtu.be` link, not its content) are dropped by `AiOutputValidator`.
 
@@ -118,10 +142,11 @@ abuse, for up to 30 days; Groq also offers a Zero Data Retention control.
 
 The Settings disclosure for Groq therefore says:
 
-> When AI organizing is on, Pinne sends the saved item's title, URL, source
-> platform, your intention and notes, plus the names and IDs of your
-> collections and any stored preview description, author and site name, to
-> GroqCloud. It does not fetch the page. Groq says it does not train models on
+> When AI organizing is on, Pinne sends GroqCloud the saved item's title, URL,
+> source platform, your intention and notes and any stored preview
+> description, author and site name, plus the names, descriptions and IDs of
+> your collections with the titles, tags and summaries of a few recent saves
+> in each, so it can pick a related collection. It does not fetch the page. Groq says it does not train models on
 > inputs or outputs unless the customer explicitly permits it. Requests are
 > not retained by default, but Groq may temporarily log inputs and outputs for
 > up to 30 days for reliability or suspected abuse. Turn this off to organize

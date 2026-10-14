@@ -20,6 +20,8 @@ import 'package:pinne_server/src/generated/calendar/calendar_selection_choice.da
     as _i396ixoa;
 import 'package:pinne_server/src/generated/collections/collection.dart'
     as _is0jaro3;
+import 'package:pinne_server/src/generated/collections/collection_summary.dart'
+    as _i1lg6bs8;
 import 'package:pinne_server/src/generated/items/item.dart' as _id0tr7gx;
 import 'package:pinne_server/src/generated/planning/calendar_write.dart'
     as _ijx3xba9;
@@ -59,6 +61,7 @@ import 'calendar/device_calendar_report.dart' as _i4awacjs;
 import 'calendar/event_sync_state.dart' as _i1s71wt9;
 import 'collections/collection.dart' as _iqfgge80;
 import 'collections/collection_draft.dart' as _ivby8odo;
+import 'collections/collection_summary.dart' as _is4wil3e;
 import 'collections/item_collection.dart' as _ingnmqw7;
 import 'common/assignment_origin.dart' as _izy6d885;
 import 'common/record_not_found_exception.dart' as _ilf890y8;
@@ -164,6 +167,7 @@ export 'calendar/device_calendar_report.dart';
 export 'calendar/event_sync_state.dart';
 export 'collections/collection.dart';
 export 'collections/collection_draft.dart';
+export 'collections/collection_summary.dart';
 export 'collections/item_collection.dart';
 export 'common/assignment_origin.dart';
 export 'common/record_not_found_exception.dart';
@@ -3445,6 +3449,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _ivby8odo.CollectionDraft) {
       return _ivby8odo.CollectionDraft.fromJson(data) as T;
     }
+    if (t == _is4wil3e.CollectionSummary) {
+      return _is4wil3e.CollectionSummary.fromJson(data) as T;
+    }
     if (t == _ingnmqw7.ItemCollection) {
       return _ingnmqw7.ItemCollection.fromJson(data) as T;
     }
@@ -3785,6 +3792,10 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null ? _ivby8odo.CollectionDraft.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_is4wil3e.CollectionSummary?>()) {
+      return (data != null ? _is4wil3e.CollectionSummary.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_ingnmqw7.ItemCollection?>()) {
       return (data != null ? _ingnmqw7.ItemCollection.fromJson(data) : null)
           as T;
@@ -4109,6 +4120,9 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
     if (t == List<_is.UuidValue>) {
       return (data as List).map((e) => deserialize<_is.UuidValue>(e)).toList()
           as T;
@@ -4240,6 +4254,12 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
+    if (t == List<_i1lg6bs8.CollectionSummary>) {
+      return (data as List)
+              .map((e) => deserialize<_i1lg6bs8.CollectionSummary>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_id0tr7gx.Item>) {
       return (data as List).map((e) => deserialize<_id0tr7gx.Item>(e)).toList()
           as T;
@@ -4309,6 +4329,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       _i1s71wt9.EventSyncState => 'EventSyncState',
       _iqfgge80.Collection => 'Collection',
       _ivby8odo.CollectionDraft => 'CollectionDraft',
+      _is4wil3e.CollectionSummary => 'CollectionSummary',
       _ingnmqw7.ItemCollection => 'ItemCollection',
       _izy6d885.AssignmentOrigin => 'AssignmentOrigin',
       _ilf890y8.RecordNotFoundException => 'RecordNotFoundException',
@@ -4454,6 +4475,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'Collection';
       case _ivby8odo.CollectionDraft():
         return 'CollectionDraft';
+      case _is4wil3e.CollectionSummary():
+        return 'CollectionSummary';
       case _ingnmqw7.ItemCollection():
         return 'ItemCollection';
       case _izy6d885.AssignmentOrigin():
@@ -4711,6 +4734,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'CollectionDraft') {
       return deserialize<_ivby8odo.CollectionDraft>(data['data']);
+    }
+    if (dataClassName == 'CollectionSummary') {
+      return deserialize<_is4wil3e.CollectionSummary>(data['data']);
     }
     if (dataClassName == 'ItemCollection') {
       return deserialize<_ingnmqw7.ItemCollection>(data['data']);

@@ -192,10 +192,10 @@ class _AiOrganizingCard extends ConsumerWidget {
   // Shown until the server answers with its own provider's disclosure, so it
   // names no provider.
   static const fallbackDisclosure =
-      "When AI organizing is on, Pinne sends the saved item's title, URL, "
-      'source platform, your intention and notes, plus the names and IDs of '
-      "your collections, to the server's external AI provider. It does not "
-      'fetch the page. The provider and its data terms are shown here once '
+      "When AI organizing is on, Pinne sends the server's external AI "
+      "provider the saved item's title, URL, source platform, your intention "
+      'and notes, plus your collections with the titles, tags and summaries '
+      'of a few recent saves in each. It does not fetch the page. The provider and its data terms are shown here once '
       'Pinne reaches the server. Turn this off to keep organizing on this '
       'server with simple rules only.';
 

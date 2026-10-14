@@ -780,6 +780,63 @@ class Endpoints extends _is.EndpointDispatch {
                     params['id'],
                   ),
         ),
+        'summaries': _is.MethodConnector(
+          name: 'summaries',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['collection'] as _i5j0184s.CollectionEndpoint)
+                      .summaries(session),
+        ),
+        'items': _is.MethodConnector(
+          name: 'items',
+          params: {
+            'collectionId': _is.ParameterDescription(
+              name: 'collectionId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['collection'] as _i5j0184s.CollectionEndpoint)
+                      .items(
+                        session,
+                        params['collectionId'],
+                      ),
+        ),
+        'removeItem': _is.MethodConnector(
+          name: 'removeItem',
+          params: {
+            'collectionId': _is.ParameterDescription(
+              name: 'collectionId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'itemId': _is.ParameterDescription(
+              name: 'itemId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['collection'] as _i5j0184s.CollectionEndpoint)
+                      .removeItem(
+                        session,
+                        params['collectionId'],
+                        params['itemId'],
+                      ),
+        ),
         'create': _is.MethodConnector(
           name: 'create',
           params: {
