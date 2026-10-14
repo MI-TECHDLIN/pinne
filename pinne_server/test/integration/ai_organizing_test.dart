@@ -323,5 +323,141 @@ void main() {
         throwsA(isA<RecordNotFoundException>()),
       );
     });
+
+    test(
+      'a newer organizing version keeps the ids of proposals it repeats, so '
+      'a chip from the first version can still be accepted',
+      () async {
+        final ideas = await Collection.db.insertRow(
+          alice.build(),
+          Collection(ownerId: aliceId, name: 'Ideas to try'),
+        );
+        final item = await itemFor(alice, aliceId, 'youtu.be/BMMcmmnjrM8');
+        AiOrganizationResult result({
+          required List<String> tags,
+          String? summary,
+          required bool uncertain,
+        }) => AiOrganizationResult(
+          collectionIds: [ideas.id!],
+          tags: tags,
+          summary: summary,
+          rationale: 'test',
+          evidenceCoverage: AiEvidenceCoverage.metadataOnly,
+          uncertain: uncertain,
+          provider: 'fake',
+        );
+        // The first pass sees only the short link, like the captain's save.
+        final fake = FakeAiProvider(
+          result: result(
+            tags: ['youtube', 'unknown', 'short'],
+            uncertain: true,
+          ),
+        );
+        final service = AiOrganizationService(remoteProviderOverride: fake);
+        await service.enqueue(
+          alice.build(),
+          ownerId: aliceId,
+          itemId: item.id!,
+        );
+        await service.process(
+          alice.build(),
+          ownerId: aliceId,
+          itemId: item.id!,
+        );
+        final first = await endpoints.aiOrganizing.review(alice, item.id!);
+        expect(first.organizing, isFalse);
+        expect(
+          first.suggestions.map((s) => s.value ?? 'collection'),
+          ['collection', 'youtube'],
+          reason: 'placeholder tags are never suggested',
+        );
+        final shownCollection = first.suggestions.first;
+        final shownTag = first.suggestions.last;
+
+        // The preview arrives and a newer version re-organizes the item.
+        fake.result = result(
+          tags: ['claude-code', 'tutorial'],
+          summary: 'A course on building mobile apps with Claude Code.',
+          uncertain: false,
+        );
+        await service.enqueue(
+          alice.build(),
+          ownerId: aliceId,
+          itemId: item.id!,
+        );
+        expect(
+          (await endpoints.aiOrganizing.review(alice, item.id!)).organizing,
+          isTrue,
+        );
+        await service.process(
+          alice.build(),
+          ownerId: aliceId,
+          itemId: item.id!,
+        );
+
+        final second = await endpoints.aiOrganizing.review(alice, item.id!);
+        expect(second.organizing, isFalse);
+        expect(second.suggestions.first.id, shownCollection.id);
+        expect(second.suggestions.first.uncertain, isFalse);
+        expect(
+          second.suggestions.map((s) => s.kind),
+          [
+            AiSuggestionKind.collection,
+            AiSuggestionKind.tag,
+            AiSuggestionKind.tag,
+            AiSuggestionKind.summary,
+          ],
+        );
+        // Accepting the chip shown before the newer version still applies.
+        await endpoints.aiOrganizing.accept(alice, shownCollection.id!);
+        expect(
+          await ItemCollection.db.count(
+            alice.build(),
+            where: (t) =>
+                t.itemId.equals(item.id!) & t.collectionId.equals(ideas.id!),
+          ),
+          1,
+        );
+        // A proposal the newer version dropped is gone, like a missing id.
+        await expectLater(
+          endpoints.aiOrganizing.accept(alice, shownTag.id!),
+          throwsA(isA<RecordNotFoundException>()),
+        );
+        // Accepting the summary sets it on the item.
+        final summary = second.suggestions.last;
+        await endpoints.aiOrganizing.accept(alice, summary.id!);
+        final stored = await Item.db.findById(alice.build(), item.id!);
+        expect(
+          stored?.summary,
+          'A course on building mobile apps with Claude Code.',
+        );
+        expect(stored?.summaryOrigin, AssignmentOrigin.ai);
+
+        // A third pass does not offer what the owner already accepted.
+        await service.enqueue(
+          alice.build(),
+          ownerId: aliceId,
+          itemId: item.id!,
+        );
+        await service.process(
+          alice.build(),
+          ownerId: aliceId,
+          itemId: item.id!,
+        );
+        final third = await endpoints.aiOrganizing.review(alice, item.id!);
+        expect(third.suggestions.map((s) => s.value), [
+          'claude-code',
+          'tutorial',
+        ]);
+      },
+    );
+
+    test('review is owner-scoped', () async {
+      final item = await itemFor(alice, aliceId, 'Private');
+      await expectLater(
+        endpoints.aiOrganizing.review(bob, item.id!),
+        throwsA(isA<RecordNotFoundException>()),
+      );
+    });
   });
 }

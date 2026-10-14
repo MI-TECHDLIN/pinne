@@ -116,6 +116,21 @@ void main() {
       expect(result.title, 'Great walkthrough');
     });
 
+    test(
+      'when the note only repeats the shared link then no note is stored',
+      () async {
+        await endpoints.item.capture(
+          alice,
+          _draft(
+            url: 'https://youtu.be/BMMcmmnjrM8?si=9DPCHgF2Gxoo0hMf',
+            intention: 'https://youtu.be/BMMcmmnjrM8?si=9DPCHgF2Gxoo0hMf',
+          ),
+        );
+        final item = (await itemsOf(alice)).single;
+        expect(item.intention, isNull);
+      },
+    );
+
     test('when the user gave a title then it is kept', () async {
       final result = await endpoints.item.capture(
         alice,
