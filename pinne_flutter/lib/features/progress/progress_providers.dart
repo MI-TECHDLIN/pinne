@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 
 /// The progress endpoint, behind an interface so tests can use a fake server.
@@ -66,6 +67,7 @@ final progressReportProvider = FutureProvider.autoDispose<ProgressReport?>((
   ref,
 ) {
   if (ref.watch(accountIdProvider) == null) return null;
+  ref.watch(libraryRevisionProvider);
   final period = ref.watch(progressPeriodProvider);
   return ref.watch(progressApiProvider).report(progressQuery(period));
 });

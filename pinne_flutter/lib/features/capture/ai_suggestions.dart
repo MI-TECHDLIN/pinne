@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/ai_suggestion_chips.dart';
 import '../../ui/feedback/toast.dart';
 import '../../ui/pinne_loading.dart';
-import '../collections/collections_screen.dart';
 import 'capture_providers.dart';
 
 /// The server calls behind AI suggestion review. Kept injectable so the
@@ -164,9 +164,7 @@ class AiSuggestionsNotifier extends AsyncNotifier<List<AiSuggestionChipData>> {
   Future<AiSuggestionOutcome> accept(String id) async {
     final outcome = await _resolve(id, (api, id) => api.accept(id));
     if (outcome == AiSuggestionOutcome.applied && ref.mounted) {
-      ref
-        ..invalidate(savedItemsProvider)
-        ..invalidate(collectionsProvider);
+      ref.read(libraryRevisionProvider.notifier).bump();
     }
     return outcome;
   }

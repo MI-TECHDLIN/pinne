@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 import 'capture_store.dart';
 import 'outbox_sync.dart';
@@ -31,6 +32,7 @@ final outboxSyncProvider = Provider<OutboxSync?>((ref) {
     api: ref.watch(captureApiProvider),
     accountId: accountId,
     canSync: () => ref.read(signedInProvider),
+    onConfirmed: () => ref.read(libraryRevisionProvider.notifier).bump(),
   );
   void kick() => unawaited(sync.drain());
 
@@ -74,6 +76,7 @@ final capturesProvider = StreamProvider<List<LocalCapture>>((ref) async* {
 final savedItemsProvider = StreamProvider.autoDispose<List<Item>>((ref) async* {
   final accountId = ref.watch(accountIdProvider);
   ref.watch(capturesProvider);
+  ref.watch(libraryRevisionProvider);
   if (accountId == null) {
     yield const [];
     return;

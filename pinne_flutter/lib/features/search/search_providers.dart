@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 
 final searchEndpointProvider = Provider<EndpointSearch>(
@@ -102,11 +103,14 @@ final searchPageProvider =
 
 class SearchResults extends AsyncNotifier<SearchPage> {
   @override
-  Future<SearchPage> build() => _fetch(
-    query: ref.watch(searchQueryProvider),
-    filters: ref.watch(searchFiltersProvider),
-    accountId: ref.watch(accountIdProvider),
-  );
+  Future<SearchPage> build() {
+    ref.watch(libraryRevisionProvider);
+    return _fetch(
+      query: ref.watch(searchQueryProvider),
+      filters: ref.watch(searchFiltersProvider),
+      accountId: ref.watch(accountIdProvider),
+    );
+  }
 
   Future<SearchPage> _fetch({
     required String query,

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 import '../../ui/ribbon_spirit/ribbon_recipe.dart';
 import '../progress/progress_providers.dart';
@@ -23,6 +24,7 @@ final accountSummaryProvider = FutureProvider.autoDispose<AccountSummary?>((
   ref,
 ) async {
   if (ref.watch(profileUserIdProvider) == null) return null;
+  ref.watch(libraryRevisionProvider);
   return ref.watch(clientProvider).account.summary();
 });
 
@@ -32,6 +34,7 @@ final profileProgressProvider = FutureProvider.autoDispose<ProgressReport?>((
   ref,
 ) {
   if (ref.watch(accountIdProvider) == null) return null;
+  ref.watch(libraryRevisionProvider);
   return ref
       .watch(progressApiProvider)
       .report(progressQuery(ProgressPeriod.thisWeek));

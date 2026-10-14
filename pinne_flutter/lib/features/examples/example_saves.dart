@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
 
+import '../../core/library_revision.dart';
 import '../../core/server_client.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/glass_card.dart';
 import '../../ui/pinne_loading.dart';
-import '../collections/collections_screen.dart';
-import '../progress/progress_providers.dart';
-import '../search/search_providers.dart';
-import '../today/today_providers.dart';
 import '../../ui/feedback/toast.dart';
 
 final exampleSavesStatusProvider =
@@ -42,10 +39,7 @@ class _ExampleSavesCardState extends ConsumerState<ExampleSavesCard> {
       }
       ref
         ..invalidate(exampleSavesStatusProvider)
-        ..invalidate(todayQueueProvider)
-        ..invalidate(collectionsProvider)
-        ..invalidate(searchPageProvider)
-        ..invalidate(progressReportProvider);
+        ..read(libraryRevisionProvider.notifier).bump();
       if (mounted) {
         showPinneToast(
           context,

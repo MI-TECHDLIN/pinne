@@ -98,6 +98,7 @@ class OutboxSync {
     required this.api,
     required this.accountId,
     required this.canSync,
+    this.onConfirmed,
     this.backoff = const BackoffPolicy(),
     DateTime Function()? clock,
     double Function()? jitter,
@@ -110,6 +111,10 @@ class OutboxSync {
 
   /// Whether a user is signed in. Captures wait locally while it is false.
   final bool Function() canSync;
+
+  /// Called after a pass in which the server confirmed operations, so what
+  /// is derived from the library can refresh.
+  final void Function()? onConfirmed;
   final BackoffPolicy backoff;
   final DateTime Function() _clock;
   final double Function() _jitter;
@@ -175,6 +180,7 @@ class OutboxSync {
         }
       }
     } while (_again && !_disposed);
+    if (confirmed > 0 && !_disposed) onConfirmed?.call();
     _scheduleNext();
     return confirmed;
   }

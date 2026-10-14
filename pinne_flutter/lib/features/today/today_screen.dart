@@ -19,7 +19,6 @@ import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../capture/paste_capture_card.dart';
 import '../examples/example_saves.dart';
 import '../progress/celebration.dart';
-import '../settings/account_badge.dart';
 import '../settings/profile_provider.dart';
 import '../tour/tour_controller.dart';
 import 'today_providers.dart';
@@ -76,7 +75,6 @@ class TodayScreen extends ConsumerWidget {
                   loading: identityLoading,
                   // A failed lookup names nobody rather than guessing "Guest".
                   name: identity?.name ?? 'Pinne reader',
-                  accountType: identity?.type,
                   onProfile: () => context.push(Routes.profile),
                   onSearch: () => context.go(Routes.search),
                 ),
@@ -288,7 +286,6 @@ class _TodayHeader extends StatelessWidget {
     required this.greeting,
     required this.loading,
     required this.name,
-    required this.accountType,
     required this.onProfile,
     required this.onSearch,
   });
@@ -298,7 +295,6 @@ class _TodayHeader extends StatelessWidget {
   final String greeting;
   final bool loading;
   final String name;
-  final ProfileAccountType? accountType;
   final VoidCallback onProfile;
   final VoidCallback onSearch;
 
@@ -351,25 +347,12 @@ class _TodayHeader extends StatelessWidget {
                   child: Bone.text(width: 120, fontSize: 16),
                 )
               else
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        name,
-                        key: const ValueKey('today-name'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    if (accountType case final type?) ...[
-                      const SizedBox(width: PinneSpacing.sm),
-                      AccountBadge(
-                        key: ValueKey('today-account-badge-${type.name}'),
-                        type: type,
-                      ),
-                    ],
-                  ],
+                Text(
+                  name,
+                  key: const ValueKey('today-name'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
             ],
           ),
