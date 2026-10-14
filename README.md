@@ -429,12 +429,24 @@ directions, not dated promises.
 
 - **Reminders that find you.** Today the review queue lives in the app.
   Step 1 is on-device reminders with `flutter_local_notifications`: no server
-  involved, so a save can nudge you about a day later even if you never open
-  Pinne. Step 2 is push notifications through Firebase Cloud Messaging, with
-  Serverpod future calls deciding when to send (about 24 hours after a save,
-  quiet hours, a daily cap). Android comes first; iOS needs an APNs key from a
-  paid Apple Developer account.
-- **A light theme, Lavender Mist,** alongside the dark violet one.
+  involved, so a save can return after the rhythm you chose even if you never
+  open Pinne. Step 2 is push notifications through Firebase Cloud Messaging,
+  with Serverpod future calls respecting that rhythm, quiet hours and a daily
+  cap. Android comes first; iOS needs an APNs key from a paid Apple Developer
+  account.
+- **Live updates with Serverpod streaming.** Suggestions, link previews and
+  progress can arrive as they change instead of the app polling for them.
+- **Smarter search.** AI-assisted query understanding and re-ranking can find
+  meaning across your notes, summaries and collections, while fresh databases
+  regain the full-text indexes needed for a fast, dependable foundation.
+- **Keep your guest saves.** Move a guest workspace into a new account during
+  sign-up, so trying Pinne first never means leaving useful saves behind.
+- **Attachments.** Save screenshots, images and files alongside links and
+  notes, backed by Serverpod file storage.
+- **More reach.** Add an iOS share extension and App Store build, and shape the
+  web experience into a responsive app that feels at home on a larger screen.
+- **AI that scales.** Add capacity beyond the free provider tier and queue
+  work gracefully when limits are busy, without losing a suggestion request.
 - **Share with friends.** Share a single save or a whole collection with a
   friend, to view or to build together, and see what friends are saving. An
   optional, friendly leaderboard of review streaks would be open only to
