@@ -1,0 +1,7 @@
+### What the Saved card shows for one item: its pending suggestions, and
+### whether a newer organizing pass (for example after the link preview
+### arrives) is still on its way and will replace them.
+class: AiSuggestionReview
+fields:
+  suggestions: List<AiSuggestion>
+  organizing: bool

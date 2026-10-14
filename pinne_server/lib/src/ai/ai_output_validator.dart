@@ -11,6 +11,35 @@ abstract final class AiOutputValidator {
   static const maxTagLength = 32;
   static const maxSummaryLength = 360;
   static const maxRationaleLength = 240;
+
+  /// Tags that say nothing about the item: model placeholders for missing
+  /// evidence, and words that only describe the link's shape (a `youtu.be`
+  /// short link). They are never suggested, whichever provider made them.
+  static const placeholderTags = {
+    'unknown',
+    'none',
+    'null',
+    'n-a',
+    'na',
+    'tbd',
+    'undefined',
+    'untitled',
+    'no-title',
+    'other',
+    'misc',
+    'miscellaneous',
+    'general',
+    'uncategorized',
+    'link',
+    'links',
+    'url',
+    'short',
+    'short-link',
+    'shortlink',
+    'http',
+    'https',
+    'www',
+  };
   static const _keys = {
     'collectionIds',
     'tags',
@@ -95,7 +124,11 @@ abstract final class AiOutputValidator {
     final seenTags = <String>{};
     for (final raw in result.tags) {
       final tag = normalizeTag(raw);
-      if (tag.isNotEmpty && seenTags.add(tag)) tags.add(tag);
+      if (tag.isNotEmpty &&
+          !placeholderTags.contains(tag) &&
+          seenTags.add(tag)) {
+        tags.add(tag);
+      }
       if (tags.length == maxTags) break;
     }
     final summary = _capSummary(result.summary);

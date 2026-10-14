@@ -97,4 +97,44 @@ void main() {
       expect(title, endsWith('🙂…'));
     });
   });
+
+  group('cleanIntention', () {
+    final shared = normalizeLink(
+      'https://youtu.be/BMMcmmnjrM8?si=9DPCHgF2Gxoo0hMf',
+    );
+
+    test('drops a note that only repeats the saved link', () {
+      expect(
+        cleanIntention(
+          ' https://youtu.be/BMMcmmnjrM8?si=9DPCHgF2Gxoo0hMf ',
+          link: shared,
+        ),
+        isNull,
+      );
+      expect(
+        cleanIntention(
+          'https://www.youtube.com/watch?v=BMMcmmnjrM8',
+          link: shared,
+        ),
+        isNull,
+      );
+    });
+
+    test('keeps words, other links and notes without a link', () {
+      expect(
+        cleanIntention(
+          'for the side project https://youtu.be/BMMcmmnjrM8',
+          link: shared,
+        ),
+        'for the side project https://youtu.be/BMMcmmnjrM8',
+      );
+      expect(
+        cleanIntention('https://example.com/other', link: shared),
+        'https://example.com/other',
+      );
+      expect(cleanIntention('  why  '), 'why');
+      expect(cleanIntention('   ', link: shared), isNull);
+      expect(cleanIntention(null), isNull);
+    });
+  });
 }

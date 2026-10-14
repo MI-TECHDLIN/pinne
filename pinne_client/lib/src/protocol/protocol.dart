@@ -40,6 +40,7 @@ import 'ai/ai_processing_state.dart' as _iuqfkn3x;
 import 'ai/ai_settings.dart' as _i8oswxfq;
 import 'ai/ai_suggestion.dart' as _ispfx06l;
 import 'ai/ai_suggestion_kind.dart' as _il1lz8eg;
+import 'ai/ai_suggestion_review.dart' as _i3khqmtt;
 import 'ai/ai_suggestion_status.dart' as _it1ujq25;
 import 'auth/account_summary.dart' as _iwcn4ziy;
 import 'auth/profile_account_type.dart' as _isbnfbq5;
@@ -139,6 +140,7 @@ export 'ai/ai_processing_state.dart';
 export 'ai/ai_settings.dart';
 export 'ai/ai_suggestion.dart';
 export 'ai/ai_suggestion_kind.dart';
+export 'ai/ai_suggestion_review.dart';
 export 'ai/ai_suggestion_status.dart';
 export 'auth/account_summary.dart';
 export 'auth/profile_account_type.dart';
@@ -289,6 +291,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _il1lz8eg.AiSuggestionKind) {
       return _il1lz8eg.AiSuggestionKind.fromJson(data) as T;
+    }
+    if (t == _i3khqmtt.AiSuggestionReview) {
+      return _i3khqmtt.AiSuggestionReview.fromJson(data) as T;
     }
     if (t == _it1ujq25.AiSuggestionStatus) {
       return _it1ujq25.AiSuggestionStatus.fromJson(data) as T;
@@ -589,6 +594,10 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _isc.getType<_il1lz8eg.AiSuggestionKind?>()) {
       return (data != null ? _il1lz8eg.AiSuggestionKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i3khqmtt.AiSuggestionReview?>()) {
+      return (data != null ? _i3khqmtt.AiSuggestionReview.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_it1ujq25.AiSuggestionStatus?>()) {
@@ -958,6 +967,12 @@ class Protocol extends _isc.SerializationManager {
     if (t == _isc.getType<_iopagaq8.Tag?>()) {
       return (data != null ? _iopagaq8.Tag.fromJson(data) : null) as T;
     }
+    if (t == List<_ispfx06l.AiSuggestion>) {
+      return (data as List)
+              .map((e) => deserialize<_ispfx06l.AiSuggestion>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i8v3said.CalendarSelection>) {
       return (data as List)
               .map((e) => deserialize<_i8v3said.CalendarSelection>(e))
@@ -1149,6 +1164,7 @@ class Protocol extends _isc.SerializationManager {
       _i8oswxfq.AiSettings => 'AiSettings',
       _ispfx06l.AiSuggestion => 'AiSuggestion',
       _il1lz8eg.AiSuggestionKind => 'AiSuggestionKind',
+      _i3khqmtt.AiSuggestionReview => 'AiSuggestionReview',
       _it1ujq25.AiSuggestionStatus => 'AiSuggestionStatus',
       _iwcn4ziy.AccountSummary => 'AccountSummary',
       _isbnfbq5.ProfileAccountType => 'ProfileAccountType',
@@ -1270,6 +1286,8 @@ class Protocol extends _isc.SerializationManager {
         return 'AiSuggestion';
       case _il1lz8eg.AiSuggestionKind():
         return 'AiSuggestionKind';
+      case _i3khqmtt.AiSuggestionReview():
+        return 'AiSuggestionReview';
       case _it1ujq25.AiSuggestionStatus():
         return 'AiSuggestionStatus';
       case _iwcn4ziy.AccountSummary():
@@ -1497,6 +1515,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'AiSuggestionKind') {
       return deserialize<_il1lz8eg.AiSuggestionKind>(data['data']);
+    }
+    if (dataClassName == 'AiSuggestionReview') {
+      return deserialize<_i3khqmtt.AiSuggestionReview>(data['data']);
     }
     if (dataClassName == 'AiSuggestionStatus') {
       return deserialize<_it1ujq25.AiSuggestionStatus>(data['data']);

@@ -210,7 +210,7 @@ class CaptureStore {
       syncState: CaptureSyncState.pending,
       url: link?.cleanUrl,
       noteText: input.note,
-      intention: _clean(intention),
+      intention: cleanIntention(intention, link: link),
       sourceItemId: link?.sourceItemId,
       canonicalUrl: link?.canonicalUrl,
       held: hold,
@@ -276,7 +276,10 @@ class CaptureStore {
         syncState: current.syncState,
         url: current.url,
         noteText: current.noteText,
-        intention: _clean(intention),
+        intention: cleanIntention(
+          intention,
+          link: current.url == null ? null : normalizeLink(current.url!),
+        ),
         sourceItemId: current.sourceItemId,
         canonicalUrl: current.canonicalUrl,
       );

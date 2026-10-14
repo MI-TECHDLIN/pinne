@@ -111,9 +111,16 @@ class ItemEndpoint extends Endpoint {
       await _scheduleOrganizing(session, itemId, ownerId);
       return item;
     }
-    // Existing metadata can still be organized immediately. A successful
-    // preview requests a newer AI task version with the richer evidence.
-    await _scheduleOrganizing(session, itemId, ownerId);
+    // A link's own metadata is usually just its URL, which made the AI guess
+    // placeholder tags that the preview pass then replaced. The preview job
+    // organizes as soon as it finishes or gives up; this delayed delivery is
+    // only the safety net if the preview never runs.
+    await _scheduleOrganizing(
+      session,
+      itemId,
+      ownerId,
+      delay: organizeWithoutPreviewDelay,
+    );
     // Preview work is entirely detached from capture. Scheduling failures are
     // recoverable through refreshPreview and must not make a saved link fail.
     try {
@@ -162,11 +169,15 @@ class ItemEndpoint extends Endpoint {
     return queued;
   }
 
+  /// How long a link waits for its preview before organizing without it.
+  static const organizeWithoutPreviewDelay = Duration(seconds: 45);
+
   Future<void> _scheduleOrganizing(
     Session session,
     UuidValue itemId,
-    UuidValue ownerId,
-  ) async {
+    UuidValue ownerId, {
+    Duration delay = Duration.zero,
+  }) async {
     // Organizing is background work. Configuration, scheduling, or provider
     // failures must never turn a successful save into a failed save.
     try {
@@ -177,7 +188,7 @@ class ItemEndpoint extends Endpoint {
       );
       if (session.serverpod.config.futureCall.enabled) {
         await session.serverpod.futureCalls
-            .callWithDelay(Duration.zero, identifier: 'ai-organize-$itemId')
+            .callWithDelay(delay, identifier: 'ai-organize-$itemId')
             .aiOrganize
             .process(itemId, ownerId);
       } else {

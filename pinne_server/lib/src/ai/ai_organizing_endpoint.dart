@@ -83,6 +83,26 @@ class AiOrganizingEndpoint extends Endpoint {
     );
   }
 
+  /// The item's pending suggestions, collections first, and whether a newer
+  /// organizing pass is still coming. The app polls this while [organizing]
+  /// is true, so chips it shows are never outlived by a newer version.
+  Future<AiSuggestionReview> review(Session session, UuidValue itemId) async {
+    final item = await _ownedItem(session, itemId);
+    final suggestions = await listSuggestions(session, itemId);
+    final ordered = [
+      for (final kind in AiSuggestionKind.values)
+        ...suggestions.where((s) => s.kind == kind),
+    ];
+    return AiSuggestionReview(
+      suggestions: ordered,
+      organizing: await AiOrganizationService.instance.isOrganizing(
+        session,
+        item: item,
+        previewsRun: session.serverpod.config.futureCall.enabled,
+      ),
+    );
+  }
+
   Future<void> reprocess(Session session, UuidValue itemId) async {
     final item = await _ownedItem(session, itemId);
     await AiOrganizationService.instance.enqueue(

@@ -48,6 +48,7 @@ class LinkPreviewService {
     required UuidValue ownerId,
     required UuidValue itemId,
   }) async {
+    var gaveUp = false;
     final claimed = await session.db.transaction((transaction) async {
       await Item.db.lockRows(
         session,
@@ -84,6 +85,7 @@ class LinkPreviewService {
           ),
           transaction: transaction,
         );
+        gaveUp = true;
         return null;
       }
       return Item.db.updateRow(
@@ -97,7 +99,10 @@ class LinkPreviewService {
         transaction: transaction,
       );
     });
-    if (claimed == null) return;
+    if (claimed == null) {
+      if (gaveUp) await _organizeWithoutPreview(session, itemId, ownerId);
+      return;
+    }
     // If a worker dies after claiming, a distinct delivery can recover the
     // stale processing lease. Completed and terminal states make it a no-op.
     try {
@@ -114,6 +119,7 @@ class LinkPreviewService {
     final uri = Uri.tryParse(claimed.url!);
     if (uri == null) {
       await _finishFailure(session, claimed, AccessState.unknown);
+      await _organizeWithoutPreview(session, itemId, ownerId);
       return;
     }
 
@@ -139,6 +145,7 @@ class LinkPreviewService {
       return;
     }
     await _finishFailure(session, claimed, result.accessState);
+    await _organizeWithoutPreview(session, itemId, ownerId);
   }
 
   /// Loads official keyless oEmbed first, then safe page metadata as fallback.
@@ -419,6 +426,30 @@ class LinkPreviewService {
     } catch (error) {
       AiProviderStatus.recordTaskError(
         'could not requeue organizing after a preview (${error.runtimeType})',
+      );
+    }
+  }
+
+  /// Organizes with the saved metadata once the preview has given up, instead
+  /// of waiting for capture's delayed safety-net delivery. A no-op when that
+  /// version was already organized.
+  Future<void> _organizeWithoutPreview(
+    Session session,
+    UuidValue itemId,
+    UuidValue ownerId,
+  ) async {
+    try {
+      await session.serverpod.futureCalls
+          .callWithDelay(
+            Duration.zero,
+            identifier: 'ai-organize-$itemId-without-preview',
+          )
+          .aiOrganize
+          .process(itemId, ownerId);
+    } catch (error) {
+      AiProviderStatus.recordTaskError(
+        'could not queue organizing after a failed preview '
+        '(${error.runtimeType})',
       );
     }
   }
