@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinne_client/pinne_client.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/library_revision.dart';
+import '../../core/open_original.dart';
 import '../../core/server_client.dart';
 import '../planner/planner_providers.dart';
 import '../progress/progress_providers.dart';
+
+export '../../core/open_original.dart'
+    show OpenExternalUrl, openExternalUrlProvider;
 
 final todayClockProvider = Provider<DateTime>((ref) => DateTime.now());
 
@@ -70,19 +73,8 @@ final todayQueueProvider = FutureProvider.autoDispose<ReviewQueueResult>((
   if (ref.watch(accountIdProvider) == null) {
     return ReviewQueueResult(entries: [], timeBudgetMinutes: budget);
   }
-  return ref
-      .watch(reviewQueueEndpointProvider)
-      .get(
-        timeBudgetMinutes: budget,
-      );
+  return ref.watch(reviewQueueEndpointProvider).get(timeBudgetMinutes: budget);
 });
-
-typedef OpenExternalUrl = Future<bool> Function(Uri uri);
-
-final openExternalUrlProvider = Provider<OpenExternalUrl>(
-  (ref) =>
-      (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
-);
 
 abstract interface class TodayActionGateway {
   Future<ReviewEventReceipt> reviewed(Item item);
