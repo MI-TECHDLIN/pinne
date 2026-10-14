@@ -47,3 +47,42 @@ final avatarRecipeProvider = Provider<({int seed, int palette})>((ref) {
     palette: profile?.avatarPalette ?? 0,
   );
 });
+
+/// Who is signed in, as Today and Profile name them.
+@immutable
+class AccountIdentity {
+  const AccountIdentity({required this.name, this.type});
+
+  /// The chosen display name, else the email's local part. Only a guest
+  /// account (or no account) is called "Guest".
+  factory AccountIdentity.of(PinneProfile? profile, AccountSummary? account) {
+    final chosen = profile?.displayName.trim();
+    final local = account?.email?.split('@').first.trim();
+    return AccountIdentity(
+      name: chosen != null && chosen.isNotEmpty
+          ? chosen
+          : local != null && local.isNotEmpty
+          ? local
+          : switch (account?.type) {
+              ProfileAccountType.guest || null => 'Guest',
+              _ => 'Pinne reader',
+            },
+      type: account?.type,
+    );
+  }
+
+  final String name;
+
+  /// Null while signed out.
+  final ProfileAccountType? type;
+}
+
+/// Rebuilds with the account id, so a switch shows the new account's name
+/// (or a loading state), never the previous one's.
+final accountIdentityProvider = FutureProvider.autoDispose<AccountIdentity>((
+  ref,
+) async {
+  final profile = ref.watch(profileProvider.future);
+  final account = ref.watch(accountSummaryProvider.future);
+  return AccountIdentity.of(await profile, await account);
+});

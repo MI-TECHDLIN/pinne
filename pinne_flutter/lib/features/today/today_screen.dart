@@ -5,7 +5,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinne_client/pinne_client.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
+import '../../core/server_client.dart';
 import '../../router.dart';
 import '../../theme/pinne_tokens.dart';
 import '../../ui/feedback/error_state.dart';
@@ -17,6 +19,7 @@ import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../capture/paste_capture_card.dart';
 import '../examples/example_saves.dart';
 import '../progress/celebration.dart';
+import '../settings/account_badge.dart';
 import '../settings/profile_provider.dart';
 import '../tour/tour_controller.dart';
 import 'today_providers.dart';
@@ -29,7 +32,7 @@ class TodayScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final queue = ref.watch(todayQueueProvider);
     final avatar = ref.watch(avatarRecipeProvider);
-    final profile = ref.watch(profileProvider).asData?.value;
+    final identityState = ref.watch(accountIdentityProvider);
     final budget = ref.watch(reviewBudgetProvider);
     final overviewState = ref.watch(todayOverviewProvider);
     final overview = overviewState.asData?.value;
@@ -38,7 +41,11 @@ class TodayScreen extends ConsumerWidget {
     final dueCount = data?.entries.length ?? 0;
     final rotatingLine = ref.watch(todayGreetingProvider);
     final top = data?.entries.firstOrNull;
-    final displayName = profile?.displayName.trim();
+    // After a sign-in the previous account's name is stale: load instead.
+    final identityLoading =
+        identityState.isLoading &&
+        (!identityState.hasValue || identityState.isReloading);
+    final identity = identityLoading ? null : identityState.asData?.value;
 
     return TourAutoStart(
       child: DecoratedBox(
@@ -66,9 +73,10 @@ class TodayScreen extends ConsumerWidget {
                   seed: avatar.seed,
                   palette: avatar.palette,
                   greeting: dueCount == 0 ? _greeting(now.hour) : rotatingLine,
-                  name: displayName == null || displayName.isEmpty
-                      ? 'Guest'
-                      : displayName,
+                  loading: identityLoading,
+                  // A failed lookup names nobody rather than guessing "Guest".
+                  name: identity?.name ?? 'Pinne reader',
+                  accountType: identity?.type,
                   onProfile: () => context.push(Routes.profile),
                   onSearch: () => context.go(Routes.search),
                 ),
@@ -194,7 +202,10 @@ class TodayScreen extends ConsumerWidget {
                   child: CaptureEntryTile(),
                 ),
                 const SizedBox(height: PinneSpacing.md),
-                const ExampleSavesCard(),
+                // A dismissal belongs to the account that made it.
+                ExampleSavesCard(
+                  key: ValueKey(('examples', ref.watch(accountIdProvider))),
+                ),
                 if ((data?.entries.length ?? 0) > 1) ...[
                   const SizedBox(height: PinneSpacing.md),
                   Text(
@@ -275,7 +286,9 @@ class _TodayHeader extends StatelessWidget {
     required this.seed,
     required this.palette,
     required this.greeting,
+    required this.loading,
     required this.name,
+    required this.accountType,
     required this.onProfile,
     required this.onSearch,
   });
@@ -283,7 +296,9 @@ class _TodayHeader extends StatelessWidget {
   final int seed;
   final int palette;
   final String greeting;
+  final bool loading;
   final String name;
+  final ProfileAccountType? accountType;
   final VoidCallback onProfile;
   final VoidCallback onSearch;
 
@@ -329,12 +344,33 @@ class _TodayHeader extends StatelessWidget {
                   context,
                 ).textTheme.bodySmall?.copyWith(color: context.pinne.muted),
               ),
-              Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              if (loading)
+                const PinneSkeleton(
+                  key: ValueKey('today-name-skeleton'),
+                  label: 'Loading your account',
+                  child: Bone.text(width: 120, fontSize: 16),
+                )
+              else
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name,
+                        key: const ValueKey('today-name'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    if (accountType case final type?) ...[
+                      const SizedBox(width: PinneSpacing.sm),
+                      AccountBadge(
+                        key: ValueKey('today-account-badge-${type.name}'),
+                        type: type,
+                      ),
+                    ],
+                  ],
+                ),
             ],
           ),
         ),

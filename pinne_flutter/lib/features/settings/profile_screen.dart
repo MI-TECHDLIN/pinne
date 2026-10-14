@@ -12,6 +12,7 @@ import '../../ui/feedback/friendly_error.dart';
 import '../../ui/pinne_loading.dart';
 import '../../ui/ribbon_spirit/ribbon_spirit.dart';
 import '../auth/sign_out.dart';
+import 'account_badge.dart';
 import 'profile_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -77,11 +78,7 @@ class _ProfileHero extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final avatar = ref.watch(avatarRecipeProvider);
     final type = account?.type;
-    final isGuest = type == null || type == ProfileAccountType.guest;
-    final name = profile?.displayName.trim();
-    final displayName = name == null || name.isEmpty
-        ? (isGuest ? 'Guest' : 'Pinne reader')
-        : name;
+    final displayName = AccountIdentity.of(profile, account).name;
     return GlassCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -113,7 +110,7 @@ class _ProfileHero extends ConsumerWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: PinneSpacing.xs),
-                _AccountBadge(type: type),
+                AccountBadge(type: type),
                 if (account?.email case final email?) ...[
                   const SizedBox(height: PinneSpacing.sm),
                   Text(
@@ -136,38 +133,6 @@ class _ProfileHero extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _AccountBadge extends StatelessWidget {
-  const _AccountBadge({required this.type});
-
-  final ProfileAccountType? type;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = switch (type) {
-      ProfileAccountType.email => 'EMAIL',
-      ProfileAccountType.demo => 'DEMO',
-      ProfileAccountType.guest || null => 'GUEST',
-    };
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.pinne.violet,
-        borderRadius: BorderRadius.circular(PinneRadii.chip),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: context.pinne.onViolet,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1,
-          ),
-        ),
       ),
     );
   }
