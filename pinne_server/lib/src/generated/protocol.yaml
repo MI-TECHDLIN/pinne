@@ -2,6 +2,7 @@ aiOrganizing:
   - getSettings:
   - setEnabled:
   - listSuggestions:
+  - review:
   - reprocess:
   - accept:
   - reject:

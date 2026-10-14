@@ -66,6 +66,23 @@ CaptureInput parseCaptureInput(String text, {String? subject}) {
   return CaptureInput._(note: note);
 }
 
+/// The user's note on a saved [link], trimmed, or null when it says nothing
+/// beyond the link itself: a bare copy of the same URL (often pasted by the
+/// keyboard's clipboard suggestion) must never show as "Your note". Words
+/// around the URL, or a different URL, are kept.
+String? cleanIntention(String? intention, {NormalizedLink? link}) {
+  final trimmed = intention?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  if (link != null) {
+    final repeated = parseCaptureInput(trimmed);
+    if (repeated.titleHint == null &&
+        repeated.link?.canonicalUrl == link.canonicalUrl) {
+      return null;
+    }
+  }
+  return trimmed;
+}
+
 /// A note's title: its first non-empty line, shortened.
 String noteTitle(String note) {
   final firstLine = note

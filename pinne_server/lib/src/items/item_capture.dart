@@ -277,10 +277,9 @@ class ItemCapture {
       title:
           clean(draft.title, CaptureLimits.maxTitleLength, 'The title') ??
           input.suggestedTitle,
-      intention: clean(
-        draft.intention,
-        CaptureLimits.maxIntentionLength,
-        'The note',
+      intention: cleanIntention(
+        clean(draft.intention, CaptureLimits.maxIntentionLength, 'The note'),
+        link: input.link,
       ),
       collectionIds: collectionIds,
     );

@@ -161,7 +161,9 @@ class NoAiProvider implements AiProvider {
         evidenceCoverage: evidence.previewAvailable
             ? AiEvidenceCoverage.metadataPlusPreview
             : AiEvidenceCoverage.metadataOnly,
-        uncertain: collectionIds.isEmpty,
+        // Every rule is an exact match on stored text, so nothing it
+        // suggests is a guess that needs a "Maybe".
+        uncertain: false,
         provider: name,
       ),
       allowedCollectionIds: collections.map((collection) => collection.id),

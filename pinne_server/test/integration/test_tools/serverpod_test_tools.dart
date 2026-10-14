@@ -15,6 +15,8 @@ import 'dart:async' as _ida;
 import 'dart:io' as _idi;
 import 'package:pinne_server/src/generated/ai/ai_settings.dart' as _ibk13w13;
 import 'package:pinne_server/src/generated/ai/ai_suggestion.dart' as _i9k1kmrj;
+import 'package:pinne_server/src/generated/ai/ai_suggestion_review.dart'
+    as _iki2osg9;
 import 'package:pinne_server/src/generated/auth/account_summary.dart'
     as _ig5svj08;
 import 'package:pinne_server/src/generated/calendar/calendar_connection_view.dart'
@@ -455,6 +457,37 @@ class _AiOrganizingEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<List<_i9k1kmrj.AiSuggestion>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iki2osg9.AiSuggestionReview> review(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue itemId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiOrganizing',
+            method: 'review',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiOrganizing',
+          methodName: 'review',
+          parameters: _ist.testObjectToJson({'itemId': itemId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iki2osg9.AiSuggestionReview>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

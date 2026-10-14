@@ -31,13 +31,28 @@ The local rules always tag a link with its site (`docs.flutter.dev` is
 `flutter`), add known keywords from the title, URL, intention, note and
 preview, suggest collections whose names appear in that text, and quote the
 stored preview description (or a note's own text, at most two sentences) as
-the summary. They never invent a summary when no such text is stored.
+the summary. They never invent a summary when no such text is stored. Rules
+are exact matches, so they never mark a suggestion "Maybe". Whatever the
+provider, placeholder tags such as `unknown`, `none` or `short` (the shape of
+a `youtu.be` link, not its content) are dropped by `AiOutputValidator`.
 
 The app lists an item's pending suggestions on its Saved card, where each can
 be accepted (it updates the item's collections, tags or summary) or dismissed.
+The card reads them through `aiOrganizing.review`, which also says whether a
+newer organizing pass is still coming (the link preview is loading, or a task
+version is unprocessed); the card polls while it is. A newer pass keeps the id
+of every proposal it repeats and never re-offers one the owner already
+accepted or dismissed, so only dropped proposals vanish. If the app still
+shows one of those, accept or dismiss gets `RecordNotFoundException` and the
+card reloads the current suggestions instead of reporting a failure.
 
 The same organizing service runs through durable future calls when the hosting
-plan supports them and inline on Serverpod Cloud Starter. Starter still cannot
+plan supports them and inline on Serverpod Cloud Starter. With future calls a
+link waits for its preview: the preview job organizes once it succeeds or
+gives up, and capture's own delivery is delayed 45 seconds as a safety net
+(`ItemEndpoint.organizeWithoutPreviewDelay`). Organizing a bare URL first gave
+placeholder suggestions that the preview pass replaced, and spent two of the
+owner's daily remote requests on one save. Starter still cannot
 run link previews, so its link organizing uses saved metadata only.
 
 ## Verified Groq choice (2026-10-12)

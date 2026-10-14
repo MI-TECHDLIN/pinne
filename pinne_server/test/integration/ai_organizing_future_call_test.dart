@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:pinne_server/src/ai/ai_organization_service.dart';
 import 'package:pinne_server/src/ai/ai_provider.dart';
 import 'package:pinne_server/src/ai/ai_provider_status.dart';
@@ -200,6 +202,81 @@ void main() {
           );
         },
       );
+
+      Future<AiSuggestionReview> settledReview(UuidValue itemId) async {
+        final deadline = DateTime.now().add(const Duration(seconds: 20));
+        while (DateTime.now().isBefore(deadline)) {
+          final review = await endpoints.aiOrganizing.review(owner, itemId);
+          if (!review.organizing) return review;
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }
+        fail('AI organizing did not settle.');
+      }
+
+      test(
+        'a link is organized once, after its preview, and review says '
+        'organizing until then',
+        () async {
+          final previewGate = Completer<void>();
+          LinkPreviewService.instance = LinkPreviewService(
+            loader: (uri) async {
+              await previewGate.future;
+              return const PreviewLoadResult(
+                accessState: AccessState.available,
+                preview: LinkPreview(
+                  title: 'How to Build Mobile Apps with Claude Code',
+                  description: 'A full course on mobile apps.',
+                  siteName: 'YouTube',
+                ),
+              );
+            },
+          );
+          final provider = _EvidenceAwareProvider();
+          AiOrganizationService.instance = AiOrganizationService(
+            remoteProviderOverride: provider,
+          );
+
+          final itemId = await capture();
+          // Give the scheduler time to run anything due now.
+          await Future<void>.delayed(const Duration(milliseconds: 800));
+          final waiting = await endpoints.aiOrganizing.review(owner, itemId);
+          expect(waiting.organizing, isTrue);
+          expect(waiting.suggestions, isEmpty);
+          expect(
+            provider.calls,
+            0,
+            reason: 'a bare link is not organized before its preview',
+          );
+
+          previewGate.complete();
+          final review = await settledReview(itemId);
+
+          expect(provider.calls, 1, reason: 'one remote call, one quota slot');
+          expect(provider.sawPreview, [true]);
+          expect(review.suggestions.map((s) => s.value), [
+            'tutorial',
+            'A full course on mobile apps.',
+          ]);
+        },
+      );
+
+      test('a failed preview still organizes promptly', () async {
+        LinkPreviewService.instance = LinkPreviewService(
+          loader: (uri) async =>
+              const PreviewLoadResult(accessState: AccessState.unavailable),
+        );
+        final provider = _EvidenceAwareProvider();
+        AiOrganizationService.instance = AiOrganizationService(
+          remoteProviderOverride: provider,
+        );
+
+        final itemId = await capture();
+        final review = await settledReview(itemId);
+
+        expect(provider.calls, 1);
+        expect(provider.sawPreview, [false]);
+        expect(review.suggestions.map((s) => s.value), ['metadata']);
+      });
     },
     configOverride: (config) => config.copyWith(
       futureCall: const FutureCallConfig(
@@ -209,4 +286,34 @@ void main() {
     // Future calls run in their own sessions and must see committed rows.
     rollbackDatabase: RollbackDatabase.disabled,
   );
+}
+
+/// Answers like a model that only has what it is given: thin evidence before
+/// the preview, a real tag and summary after it.
+class _EvidenceAwareProvider implements AiProvider {
+  int calls = 0;
+  final sawPreview = <bool>[];
+
+  @override
+  String get name => 'fake';
+
+  @override
+  Future<AiOrganizationResult> organize({
+    required AiItemEvidence evidence,
+    required List<AiCollectionOption> collections,
+  }) async {
+    calls++;
+    sawPreview.add(evidence.previewAvailable);
+    return AiOrganizationResult(
+      collectionIds: const [],
+      tags: evidence.previewAvailable
+          ? const ['tutorial']
+          : const ['metadata', 'unknown'],
+      summary: evidence.previewAvailable ? evidence.description : null,
+      rationale: 'test',
+      evidenceCoverage: AiEvidenceCoverage.metadataOnly,
+      uncertain: !evidence.previewAvailable,
+      provider: 'fake',
+    );
+  }
 }

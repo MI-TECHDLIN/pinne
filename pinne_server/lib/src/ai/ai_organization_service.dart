@@ -182,16 +182,8 @@ class AiOrganizationService {
           latestTask.requestedVersion != processingVersion) {
         return;
       }
-      await AiSuggestion.db.deleteWhere(
-        session,
-        where: (t) =>
-            t.ownerId.equals(ownerId) &
-            t.itemId.equals(itemId) &
-            t.status.equals(AiSuggestionStatus.pending),
-        transaction: transaction,
-      );
       final now = _clock();
-      final suggestions = <AiSuggestion>[
+      final proposals = <AiSuggestion>[
         for (final collectionId in result.collectionIds)
           AiSuggestion(
             ownerId: ownerId,
@@ -226,13 +218,13 @@ class AiOrganizationService {
             createdAt: now,
           ),
       ];
-      if (suggestions.isNotEmpty) {
-        await AiSuggestion.db.insert(
-          session,
-          suggestions,
-          transaction: transaction,
-        );
-      }
+      await _replacePending(
+        session,
+        ownerId: ownerId,
+        itemId: itemId,
+        proposals: proposals,
+        transaction: transaction,
+      );
       await AiOrganizeTask.db.updateRow(
         session,
         latestTask.copyWith(
@@ -245,6 +237,101 @@ class AiOrganizationService {
       );
     });
   }
+
+  /// True while a newer organizing pass for [item] is still to come: the
+  /// task has an unprocessed version, or (on hosts with future calls) the
+  /// link preview is still loading and will requeue organizing.
+  Future<bool> isOrganizing(
+    Session session, {
+    required Item item,
+    bool previewsRun = true,
+  }) async {
+    if (previewsRun &&
+        item.url != null &&
+        (item.enrichmentState == EnrichmentState.pending ||
+            item.enrichmentState == EnrichmentState.processing)) {
+      return true;
+    }
+    final task = await AiOrganizeTask.db.findFirstRow(
+      session,
+      where: (t) => t.itemId.equals(item.id) & t.ownerId.equals(item.ownerId),
+    );
+    if (task == null) return false;
+    return task.state != AiProcessingState.completed ||
+        task.processedVersion < task.requestedVersion;
+  }
+
+  /// Replaces the item's pending suggestions with [proposals] while keeping
+  /// the id of every proposal that is still made. A chip the app is showing
+  /// therefore stays valid across organizing versions, and only proposals
+  /// the newer pass dropped disappear. Proposals the owner already accepted
+  /// or dismissed are not offered again.
+  Future<void> _replacePending(
+    Session session, {
+    required UuidValue ownerId,
+    required UuidValue itemId,
+    required List<AiSuggestion> proposals,
+    required Transaction transaction,
+  }) async {
+    final existing = await AiSuggestion.db.find(
+      session,
+      where: (t) => t.ownerId.equals(ownerId) & t.itemId.equals(itemId),
+      transaction: transaction,
+    );
+    final resolved = {
+      for (final row in existing)
+        if (row.status != AiSuggestionStatus.pending) _proposalKey(row),
+    };
+    final pending = {
+      for (final row in existing)
+        if (row.status == AiSuggestionStatus.pending) _proposalKey(row): row,
+    };
+    final kept = <String>{};
+    final inserts = <AiSuggestion>[];
+    for (final proposal in proposals) {
+      final key = _proposalKey(proposal);
+      if (resolved.contains(key) || !kept.add(key)) continue;
+      final current = pending[key];
+      if (current == null) {
+        inserts.add(proposal);
+        continue;
+      }
+      await AiSuggestion.db.updateRow(
+        session,
+        current.copyWith(
+          rationale: proposal.rationale,
+          evidenceCoverage: proposal.evidenceCoverage,
+          uncertain: proposal.uncertain,
+        ),
+        transaction: transaction,
+      );
+    }
+    final dropped = [
+      for (final entry in pending.entries)
+        if (!kept.contains(entry.key)) entry.value.id!,
+    ];
+    if (dropped.isNotEmpty) {
+      await AiSuggestion.db.deleteWhere(
+        session,
+        where: (t) =>
+            t.ownerId.equals(ownerId) &
+            t.status.equals(AiSuggestionStatus.pending) &
+            t.id.inSet(dropped.toSet()),
+        transaction: transaction,
+      );
+    }
+    if (inserts.isNotEmpty) {
+      await AiSuggestion.db.insert(session, inserts, transaction: transaction);
+    }
+  }
+
+  static String _proposalKey(AiSuggestion suggestion) =>
+      switch (suggestion.kind) {
+        AiSuggestionKind.collection => 'collection:${suggestion.collectionId}',
+        AiSuggestionKind.tag =>
+          'tag:${AiOutputValidator.normalizeTag(suggestion.value ?? '')}',
+        AiSuggestionKind.summary => 'summary:${suggestion.value?.trim()}',
+      };
 
   Future<AiOrganizationResult> _organizeSafely(
     Session session,

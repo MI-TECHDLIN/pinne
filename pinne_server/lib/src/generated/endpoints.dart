@@ -235,6 +235,26 @@ class Endpoints extends _is.EndpointDispatch {
                         params['itemId'],
                       ),
         ),
+        'review': _is.MethodConnector(
+          name: 'review',
+          params: {
+            'itemId': _is.ParameterDescription(
+              name: 'itemId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['aiOrganizing'] as _icvqao4l.AiOrganizingEndpoint)
+                      .review(
+                        session,
+                        params['itemId'],
+                      ),
+        ),
         'reprocess': _is.MethodConnector(
           name: 'reprocess',
           params: {

@@ -14,6 +14,8 @@ import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
 import 'package:pinne_client/src/protocol/ai/ai_settings.dart' as _iqo53bjr;
 import 'package:pinne_client/src/protocol/ai/ai_suggestion.dart' as _iq5krdy3;
+import 'package:pinne_client/src/protocol/ai/ai_suggestion_review.dart'
+    as _i953wqow;
 import 'package:pinne_client/src/protocol/auth/account_summary.dart'
     as _i8fiinuh;
 import 'package:pinne_client/src/protocol/calendar/calendar_connection_view.dart'
@@ -127,6 +129,16 @@ class EndpointAiOrganizing extends _isc.EndpointRef {
     'listSuggestions',
     {'itemId': itemId},
   );
+
+  /// The item's pending suggestions, collections first, and whether a newer
+  /// organizing pass is still coming. The app polls this while [organizing]
+  /// is true, so chips it shows are never outlived by a newer version.
+  _ida.Future<_i953wqow.AiSuggestionReview> review(_isc.UuidValue itemId) =>
+      caller.callServerEndpoint<_i953wqow.AiSuggestionReview>(
+        'aiOrganizing',
+        'review',
+        {'itemId': itemId},
+      );
 
   _ida.Future<void> reprocess(_isc.UuidValue itemId) =>
       caller.callServerEndpoint<void>(
